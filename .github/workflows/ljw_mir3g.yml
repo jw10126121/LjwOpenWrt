@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
-      
+
     - name: 更新源码设置
       uses: actions/checkout@master
 
@@ -79,7 +79,7 @@ jobs:
       run: |
         rm -f ./.config*
         if [ -e $CONFIG_FILE ]; then
-          cp -f $CONFIG_FILE openwrt/.config
+          cp -f $CONFIG_FILE openwrt/.config;
         else
           touch ./.config
         fi
@@ -105,14 +105,15 @@ jobs:
         echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
 
     - name: 加载自定义配置 Configuration Customization
+      env: 
+        DIYCONFIG: diyconfig.sh
       run: |
-        if [ -e diyconfig.sh ]; then
-          cp -f diyconfig.sh openwrt/diyconfig.sh
+        echo $PWD
+        if [ -e $DIYCONFIG ]; then
+          cp -f $DIYCONFIG openwrt/$DIYCONFIG
           cd openwrt
-          chmod +x diyconfig.sh && ./diyconfig.sh
-          cd ..
-        else
-
+          chmod +x $DIYCONFIG && ./$DIYCONFIG
+          cd ..;
         fi
     
     - name: 更新并且安装Feeds组件 Update & Install feeds
