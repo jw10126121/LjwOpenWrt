@@ -124,21 +124,11 @@ jobs:
       run: |
         make defconfig
 
-    - name: 更新并且安装Feeds组件 Update & Install feeds
-      env:
-        FEEDFILE: feeds.conf.default
+    - name: 更新并且安装Feeds组件
       working-directory: ./openwrt
       run: |
-        # update feeds
-          if [[ -e $FEEDFILE ]]; then
-          grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $FEEDFILE
-          if [[ ! $? -eq 0 ]]; then
-          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $FEEDFILE
-          fi
-          else
-          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $FEEDFILE
-          fi
-        cat $FEEDFILE
+        # feeds update
+        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
         echo 'start lienol feeds update'
         ./scripts/feeds update -a
         ./scripts/feeds install -a
