@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name:  xiaomi_mir3g_wf
+name:  Ljw自用MiR3G
 
 on:
   release:
@@ -42,7 +42,7 @@ jobs:
     - name: 修改git下载缓冲大小
       run: git config --global http.postBuffer 524288000
 
-    - name: Initialization environment
+    - name: 初始化环境 Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -51,7 +51,7 @@ jobs:
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
         curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
-    - name: Free up disk space
+    - name: 释放磁盘空间 Free up disk space
       if: env.FREE_UP_DISK == 'true'
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -62,13 +62,13 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
 
-    - name: Clone source code
+    - name: 下载源码 Clone source code
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Update & Install feeds
+    - name: 更新并且安装Feeds组件 Update & Install feeds
       working-directory: ./openwrt
       run: |
         #cp feeds.conf.default feeds.conf
@@ -80,7 +80,7 @@ jobs:
         # Add other app
         # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
-    - name: Configuration Customization - xiaomi_mir3g_lean源码
+    - name: 加载自定义配置 Configuration Customization
       env:
         CONFIG_FILE: 'xiaomi_mir3g.config'
       run: |
@@ -88,20 +88,20 @@ jobs:
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt && make defconfig
         
-    - name: Download package
+    - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Build firmware
+    - name: 编译固件 Build firmware
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
 
-    - name : Upload artifact
+    - name : 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
         name: xiaomi_mir3g_lean
