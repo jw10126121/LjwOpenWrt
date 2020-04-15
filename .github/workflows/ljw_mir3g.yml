@@ -8,14 +8,15 @@
 
 name:  Lin自用MiR3G
 
+# 配置触发条件
 on:
   release:
     types: [published]
   push:
     branches:
      - master
-    paths:
-      - 'ljw_mir3g.config'
+#    paths:
+#      - 'ljw_mir3g.config'
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
