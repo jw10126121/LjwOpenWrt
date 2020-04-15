@@ -130,15 +130,14 @@ jobs:
       working-directory: ./openwrt
       run: |
         # update feeds
-        if [[ -e $FEEDFILE ]]; then
+          if [[ -e $FEEDFILE ]]; then
           grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $FEEDFILE
           if [[ ! $? -eq 0 ]]; then
-            echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $FEEDFILE
-          fi
-        else
           echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $FEEDFILE
-        fi
-
+          fi
+          else
+          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $FEEDFILE
+          fi
         cat $FEEDFILE
         echo 'start lienol feeds update'
         ./scripts/feeds update -a
