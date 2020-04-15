@@ -72,8 +72,18 @@ jobs:
         else
           git pull
         fi
-    
-    - name: 添加第三方主题
+
+    - name: 加载配置 Configuration Customization
+      run: |
+        rm -f ./.config*
+        if [ -e $CONFIG_FILE ]; then
+          cp -f $CONFIG_FILE openwrt/.config
+        else
+          touch ./.config
+
+        fi
+
+    - name: 添加第三方主题与App
       working-directory: ./openwrt
       run: |
         cd package
@@ -85,7 +95,26 @@ jobs:
          git pull
         fi
         cd ..
+        cd ..
 
+     - name: 配置第三方主题与App
+      working-directory: ./openwrt
+      run: |
+        sed -i 's/CONFIG_PACKAGE_luci-theme-rosy=y//g' .config
+        echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
+
+    - name: 加载自定义配置 Configuration Customization
+      if: [ -e diyconfig.sh ]
+      run: |
+        if [ -e diyconfig.sh ]; then
+          cp -f diyconfig.sh openwrt/diyconfig.sh
+          cd openwrt
+          chmod +x diyconfig.sh && ./diyconfig.sh
+          cd ..
+        else
+
+        fi
+    
     - name: 更新并且安装Feeds组件 Update & Install feeds
       working-directory: ./openwrt
       run: |
@@ -98,17 +127,11 @@ jobs:
         # Add other app
         # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
-    - name: 加载配置 Configuration Customization
+    - name: 确认配置
+      working-directory: ./openwrt
       run: |
-        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
-
-    - name: 加载自定义配置 Configuration Customization
-      run: |
-        [ -e customize.sh ] && cp -f customize.sh openwrt/diyconfig.sh
-        cd openwrt
-        chmod +x diyconfig.sh && ./diyconfig.sh
         make defconfig
-        
+
     - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
