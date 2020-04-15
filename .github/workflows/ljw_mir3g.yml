@@ -128,11 +128,13 @@ jobs:
       working-directory: ./openwrt
       run: |
         grep -l 'src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
-        if [ ! $? -eq 0 ]; then 
+        if [ ! $? -eq 0 ]; then
           echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+          ./scripts/feeds update -a && ./scripts/feeds install -a
+        else
+          ./scripts/feeds update -a && ./scripts/feeds install -a
         fi
-        ./scripts/feeds update -a && ./scripts/feeds install -a
-        
+
     - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
