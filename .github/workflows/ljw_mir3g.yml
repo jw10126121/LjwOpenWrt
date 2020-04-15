@@ -82,7 +82,7 @@ jobs:
           touch ./.config
         fi
 
-    - name: 添加第三方主题与App
+    - name: 添加第三方主题
       working-directory: ./openwrt
       run: |
         cd package
@@ -96,7 +96,7 @@ jobs:
         cd ..
         cd ..
 
-    - name: 配置第三方主题与App
+    - name: 配置第三方主题
       working-directory: ./openwrt
       run: |
         sed -i 's/CONFIG_PACKAGE_luci-theme-rosy=y//g' .config
