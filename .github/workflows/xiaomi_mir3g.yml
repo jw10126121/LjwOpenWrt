@@ -90,14 +90,13 @@ jobs:
         # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
     - name: 加载自定义配置 Configuration Customization
-      working-directory: ./openwrt/..
       env:
         CONFIG_FILE: 'xiaomi_mir3g.config'
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        echo $PWD
-        ls
-        chmod +x ./customize.sh && ./customize.sh
+        [ -e ./customize.sh ] && cp ./customize.sh openwrt/diyconfig.sh
+        cd openwrt
+        chmod +x ./diyconfig.sh && ./diyconfig.sh
         cd openwrt && make defconfig
         
     - name: 下载工具包 Download package
