@@ -80,7 +80,6 @@ jobs:
           cp -f $CONFIG_FILE openwrt/.config
         else
           touch ./.config
-
         fi
 
     - name: 添加第三方主题与App
@@ -104,7 +103,6 @@ jobs:
         echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
 
     - name: 加载自定义配置 Configuration Customization
-      if: [ -e diyconfig.sh ]
       run: |
         if [ -e diyconfig.sh ]; then
           cp -f diyconfig.sh openwrt/diyconfig.sh
