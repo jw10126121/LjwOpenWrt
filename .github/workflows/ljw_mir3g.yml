@@ -95,7 +95,6 @@ jobs:
          git pull
         fi
         cd ..
-        cd ..
 
      - name: 配置第三方主题与App
       working-directory: ./openwrt
