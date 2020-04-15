@@ -38,7 +38,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    - name: 更新源码设置
+    - name: `date +%Y%m%d`更新源码设置
       uses: actions/checkout@master
 
     - name: 修改git下载缓冲大小
@@ -150,7 +150,7 @@ jobs:
     - name : 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: xiaomi_mir3g_lean
+        name: lin_mir3g_`date +%Y%m%d`
         path: openwrt/bin
 
 
