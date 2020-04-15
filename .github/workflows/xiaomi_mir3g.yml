@@ -95,11 +95,11 @@ jobs:
       run: |
         echo $PWD
         ls
-        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE ./openwrt/.config
-        [ -e ./customize.sh ] && cp -f ./customize.sh ./openwrt/diyconfig.sh
+        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
+        [ -e customize.sh ] && cp -f customize.sh openwrt/diyconfig.sh
         cd openwrt
-        chmod +x ./diyconfig.sh && ./diyconfig.sh
-        cd openwrt && make defconfig
+        chmod +x diyconfig.sh && ./diyconfig.sh
+        make defconfig
         
     - name: 下载工具包 Download package
       working-directory: ./openwrt
