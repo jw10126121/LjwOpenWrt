@@ -38,7 +38,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    - name: `date +%Y%m%d`更新源码设置
+    - name: 更新源码设置
       uses: actions/checkout@master
 
     - name: 修改git下载缓冲大小
@@ -102,8 +102,10 @@ jobs:
     - name: 配置第三方主题
       working-directory: ./openwrt
       run: |
-        sed -i 's/CONFIG_PACKAGE_luci-theme-rosy=y//g' .config
-        echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
+        grep -l "CONFIG_PACKAGE_luci-theme-rosy=y" .config
+        if [ ! $? -eq 0 ]; then
+          echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
+        fi
 
     - name: 加载自定义配置 Configuration Customization
       env: 
@@ -116,24 +118,26 @@ jobs:
           chmod +x $DIYCONFIG && ./$DIYCONFIG
           cd ..;
         fi
-    
-    - name: 更新并且安装Feeds组件 Update & Install feeds
-      working-directory: ./openwrt
-      run: |
-        #cp feeds.conf.default feeds.conf
-        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
-        cat feeds.conf.default
-        echo 'start feeds update lienol'
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        # Add other app
-        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
 
     - name: 确认配置
       working-directory: ./openwrt
       run: |
         make defconfig
-
+    
+    - name: 更新并且安装Feeds组件 Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        grep -l "src-git lienol https://github.com/Lienol/openwrt-package" feeds.conf.default
+        if [ ! $? -eq 0 ]; then 
+          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+        fi
+        cat feeds.conf.default
+        echo 'start lienol's feeds update'
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Add other app
+        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
+        
     - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
@@ -150,7 +154,7 @@ jobs:
     - name : 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: lin_mir3g_`date +%Y%m%d`
+        name: lin_mir3g_fromLean
         path: openwrt/bin
 
 
