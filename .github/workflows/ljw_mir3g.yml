@@ -95,8 +95,9 @@ jobs:
          git pull
         fi
         cd ..
+        cd ..
 
-     - name: 配置第三方主题与App
+    - name: 配置第三方主题与App
       working-directory: ./openwrt
       run: |
         sed -i 's/CONFIG_PACKAGE_luci-theme-rosy=y//g' .config
