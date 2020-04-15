@@ -93,6 +93,7 @@ jobs:
       env:
         CONFIG_FILE: 'xiaomi_mir3g.config'
       run: |
+        echo $PWD
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         [ -e ./customize.sh ] && cp ./customize.sh openwrt/diyconfig.sh
         cd openwrt
