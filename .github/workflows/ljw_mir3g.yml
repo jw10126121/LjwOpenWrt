@@ -15,12 +15,12 @@ on:
   push:
     branches:
      - master
-    # paths:
-    #  - 'ljw_mir3g.config'
+    paths:
+     - 'ljw_mir3g.config'
 #  schedule:
 #    - cron: 0 8 * * 5
-  # watch:
-  #   types: [started]
+  watch:
+    types: [started]
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -127,13 +127,17 @@ jobs:
     - name: 更新并且安装Feeds组件 Update & Install feeds
       working-directory: ./openwrt
       run: |
-        grep -l 'src-git lienol https://github.com/Lienol/openwrt-package' feeds.conf.default
-        if [ ! $? -eq 0 ]; then
-          echo 'src-git lienol https://github.com/Lienol/openwrt-package' >> feeds.conf.default
-        
-        fi
+        # update feeds
+        grep -l "src-git lienol https://github.com/Lienol/openwrt-package" feeds.conf.default
+        if [ ! $? -eq 0 ]; then 
+          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+        fi 
         cat feeds.conf.default
-        ./scripts/feeds update -a && ./scripts/feeds install -a
+        echo 'start lienol feeds update'
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Add other app
+        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd 
 
     - name: 下载工具包 Download package
       working-directory: ./openwrt
