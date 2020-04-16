@@ -72,9 +72,21 @@ jobs:
       run: |
         if [[ ! -d openwrt ]]; then
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
         else
+          sed -i '/src-git lienol https:\/\/github.com\/Lienol\/openwrt-package/d' feeds.conf.default
           git pull
+          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
         fi
+
+    - name: 更新并且安装Feeds组件
+      working-directory: ./openwrt
+      run: |
+        # feeds update
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Add other app
+        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd 
 
     - name: 加载配置 Configuration Customization
       run: |
@@ -123,18 +135,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         make defconfig
-
-    - name: 更新并且安装Feeds组件
-      working-directory: ./openwrt
-      run: |
-        # feeds update
-        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
-        echo 'start lienol feeds update'
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        # Add other app
-        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd 
-
+        
     - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
