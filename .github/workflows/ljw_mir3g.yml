@@ -72,17 +72,19 @@ jobs:
       run: |
         if [[ ! -d openwrt ]]; then
           git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+
         else
+          cd openwrt
           sed -i '/src-git lienol https:\/\/github.com\/Lienol\/openwrt-package/d' feeds.conf.default
           git pull
-          echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+          
         fi
 
     - name: 更新并且安装Feeds组件
       working-directory: ./openwrt
       run: |
         # feeds update
+        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         # Add other app
@@ -135,7 +137,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         make defconfig
-        
+
     - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
