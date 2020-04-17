@@ -93,11 +93,12 @@ jobs:
 
     - name: 加载配置 Configuration Customization
       run: |
-        rm -f ./openwrt/.config*
+        rm -rf ./openwrt/.config*
         if [ -e $CONFIG_FILE ]; then
+          echo '查到配置文件，复制到.config中'
           cp -f $CONFIG_FILE openwrt/.config;
         else
-          touch ./.config
+            
         fi
 
     - name: 添加第三方主题
