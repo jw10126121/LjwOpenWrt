@@ -118,8 +118,10 @@ jobs:
       working-directory: ./openwrt
       run: |
         grep -l "CONFIG_PACKAGE_luci-theme-rosy=y" .config
+        
         if [ ! $? -eq 0 ]; then
           echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
+
         fi
 
     - name: 加载自定义配置 Configuration Customization
