@@ -117,9 +117,11 @@ jobs:
     - name: 配置第三方主题
       working-directory: ./openwrt
       run: |
+        echo $PWD
         grep -l "CONFIG_PACKAGE_luci-theme-rosy=y" .config
-        
+        echo '查询CONFIG_PACKAGE_luci-theme-rosy=y配置'
         if [ ! $? -eq 0 ]; then
+          echo '查不到CONFIG_PACKAGE_luci-theme-rosy=y配置'
           echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
 
         fi
