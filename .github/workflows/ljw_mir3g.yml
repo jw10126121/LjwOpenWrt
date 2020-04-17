@@ -93,7 +93,7 @@ jobs:
 
     - name: 加载配置 Configuration Customization
       run: |
-        rm -f ./.config*
+        rm -f ./openwrt/.config*
         if [ -e $CONFIG_FILE ]; then
           cp -f $CONFIG_FILE openwrt/.config;
         else
@@ -117,11 +117,11 @@ jobs:
     - name: 配置第三方主题
       working-directory: ./openwrt
       run: |
-        echo $PWD
+
         grep -l "CONFIG_PACKAGE_luci-theme-rosy=y" .config
-        echo '查询CONFIG_PACKAGE_luci-theme-rosy=y配置'
+
         if [ ! $? -eq 0 ]; then
-          echo '查不到CONFIG_PACKAGE_luci-theme-rosy=y配置'
+
           echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
 
         fi
