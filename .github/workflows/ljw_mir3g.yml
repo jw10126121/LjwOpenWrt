@@ -97,8 +97,7 @@ jobs:
         if [ -e $CONFIG_FILE ]; then
           echo '查到配置文件，复制到.config中'
           cp -f $CONFIG_FILE openwrt/.config;
-        else
-            
+          
         fi
 
     - name: 添加第三方主题
@@ -120,7 +119,7 @@ jobs:
 
         sed -i 's/#CONFIG_PACKAGE_luci-theme-rosy=y/CONFIG_PACKAGE_luci-theme-rosy=y/g' .config
         echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
-        
+
     - name: 加载自定义配置 Configuration Customization
       env: 
         DIYCONFIG: diyconfig.sh
