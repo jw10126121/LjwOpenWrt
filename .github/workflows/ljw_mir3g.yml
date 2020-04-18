@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name:  Lin自用MiR3G
+name:  Lin_MiR3G
 
 # 配置触发条件
 on:
@@ -117,7 +117,7 @@ jobs:
     - name: 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: lin_mir3g
+        name: Lin_MiR3G
         path: openwrt/bin
 
 
