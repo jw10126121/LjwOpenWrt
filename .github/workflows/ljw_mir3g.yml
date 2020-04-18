@@ -16,9 +16,8 @@ on:
     branches:
      - master
     paths:
-     - 'ljw_mir3g.config'
-     - 'diyconfig.sh'
-
+     - 'ljw_mir3g.config,diyconfig.sh'
+     
 #  schedule:
 #    - cron: 0 8 * * 5
   # watch:
