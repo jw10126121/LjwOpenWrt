@@ -14,8 +14,7 @@ on:
      - master
     paths:
      - 'ljw_mir3g.config'
-     - 'diyconfig.sh'
-     - 'configThirdApp.sh'
+     
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
