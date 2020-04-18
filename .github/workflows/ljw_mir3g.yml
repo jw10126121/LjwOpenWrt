@@ -17,6 +17,7 @@ on:
      - master
     paths:
      - 'ljw_mir3g.config'
+     - 'diyconfig.sh'
 
 #  schedule:
 #    - cron: 0 8 * * 5
@@ -28,7 +29,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
   DIY_SH: diyconfig.sh
-  
+
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
