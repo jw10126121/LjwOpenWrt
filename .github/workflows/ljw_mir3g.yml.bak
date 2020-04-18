@@ -26,7 +26,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
-  DIY_SH: diyconfig.sh
+  DIY_SH: diy.sh
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
@@ -65,12 +65,31 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
 
-    - name: 下载Lean源码并设置Feeds
+    - name: 下载或更新Lean源码 Clone source code
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
       run: |
-        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh
+        if [[ ! -d openwrt ]]; then
+          git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+
+        else
+          cd openwrt
+          sed -i '/src-git lienol https:\/\/github.com\/Lienol\/openwrt-package/d' feeds.conf.default
+          git pull
+          
+        fi
+
+    - name: 更新并且安装Feeds组件
+      working-directory: ./openwrt
+      run: |
+        # feeds update
+        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
+        echo -e "src-git helloworld https://github.com/fw876/helloworld" >> feeds.conf.default
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        # Add other app
+        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd 
 
     - name: 加载配置 Configuration Customization
       run: |
@@ -80,7 +99,27 @@ jobs:
           cp -f $CONFIG_FILE openwrt/.config;
           
         fi
-        
+
+    - name: 添加第三方主题
+      working-directory: ./openwrt
+      run: |
+        cd package
+        [[ ! -d openwrt-packages ]] && mkdir openwrt-packages
+        cd openwrt-packages
+        if [[ ! -d luci-theme-rosy ]]; then
+         git clone https://github.com/rosywrt/luci-theme-rosy
+        else
+         git pull
+        fi
+        cd ../../..
+
+    - name: 配置第三方主题
+      working-directory: ./openwrt
+      run: |
+
+        sed -i 's/#CONFIG_PACKAGE_luci-theme-rosy=y/CONFIG_PACKAGE_luci-theme-rosy=y/g' .config
+        echo 'CONFIG_PACKAGE_luci-theme-rosy=y' >> .config
+
     - name: 加载自定义配置 Configuration Customization
       env: 
         DIYCONFIG: diyconfig.sh
@@ -105,17 +144,6 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 处理不可描述Plus
-      working-directory: ./openwrt
-      run: |
-        grep -l "CONFIG_PACKAGE_luci-app-ssr-plus=y" .config
-        if [ $? -eq 0 ]; then
-        echo '----------------------------------------------------------------'
-        echo '--因为添加了不可描述plus，所以先编译luci-base-----------------------'
-        echo '----------------------------------------------------------------'
-        make package/feeds/luci/luci-base/compile V=99
-        fi
-
     - name: 编译固件 Build firmware
       working-directory: ./openwrt
       run: |
@@ -125,7 +153,7 @@ jobs:
     - name : 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: lin_mir3g
+        name: lin_mir3g_fromLean
         path: openwrt/bin
 
 
