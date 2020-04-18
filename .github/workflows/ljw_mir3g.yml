@@ -1,9 +1,6 @@
 #=================================================
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-# Lisence: MIT
-# Author: P3TERX
-# Blog: https://p3terx.com  
+#
+# Description: 自动生成固件
 #=================================================
 
 name:  Lin自用MiR3G
@@ -15,18 +12,22 @@ on:
   push:
     branches:
      - master
-    # paths:
-    #  - 'ljw_mir3g.config'
+    paths:
+     - 'ljw_mir3g.config'
+     - 'diyconfig.sh'
+     - 'configThirdApp.sh'
 #  schedule:
 #    - cron: 0 8 * * 5
-  # watch:
-  #   types: [started]
+  watch:
+    types: [started]
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_URL: https://github.com/coolsnowwolf/lede  
+  OPENWRT_DIR_NAME: openwrt
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
-  DIY_SH: diyconfig.sh
+  DIYCONFIG: diyconfig.sh
+  THIRDAPPCONFIG: configThirdApp.sh
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
@@ -66,40 +67,46 @@ jobs:
         sudo -E apt-get -qq clean
 
     - name: 下载Lean源码并设置Feeds
-      env: 
-        REPO_URL: https://github.com/coolsnowwolf/lede
-        REPO_BRANCH: master
+
       run: |
         chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh
 
     - name: 加载配置 Configuration Customization
       run: |
-        rm -rf ./openwrt/.config*
+        rm -rf ./$OPENWRT_DIR_NAME/.config*
         if [ -e $CONFIG_FILE ]; then
           echo '查到配置文件，复制到.config中'
-          cp -f $CONFIG_FILE openwrt/.config;
+          cp -f $CONFIG_FILE $OPENWRT_DIR_NAME/.config;
           
         fi
-        
-    - name: 加载自定义配置 Configuration Customization
-      env: 
-        DIYCONFIG: diyconfig.sh
+    
+    - name: 第三方app配置
+      run: |
+        if [ -e $THIRDAPPCONFIG ]; then
+            cp -f $THIRDAPPCONFIG $OPENWRT_DIR_NAME/$THIRDAPPCONFIG
+            cd $OPENWRT_DIR_NAME
+            chmod +x $THIRDAPPCONFIG && ./$THIRDAPPCONFIG
+        fi        
+
+    - name: 加载DIY配置 Configuration Customization
+
       run: |
         echo $PWD
         if [ -e $DIYCONFIG ]; then
-          cp -f $DIYCONFIG openwrt/$DIYCONFIG
-          cd openwrt
+          echo '查到DIY文件，运行'
+          cp -f $DIYCONFIG $OPENWRT_DIR_NAME/$DIYCONFIG
+          cd $OPENWRT_DIR_NAME
           chmod +x $DIYCONFIG && ./$DIYCONFIG
           cd ..;
         fi
 
     - name: 确认配置
-      working-directory: ./openwrt
+      working-directory: ./$OPENWRT_DIR_NAME
       run: |
         make defconfig
 
     - name: 下载工具包 Download package
-      working-directory: ./openwrt
+      working-directory: ./$OPENWRT_DIR_NAME
       run: |
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
@@ -107,16 +114,21 @@ jobs:
         
 
     - name: 编译固件 Build firmware
-      working-directory: ./openwrt
+      working-directory: ./$OPENWRT_DIR_NAME
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
 
-    - name: 保存固件到bin目录下 Upload artifact
+    - name: 保存固件Github
       uses: actions/upload-artifact@master
       with:
         name: lin_mir3g
-        path: openwrt/bin
+        path: $OPENWRT_DIR_NAME/bin
+        paths:
+          - $OPENWRT_DIR_NAME/bin
+          - 'ljw_mir3g.config'
+          - 'diyconfig.sh'
+          - 'configThirdApp.sh'
 
 
 
