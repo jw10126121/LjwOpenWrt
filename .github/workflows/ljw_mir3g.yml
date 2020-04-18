@@ -38,7 +38,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    - name: 更新源码设置
+    - name: 下载当前源码
       uses: actions/checkout@master
 
     - name: 修改git下载缓冲大小
@@ -104,17 +104,7 @@ jobs:
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
-    - name: 处理不可描述Plus
-      working-directory: ./openwrt
-      run: |
-        grep -l "CONFIG_PACKAGE_luci-app-ssr-plus=y" .config
-        if [ $? -eq 0 ]; then
-        echo '----------------------------------------------------------------'
-        echo '--因为添加了不可描述plus，所以先编译luci-base-----------------------'
-        echo '----------------------------------------------------------------'
-        make package/feeds/luci/luci-base/compile V=99
-        fi
+        
 
     - name: 编译固件 Build firmware
       working-directory: ./openwrt
@@ -122,7 +112,7 @@ jobs:
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
 
-    - name : 保存固件到bin目录下 Upload artifact
+    - name: 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
         name: lin_mir3g
