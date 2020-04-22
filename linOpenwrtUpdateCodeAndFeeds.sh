@@ -5,34 +5,82 @@
 #=================================================
 #
 
+# 是否更新脚本
+should_update_openwrt=$1
+# 是否清空feeds
+should_clean_feeds=$2
+
 openwrt_root='openwrt'
 lean_code_url='https://github.com/coolsnowwolf/lede'
 feed_config_name='feeds.conf.default'
 
 downloadCode() {
+			
+	echo ''
+	echo '--------------------------------'
+	echo '--配置git config-------------------'
+	echo '--------------------------------'
+	echo ''
+
+	git config --global http.postBuffer 524288000
+	git config --global http.lowSpeedLimit 0
+	git config --global http.lowSpeedTime 999999
+
+	echo ''
 	echo '--------------------------------'
 	echo '--更新Lean源码-------------------'
 	echo '--------------------------------'
+	echo ''
+
 	if [[ ! -d $openwrt_root ]]; then
 		git clone --depth 1 $1 -b $2 $openwrt_root
+
+		if [ $? -ne 0 ]; then
+			# 失败
+			echo ''
+			echo '----------------------------------------------------------------'
+			echo '--更新源码失败----------------------------------------------------'
+			echo '----------------------------------------------------------------'
+			echo ''
+			exit 0
+		fi
+
 	else
-		cd $openwrt_root
-		echo '--------------------------------'
-		echo '--当前feeds.conf.default文件:----'
-		cat $feed_config_name
-		echo '--------------------------------'
-		
-		git reset --hard
 
-		git checkout master -f $feed_config_name
+		if [[ $should_update_openwrt == 1 ]]; then
 
-		git pull
-		echo '--------------------------------'
-		echo '--强制重置feeds.conf.default文件:-'
-		cat $feed_config_name
-		echo '--------------------------------'
-		
-		cd ..
+			cd $openwrt_root
+
+			# 还原所有内容
+			# git checkout . && git clean -xdf
+
+			echo ''
+			echo '--------------------------------'
+			echo '--当前feeds.conf.default文件:----'
+			cat $feed_config_name
+			echo '--------------------------------'
+			echo ''
+			git reset --hard
+
+			git checkout master -f $feed_config_name
+
+			git pull
+
+			if [ $? -ne 0 ]; then
+			# 失败
+			echo ''
+			echo '----------------------------------------------------------------'
+			echo '--更新源码失败----------------------------------------------------'
+			echo '----------------------------------------------------------------'
+			echo ''
+			exit 0
+			fi
+			echo '--------------------------------'
+			echo '--强制重置feeds.conf.default文件:-'
+			cat $feed_config_name
+			echo '--------------------------------'
+			cd ..
+		fi
 	fi
 }
 
@@ -45,8 +93,10 @@ configFeeds() {
 	# 	echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $feed_config_name
 	# fi
 	# 删除 src-git helloworld的注释，并重新启用
-	sed -i "/#src-git helloworld https:\/\/github.com\/fw876\/helloworld/d" $feed_config_name
-	echo -e "src-git helloworld https://github.com/fw876/helloworld" >> $feed_config_name
+	#sed -i "/#src-git helloworld https:\/\/github.com\/fw876\/helloworld/d" $feed_config_name
+	#echo -e "src-git helloworld https://github.com/fw876/helloworld" >> $feed_config_name
+    sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
+
 
 	echo '--------------------------------'
 	echo '--配置feeds.conf.default文件:----'
@@ -61,6 +111,9 @@ updateFeeds() {
 	echo '--更新Feeds----------------------'
 	echo '--------------------------------'
 	cd $openwrt_root
+	if [[ $should_clean_feeds == 1 ]];then
+		./scripts/feeds clean
+	fi
 	./scripts/feeds update -a && ./scripts/feeds install -a
 	cd ..
 }
