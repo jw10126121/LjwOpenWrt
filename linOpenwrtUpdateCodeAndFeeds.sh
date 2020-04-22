@@ -40,10 +40,10 @@ downloadCode() {
 configFeeds() {
 	
 	cd $openwrt_root
-	grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $feed_config_name
-	if [ ! $? -eq 0 ]; then 
-		echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $feed_config_name
-	fi
+	# grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $feed_config_name
+	# if [ ! $? -eq 0 ]; then 
+	# 	echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $feed_config_name
+	# fi
 	# 删除 src-git helloworld的注释，并重新启用
 	sed -i "/#src-git helloworld https:\/\/github.com\/fw876\/helloworld/d" $feed_config_name
 	echo -e "src-git helloworld https://github.com/fw876/helloworld" >> $feed_config_name
