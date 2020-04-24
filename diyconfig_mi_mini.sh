@@ -28,11 +28,3 @@ sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default
 # 修改wifi密码
 sed -i 's/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=12356789/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 
-# 修改登录密码
-sed -i 's/root::0:0:99999:7:::/root:$1$c7pbpCMC$5qcpVIj8ptyvUQpAJ6m74\/:18369:0:99999:7:::/g' $package_root/base-files/files/etc/shadow
-
-#########
-#
-#	某些设置，也可以通过$package_root/package/lean/default-settings/files/zzz-default-settings进行修改
-#	如：修改登录密码
-#	sed -i 's/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::/root:$1$c7pbpCMC$5qcpVIj8ptyvUQpAJ6m74\/:18369:0:99999:7:::/g' $package_root/package/lean/default-settings/files/zzz-default-settings
