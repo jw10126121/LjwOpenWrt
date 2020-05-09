@@ -6,28 +6,30 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name: xiaomi_mir3g_lean手动配置
+name:  Lin_mi_mini
 
+# 配置触发条件
 on:
   release:
     types: [published]
   push:
     branches:
-      - master
+     - master
     paths:
-      - 'xiaomi_mir3g2.config'
+     - 'ljw_k2p.config'
+
 #  schedule:
 #    - cron: 0 8 * * 5
-#  watch:
-#    types: [started]
+  watch:
+    types: [started]
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: xiaomi_mir3g2.config
-  DIY_SH: diy.sh
+  CONFIG_FILE: ljw_k2p.config
+  DIY_SH: diyconfig_k2p.sh
+
   FREE_UP_DISK: false
-  SSH_ACTIONS: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
@@ -37,20 +39,24 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
-    - name: Checkout
+
+    - name: 下载当前源码
       uses: actions/checkout@master
 
-    - name: Initialization environment
+    - name: 修改git下载缓冲大小
+      run: git config --global http.postBuffer 524288000
+
+    - name: 初始化环境 Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo swapoff /swapfile
         sudo rm -rf /swapfile /etc/apt/sources.list.d/*
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
+        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf
         curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
 
-    - name: Free up disk space
+    - name: 释放磁盘空间 Free up disk space
       if: env.FREE_UP_DISK == 'true'
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -61,49 +67,57 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
 
-    - name: Clone source code
-      run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-      
-    - name: Update & Install feeds
+    - name: 下载Lean源码并设置Feeds
+      env: 
+        REPO_URL: https://github.com/coolsnowwolf/lede
+        REPO_BRANCH: master
+      run: |
+        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh
+
+    - name: 加载配置 Configuration Customization
+      run: |
+        rm -rf ./openwrt/.config*
+        if [ -e $CONFIG_FILE ]; then
+          echo '查到配置文件，复制到.config中'
+          cp -f $CONFIG_FILE openwrt/.config;
+          
+        fi
+        
+    - name: 加载自定义配置 Configuration Customization
+      run: |
+        echo $PWD
+        if [ -e $DIY_SH ]; then
+          cp -f $DIY_SH openwrt/$DIY_SH
+          cd openwrt
+          chmod +x $DIY_SH && ./$DIY_SH
+          cd ..;
+        fi
+
+    - name: 确认配置
       working-directory: ./openwrt
       run: |
-        #cp feeds.conf.default feeds.conf
-        echo -e src-git lienol https://github.com/Lienol/openwrt-package >> feeds.conf.default
-        cat feeds.conf.default
-        echo 'start feeds update lienol'
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        # Add other app
-        # git clone https://github.com/ozon/luci-app-ttyd.git package/feeds/luci-app-ttyd
-
-    - name: Load custom configuration
-      run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_SH
-        cd openwrt
-        ../$DIY_SH
         make defconfig
 
-    - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
-      if: env.SSH_ACTIONS == 'true'
-
-    - name: Download package
+    - name: 下载工具包 Download package
       working-directory: ./openwrt
       run: |
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+        
 
-    - name: Build firmware
+    - name: 编译固件 Build firmware
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
 
-    - name : Upload artifact
+    - name: 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: xiaomi_mr3g_lean OpenWrt
+        name: Lin_k2p
         path: openwrt/bin
+
+
+
+
