@@ -115,9 +115,11 @@ configFeeds() {
 }
 
 configCustomPackages() {
-	cd $openwrt_root/package
-	git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git luci-app-kickass
-	cd ../..
+	git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git $openwrt_root/package/feeds/luci-app-kickass
+
+	# cd $openwrt_root/package/feeds
+	# git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git luci-app-kickass
+	# cd ../../..
 }
 
 updateFeeds() {
