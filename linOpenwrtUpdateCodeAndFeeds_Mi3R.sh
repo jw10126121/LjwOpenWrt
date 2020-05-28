@@ -33,7 +33,7 @@ downloadCode() {
 	echo ''
 
 	if [[ ! -d $openwrt_root ]]; then
-		git clone $lean_code_url -b master $openwrt_root && cd $openwrt_root && git reset —hard 5b88caedf6f3ed13536f1073810a583bff4328c7 && cd ..
+		git clone $lean_code_url -b master $openwrt_root && cd $openwrt_root && git reset --hard 5b88caedf6f3ed13536f1073810a583bff4328c7 && cd ..
 
 		if [ $? -ne 0 ]; then
 			# 失败
