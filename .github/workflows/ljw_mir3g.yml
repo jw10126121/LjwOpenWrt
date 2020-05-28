@@ -27,7 +27,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
-  DIY_SH: diyconfig.sh
+  DIY_SH: diyconfig_mir3g.sh
 
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
@@ -68,11 +68,8 @@ jobs:
         sudo -E apt-get -qq clean
 
     - name: 下载Lean源码并设置Feeds
-      env: 
-        REPO_URL: https://github.com/coolsnowwolf/lede
-        REPO_BRANCH: master
       run: |
-        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0
+        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
 
     - name: 加载配置 Configuration Customization
       run: |

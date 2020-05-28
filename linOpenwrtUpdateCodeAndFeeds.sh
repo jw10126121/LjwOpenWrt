@@ -9,6 +9,8 @@
 should_update_openwrt=$1
 # 是否清空feeds
 should_clean_feeds=$2
+# 添加ssr
+add_ssr_plus=$3
 
 openwrt_root='openwrt'
 lean_code_url='https://github.com/coolsnowwolf/lede'
@@ -33,7 +35,8 @@ downloadCode() {
 	echo ''
 
 	if [[ ! -d $openwrt_root ]]; then
-		git clone --depth 1 $1 -b $2 $openwrt_root
+		# 下载源码
+		git clone $lean_code_url -b $master $openwrt_root
 
 		if [ $? -ne 0 ]; then
 			# 失败
@@ -47,7 +50,7 @@ downloadCode() {
 
 	else
 
-		if [[ $should_update_openwrt == 1 ]]; then
+		if [[ $should_update_openwrt -eq 1 ]]; then
 
 			cd $openwrt_root
 
@@ -86,24 +89,37 @@ downloadCode() {
 
 
 configFeeds() {
+
+	if [[ $add_ssr_plus -eq 1 ]]; then
 	
-	cd $openwrt_root
-	# grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $feed_config_name
-	# if [ ! $? -eq 0 ]; then 
-	# 	echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $feed_config_name
-	# fi
-	# 删除 src-git helloworld的注释，并重新启用
-	#sed -i "/#src-git helloworld https:\/\/github.com\/fw876\/helloworld/d" $feed_config_name
-	#echo -e "src-git helloworld https://github.com/fw876/helloworld" >> $feed_config_name
-    sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
+		cd $openwrt_root
+		# grep -l "src-git lienol https://github.com/Lienol/openwrt-package" $feed_config_name
+		# if [ ! $? -eq 0 ]; then 
+		# 	echo -e src-git lienol https://github.com/Lienol/openwrt-package >> $feed_config_name
+		# fi
+		# 删除 src-git helloworld的注释，并重新启用
+		#sed -i "/#src-git helloworld https:\/\/github.com\/fw876\/helloworld/d" $feed_config_name
+		#echo -e "src-git helloworld https://github.com/fw876/helloworld" >> $feed_config_name
+		
+	    sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
 
 
-	echo '--------------------------------'
-	echo '--配置feeds.conf.default文件:----'
-	cat $feed_config_name
-	echo '--------------------------------'
+		echo '--------------------------------'
+		echo '--配置feeds.conf.default文件:----'
+		cat $feed_config_name
+		echo '--------------------------------'
 
-	cd ..
+		cd ..
+
+	fi
+}
+
+configCustomPackages() {
+	git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git $openwrt_root/package/feeds/luci-app-kickass
+
+	# cd $openwrt_root/package/feeds
+	# git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git luci-app-kickass
+	# cd ../../..
 }
 
 updateFeeds() {
@@ -111,7 +127,7 @@ updateFeeds() {
 	echo '--更新Feeds----------------------'
 	echo '--------------------------------'
 	cd $openwrt_root
-	if [[ $should_clean_feeds == 1 ]];then
+	if [[ $should_clean_feeds -eq 1 ]];then
 		./scripts/feeds clean
 	fi
 	./scripts/feeds update -a && ./scripts/feeds install -a
@@ -132,6 +148,8 @@ updateFeeds() {
 	# 三、配置并更新Feeds
 	configFeeds
 	updateFeeds
+
+	configCustomPackages
 
 	echo '++++++++++++++++++++++++++++++++'
 	echo '--结束更新源码和Feeds-------------'
