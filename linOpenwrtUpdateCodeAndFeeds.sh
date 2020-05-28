@@ -36,7 +36,7 @@ downloadCode() {
 
 	if [[ ! -d $openwrt_root ]]; then
 		# 下载源码
-		git clone $lean_code_url -b $master $openwrt_root
+		git clone $lean_code_url -b master $openwrt_root
 
 		if [ $? -ne 0 ]; then
 			# 失败
