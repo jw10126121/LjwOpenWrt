@@ -27,7 +27,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
-  DIY_SH: diyconfig_mir3g.sh
+  DIYCONFIG: diyconfig_mir3g.sh
 
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
@@ -81,8 +81,6 @@ jobs:
         fi
         
     - name: 加载自定义配置 Configuration Customization
-      env: 
-        DIYCONFIG: diyconfig.sh
       run: |
         echo $PWD
         if [ -e $DIYCONFIG ]; then
