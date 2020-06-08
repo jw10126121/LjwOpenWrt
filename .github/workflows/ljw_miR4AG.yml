@@ -111,7 +111,7 @@ jobs:
     - name: 保存固件到bin目录下 Upload artifact
       uses: actions/upload-artifact@master
       with:
-        name: Lin_MiR3G
+        name: Lin_MiR4AG
         path: openwrt/bin
 
 
