@@ -114,14 +114,6 @@ configFeeds() {
 	fi
 }
 
-configCustomPackages() {
-	 git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git $openwrt_root/package/feeds/luci-app-kickass
-
-	# cd $openwrt_root/package/feeds
-	# git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git luci-app-kickass
-	# cd ../../..
-}
-
 updateFeeds() {
 	echo '--------------------------------'
 	echo '--更新Feeds----------------------'
@@ -148,8 +140,6 @@ updateFeeds() {
 	# 三、配置并更新Feeds
 	configFeeds
 	updateFeeds
-
-	# configCustomPackages
 
 	echo '++++++++++++++++++++++++++++++++'
 	echo '--结束更新源码和Feeds-------------'
