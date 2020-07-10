@@ -1,0 +1,120 @@
+#=================================================
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com  
+#=================================================
+
+name:  Lin_RedMi_AC2100
+
+# 配置触发条件
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+     - master
+    paths:
+     - 'ljw_redmi_ac2100.config'
+
+#  schedule:
+#    - cron: 0 8 * * 5
+  watch:
+    types: [started]
+
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_FILE: ljw_redmi_ac2100.config
+  DIYCONFIG: diyconfig_redmi_ac2100.sh
+
+  FREE_UP_DISK: false
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+
+    - name: 下载当前源码
+      uses: actions/checkout@master
+
+    - name: 修改git下载缓冲大小
+      run: git config --global http.postBuffer 524288000
+
+    - name: 初始化环境 Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo swapoff /swapfile
+        sudo rm -rf /swapfile /etc/apt/sources.list.d/*
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget
+        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
+
+    - name: 释放磁盘空间 Free up disk space
+      if: env.FREE_UP_DISK == 'true'
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        docker rmi `docker images -q`
+        sudo -E apt-get -q purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+
+    - name: 下载Lean源码并设置Feeds
+      run: |
+        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
+
+    - name: 加载配置 Configuration Customization
+      run: |
+        rm -rf ./openwrt/.config*
+        if [ -e $CONFIG_FILE ]; then
+          echo '查到配置文件，复制到.config中'
+          cp -f $CONFIG_FILE openwrt/.config;
+          
+        fi
+        
+    - name: 加载自定义配置 Configuration Customization
+      run: |
+        echo $PWD
+        if [ -e $DIYCONFIG ]; then
+          cp -f $DIYCONFIG openwrt/$DIYCONFIG
+          cd openwrt
+          chmod +x $DIYCONFIG && ./$DIYCONFIG
+          cd ..;
+        fi
+
+    - name: 确认配置
+      working-directory: ./openwrt
+      run: |
+        make defconfig
+
+    - name: 下载工具包 Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        
+
+    - name: 编译固件 Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+
+    - name: 保存固件到bin目录下 Upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: Lin_redmi_ac2100
+        path: openwrt/bin
+
+
+
+
