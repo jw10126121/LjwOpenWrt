@@ -73,6 +73,7 @@ jobs:
         sed -i "s/#src-git helloworld/src-git helloworld/g" $Feed_Path
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+        git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
         useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
         echo "::set-env name=useVersionInfo::$useVersionInfo"
         echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
@@ -134,7 +135,7 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages
+        # rm -rf packages
         echo "::set-env name=FIRMWARE::$PWD"
         echo "::set-output name=status::success"
 
