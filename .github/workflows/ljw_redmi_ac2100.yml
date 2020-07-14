@@ -151,6 +151,7 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
         echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "::set-env name=COWTRANSFERURL::$(cat cowtransfer.log | grep https)"
 
     # - name: 创建稳定版
     #   uses: ncipollo/release-action@v1
@@ -167,7 +168,7 @@ jobs:
 
     - name: 微信推送
       if: steps.organize.outputs.status == 'success' && !cancelled()
-      run: curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}编译成功&desp=Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+      run: curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}编译成功&desp=${{ env.COWTRANSFERURL }}
 
 
 
