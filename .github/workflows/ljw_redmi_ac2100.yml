@@ -77,9 +77,9 @@ jobs:
         echo "::set-env name=useVersionInfo::$useVersionInfo"
         echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
 
-    - name: 下载Lean源码并设置Feeds
-      run: |
-        chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
+    # - name: 下载Lean源码并设置Feeds
+    #   run: |
+    #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
 
     - name: 加载配置 Configuration Customization
       run: |
@@ -167,7 +167,7 @@ jobs:
 
     - name: 微信推送
       if: steps.organize.outputs.status == 'success' && !cancelled()
-      run: curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}发布成功-编译结束
+      run: curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}编译成功&desp=Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
 
 
 
