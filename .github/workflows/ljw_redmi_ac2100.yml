@@ -168,7 +168,8 @@ jobs:
 
     - name: 微信推送
       if: steps.organize.outputs.status == 'success' && !cancelled()
-      run: curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}编译成功&desp=${{ env.COWTRANSFERURL }}
+      run: |
+        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}&desp=编译成功 Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
 
 
 
