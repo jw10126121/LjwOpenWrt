@@ -155,7 +155,7 @@ jobs:
         # echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
         # echo "${{ env.COWTRANSFER_URL }}"
         # echo "::set-output name=status::success"
-        echo "::set-env name=COWTRANSFER_URL_TEST::'https://c-t.work/s/f205987f7a744d'"
+        echo "::set-env name=COWTRANSFER_URL_TEST::https://c-t.work/s/f205987f7a744d"
 
     # - name: 创建稳定版
     #   uses: ncipollo/release-action@v1
