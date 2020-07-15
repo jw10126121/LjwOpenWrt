@@ -51,17 +51,17 @@ jobs:
     - name: 修改git下载缓冲大小
       run: git config --global http.postBuffer 524288000
 
-    - name: 初始化环境 Initialization environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+    # - name: 初始化环境 Initialization environment
+    #   env:
+    #     DEBIAN_FRONTEND: noninteractive
+    #   run: |
+    #     sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+    #     sudo -E apt-get -qq update
+    #     sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+    #     sudo -E apt-get -qq autoremove --purge
+    #     sudo -E apt-get -qq clean
+    #     sudo mkdir -p /workdir
+    #     sudo chown $USER:$GROUPS /workdir
 
     # - name: Clone源代码 # 克隆源代码
     #   working-directory: /workdir
@@ -147,7 +147,6 @@ jobs:
     #     path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到奶牛快传cowtransfer #奶牛快传
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
         # curl -fsSL git.io/file-transfer | sh
         # ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
@@ -172,7 +171,6 @@ jobs:
     #     artifacts: ${{ env.FIRMWARE }}/*
 
     - name: 微信推送
-      if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL_TEST }}&desp=${{ env.COWTRANSFER_URL_TEST }}
 
