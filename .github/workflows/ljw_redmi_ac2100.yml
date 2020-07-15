@@ -63,99 +63,100 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: Clone源代码 # 克隆源代码
-      working-directory: /workdir
-      run: |
-        df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd openwrt
-        sed -i "s/#src-git helloworld/src-git helloworld/g" $Feed_Path
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
-        useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
-        echo "::set-env name=useVersionInfo::$useVersionInfo"
-        echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
-
-    # - name: 下载Lean源码并设置Feeds
+    # - name: Clone源代码 # 克隆源代码
+    #   working-directory: /workdir
     #   run: |
-    #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
+    #     df -hT $PWD
+    #     git clone $REPO_URL -b $REPO_BRANCH openwrt
+    #     ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+    #     cd openwrt
+    #     sed -i "s/#src-git helloworld/src-git helloworld/g" $Feed_Path
+    #     ./scripts/feeds update -a
+    #     ./scripts/feeds install -a
+    #     git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
+    #     useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
+    #     echo "::set-env name=useVersionInfo::$useVersionInfo"
+    #     echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
 
-    - name: 加载配置 Configuration Customization
-      run: |
-        [ -e files ] && mv files openwrt/files
-        rm -rf ./openwrt/.config*
-        if [ -e $CONFIG_FILE ]; then
-          echo '查到配置文件，复制到.config中'
-          cp -f $CONFIG_FILE openwrt/.config;
+    # # - name: 下载Lean源码并设置Feeds
+    # #   run: |
+    # #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
+
+    # - name: 加载配置 Configuration Customization
+    #   run: |
+    #     [ -e files ] && mv files openwrt/files
+    #     rm -rf ./openwrt/.config*
+    #     if [ -e $CONFIG_FILE ]; then
+    #       echo '查到配置文件，复制到.config中'
+    #       cp -f $CONFIG_FILE openwrt/.config;
           
-        fi
+    #     fi
         
-    - name: 加载自定义配置 Configuration Customization
-      run: |
-        echo $PWD
-        if [ -e $DIYCONFIG ]; then
-          echo '查到配置文件，复制到openwrt中，并运行'
-          cp -f $DIYCONFIG openwrt/$DIYCONFIG
-          cd openwrt
-          chmod +x $DIYCONFIG && ./$DIYCONFIG
-          cd ..;
-        fi
+    # - name: 加载自定义配置 Configuration Customization
+    #   run: |
+    #     echo $PWD
+    #     if [ -e $DIYCONFIG ]; then
+    #       echo '查到配置文件，复制到openwrt中，并运行'
+    #       cp -f $DIYCONFIG openwrt/$DIYCONFIG
+    #       cd openwrt
+    #       chmod +x $DIYCONFIG && ./$DIYCONFIG
+    #       cd ..;
+    #     fi
 
-    - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
-      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+    # - name: SSH connection to Actions
+    #   uses: P3TERX/debugger-action@master
+    #   if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
-    - name: Download package
-      id: package
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j8
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+    # - name: Download package
+    #   id: package
+    #   run: |
+    #     cd openwrt
+    #     make defconfig
+    #     make download -j8
+    #     find dl -size -1024c -exec ls -l {} \;
+    #     find dl -size -1024c -exec rm -f {} \;
         
 
-    - name: 编译固件 Build firmware
-      working-directory: ./openwrt
-      run: |
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        echo -e "$(nproc) 线程编译设备：$(cat DEVICE_NAME)"
-        make -j$(nproc) V=s
-        [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
-        echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
+    # - name: 编译固件 Build firmware
+    #   working-directory: ./openwrt
+    #   run: |
+    #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+    #     echo -e "$(nproc) 线程编译设备：$(cat DEVICE_NAME)"
+    #     make -j$(nproc) V=s
+    #     [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
+    #     echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
 
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
+    # - name: Check space usage
+    #   if: (!cancelled())
+    #   run: df -hT
 
-    - name: 整理文件
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        # rm -rf packages
-        echo "::set-env name=FIRMWARE::$PWD"
-        echo "::set-output name=status::success"
+    # - name: 整理文件
+    #   id: organize
+    #   if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+    #   run: |
+    #     cd openwrt/bin/targets/*/*
+    #     # rm -rf packages
+    #     echo "::set-env name=FIRMWARE::$PWD"
+    #     echo "::set-output name=status::success"
 
-    - name: 保存固件Bin，上传到Github
-      uses: actions/upload-artifact@master
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+    # - name: 保存固件Bin，上传到Github
+    #   uses: actions/upload-artifact@master
+    #   if: steps.organize.outputs.status == 'success' && !cancelled()
+    #   with:
+    #     name: Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+    #     path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到奶牛快传cowtransfer #奶牛快传
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-        echo "::set-env name=COWTRANSFER_URL::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-        echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
-        echo "${{ env.COWTRANSFER_URL }}"
-        echo "::set-output name=status::success"
+        # curl -fsSL git.io/file-transfer | sh
+        # ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        # echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        # echo "::set-env name=COWTRANSFER_URL::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        # echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
+        # echo "${{ env.COWTRANSFER_URL }}"
+        # echo "::set-output name=status::success"
+        echo "::set-env name=COWTRANSFER_URL_TEST::$('https://c-t.work/s/f205987f7a744d' | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g')"
 
     # - name: 创建稳定版
     #   uses: ncipollo/release-action@v1
@@ -173,7 +174,7 @@ jobs:
     - name: 微信推送
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
-        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}&desp=${{ env.COWTRANSFER_URL }}
+        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL_TEST }}&desp=${{ env.COWTRANSFER_URL_TEST }}
 
 
 
