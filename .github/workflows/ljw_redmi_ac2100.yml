@@ -172,7 +172,7 @@ jobs:
 
     - name: 微信推送
       run: |
-        curl --data-urlencode https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL_TEST }}&desp=${{ env.COWTRANSFER_URL_TEST }}
+        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL_TEST }}&desp=${{ env.COWTRANSFER_URL_TEST }}
 
 
 
