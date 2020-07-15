@@ -172,7 +172,7 @@ jobs:
     - name: 微信推送
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
-        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}&desp=${{ COWTRANSFER_URL }}
+        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=Lin${{ env.DEVICE_NAME }}&desp=${{ env.COWTRANSFER_URL }}
 
 
 
