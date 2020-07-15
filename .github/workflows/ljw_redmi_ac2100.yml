@@ -155,7 +155,7 @@ jobs:
         # echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
         # echo "${{ env.COWTRANSFER_URL }}"
         # echo "::set-output name=status::success"
-        aa = echo 'https://c-t.work/s/f205987f7a744d' | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g'
+        aa = $(echo 'https://c-t.work/s/f205987f7a744d' | tr -d '\n' | xxd -plain | sed 's/\(..\)/%\1/g')
         echo "::set-env name=COWTRANSFER_URL_TEST::${{ aa }}"
 
     # - name: 创建稳定版
