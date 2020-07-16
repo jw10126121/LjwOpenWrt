@@ -100,7 +100,7 @@ jobs:
           cp -f $DIYCONFIG openwrt/$DIYCONFIG
           cd openwrt
           chmod +x $DIYCONFIG && ./$DIYCONFIG
-          sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
+          # sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
           cd ..;
         fi
 
