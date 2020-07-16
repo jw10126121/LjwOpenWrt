@@ -100,7 +100,7 @@ jobs:
           cp -f $DIYCONFIG openwrt/$DIYCONFIG
           cd openwrt
           chmod +x $DIYCONFIG && ./$DIYCONFIG
-          # sed -i 's/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g' package/base-files/files/etc/shadow
+          sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
           cd ..;
         fi
 
@@ -136,7 +136,7 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        # rm -rf packages
+        rm -rf packages
         echo "::set-env name=FIRMWARE::$PWD"
         echo "::set-output name=status::success"
 
