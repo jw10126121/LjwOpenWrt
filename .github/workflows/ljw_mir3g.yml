@@ -28,6 +28,7 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: ljw_mir3g.config
   DIYCONFIG: diyconfig_mir3g.sh
+  ClosedSourceWifiDrive: true
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
