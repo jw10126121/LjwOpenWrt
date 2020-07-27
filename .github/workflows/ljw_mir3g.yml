@@ -17,7 +17,7 @@ on:
      - master
     paths:
      - 'ljw_mir3g.config'
-
+     - '.github/workflows/ljw_mir3g.yml'
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
