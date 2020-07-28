@@ -17,7 +17,7 @@ on:
      - master
     paths:
      - 'ljw_redmi_ac2100.config'
-
+     - '.github/workflows/ljw_redmi_ac2100.yml'
 #  schedule:
 #    - cron: 0 8 * * 5
   watch:
