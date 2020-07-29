@@ -117,7 +117,7 @@ jobs:
         echo "::set-output name=status::success"
     
     - name: 微信推送-开始编译
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+      working-directory: ./openwrt
       run: |
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
