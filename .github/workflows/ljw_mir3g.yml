@@ -114,13 +114,19 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
+        echo "::set-output name=status::success"
+    
+    - name: 微信推送-开始编译
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      run: |
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
+        echo "::set-output name=status::success"
 
     - name: 编译固件 Build firmware
       working-directory: ./openwrt
       run: |
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        echo -e "$(nproc) 线程编译设备：$(cat DEVICE_NAME)"
+        echo -e "$(nproc) 线程编译固件，设备是：$(cat DEVICE_NAME)"
         make -j$(nproc) V=s
         [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
         echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
@@ -170,7 +176,7 @@ jobs:
     #       ${{ env.useVersionInfo }}
     #     artifacts: ${{ env.FIRMWARE }}/*
 
-    - name: 微信推送
+    - name: 微信推送-编译完成
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL }}&desp=编译完成${{ env.DEVICE_NAME }}
