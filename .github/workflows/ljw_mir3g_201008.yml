@@ -73,8 +73,8 @@ jobs:
         ./scripts/feeds install -a
         git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
         useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
-        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
-        echo "DATE=$(date "+%Y-%m-%d·%H:%M:%S")" >> $GITHUB_ENV
+        echo "::set-env name=useVersionInfo::$useVersionInfo"
+        echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
 
     # - name: 下载Lean源码并设置Feeds
     #   run: |
@@ -120,7 +120,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
         curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
         echo "::set-output name=status::success"
 
@@ -130,7 +130,7 @@ jobs:
         echo -e "$(nproc) 线程编译固件，设备是：${{ env.DEVICE_NAME }}"
         make -j$(nproc) V=s
         
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
         echo "::set-output name=status::success"
 
     - name: Check space usage
@@ -143,7 +143,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "::set-env name=FIRMWARE::$PWD"
         echo "::set-output name=status::success"
 
     - name: 保存固件Bin，上传到Github
@@ -159,7 +159,7 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
         echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-        echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_ENV
+        echo "::set-env name=COWTRANSFER_URL::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
         echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
         echo "${{ env.COWTRANSFER_URL }}"
         echo "::set-output name=status::success"
@@ -180,7 +180,6 @@ jobs:
     - name: 微信推送-编译完成
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
-        echo "${{ env.DEVICE_NAME }}"
         curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL }}&desp=编译完成${{ env.DEVICE_NAME }}
 
 
