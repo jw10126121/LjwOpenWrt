@@ -134,6 +134,11 @@ jobs:
         desp: |
           开始编译${{ env.DEVICE_NAME }}
 
+          源码信息：
+
+          ${{ env.useVersionInfo }}
+          
+
     - name: 钉钉推送-开始编译
       uses: zcong1993/actions-ding@master
       with:
@@ -142,8 +147,8 @@ jobs:
         body: |
           {
             "msgtype": "text",
-            "markdown": {
-              "content": "开始编译 ${{ env.DEVICE_NAME }}"
+            "text": {
+              "content": "开始编译 ${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
             }
           }
 
@@ -220,6 +225,11 @@ jobs:
 
           [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }}
 
+          源码信息：
+
+          ${{ env.useVersionInfo }}
+
+
     - name: 发送钉钉通知
       uses: zcong1993/actions-ding@master
       with:
@@ -230,7 +240,7 @@ jobs:
             "msgtype": "markdown",
             "markdown": {
               "title": "编译成功 ${{ env.DEVICE_NAME }}",
-              "text": "编译成功 ${{ env.DEVICE_NAME }} \n [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }} \n [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }}"
+              "text": "编译成功 ${{ env.DEVICE_NAME }} \n\n [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }} \n\n [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }} \n\n 源码信息： \n\n ${{ env.useVersionInfo }}"
             }
           }
 
