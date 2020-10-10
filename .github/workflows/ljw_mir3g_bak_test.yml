@@ -67,7 +67,25 @@ jobs:
       with:
         key: ${{ secrets.ServerChan }}
         text: 编译设备 xiaomi_r3g
-        desp: 编译成功：https://cowtransfer.com/s/48a9d975c66f40
+        desp: |
+          编译成功 xiaomi_r3g
+          奶牛地址：https://cowtransfer.com/s/48a9d975c66f40
+          WeTransfer地址：https://cowtransfer.com/s/48a9d975c66f40
+
+    - name: 钉钉通知
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
+        secret: ${{ secrets.DING_SIGN }}
+        body: |
+          {
+            "msgtype": "link",
+            "link": {
+              "text": "编译成功 xiaomi_r3g",
+              "title": "编译成功",
+              "messageUrl": "https://cowtransfer.com/s/48a9d975c66f40"
+            }
+          }
 
     # - name: Clone源代码 # 克隆源代码
     #   working-directory: /workdir
