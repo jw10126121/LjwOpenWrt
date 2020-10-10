@@ -127,7 +127,6 @@ jobs:
      # echo "::set-output name=status::success"
 
     - name: 微信推送-开始编译
-      working-directory: ./openwrt
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.ServerChan }}
@@ -136,7 +135,6 @@ jobs:
           开始编译${{ env.DEVICE_NAME }}
 
     - name: 钉钉推送-开始编译
-      working-directory: ./openwrt
       uses: zcong1993/actions-ding@master
       with:
         dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
