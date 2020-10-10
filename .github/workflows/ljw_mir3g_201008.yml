@@ -16,7 +16,7 @@ on:
     branches:
      - master
     paths:
-     - 'ljw_mir3g.config'
+     - 'ljw_mir3g_bak_test.config'
      - '.github/workflows/ljw_mir3g.yml'
 #  schedule:
 #    - cron: 0 8 * * 5
@@ -26,7 +26,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: ljw_mir3g.config
+  CONFIG_FILE: ljw_mir3g_bak_test.config
   DIYCONFIG: diyconfig_mir3g.sh
   ClosedSourceWifiDrive: true
   FREE_UP_DISK: false
