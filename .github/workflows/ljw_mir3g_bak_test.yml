@@ -62,16 +62,16 @@ jobs:
     #     sudo chown $USER:$GROUPS /workdir
 
 
-    - name: 发送通知
-      uses: yakumioto/serverchan-action@v1
-      with:
-        key: ${{ secrets.ServerChan }}
-        text: 编译设备 xiaomi_r3g
-        desp: |
-          编译成功 xiaomi_r3g
-          [奶牛下载](https://cowtransfer.com/s/48a9d975c66f40)
-          
-          [WeTransfer下载](https://cowtransfer.com/s/48a9d975c66f40)
+    # - name: 发送通知
+    #   uses: yakumioto/serverchan-action@v1
+    #   with:
+    #     key: ${{ secrets.ServerChan }}
+    #     text: 编译设备 xiaomi_r3g
+    #     desp: |
+    #       编译成功 xiaomi_r3g
+    #       [奶牛下载](https://cowtransfer.com/s/48a9d975c66f40)
+
+    #       [WeTransfer下载](https://cowtransfer.com/s/48a9d975c66f40)
 
     - name: 钉钉通知
       uses: zcong1993/actions-ding@master
@@ -80,11 +80,9 @@ jobs:
         secret: ${{ secrets.DING_SIGN }}
         body: |
           {
-            "msgtype": "link",
-            "link": {
-              "text": "编译成功 xiaomi_r3g",
-              "title": "编译成功",
-              "messageUrl": "https://cowtransfer.com/s/48a9d975c66f40"
+            "msgtype": "text",
+            "text": {
+              "content": "开始编译 11212 \n\n 编译源码信息： \n\n 3333"
             }
           }
 
