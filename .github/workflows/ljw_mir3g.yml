@@ -33,6 +33,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: true
   SSH_ACTIONS: false
   TZ: Asia/Shanghai
   Feed_Path: feeds.conf.default
@@ -163,6 +164,14 @@ jobs:
         echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
         echo "${{ env.COWTRANSFER_URL }}"
         echo "::set-output name=status::success"
+
+    - name: 上传固件到WeTransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "WETRANSFER_URL=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_ENV
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
     # - name: 创建稳定版
     #   uses: ncipollo/release-action@v1
