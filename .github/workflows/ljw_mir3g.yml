@@ -123,8 +123,6 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
 
-
-
      # curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
      # echo "::set-output name=status::success"
 
@@ -145,10 +143,9 @@ jobs:
         secret: ${{ secrets.DING_SIGN }}
         body: |
           {
-            "msgtype": "markdown",
+            "msgtype": "text",
             "markdown": {
-              "text": "开始编译 ${{ env.DEVICE_NAME }}",
-              "title": "开始编译 ${{ env.DEVICE_NAME }}"
+              "content": "开始编译 ${{ env.DEVICE_NAME }}"
             }
           }
 
@@ -219,15 +216,33 @@ jobs:
         key: ${{ secrets.ServerChan }}
         text: 编译成功 ${{ env.DEVICE_NAME }}
         desp: |
-          编译成功 ${{ env.DEVICE_NAME }}
-          奶牛地址：https://cowtransfer.com/s/48a9d975c66f40
-          WeTransfer地址：https://cowtransfer.com/s/48a9d975c66f40
+          编译成功设备： ${{ env.DEVICE_NAME }}
 
-    - name: 微信推送-编译完成
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      run: |
-        echo "${{ env.DEVICE_NAME }}"
-        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL }}&desp=编译完成${{ env.DEVICE_NAME }}
+          [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }}
+
+          [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }}
+
+    - name: 发送钉钉通知
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
+        secret: ${{ secrets.DING_SIGN }}
+        body: |
+          {
+            "msgtype": "markdown",
+            "markdown": {
+              "title": "编译成功 ${{ env.DEVICE_NAME }}",
+              "text": "编译成功 ${{ env.DEVICE_NAME }} \n [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }} \n [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }}"
+            }
+          }
+
+
+
+    # - name: 微信推送-编译完成
+    #   if: steps.organize.outputs.status == 'success' && !cancelled()
+    #   run: |
+    #     echo "${{ env.DEVICE_NAME }}"
+    #     curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL }}&desp=编译完成${{ env.DEVICE_NAME }}
 
 
 
