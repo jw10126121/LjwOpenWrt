@@ -69,8 +69,9 @@ jobs:
         text: 编译设备 xiaomi_r3g
         desp: |
           编译成功 xiaomi_r3g
-          奶牛地址：https://cowtransfer.com/s/48a9d975c66f40
-          WeTransfer地址：https://cowtransfer.com/s/48a9d975c66f40
+          [奶牛下载](https://cowtransfer.com/s/48a9d975c66f40)
+          
+          [WeTransfer下载](https://cowtransfer.com/s/48a9d975c66f40)
 
     - name: 钉钉通知
       uses: zcong1993/actions-ding@master

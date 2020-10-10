@@ -213,6 +213,16 @@ jobs:
     #       ${{ env.useVersionInfo }}
     #     artifacts: ${{ env.FIRMWARE }}/*
 
+    - name: 发送ServerChan通知
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.ServerChan }}
+        text: 编译成功 ${{ env.DEVICE_NAME }}
+        desp: |
+          编译成功 ${{ env.DEVICE_NAME }}
+          奶牛地址：https://cowtransfer.com/s/48a9d975c66f40
+          WeTransfer地址：https://cowtransfer.com/s/48a9d975c66f40
+
     - name: 微信推送-编译完成
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
