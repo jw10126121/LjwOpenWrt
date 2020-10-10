@@ -117,13 +117,40 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
         echo "::set-output name=status::success"
     
-    - name: 微信推送-开始编译
+    - name: 获取设备信息
       working-directory: ./openwrt
       run: |
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
-        echo "::set-output name=status::success"
+
+
+
+     # curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
+     # echo "::set-output name=status::success"
+
+    - name: 微信推送-开始编译
+      working-directory: ./openwrt
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.ServerChan }}
+        text: 开始编译${{ env.DEVICE_NAME }}
+        desp: |
+          开始编译${{ env.DEVICE_NAME }}
+
+    - name: 钉钉推送-开始编译
+      working-directory: ./openwrt
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
+        secret: ${{ secrets.DING_SIGN }}
+        body: |
+          {
+            "msgtype": "markdown",
+            "markdown": {
+              "text": "开始编译 ${{ env.DEVICE_NAME }}",
+              "title": "开始编译 ${{ env.DEVICE_NAME }}"
+            }
+          }
 
     - name: 编译固件 Build firmware
       working-directory: ./openwrt
