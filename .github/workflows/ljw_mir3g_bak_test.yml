@@ -33,6 +33,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: true
+  UPLOAD_WETRANSFER: true
   SSH_ACTIONS: false
   TZ: Asia/Shanghai
   Feed_Path: feeds.conf.default
@@ -43,37 +44,102 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    # - name: 下载源码
-    #   uses: actions/checkout@master
+    - name: 下载源码
+      uses: actions/checkout@master
 
-    # - name: 修改git下载缓冲大小
-    #   run: git config --global http.postBuffer 524288000
+    - name: 修改git下载缓冲大小
+      run: git config --global http.postBuffer 524288000
 
-    # - name: 初始化环境 Initialization environment
-    #   env:
-    #     DEBIAN_FRONTEND: noninteractive
+    - name: 初始化环境 Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: Clone源代码 # 克隆源代码
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
+        sed -i "s/#src-git helloworld/src-git helloworld/g" $Feed_Path
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
+        useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
+        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "DATE=$(date "+%Y-%m-%d·%H:%M:%S")" >> $GITHUB_ENV
+
+    # - name: 下载Lean源码并设置Feeds
     #   run: |
-    #     sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-    #     sudo -E apt-get -qq update
-    #     sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-1804)
-    #     sudo -E apt-get -qq autoremove --purge
-    #     sudo -E apt-get -qq clean
-    #     sudo mkdir -p /workdir
-    #     sudo chown $USER:$GROUPS /workdir
+    #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
 
+    - name: 加载配置 Configuration Customization
+      run: |
+        [ -e files ] && mv files openwrt/files
+        rm -rf ./openwrt/.config*
+        if [ -e $CONFIG_FILE ]; then
+          echo '查到配置文件，复制到.config中'
+          cp -f $CONFIG_FILE openwrt/.config;
+          
+        fi
+        
+    - name: 加载自定义配置 Configuration Customization
+      run: |
+        echo $PWD
+        if [ -e $DIYCONFIG ]; then
+          echo '查到配置文件，复制到openwrt中，并运行'
+          cp -f $DIYCONFIG openwrt/$DIYCONFIG
+          cd openwrt
+          chmod +x $DIYCONFIG && ./$DIYCONFIG
+          # sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
+          cd ..;
+        fi
 
-    # - name: 发送通知
-    #   uses: yakumioto/serverchan-action@v1
-    #   with:
-    #     key: ${{ secrets.ServerChan }}
-    #     text: 编译设备 xiaomi_r3g
-    #     desp: |
-    #       编译成功 xiaomi_r3g
-    #       [奶牛下载](https://cowtransfer.com/s/48a9d975c66f40)
+    # - name: SSH connection to Actions
+    #   uses: P3TERX/debugger-action@master
+    #   if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
-    #       [WeTransfer下载](https://cowtransfer.com/s/48a9d975c66f40)
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        echo "::set-output name=status::success"
+    
+    - name: 获取设备信息
+      working-directory: ./openwrt
+      run: |
+        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
 
-    - name: 钉钉通知
+     # curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
+     # echo "::set-output name=status::success"
+
+    - name: 微信推送-开始编译
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.ServerChan }}
+        text: 开始编译${{ env.DEVICE_NAME }}
+        desp: |
+          开始编译${{ env.DEVICE_NAME }}
+
+          源码信息：
+
+          ${{ env.useVersionInfo }}
+          
+
+    - name: 钉钉推送-开始编译
       uses: zcong1993/actions-ding@master
       with:
         dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
@@ -82,116 +148,108 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-              "content": "开始编译 11212 \n\n 编译源码信息： \n\n 3333"
+              "content": "开始编译 ${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
             }
           }
 
-    # - name: Clone源代码 # 克隆源代码
-    #   working-directory: /workdir
-    #   run: |
-    #     df -hT $PWD
-    #     git clone $REPO_URL -b $REPO_BRANCH openwrt
-    #     ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-    #     cd openwrt
-    #     sed -i "s/#src-git helloworld/src-git helloworld/g" $Feed_Path
-    #     ./scripts/feeds update -a
-    #     ./scripts/feeds install -a
-    #     git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
-    #     useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
-    #     echo "::set-env name=useVersionInfo::$useVersionInfo"
-    #     echo "::set-env name=DATE::$(date "+%Y-%m-%d·%H:%M:%S")"
-
-    # # - name: 下载Lean源码并设置Feeds
-    # #   run: |
-    # #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
-
-    # - name: 加载配置 Configuration Customization
-    #   run: |
-    #     [ -e files ] && mv files openwrt/files
-    #     rm -rf ./openwrt/.config*
-    #     if [ -e $CONFIG_FILE ]; then
-    #       echo '查到配置文件，复制到.config中'
-    #       cp -f $CONFIG_FILE openwrt/.config;
-          
-    #     fi
+    - name: 编译固件 Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) 线程编译固件，设备是：${{ env.DEVICE_NAME }}"
+        make -j$(nproc) V=s
         
-    # - name: 加载自定义配置 Configuration Customization
-    #   run: |
-    #     echo $PWD
-    #     if [ -e $DIYCONFIG ]; then
-    #       echo '查到配置文件，复制到openwrt中，并运行'
-    #       cp -f $DIYCONFIG openwrt/$DIYCONFIG
-    #       cd openwrt
-    #       chmod +x $DIYCONFIG && ./$DIYCONFIG
-    #       # sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
-    #       cd ..;
-    #     fi
+        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
 
-    # # - name: SSH connection to Actions
-    # #   uses: P3TERX/debugger-action@master
-    # #   if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
 
-    # - name: Download package
-    #   id: package
-    #   run: |
-    #     cd openwrt
-    #     make defconfig
-    #     make download -j8
-    #     find dl -size -1024c -exec ls -l {} \;
-    #     find dl -size -1024c -exec rm -f {} \;
-    #     echo "::set-output name=status::success"
-    
-    # - name: 微信推送-开始编译
-    #   working-directory: ./openwrt
-    #   run: |
-    #     grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-    #     [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
-    #     curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
-    #     echo "::set-output name=status::success"
+    - name: 整理文件
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=status::success"
 
-    # - name: 编译固件 Build firmware
-    #   working-directory: ./openwrt
-    #   run: |
-    #     echo -e "$(nproc) 线程编译固件，设备是：${{ env.DEVICE_NAME }}"
-    #     make -j$(nproc) V=s
-        
-    #     echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
-    #     echo "::set-output name=status::success"
+    - name: 保存固件Bin，上传到Github
+      uses: actions/upload-artifact@master
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        path: ${{ env.FIRMWARE }}
 
-    # - name: Check space usage
-    #   if: (!cancelled())
-    #   run: df -hT
+    - name: 上传固件到奶牛快传cowtransfer #奶牛快传
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        echo "COWTRANSFER_URL=$(cat cowtransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_ENV
+        echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
+        echo "${{ env.COWTRANSFER_URL }}"
+        echo "::set-output name=status::success"
 
-    # - name: 整理文件
-    #   id: organize
-    #   if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-    #   run: |
-    #     cd openwrt/bin/targets/*/*
-    #     rm -rf packages
-    #     echo "::set-env name=FIRMWARE::$PWD"
-    #     echo "::set-output name=status::success"
+    - name: 上传固件到WeTransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+        echo "WETRANSFER_URL=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_ENV
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
-    # - name: 保存固件Bin，上传到Github
-    #   uses: actions/upload-artifact@master
-    #   if: steps.organize.outputs.status == 'success' && !cancelled()
+    # - name: 创建稳定版
+    #   uses: ncipollo/release-action@v1
+    #   if: env.UPLOAD_RELEASE == 'true' && steps.organize.outputs.status == 'success' && !cancelled()
     #   with:
-    #     name: Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #     path: ${{ env.FIRMWARE }}
+    #     name: Lin_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }} 🚀 | 自动编译
+    #     allowUpdates: true
+    #     tag: x64稳定版
+    #     commit: master
+    #     token: ${{ secrets.RELEASES_TOKEN }}
+    #     body: |
+    #       ${{ env.useVersionInfo }}
+    #     artifacts: ${{ env.FIRMWARE }}/*
 
-    # - name: 上传固件到奶牛快传cowtransfer #奶牛快传
-    #   if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-    #   run: |
-    #     curl -fsSL git.io/file-transfer | sh
-    #     ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-    #     echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-    #     echo "::set-env name=COWTRANSFER_URL::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
-    #     echo "🔗 [Cowtransfer](${{ env.COWTRANSFER_URL }})" >> release.txt
-    #     echo "${{ env.COWTRANSFER_URL }}"
-    #     echo "::set-output name=status::success"
+    - name: 发送ServerChan通知
+      uses: yakumioto/serverchan-action@v1
+      with:
+        key: ${{ secrets.ServerChan }}
+        text: 编译成功 ${{ env.DEVICE_NAME }}
+        desp: |
+          编译成功设备： ${{ env.DEVICE_NAME }}
+
+          [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }}
+
+          [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }}
+
+          源码信息：
+
+          ${{ env.useVersionInfo }}
+
+
+    - name: 发送钉钉通知
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{ secrets.DING_ACCESS_TOKEN }}
+        secret: ${{ secrets.DING_SIGN }}
+        body: |
+          {
+            "msgtype": "markdown",
+            "markdown": {
+              "title": "编译成功 ${{ env.DEVICE_NAME }}",
+              "text": "编译成功 ${{ env.DEVICE_NAME }} \n\n [Cowtransfer下载](${{ env.COWTRANSFER_URL }})： ${{ env.COWTRANSFER_URL }} \n\n [WeTransfer下载](${{ env.WETRANSFER_URL }})： ${{ env.WETRANSFER_URL }} \n\n 源码信息： \n\n ${{ env.useVersionInfo }}"
+            }
+          }
+
+
 
     # - name: 微信推送-编译完成
     #   if: steps.organize.outputs.status == 'success' && !cancelled()
     #   run: |
+    #     echo "${{ env.DEVICE_NAME }}"
     #     curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=${{ env.COWTRANSFER_URL }}&desp=编译完成${{ env.DEVICE_NAME }}
 
 
