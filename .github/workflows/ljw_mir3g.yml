@@ -73,8 +73,10 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         git clone https://github.com/tty228/luci-app-serverchan.git package/openwrt-packages/luci-app-serverchan
-        useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)。更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
+        useVersionInfoWX=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)。更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
+        useVersionInfo=$(git show -s --date=short --format="编译前的最后一次 \n [➦主源码](https://github.com/coolsnowwolf/lede)：https://github.com/coolsnowwolf/lede。 \n更新记录: \n更新人: %an \n更新时间: %cd \n更新内容: %s \n哈希值: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "useVersionInfoWX=$useVersionInfoWX" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d·%H:%M:%S")" >> $GITHUB_ENV
 
     # - name: 下载Lean源码并设置Feeds
@@ -121,7 +123,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
 
      # curl https://sc.ftqq.com/${{ secrets.ServerChan }}.send?text=开始编译${{ env.DEVICE_NAME }}&desp=${{ env.DEVICE_NAME }}
      # echo "::set-output name=status::success"
@@ -130,13 +132,13 @@ jobs:
       uses: yakumioto/serverchan-action@v1
       with:
         key: ${{ secrets.ServerChan }}
-        text: 开始编译${{ env.DEVICE_NAME }}
+        text: 开始编译_${{ env.DEVICE_NAME }}
         desp: |
-          开始编译${{ env.DEVICE_NAME }}
+          开始编译_${{ env.DEVICE_NAME }}
 
           源码信息：
 
-          ${{ env.useVersionInfo }}
+          ${{ env.useVersionInfoWX }}
 
 
     - name: 钉钉推送-开始编译
@@ -146,9 +148,10 @@ jobs:
         secret: ${{ secrets.DING_SIGN }}
         body: |
           {
-            "msgtype": "text",
-            "text": {
-              "content": "开始编译 ${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
+            "msgtype": "markdown",
+            "markdown": {
+              "title": "开始编译_${{ env.DEVICE_NAME }}",
+              "text": "${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
             }
           }
 
@@ -178,7 +181,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: Lin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+        name: Lin_${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件到奶牛快传cowtransfer #奶牛快传
@@ -227,7 +230,7 @@ jobs:
 
           源码信息：
 
-          ${{ env.useVersionInfo }}
+          ${{ env.useVersionInfoWX }}
 
 
     - name: 发送钉钉通知
