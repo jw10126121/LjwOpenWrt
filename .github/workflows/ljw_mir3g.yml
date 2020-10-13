@@ -84,22 +84,18 @@ jobs:
     #   run: |
     #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
 
-
-    
-    # [ -e files ] && mv files openwrt/files
-
     - name: 加载配置 Configuration Customization
       run: |
-        
+        # [ -e files ] && mv files openwrt/files
         rm -rf ./openwrt/.config*
         if [ -e $CONFIG_FILE ]; then
           echo '查到配置文件，复制到.config中'
           cp -f $CONFIG_FILE openwrt/.config;
           
         fi
-        grep -l "CONFIG_PACKAGE_luci-theme-edge=y" openwrt/.config
+        grep -l "CONFIG_PACKAGE_luci-theme-edge=y" openwrt/.config;
         if [ ! $? -eq 0 ]; then
-          echo 'CONFIG_PACKAGE_luci-theme-edge=y' >> openwrt/.config
+          echo 'CONFIG_PACKAGE_luci-theme-edge=y' >> openwrt/.config;
         fi
         
     - name: 加载自定义配置 Configuration Customization
