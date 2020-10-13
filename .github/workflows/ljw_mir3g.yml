@@ -84,9 +84,13 @@ jobs:
     #   run: |
     #     chmod +x linOpenwrtUpdateCodeAndFeeds.sh && ./linOpenwrtUpdateCodeAndFeeds.sh 1 0 1
 
+
+    
+    # [ -e files ] && mv files openwrt/files
+
     - name: 加载配置 Configuration Customization
       run: |
-        [ -e files ] && mv files openwrt/files
+        
         rm -rf ./openwrt/.config*
         if [ -e $CONFIG_FILE ]; then
           echo '查到配置文件，复制到.config中'
