@@ -93,8 +93,6 @@ jobs:
           cp -f $CONFIG_FILE openwrt/.config;
           
         fi
-
-        echo '配置主题edge编译'
         grep -l "CONFIG_PACKAGE_luci-theme-edge=y" openwrt/.config
         if [ ! $? -eq 0 ]; then
           echo 'CONFIG_PACKAGE_luci-theme-edge=y' >> openwrt/.config
