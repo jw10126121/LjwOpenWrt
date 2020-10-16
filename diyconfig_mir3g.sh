@@ -28,3 +28,18 @@ sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default
 # 修改wifi密码
 sed -i 's/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=12356789/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 
+
+
+
+sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default_radio\${devidx}.ssid=ljwAP/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
+
+
+
+# 修改闭源驱动ssid名，2G=ljwAP，5G=ljwAP_5G
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7603.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.2G.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.5G.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.5G.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7612.dat
+sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.2G.dat
