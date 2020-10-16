@@ -36,10 +36,12 @@ sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default
 
 
 # 修改闭源驱动ssid名，2G=ljwAP，5G=ljwAP_5G
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7603.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.2G.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.5G.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.5G.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7612.dat
-sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.2G.dat
+# grep -rl '^SSID1=OpenWrt_5G' $package_root/lean/mt/drivers/mt_wifi/files/ | xargs sed -i 's/SSID1=OpenWrt/SSID1=ljwAP_5G/g'
+grep -rl '^SSID1=OpenWrt' $package_root/lean/mt/drivers/mt_wifi/files/ | xargs sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g'
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7603.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.2G.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.5G.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.5G.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7612.dat
+# sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.1.2G.dat
