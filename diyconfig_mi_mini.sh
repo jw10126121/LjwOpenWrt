@@ -26,4 +26,4 @@ sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx
 # 修改wifi名
 sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default_radio\${devidx}.ssid=ljwAP/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 # 修改wifi密码
-sed -i 's/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=12356789/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
+sed -i 's/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=12345678/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh

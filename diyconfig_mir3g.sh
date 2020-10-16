@@ -8,6 +8,9 @@
 
 package_root='package'
 
+wifi_password=$1
+
+
 # 修改路由器名称
 sed -i 's/OpenWrt/LinjwRouter/g' $package_root/base-files/files/bin/config_generate
 
@@ -26,7 +29,7 @@ sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx
 # 修改wifi名
 sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default_radio\${devidx}.ssid=ljwAP/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 # 修改wifi密码
-sed -i 's/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=12356789/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
+sed -i "s/set wireless.default_radio\${devidx}.encryption=none/set wireless.default_radio\${devidx}.encryption=psk-mixed \n\t\t\t set wireless.default_radio\${devidx}.key=$wifi_password/g" $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 
 
 
@@ -38,6 +41,8 @@ sed -i 's/set wireless.default_radio\${devidx}.ssid=OpenWrt/set wireless.default
 # 修改闭源驱动ssid名，2G=ljwAP，5G=ljwAP_5G
 # grep -rl '^SSID1=OpenWrt_5G' $package_root/lean/mt/drivers/mt_wifi/files/ | xargs sed -i 's/SSID1=OpenWrt/SSID1=ljwAP_5G/g'
 grep -rl '^SSID1=OpenWrt' $package_root/lean/mt/drivers/mt_wifi/files/ | xargs sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g'
+grep -rl '^WPAPSK1=12345678' $package_root/lean/mt/drivers/mt_wifi/files/ | xargs sed -i "s/WPAPSK1=12345678/WPAPSK1=$wifi_password/g"
+
 # sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7603.dat
 # sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.2G.dat
 # sed -i 's/SSID1=OpenWrt/SSID1=ljwAP/g' $package_root/lean/mt/drivers/mt_wifi/files/mt7615.5G.dat

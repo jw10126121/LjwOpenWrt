@@ -100,7 +100,7 @@ jobs:
           echo '查到配置文件，复制到openwrt中，并运行'
           cp -f $DIYCONFIG openwrt/$DIYCONFIG
           cd openwrt
-          chmod +x $DIYCONFIG && ./$DIYCONFIG
+          chmod +x $DIYCONFIG && ./$DIYCONFIG ${{ secrets.ROUTER_WIFI_PASSWORD }}
           # 修改路由器登录密码
           # sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
           cd ..;
@@ -152,7 +152,7 @@ jobs:
             "msgtype": "markdown",
             "markdown": {
               "title": "开始编译_${{ env.DEVICE_NAME }}",
-              "text": "${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
+              "text": "开始编译：${{ env.DEVICE_NAME }} \n\n 编译源码信息： \n ${{ env.useVersionInfo }}"
             }
           }
 
