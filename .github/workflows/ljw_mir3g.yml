@@ -78,6 +78,8 @@ jobs:
         git clone https://github.com/zzsj0928/luci-app-serverchand.git package/openwrt-packages/luci-app-serverchand
         # ARP在线人员查看 CONFIG_PACKAGE_luci-app-onliner=y
         # git clone https://github.com/rufengsuixing/luci-app-onliner.git package/openwrt-packages/luci-app-onliner
+        # 京东签到插件
+        git clone https://github.com/jerrykuku/luci-app-jd-dailybonus.git package/openwrt-packages/luci-app-jd-dailybonus
         git clone https://github.com/garypang13/luci-theme-edge.git package/openwrt-packages/luci-theme-edge
         useVersionInfoWX=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)。更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
         useVersionInfo=$(git show -s --date=short --format="编译前的最后一次 \n [➦主源码](https://github.com/coolsnowwolf/lede)：https://github.com/coolsnowwolf/lede。 \n更新记录: \n更新人: %an \n更新时间: %cd \n更新内容: %s \n哈希值: %H")
@@ -107,7 +109,7 @@ jobs:
           cd openwrt
           chmod +x $DIYCONFIG && ./$DIYCONFIG ${{ secrets.ROUTER_WIFI_PASSWORD }}
           # 修改路由器登录密码
-          # sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
+          sed -i "s/root::0:0:99999:7:::/${{ secrets.ROUTER_PASSWORD }}/g" package/base-files/files/etc/shadow
           cd ..;
         fi
 
