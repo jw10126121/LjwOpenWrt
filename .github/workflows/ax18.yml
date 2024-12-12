@@ -127,14 +127,8 @@ jobs:
         cd openwrt
         sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
-        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
-        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
-        if [[ $REPO_URL == *"lede"* ]]; then
-          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' include/kernel-6.1)
-          echo "内核版本：$VERSION_KERNEL"
-        fi
 
-    - name: Install Feeds(安装feeds)
+    - name: Install Feeds (安装feeds)
       run: |
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
@@ -147,12 +141,35 @@ jobs:
         rm -rf ./tmp* ./.config*
         cat $GITHUB_WORKSPACE/$CONFIGS_DIR/GENERAL.txt $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
         make defconfig > /dev/null 2>&1
+
+    - name: Read Variables (读取变量)
+      run: |
+        echo '移除所有.config并添加新的.config'
+        cd $OPENWRT_PATH
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
         echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
         DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+        dir_linux_version="$OPENWRT_PATH/target/linux/"
+        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
+        KERNEL_PATCHVER=''
+        if [ -n "$dir_linux_device_target" ]; then
+          MAKEFILE_PATH="$dir_linux_device_target/Makefile"
+          if [ -f "$MAKEFILE_PATH" ]; then
+            KERNEL_PATCHVER=$(grep -E "11KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
+          fi
+        fi
+        if [ -s KERNEL_PATCHVER ]; then
+          if [ -f "./include/kernel-$KERNEL_PATCHVER" ]; then
+            VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+            echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
+            echo "内核版本：$VERSION_KERNEL"
+          fi
+        fi
         
     - name: Configuration Customization (加载自定义配置)
       run: |
@@ -232,13 +249,13 @@ jobs:
         body: |
           **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
           ### 📒 固件信息(无WIFI)
-          - 无WIFI带有线NSS的6.12内核固件
           - 💻 这是 ${{ env.FIRMWARE_TAG }} 平台使用的 OpenWrt 固件
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🌐 默认地址: 192.168.1.1
           - 🔑 默认密码: password
           ### 🧊 固件版本
+          - 固件内核版本：**${{ env.VERSION_KERNEL }}**
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
           - ${{ env.VERSION_INFO }}
 
