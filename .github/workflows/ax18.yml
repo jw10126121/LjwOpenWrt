@@ -16,7 +16,7 @@ on:
         description: '配置文件名：'
         required: false
         type: string
-        default: 'ax18.config'
+        default: 'ax18.txt'
       iDIY:
         description: 'DIY脚本：'
         required: false
