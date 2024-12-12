@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 # Modify default IP
-#sed -i 's/192.168.1.1/192.168.50.5/g' package/base-files/files/bin/config_generate
+
 
 WRT_IP=192.168.0.1
 WRT_NAME=Linjw
@@ -25,7 +25,7 @@ sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
 sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
 
 #LEDE平台调整
-if [[ -e $CFG_FILE_LEDE ]]; then
+if [ -f "$CFG_FILE_LEDE" ]; then
 	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
 	sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
 fi
@@ -35,7 +35,7 @@ sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root
 sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
 sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/ -type f -name "luci-app-upnp.json")
 sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-alist/root/usr/share/luci/menu.d/ -type f -name "luci-app-alist.json")
-if [[ -e $CFG_FILE_LEDE ]]; then
+if [ -f "$CFG_FILE_LEDE" ]; then
 	sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
 fi
 
