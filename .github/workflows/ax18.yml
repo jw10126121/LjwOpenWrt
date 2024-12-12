@@ -158,28 +158,18 @@ jobs:
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
         KERNEL_PATCHVER=''
-        echo "【LinInfo】dir_linux_device_target：$dir_linux_device_target"
         if [ -n "$dir_linux_device_target" ]; then
           MAKEFILE_PATH="$dir_linux_device_target/Makefile"
           if [ -f "$MAKEFILE_PATH" ]; then
             KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
-            echo "【LinInfo】内核中版本：$KERNEL_PATCHVER"
-          else
-            echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
           fi
-        else
-          echo "【LinInfo】文件夹不存在：$dir_linux_device_target"
         fi
-        if [ -s KERNEL_PATCHVER ]; then
+        if [ -s $KERNEL_PATCHVER ]; then
           if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
             VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
             echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
             echo "【LinInfo】内核版本：$VERSION_KERNEL"
-          else
-            echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
           fi
-        else 
-          echo "【LinInfo】KERNEL_PATCHVER为空"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
 
