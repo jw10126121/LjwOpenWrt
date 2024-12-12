@@ -139,7 +139,7 @@ jobs:
         echo '【LinInfo】移除所有.config并添加新的.config'
         cd $OPENWRT_PATH
         rm -rf ./tmp* ./.config*
-        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
         echo "【LinInfo】写入配置文件为："
         echo "$(cat .config)"
         make defconfig > /dev/null 2>&1
