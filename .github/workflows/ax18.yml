@@ -101,10 +101,8 @@ jobs:
     - name: Clone Source Code (克隆源代码)
       run: |
         df -hT $GITHUB_WORKSPACE
-        # git clone $REPO_URL -b $REPO_BRANCH openwrt
         echo "克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
-	# openwrt目录下操作
 	cd openwrt
 	sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SOURCE_CODE
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
@@ -146,6 +144,8 @@ jobs:
         make defconfig
 	./scripts/diffconfig.sh > seed.config
  	cat seed.config
+  	echo "环境"
+  	cat $GITHUB_ENV
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
