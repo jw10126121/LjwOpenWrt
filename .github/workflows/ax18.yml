@@ -113,6 +113,10 @@ jobs:
     - name: Checkout (下载当前源码)
       uses: actions/checkout@master
 
+    - name: Check Scripts
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
     - name: config git (修改git下载缓冲大小)
       run: |
         git config --global http.postBuffer 524288000
@@ -217,9 +221,16 @@ jobs:
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
 
-    - name: Check Space Usage(检查空间使用情况)
-      if: (!cancelled())
-      run: df -hT
+    - name: Machine Information
+      run: |
+        cd $OPENWRT_PATH
+        echo "======================="
+        lscpu | grep -E "name|Core|Thread"
+        echo "======================="
+        df -h
+        echo "======================="
+        du -h --max-depth=1
+        echo "======================="
 
     - name: 保存固件到bin目录下 Upload artifact
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
