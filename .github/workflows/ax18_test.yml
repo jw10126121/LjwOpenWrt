@@ -1,0 +1,177 @@
+#=================================================
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com  
+#=================================================
+
+name:  ax18_test
+
+on:
+  #手动编译
+  workflow_dispatch:
+    inputs:
+      iCONFIG:
+        description: '配置文件名：'
+        required: false
+        type: string
+        default: 'ax18.config'
+      iDIY:
+        description: 'DIY脚本：'
+        required: false
+        type: string
+        default: 'diyconfig_ax18.sh'
+      iUpdate_bin:
+        description: '是否上传Bin：'
+        required: false
+        type: boolean
+        default: true
+      iRelease_FIRMWARE:
+        description: '是否发布firmware：'
+        required: false
+        type: boolean
+        default: false
+
+#环境变量配置
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_FILE: ${{inputs.iCONFIG}}
+  DIYCONFIG: ${{inputs.iDIY}}
+  DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
+  GENERAL_CONFIG: GENERAL.txt   # 通用配置
+  CLASH_KERNEL: amd64
+  CACHE_TOOLCHAIN: true
+  FREE_UP_DISK: false
+  UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
+  UPLOAD_FIRMWARE: true
+  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
+  FIRMWARE_TAG: ax18
+  TZ: Asia/Shanghai
+  CONFIGS_DIR: Config
+  SCRIPTS_DIR: Scripts
+  
+#CI权限
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+
+    - name: Initialization Environment (初始化环境)
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi $(docker images -q)
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        sudo -E apt-get -y update
+        sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
+
+    - name: config git (修改git下载缓冲大小)
+      run: |
+        git config --global http.postBuffer 524288000
+        git config --global http.lowSpeedLimit 0
+        git config --global http.lowSpeedTime 999999
+
+    - name: Clone Source Code (克隆源代码)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+        echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
+        git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
+        cd openwrt
+        sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+
+    - name: Generate Variables (加载配置)
+      run: |
+        echo '【LinInfo】移除所有.config并添加新的.config'
+        cd $OPENWRT_PATH
+        rm -rf ./tmp* ./.config*
+        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        echo "【LinInfo】写入配置文件为："
+        echo "$(cat .config)"
+        make defconfig > /dev/null 2>&1
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
+
+    - name: Read Variables (读取变量)
+      run: |
+        cd $OPENWRT_PATH
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+        SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+        DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
+        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+        DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
+        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+        DEVICE_PROFILE=$(cat .config | grep CONFIG_TARGET_PROFILE | awk -F '"' '{print $2}' | grep -oP 'DEVICE_\K\w+')
+        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
+        dir_linux_version="$OPENWRT_PATH/target/linux/"
+        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
+        KERNEL_PATCHVER=''
+        if [ -n "$dir_linux_device_target" ]; then
+          MAKEFILE_PATH="$dir_linux_device_target/Makefile"
+          if [ -f "$MAKEFILE_PATH" ]; then
+            KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
+            echo "【LinInfo】KERNEL_PATCHVER：$KERNEL_PATCHVER"
+          else
+            echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
+          fi
+        fi
+        if [ -s $KERNEL_PATCHVER ]; then
+          if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
+            VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+            echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
+            echo "【LinInfo】内核版本：$VERSION_KERNEL"
+          else
+            echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
+          fi
+        else
+          echo "【LinInfo】KERNEL_PATCHVER为空"
+        fi
+        echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+
+        
+    - name: Configuration Customization (加载自定义配置)
+      run: |
+        echo $PWD
+        cd $OPENWRT_PATH
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
+          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+          sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+        fi
+
+    - name: Install Feeds (安装feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: defconfig (确认配置)
+      working-directory: ./openwrt
+      run: |
+        echo "【LinInfo】make defconfig前配置文件为："
+        echo "$(cat .config)"
+        make defconfig
+        ./scripts/diffconfig.sh > seed.config
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
+        echo "【LinInfo】：$GITHUB_ENV"
+
+    - name: Check Space Usage(检查空间使用情况)
+      if: (!cancelled())
+      run: df -hT
