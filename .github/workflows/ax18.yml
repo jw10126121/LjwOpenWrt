@@ -27,16 +27,24 @@ on:
 #   watch:
 #     types: [started]
 
+#环境变量配置
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: ax18.config
   DIYCONFIG: diyconfig_ax18.sh
-
+  DIY_SOURCE_CODE: diy_code.sh
+  CLASH_KERNEL: amd64
+  CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
+  FIRMWARE_RELEASE: true
+  FIRMWARE_TAG: AX18
   TZ: Asia/Shanghai
+  
+#CI权限
+permissions: write-all
 
 jobs:
   build:
@@ -44,7 +52,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    - name: Check Server Performance(检查服务器性能)
+    - name: Check Server Performance (检查服务器性能)
       run: |
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
@@ -58,7 +66,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
-    - name: Initialization Environment(初始化环境)
+    - name: Initialization Environment (初始化环境)
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -72,43 +80,63 @@ jobs:
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
 
-    - name: Combine Disks(合并磁盘)
+    - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
       with:
         swap-size-mb: 1024
         temp-reserve-mb: 100
         root-reserve-mb: 1024
 
-    - name: Checkout(下载当前源码)
+    - name: Checkout (下载当前源码)
       uses: actions/checkout@master
 
     - name: 修改git下载缓冲大小
-      run: git config --global http.postBuffer 524288000
-
-    - name: Clone Source Code(克隆源代码)
-      env: 
-        REPO_URL: https://github.com/coolsnowwolf/lede
-        REPO_BRANCH: master
       run: |
-        chmod +x linOpenwrtUpdateCodeAndFeeds_ax18.sh && ./linOpenwrtUpdateCodeAndFeeds_ax18.sh 1 0 0
+        git config --global http.postBuffer 524288000
+        git config --global http.lowSpeedLimit 0
+	      git config --global http.lowSpeedTime 999999
 
-    - name: 加载配置 Configuration Customization
+    - name: Clone Source Code (克隆源代码)
       run: |
-        rm -rf ./openwrt/.config*
-        if [ -e $CONFIG_FILE ]; then
-          echo '查到配置文件，复制到.config中'
-          cp -f $CONFIG_FILE openwrt/.config;
-          
+        df -hT $GITHUB_WORKSPACE
+        # git clone $REPO_URL -b $REPO_BRANCH openwrt
+        echo "克隆源代码：【$REPO_BRANCH】$REPO_URL"
+        git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
+        cd openwrt
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+        if [[ $REPO_URL == *"lede"* ]]; then
+            VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' include/kernel-6.1)
+            echo "内核版本：VERSION_KERNEL"
         fi
+        echo "处理源代码脚本执行：$DIY_SOURCE_CODE"
+        # openwrt目录下操作
+        chmod +x $DIY_SOURCE_CODE && ./$DIY_SOURCE_CODE openwrt
+
+    - name: Generate Variables (加载配置)
+      run: |
+        echo '移除所有.config并添加新的.config'
+        rm -rf ./openwrt/.config*
+        cp $CONFIG_FILE $OPENWRT_PATH/.config
+        cd $OPENWRT_PATH
+        make defconfig > /dev/null 2>&1
+        SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+        DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
+        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+        DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
+        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
         
-    - name: 加载自定义配置 Configuration Customization
+    - name: Configuration Customization (加载自定义配置)
       run: |
         echo $PWD
         if [ -e $DIYCONFIG ]; then
-          cp -f $DIYCONFIG openwrt/$DIYCONFIG
-          cd openwrt
+          cp -f $DIYCONFIG $OPENWRT_PATH/$DIYCONFIG
+          cd $OPENWRT_PATH
           chmod +x $DIYCONFIG && ./$DIYCONFIG
           cd ..;
+          echo "加载自定义配置成功：$DIYCONFIG"
         fi
 
     - name: 确认配置
