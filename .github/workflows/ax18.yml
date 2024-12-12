@@ -23,7 +23,12 @@ on:
         type: string
         default: 'diyconfig_ax18.sh'
       iUpdate_bin:
-        description: '是否发布：'
+        description: '是否上传Bin：'
+        required: false
+        type: boolean
+        default: true
+      iRelease_FIRMWARE:
+        description: '是否发布firmware：'
         required: false
         type: boolean
         default: false
@@ -33,16 +38,16 @@ env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: ax18.config
-  DIYCONFIG: diyconfig_ax18.sh
+  CONFIG_FILE: ${{inputs.iCONFIG}}
+  DIYCONFIG: ${{inputs.iDIY}}
   DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
   GENERAL_CONFIG: GENERAL.txt   # 通用配置
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
-  UPLOAD_BIN_DIR: true
+  UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
   UPLOAD_FIRMWARE: true
-  FIRMWARE_RELEASE: true
+  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
   FIRMWARE_TAG: ax18
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config
