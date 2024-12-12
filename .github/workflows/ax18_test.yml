@@ -102,9 +102,6 @@ jobs:
         cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
         echo "【LinInfo】写入配置文件为："
         echo "$(cat .config)"
-        make defconfig > /dev/null 2>&1
-        echo "【LinInfo】make defconfig后配置文件为："
-        echo "$(cat .config)"
 
     - name: Read Variables (读取变量)
       run: |
@@ -144,6 +141,11 @@ jobs:
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
 
+    - name: Install Feeds (安装feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
         
     - name: Configuration Customization (加载自定义配置)
       run: |
@@ -154,12 +156,6 @@ jobs:
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
           sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
         fi
-
-    - name: Install Feeds (安装feeds)
-      run: |
-        cd $OPENWRT_PATH
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
 
     - name: defconfig (确认配置)
       working-directory: ./openwrt
