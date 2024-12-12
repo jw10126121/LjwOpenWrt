@@ -33,15 +33,17 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: ax18.config
   DIYCONFIG: diyconfig_ax18.sh
-  DIY_SOURCE_CODE: diy_code.sh
+  DIY_SOURCE_CODE: diy_code.sh  # 主要用于更新Feeds
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
-  UPLOAD_BIN_DIR: false
+  UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: true
   FIRMWARE_TAG: AX18
   TZ: Asia/Shanghai
+  CONFIGS_DIR: Config
+  SCRIPTS_DIR: Scripts
   
 #CI权限
 permissions: write-all
@@ -95,14 +97,16 @@ jobs:
         git config --global http.postBuffer 524288000
         git config --global http.lowSpeedLimit 0
 	git config --global http.lowSpeedTime 999999
- 
+
     - name: Clone Source Code (克隆源代码)
       run: |
         df -hT $GITHUB_WORKSPACE
         # git clone $REPO_URL -b $REPO_BRANCH openwrt
         echo "克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
-        cd openwrt
+	# openwrt目录下操作
+	cd openwrt
+	sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SOURCE_CODE
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
@@ -110,16 +114,15 @@ jobs:
             VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' include/kernel-6.1)
             echo "内核版本：VERSION_KERNEL"
         fi
-        echo "处理源代码脚本执行：$DIY_SOURCE_CODE"
-        # openwrt目录下操作
-        chmod +x $DIY_SOURCE_CODE && ./$DIY_SOURCE_CODE openwrt
+	./scripts/feeds update -a
+ 	./scripts/feeds install -a
 
     - name: Generate Variables (加载配置)
       run: |
         echo '移除所有.config并添加新的.config'
-        rm -rf ./openwrt/.config*
-        cp $CONFIG_FILE $OPENWRT_PATH/.config
-        cd $OPENWRT_PATH
+	cd $OPENWRT_PATH
+        rm -rf ./tmp* ./.config*
+	cat $GITHUB_WORKSPACE/$CONFIGS_DIR/GENERAL.txt $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
         make defconfig > /dev/null 2>&1
         SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
         echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
@@ -131,20 +134,20 @@ jobs:
     - name: Configuration Customization (加载自定义配置)
       run: |
         echo $PWD
-        if [ -e $DIYCONFIG ]; then
-          cp -f $DIYCONFIG $OPENWRT_PATH/$DIYCONFIG
-          cd $OPENWRT_PATH
-          chmod +x $DIYCONFIG && ./$DIYCONFIG
-          cd ..;
-          echo "加载自定义配置成功：$DIYCONFIG"
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
+	  echo "加载自定义配置成功：$DIYCONFIG"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+	  sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
         fi
 
-    - name: 确认配置
+    - name: defconfig (确认配置)
       working-directory: ./openwrt
       run: |
         make defconfig
+	./scripts/diffconfig.sh > seed.config
+ 	cat seed.config
 
-    - name: 下载工具包 Download package
+    - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
         make download -j$(nproc)
@@ -156,10 +159,14 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
-        make -j$(nproc) V=s
+        make -j$(nproc) || make -j1 V=s
+	echo "status=success" >> $GITHUB_OUTPUT
+        echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
 
     - name: 保存固件到bin目录下 Upload artifact
-      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      uses: actions/upload-artifact@main
       with:
         name: ax18
         path: openwrt/bin
