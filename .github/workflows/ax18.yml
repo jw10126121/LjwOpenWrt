@@ -126,6 +126,7 @@ jobs:
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
         sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
+        echo "$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
 
     - name: Install Feeds (安装feeds)
@@ -171,7 +172,7 @@ jobs:
             echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
           fi
         fi
-        if [ -s $KERNEL_PATCHVER ]; then
+        if [ -n "$KERNEL_PATCHVER" ]; then
           if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
             VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
             echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
