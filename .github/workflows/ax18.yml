@@ -8,20 +8,24 @@
 
 name:  ax18
 
-# 配置触发条件
 on:
-  release:
-    types: [published]
-  push:
-    branches:
-     - master
-    paths:
-     - 'ax18.config'
-
-#  schedule:
-#    - cron: 0 8 * * 5
-  watch:
-    types: [started]
+  workflow_dispatch:
+  schedule:
+    - cron: 0 3 * * *
+    
+# # 配置触发条件
+# on:
+#   release:
+#     types: [published]
+#   push:
+#     branches:
+#      - master
+#     paths:
+#      - 'ax18.config'
+# #  schedule:
+# #    - cron: 0 8 * * 5
+#   watch:
+#     types: [started]
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
