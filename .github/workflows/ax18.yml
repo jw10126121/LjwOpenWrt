@@ -33,14 +33,15 @@ env:
   REPO_BRANCH: master
   CONFIG_FILE: ax18.config
   DIYCONFIG: diyconfig_ax18.sh
-  DIY_SOURCE_CODE: diy_code.sh  # 主要用于更新Feeds
+  DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
+  GENERAL_CONFIG: GENERAL.txt   # 通用配置
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
   UPLOAD_BIN_DIR: true
   UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: true
-  FIRMWARE_TAG: AX18
+  FIRMWARE_TAG: ax18
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config
   SCRIPTS_DIR: Scripts
@@ -92,7 +93,7 @@ jobs:
     - name: Checkout (下载当前源码)
       uses: actions/checkout@master
 
-    - name: 修改git下载缓冲大小
+    - name: config git (修改git下载缓冲大小)
       run: |
         git config --global http.postBuffer 524288000
         git config --global http.lowSpeedLimit 0
@@ -104,14 +105,18 @@ jobs:
         echo "克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
-        sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SOURCE_CODE
+        sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         if [[ $REPO_URL == *"lede"* ]]; then
           VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' include/kernel-6.1)
-          echo "内核版本：VERSION_KERNEL"
+          echo "内核版本：$VERSION_KERNEL"
         fi
+
+    - name: Install Feeds(安装feeds)
+      run: |
+        cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
@@ -132,8 +137,10 @@ jobs:
     - name: Configuration Customization (加载自定义配置)
       run: |
         echo $PWD
+        echo $GITHUB_WORKSPACE
+        cd $OPENWRT_PATH
         if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
-          echo "加载自定义配置成功：$DIYCONFIG"
+          echo "加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
           sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
         fi
@@ -150,7 +157,7 @@ jobs:
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
-        make download -j$(nproc)
+        make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
         
@@ -164,9 +171,56 @@ jobs:
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
 
+    - name: Check Space Usage(检查空间使用情况)
+      if: (!cancelled())
+      run: df -hT
+
     - name: 保存固件到bin目录下 Upload artifact
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       uses: actions/upload-artifact@main
       with:
-        name: ax18
-        path: openwrt/bin
+        name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}
+        path: ${{ env.OPENWRT_PATH }}/bin
+
+    - name: Organize Files(整理文件)
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd $OPENWRT_PATH/bin/targets/*/*
+        cat sha256sums
+        cp $OPENWRT_PATH/.config build.config
+        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
+        tar -zcf Packages.tar.gz packages
+        rm -rf packages feeds.buildinfo version.buildinfo
+        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+
+    - name: Upload Firmware To Artifact(将固件上传到Artifact)
+      if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}-Firmware
+        path: ${{ env.FIRMWARE_PATH }}
+
+    - name: Upload Firmware To Release(发布固件)
+      if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
+      uses: ncipollo/release-action@v1
+      with:
+        name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
+        allowUpdates: true
+        tag: ${{ env.FIRMWARE_TAG }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.FIRMWARE_PATH }}/*
+        body: |
+          **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
+          ### 📒 固件信息(无WIFI)
+          - 无WIFI带有线NSS的6.12内核固件
+          - 💻 这是 ${{ env.FIRMWARE_TAG }} 平台使用的 OpenWrt 固件
+          - ⚽ 固件源码: ${{ env.REPO_URL }}
+          - 💝 源码分支: ${{ env.REPO_BRANCH }}
+          - 🌐 默认地址: 192.168.1.1
+          - 🔑 默认密码: password
+          ### 🧊 固件版本
+          - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
+          - ${{ env.VERSION_INFO }}
+
+
+
