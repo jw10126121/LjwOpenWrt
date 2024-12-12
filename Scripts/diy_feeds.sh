@@ -5,16 +5,28 @@
 #=================================================
 #
 
-# 是否更新脚本
-should_update_openwrt=$1
-# 是否清空feeds
-should_clean_feeds=$2
-# 添加ssr
-add_ssr_plus=$3
 
-openwrt_root='openwrt'
-lean_code_url='https://github.com/coolsnowwolf/lede'
+openwrt_root="openwrt"
 feed_config_name='feeds.conf.default'
+
+
+# configGit
+
+# cd "$openwrt_root"
+sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
+
+configGit() {
+
+	echo ''
+	echo '--------------------------------'
+	echo '--配置git config-------------------'
+	echo '--------------------------------'
+	echo ''	
+	git config --global http.postBuffer 524288000
+	git config --global http.lowSpeedLimit 0
+	git config --global http.lowSpeedTime 999999
+
+}
 
 downloadCode() {
 			
@@ -36,7 +48,7 @@ downloadCode() {
 
 	if [[ ! -d $openwrt_root ]]; then
 		# 下载源码
-		git clone $lean_code_url -b master $openwrt_root && cd $openwrt_root && git reset --hard 5b88caedf6f3ed13536f1073810a583bff4328c7 && cd ..
+		git clone $lean_code_url -b master $openwrt_root
 
 		if [ $? -ne 0 ]; then
 			# 失败
@@ -114,14 +126,6 @@ configFeeds() {
 	fi
 }
 
-configCustomPackages() {
-	git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git $openwrt_root/package/feeds/luci-app-kickass
-
-	# cd $openwrt_root/package/feeds
-	# git clone https://github.com/zaiyuyishiyoudu/luci-app-kickass.git luci-app-kickass
-	# cd ../../..
-}
-
 updateFeeds() {
 	echo '--------------------------------'
 	echo '--更新Feeds----------------------'
@@ -134,26 +138,24 @@ updateFeeds() {
 	cd ..
 }
 
-	echo '++++++++++++++++++++++++++++++++'
-	echo '--开始更新源码和Feeds-------------'
-	echo '++++++++++++++++++++++++++++++++'
+	# echo '++++++++++++++++++++++++++++++++'
+	# echo '--开始更新源码和Feeds-------------'
+	# echo '++++++++++++++++++++++++++++++++'
 
-	# 一、下载Lean源码
-	downloadCode $lean_code_url 'master'
-	# 二、清理缓存
-	echo '--------------------------------'
-	echo '--清理缓存-----------------------'
-	echo '--------------------------------'
-	rm -rf ./$openwrt_root/tmp
-	# 三、配置并更新Feeds
-	configFeeds
-	updateFeeds
+	# # 一、下载Lean源码
+	# downloadCode $lean_code_url 'master'
+	# # 二、清理缓存
+	# echo '--------------------------------'
+	# echo '--清理缓存-----------------------'
+	# echo '--------------------------------'
+	# rm -rf ./$openwrt_root/tmp
+	# # 三、配置并更新Feeds
+	# configFeeds
+	# updateFeeds
 
-	configCustomPackages
-
-	echo '++++++++++++++++++++++++++++++++'
-	echo '--结束更新源码和Feeds-------------'
-	echo '++++++++++++++++++++++++++++++++'
+	# echo '++++++++++++++++++++++++++++++++'
+	# echo '--结束更新源码和Feeds-------------'
+	# echo '++++++++++++++++++++++++++++++++'
 
 
 
