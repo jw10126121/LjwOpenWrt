@@ -139,8 +139,12 @@ jobs:
         echo '【LinInfo】移除所有.config并添加新的.config'
         cd $OPENWRT_PATH
         rm -rf ./tmp* ./.config*
-        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/GENERAL.txt $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        echo "【LinInfo】写入配置文件为："
+        echo "$(cat .config)"
         make defconfig > /dev/null 2>&1
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
 
     - name: Read Variables (读取变量)
       run: |
@@ -162,6 +166,9 @@ jobs:
           MAKEFILE_PATH="$dir_linux_device_target/Makefile"
           if [ -f "$MAKEFILE_PATH" ]; then
             KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
+            echo "【LinInfo】KERNEL_PATCHVER：$KERNEL_PATCHVER"
+          else
+            echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
           fi
         fi
         if [ -s $KERNEL_PATCHVER ]; then
@@ -169,7 +176,11 @@ jobs:
             VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
             echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
             echo "【LinInfo】内核版本：$VERSION_KERNEL"
+          else
+            echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
           fi
+        else
+          echo "【LinInfo】KERNEL_PATCHVER为空"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
 
@@ -187,9 +198,12 @@ jobs:
     - name: defconfig (确认配置)
       working-directory: ./openwrt
       run: |
+        echo "【LinInfo】make defconfig前配置文件为："
+        echo "$(cat .config)"
         make defconfig
         ./scripts/diffconfig.sh > seed.config
-        cat seed.config
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
         echo "【LinInfo】：$GITHUB_ENV"
 
     - name: Download tools (下载工具包) 
