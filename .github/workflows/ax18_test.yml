@@ -139,6 +139,7 @@ jobs:
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
         echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
 
     - name: Organize Files(整理文件)
@@ -154,3 +155,4 @@ jobs:
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
         echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
         echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
+        echo "【LinInfo】bash ll"
