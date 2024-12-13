@@ -130,6 +130,7 @@ jobs:
         git config --global http.lowSpeedTime 999999
 
     - name: Clone Source Code (克隆源代码)
+      id: compile
       run: |
         df -hT $GITHUB_WORKSPACE
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
