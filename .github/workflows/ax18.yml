@@ -114,7 +114,7 @@ jobs:
     - name: Checkout (下载当前源码)
       uses: actions/checkout@master
 
-    - name: Check Scripts
+    - name: Check Scripts (搜索脚本并配置权限)
       run: |
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
@@ -204,7 +204,6 @@ jobs:
           MAKEFILE_PATH="$dir_linux_device_target/Makefile"
           if [ -f "$MAKEFILE_PATH" ]; then
             KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
-            echo "【LinInfo】KERNEL_PATCHVER：$KERNEL_PATCHVER"
           else
             echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
           fi
@@ -288,14 +287,16 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
-          **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
+          **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
           ### 📒 固件信息(无WIFI)
           - 无WIFI带有线NSS的${{ env.VERSION_KERNEL }}内核固件
-          - 💻 这是 ${{ env.FIRMWARE_TAG }} 平台使用的 OpenWrt 固件
+          - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt 固件
+          - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🌐 默认地址: 192.168.0.1
           - 🔑 默认密码: password
+          - 是否带WIFI：否
           ### 🧊 固件版本
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
