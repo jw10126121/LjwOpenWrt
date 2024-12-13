@@ -130,7 +130,7 @@ jobs:
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
-        sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
+        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
 
@@ -145,7 +145,7 @@ jobs:
         cd $OPENWRT_PATH/package
         echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
         chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
-        sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+        bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
 
     - name: Generate Variables (加载配置)
       run: |
@@ -161,7 +161,7 @@ jobs:
         if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
           echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
         fi
 
     - name: defconfig (确认配置)
