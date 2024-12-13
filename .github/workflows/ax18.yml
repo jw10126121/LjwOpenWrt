@@ -1,9 +1,6 @@
 #=================================================
-# https://github.com/P3TERX/Actions-OpenWrt
 # Description: Build OpenWrt using GitHub Actions
 # Lisence: MIT
-# Author: P3TERX
-# Blog: https://p3terx.com  
 #=================================================
 
 name:  ax18
@@ -23,15 +20,20 @@ on:
         type: string
         default: 'diyconfig_ax18.sh'
       iUpdate_bin:
-        description: '是否上传Bin：'
+        description: '将固件上传到Artifact'
         required: false
         type: boolean
         default: true
       iRelease_FIRMWARE:
-        description: '是否发布firmware：'
+        description: '发布firmware'
         required: false
         type: boolean
         default: false
+      iReset_password:
+        description: '重置root密码'
+        required: false
+        type: boolean
+        default: true
 
 #环境变量配置
 env:
@@ -50,6 +52,7 @@ env:
   UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
   FIRMWARE_TAG: ax18
+  IS_RESET_PASSWORD: ${{inputs.iReset_password}}
   IS_RESIZE_SPACE: false # 磁盘扩容，非必要不使用
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config
@@ -253,13 +256,6 @@ jobs:
         du -h --max-depth=1
         echo "======================="
 
-    - name: 保存固件到bin目录下 Upload artifact
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == true
-      uses: actions/upload-artifact@main
-      with:
-        name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}
-        path: ${{ env.OPENWRT_PATH }}/bin
-
     - name: Organize Files(整理文件)
       if: steps.compile.outputs.status == 'success'
       run: |
@@ -274,7 +270,7 @@ jobs:
         echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == false || env.UPLOAD_BIN_DIR == true)
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == true
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}-Firmware
