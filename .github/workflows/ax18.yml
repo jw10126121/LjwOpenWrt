@@ -142,7 +142,7 @@ jobs:
 
     - name: Custom Packages (自定义包)
       run: |
-        cd $OPENWRT_PATH
+        cd $OPENWRT_PATH/package
         echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
         chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
         sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
