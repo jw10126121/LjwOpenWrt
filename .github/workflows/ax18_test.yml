@@ -76,8 +76,6 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-        steps.compile.outputs.status == 'success'
-        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
         echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.FIRMWARE_RELEASE }}"
         echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.UPLOAD_BIN_DIR }}"
         echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.UPLOAD_FIRMWARE }}"
@@ -140,6 +138,7 @@ jobs:
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
 
     - name: Organize Files(整理文件)
       if: steps.compile.outputs.status == 'success'
@@ -153,3 +152,4 @@ jobs:
         rm -rf packages feeds.buildinfo version.buildinfo
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
         echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
+        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
