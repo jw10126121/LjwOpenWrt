@@ -36,9 +36,16 @@ fi
 # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
 if [ -f "$USAGE_FILE" ]; then
-    cat $GITHUB_WORKSPACE/Scripts/patch/usage > $USAGE_FILE
-    echo "【LinInfo】配置NSS："
-    echo "$(cat $GITHUB_WORKSPACE/Scripts/patch/usage)"
+    NEW_USAGE_FILE="$GITHUB_WORKSPACE/Scripts/patch/usage.txt"
+    if [ -f "$NEW_USAGE_FILE" ]; then
+        cat $NEW_USAGE_FILE > $USAGE_FILE
+        echo "【LinInfo】配置NSS："
+        echo "$(cat $NEW_USAGE_FILE)"
+    else
+        echo "【LinInfo】不存在：$NEW_USAGE_FILE"
+    fi
+else
+    echo "【LinInfo】不存在：$USAGE_FILE"
 fi
 
 #调整位置

@@ -20,8 +20,10 @@ UPDATE_PACKAGE() {
 
     # 删除原本同名的软件包
     the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune)
-    echo "【LinInfo】删除同名插件：$the_exist_pkg"
-    rm -rf $the_exist_pkg
+    if [ -n "$the_exist_pkg" ]; then
+        echo "【LinInfo】删除同名插件：$the_exist_pkg"
+        rm -rf $the_exist_pkg
+    fi
 
     # Clone插件
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
@@ -110,7 +112,7 @@ UPDATE_VERSION "openvpn-easy-rsa"
 
 
 #预置HomeProxy数据
-if find ./package -type d -name '*homeproxy*' | grep -q .; then
+if [ -d *"homeproxy"* ]; then
     HP_RULES="surge"
     HP_PATCH="./package/homeproxy/root/etc/homeproxy"
 
