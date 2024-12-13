@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com  
 #=================================================
 
-name:  ax18_test
+name:  ax18
 
 on:
   #手动编译
@@ -16,7 +16,7 @@ on:
         description: '配置文件名：'
         required: false
         type: string
-        default: 'ax18.config'
+        default: 'ax18.txt'
       iDIY:
         description: 'DIY脚本：'
         required: false
@@ -42,6 +42,7 @@ env:
   DIYCONFIG: ${{inputs.iDIY}}
   DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
   GENERAL_CONFIG: GENERAL.txt   # 通用配置
+  DIYPackages: Packages.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
@@ -62,6 +63,40 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
+    - name: Check Server Performance (检查服务器性能)
+      run: |
+        echo "警告⚠"
+        echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+        echo -e "已知CPU型号（降序）：7763，8370C，8272CL，8171M，E5-2673 \n"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量：$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo -e "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "--------------------------内存信息--------------------------"
+        echo "已安装内存详细信息："
+        echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+        steps.compile.outputs.status == 'success'
+        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
+        echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.FIRMWARE_RELEASE }}"
+        echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.UPLOAD_BIN_DIR }}"
+        echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ env.UPLOAD_FIRMWARE }}"
+        echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ inputs.iUpdate_bin }}"
+        echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ inputs.iRelease_FIRMWARE }}"
+
+    - name: Free Disk Space
+      uses: endersonmenezes/free-disk-space@main
+      with:
+        remove_android: true
+        remove_dotnet: true
+        remove_haskell: true
+        remove_tool_cache: true
+        remove_swap: true
+        remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
+        remove_packages_one_command: true
+        remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+        testing: false
+
     - name: Initialization Environment (初始化环境)
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -76,8 +111,19 @@ jobs:
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
 
+    - name: Combine Disks (合并磁盘)
+      uses: easimon/maximize-build-space@master
+      with:
+        swap-size-mb: 1024
+        temp-reserve-mb: 100
+        root-reserve-mb: 1024
+
     - name: Checkout (下载当前源码)
       uses: actions/checkout@master
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: config git (修改git下载缓冲大小)
       run: |
@@ -91,84 +137,19 @@ jobs:
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
-        sh $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
-        echo "$(cat ./feeds.conf.default)"
+        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
+        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
 
-    - name: Install Feeds (安装feeds)
+    - name: Organize Files(整理文件)
+      if: steps.compile.outputs.status == 'success'
       run: |
-        cd $OPENWRT_PATH
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-
-    - name: Generate Variables (加载配置)
-      run: |
-        echo '【LinInfo】移除所有.config并添加新的.config'
-        cd $OPENWRT_PATH
-        rm -rf ./tmp* ./.config*
-        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
-        echo "【LinInfo】写入配置文件为："
-        echo "$(cat .config)"
-
-    - name: Read Variables (读取变量)
-      run: |
-        cd $OPENWRT_PATH
-        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
-        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
-        SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
-        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
-        DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
-        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-        DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
-        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-        DEVICE_PROFILE=$(cat .config | grep CONFIG_TARGET_PROFILE | awk -F '"' '{print $2}' | grep -oP 'DEVICE_\K\w+')
-        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
-        dir_linux_version="$OPENWRT_PATH/target/linux/"
-        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
-        KERNEL_PATCHVER=''
-        if [ -n "$dir_linux_device_target" ]; then
-          MAKEFILE_PATH="$dir_linux_device_target/Makefile"
-          if [ -f "$MAKEFILE_PATH" ]; then
-            KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
-            echo "【LinInfo】KERNEL_PATCHVER：$KERNEL_PATCHVER"
-          else
-            echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
-          fi
-        fi
-        if [ -n "$KERNEL_PATCHVER" ]; then
-          if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
-            VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
-            echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
-            echo "【LinInfo】内核版本：$VERSION_KERNEL"
-          else
-            echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
-          fi
-        else
-          echo "【LinInfo】KERNEL_PATCHVER为空"
-        fi
-        echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
-        
-    - name: Configuration Customization (加载自定义配置)
-      run: |
-        echo $PWD
-        cd $OPENWRT_PATH
-        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
-          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-        fi
-
-    - name: defconfig (确认配置)
-      working-directory: ./openwrt
-      run: |
-        echo "【LinInfo】make defconfig前配置文件为："
-        echo "$(cat .config)"
-        make defconfig
-        ./scripts/diffconfig.sh > seed.config
-        echo "【LinInfo】make defconfig后配置文件为："
-        echo "$(cat .config)"
-        echo "【LinInfo】：$GITHUB_ENV"
-
-    - name: Check Space Usage(检查空间使用情况)
-      if: (!cancelled())
-      run: df -hT
+        cd $OPENWRT_PATH/bin/targets/*/*
+        cat sha256sums
+        cp $OPENWRT_PATH/.config build.config
+        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
+        mv -f $OPENWRT_PATH/bin/packages/*/*/*.apk packages
+        tar -zcf Packages.tar.gz packages
+        rm -rf packages feeds.buildinfo version.buildinfo
+        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
+        echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
