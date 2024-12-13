@@ -172,11 +172,23 @@ jobs:
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
         echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
-        DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}')
+        path_config_file="$OPENWRT_PATH/.config"
+        results=()
+        while IFS= read -r line
+        do
+          if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
+            prefix=${BASH_REMATCH[1]} 
+            platform=${BASH_REMATCH[2]}
+            subplatform=${BASH_REMATCH[3]}
+            deviceName=${BASH_REMATCH[4]}
+            results+=("$prefix $platform $subplatform $deviceName")
+            DEVICE_TARGET=$platform
+            DEVICE_SUBTARGET=$subplatform
+            DEVICE_PROFILE=$deviceName
+          fi
+        done < "$path_config_file"
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-        DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-        DEVICE_PROFILE=$(cat .config | grep CONFIG_TARGET_PROFILE | awk -F '"' '{print $2}' | grep -oP 'DEVICE_\K\w+')
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
@@ -280,6 +292,3 @@ jobs:
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
           - ${{ env.VERSION_INFO }}
-
-
-
