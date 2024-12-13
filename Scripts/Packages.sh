@@ -2,6 +2,8 @@
 
 # PKG_PATCH="$GITHUB_WORKSPACE/openwrt/package/"
 
+# 运行在openwrt/package目录下
+
 #删除软件包
 DELETE_PACKAGE() {
     local PKG_NAME=$1
@@ -114,7 +116,7 @@ UPDATE_VERSION "openvpn-easy-rsa"
 #预置HomeProxy数据
 if [ -d *"homeproxy"* ]; then
     HP_RULES="surge"
-    HP_PATCH="./package/homeproxy/root/etc/homeproxy"
+    HP_PATCH="./homeproxy/root/etc/homeproxy"
 
     chmod +x ./$HP_PATCH/scripts/*
     rm -rf ./$HP_PATCH/resources/*
