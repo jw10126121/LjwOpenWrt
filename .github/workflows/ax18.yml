@@ -145,6 +145,25 @@ jobs:
         cd $OPENWRT_PATH
         rm -rf ./tmp* ./.config*
         cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        
+    - name: Configuration Customization (加载自定义配置)
+      run: |
+        echo $PWD
+        cd $OPENWRT_PATH
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
+          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+          sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+        fi
+
+    - name: defconfig (确认配置)
+      working-directory: ./openwrt
+      run: |
+        make defconfig
+        ./scripts/diffconfig.sh > seed.config
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
+        echo "【LinInfo】：$GITHUB_ENV"
 
     - name: Read Variables (读取变量)
       run: |
@@ -172,37 +191,19 @@ jobs:
           fi
         fi
         if [ -n "$KERNEL_PATCHVER" ]; then
-          if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
-            VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
-            echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
-            echo "【LinInfo】内核版本：$VERSION_KERNEL"
-          else
-            echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
-          fi
+          echo "【LinInfo】KERNEL_PATCHVER为$KERNEL_PATCHVER"
         else
-          echo "【LinInfo】KERNEL_PATCHVER为空"
+          echo "【LinInfo】KERNEL_PATCHVER为空，取6.1"
+          KERNEL_PATCHVER=6.1
+        fi
+        if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
+          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+          echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
+          echo "【LinInfo】内核版本：$VERSION_KERNEL"
+        else
+          echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
-
-        
-    - name: Configuration Customization (加载自定义配置)
-      run: |
-        echo $PWD
-        cd $OPENWRT_PATH
-        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
-          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-        fi
-
-    - name: defconfig (确认配置)
-      working-directory: ./openwrt
-      run: |
-        make defconfig
-        ./scripts/diffconfig.sh > seed.config
-        echo "【LinInfo】make defconfig后配置文件为："
-        echo "$(cat .config)"
-        echo "【LinInfo】：$GITHUB_ENV"
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
