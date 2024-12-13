@@ -50,6 +50,7 @@ env:
   UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
   FIRMWARE_TAG: ax18
+  IS_RESIZE_SPACE: false # 磁盘扩容，非必要不使用
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config
   SCRIPTS_DIR: Scripts
@@ -106,6 +107,7 @@ jobs:
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
+      if: env.IS_RESIZE_SPACE == true
       with:
         swap-size-mb: 1024
         temp-reserve-mb: 100
