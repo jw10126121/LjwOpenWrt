@@ -42,6 +42,7 @@ env:
   DIYCONFIG: ${{inputs.iDIY}}
   DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
   GENERAL_CONFIG: GENERAL.txt   # 通用配置
+  DIYPackages: Packages.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: false
@@ -138,6 +139,13 @@ jobs:
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+
+    - name: Custom Packages (自定义包)
+      run: |
+        cd $OPENWRT_PATH
+        echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+        chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+        sh "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
 
     - name: Generate Variables (加载配置)
       run: |
