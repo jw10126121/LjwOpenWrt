@@ -1,0 +1,19 @@
+#!/bin/sh
+
+NSS_PATH="/sys/kernel/debug/qca-nss-drv/stats"
+
+cpu_usage="$(busybox top -n1 | awk '/^CPU/ {printf("%d%", 100 - $8)}')"
+
+[ ! -d "$NSS_PATH" ] || \
+npu_usage="$(grep '%' "$NSS_PATH"/cpu_load_ubi | awk -F ' ' '{print $2}')"
+
+if [ -d "$NSS_PATH" ]; then
+	if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then
+		connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)
+		echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage} ECM: ${connection_count}"
+	else
+		echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"
+	fi
+else
+	echo -n "CPU: ${cpu_usage}"
+fi
