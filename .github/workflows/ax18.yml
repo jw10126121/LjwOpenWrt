@@ -272,7 +272,7 @@ jobs:
         echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE != true || env.UPLOAD_BIN_DIR == true)
+      if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == false || env.UPLOAD_BIN_DIR == true)
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}-Firmware
@@ -282,7 +282,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == true || env.FIRMWARE_RELEASE == 'true')
       uses: ncipollo/release-action@v1
       with:
-        name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
+        name: R${{ env.DATE }} for ${{ env.DEVICE_SUBTARGET }}
         allowUpdates: true
         tag: ${{ env.FIRMWARE_TAG }}
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -297,7 +297,6 @@ jobs:
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🌐 默认地址: 192.168.0.1
           - 🔑 默认密码: password
-          - 是否带WIFI：否
           ### 🧊 固件版本
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
