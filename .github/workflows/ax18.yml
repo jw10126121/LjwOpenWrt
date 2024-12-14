@@ -80,7 +80,7 @@ jobs:
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
     - name: Free Disk Space
-      if: env.FREE_UP_DISK == true
+      if: ${{ env.FREE_UP_DISK == true }}
       uses: endersonmenezes/free-disk-space@main
       with:
         remove_android: true
@@ -109,7 +109,7 @@ jobs:
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
-      if: env.IS_RESIZE_SPACE == true
+      if: ${{ env.IS_RESIZE_SPACE == true }}
       with:
         swap-size-mb: 1024
         temp-reserve-mb: 100
@@ -286,14 +286,14 @@ jobs:
         find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == true
+      if: steps.compile.outputs.status == 'success' && ${{ env.UPLOAD_BIN_DIR == true }}
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_NAME_LIST_LIAN }}-${{ env.FILE_DATE }}-Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Upload Firmware To Release(发布固件)
-      if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == true || env.FIRMWARE_RELEASE == 'true')
+      if: steps.compile.outputs.status == 'success' && ${{ env.FIRMWARE_RELEASE == true }}
       uses: softprops/action-gh-release@v2
       with:
         name: R${{ env.DATE }} for ${{ env.DEVICE_SUBTARGET }}
