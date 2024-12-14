@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       iCONFIG:
-        description: '配置文件名：'
+        description: '配置文件：'
         required: false
         type: string
         default: 'ax18.txt'
@@ -19,6 +19,11 @@ on:
         required: false
         type: string
         default: 'diyconfig_ax18.sh'
+      iGENERAL:
+        description: '通用配置文件：'
+        required: false
+        type: string
+        default: 'GENERAL.txt'      
       iUpdate_bin:
         description: '将固件上传到Artifact'
         required: false
@@ -43,7 +48,7 @@ env:
   CONFIG_FILE: ${{inputs.iCONFIG}}
   DIYCONFIG: ${{inputs.iDIY}}
   DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
-  GENERAL_CONFIG: GENERAL.txt   # 通用配置
+  GENERAL_CONFIG: ${{inputs.iGENERAL}}  # 通用配置
   DIYPackages: Packages.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
