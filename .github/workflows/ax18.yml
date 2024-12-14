@@ -47,11 +47,9 @@ env:
   DIYPackages: Packages.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
-  FREE_UP_DISK: false
+  FREE_UP_DISK: true
   UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
-  UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
-  FIRMWARE_TAG: ax18
   IS_RESET_PASSWORD: ${{inputs.iReset_password}}
   IS_RESIZE_SPACE: false # 磁盘扩容，非必要不使用
   TZ: Asia/Shanghai
@@ -82,6 +80,7 @@ jobs:
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
     - name: Free Disk Space
+      if: env.FREE_UP_DISK == true
       uses: endersonmenezes/free-disk-space@main
       with:
         remove_android: true
@@ -178,9 +177,12 @@ jobs:
         echo "【LinInfo】make defconfig后配置文件为："
         echo "$(cat .config)"
 
+
     - name: Read Variables (读取变量)
       run: |
         cd $OPENWRT_PATH
+        export WRT_VER=$(echo $REPO_URL | cut -d '/' -f 5-)-$REPO_BRANCH
+        echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
@@ -200,9 +202,13 @@ jobs:
           fi
         done < "$path_config_file"
         DEVICE_PROFILE=$(IFS=$'、'; echo "${device_name_list[*]}")
+        DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
+        DEVICE_NAME_LIST_LIAN=$(IFS=$'-'; echo "${device_name_list[*]}")
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
+        echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
+        echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
         KERNEL_PATCHVER=''
@@ -215,9 +221,9 @@ jobs:
           fi
         fi
         if [ -n "$KERNEL_PATCHVER" ]; then
-          echo "【LinInfo】KERNEL_PATCHVER为$KERNEL_PATCHVER"
+          echo "【LinInfo】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
         else
-          echo "【LinInfo】KERNEL_PATCHVER为空，取6.1"
+          echo "【LinInfo】主版本KERNEL_PATCHVER为空，取6.1"
           KERNEL_PATCHVER=6.1
         fi
         if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
@@ -232,6 +238,7 @@ jobs:
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
+        echo "【LinInfo】下载工具，DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -245,6 +252,8 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+        export WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")
+        echo "WRT_DATE=$WRT_DATE" >> $GITHUB_ENV
 
     - name: Machine Information
       run: |
@@ -260,31 +269,36 @@ jobs:
     - name: Organize Files(整理文件)
       if: steps.compile.outputs.status == 'success'
       run: |
-        cd $OPENWRT_PATH/bin/targets/*/*
-        cat sha256sums
-        cp $OPENWRT_PATH/.config build.config
-        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
-        tar -zcf Packages.tar.gz packages
-        rm -rf packages feeds.buildinfo version.buildinfo
-        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
-        echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
+        cd $OPENWRT_PATH && mkdir ./upload/
+        cp -f ./.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$WRT_DATE".txt
+        cp -f ./seed.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$WRT_DATE".seed.txt
+        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
+        echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
+        for TYPE in $DEVICE_NAME_LIST ; do
+          echo "【LinInfo】"
+          for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
+            EXT=$(basename $FILE | cut -d '.' -f 2-)
+            NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
+            NEW_FILE="$DEVICE_SUBTARGET"_"$WRT_VER"_"$NAME"_"$WRT_DATE"."$EXT"
+            mv -f $FILE ./upload/$NEW_FILE
+          done
+        done
+        find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == true
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}-Firmware
-        path: ${{ env.FIRMWARE_PATH }}
+        name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_NAME_LIST_LIAN }}-${{ env.FILE_DATE }}-Firmware
+        path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == true || env.FIRMWARE_RELEASE == 'true')
-      uses: ncipollo/release-action@v1
+      uses: softprops/action-gh-release@v2
       with:
         name: R${{ env.DATE }} for ${{ env.DEVICE_SUBTARGET }}
-        allowUpdates: true
-        tag: ${{ env.DEVICE_SUBTARGET }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ${{ env.FIRMWARE_PATH }}/*
+        tag_name: R${{ env.DATE }}_${{ env.DEVICE_SUBTARGET }}
+        files: ./openwrt/upload/*.*
         body: |
           **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
           ### 📒 固件信息(无WIFI)
@@ -294,7 +308,7 @@ jobs:
           - ⚽ 固件源码: ${{ env.REPO_URL }}
           - 💝 源码分支: ${{ env.REPO_BRANCH }}
           - 🌐 默认地址: 192.168.0.1
-          - 🔑 默认密码: password
+          - 🔑 默认密码: 无|password
           ### 🧊 固件版本
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
