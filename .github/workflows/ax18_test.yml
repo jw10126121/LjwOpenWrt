@@ -45,7 +45,7 @@ env:
   DIYPackages: Packages.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
-  FREE_UP_DISK: false
+  FREE_UP_DISK: true
   UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
   UPLOAD_FIRMWARE: true
   FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
@@ -84,6 +84,7 @@ jobs:
 
     - name: Free Disk Space
       uses: endersonmenezes/free-disk-space@main
+      if: ${{ env.FREE_UP_DISK }} == true
       with:
         remove_android: true
         remove_dotnet: true
@@ -94,65 +95,3 @@ jobs:
         remove_packages_one_command: true
         remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
         testing: false
-
-    - name: Initialization Environment (初始化环境)
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        docker rmi $(docker images -q)
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
-        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-        sudo -E apt-get -y update
-        sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
-        sudo -E systemctl daemon-reload
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get -y clean
-        sudo timedatectl set-timezone "$TZ"
-
-    - name: Combine Disks (合并磁盘)
-      uses: easimon/maximize-build-space@master
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 100
-        root-reserve-mb: 1024
-
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@master
-
-    - name: Check Scripts (搜索脚本并配置权限)
-      run: |
-        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
-
-    - name: config git (修改git下载缓冲大小)
-      run: |
-        git config --global http.postBuffer 524288000
-        git config --global http.lowSpeedLimit 0
-        git config --global http.lowSpeedTime 999999
-
-    - name: Clone Source Code (克隆源代码)
-      id: compile
-      run: |
-        df -hT $GITHUB_WORKSPACE
-        echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
-        git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
-        cd openwrt
-        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
-        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
-        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
-
-    - name: Organize Files(整理文件)
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd $OPENWRT_PATH/bin/targets/*/*
-        cat sha256sums
-        cp $OPENWRT_PATH/.config build.config
-        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
-        mv -f $OPENWRT_PATH/bin/packages/*/*/*.apk packages
-        tar -zcf Packages.tar.gz packages
-        rm -rf packages feeds.buildinfo version.buildinfo
-        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
-        echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
-        echo "【LinInfo】steps.compile.outputs.status: ${{ steps.compile.outputs.status }}"
-        echo "【LinInfo】bash ll"
