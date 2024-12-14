@@ -28,7 +28,7 @@ on:
         description: '发布firmware'
         required: false
         type: boolean
-        default: false
+        default: true
       iReset_password:
         description: '重置root密码'
         required: false
@@ -163,6 +163,7 @@ jobs:
       run: |
         echo $PWD
         cd $OPENWRT_PATH
+        cp $GITHUB_WORKSPACE/$SCRIPTS_DIR/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
           echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
@@ -282,7 +283,7 @@ jobs:
       with:
         name: R${{ env.DATE }} for ${{ env.DEVICE_SUBTARGET }}
         allowUpdates: true
-        tag: ${{ env.FIRMWARE_TAG }}
+        tag: ${{ env.DEVICE_SUBTARGET }}
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
