@@ -80,7 +80,7 @@ jobs:
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
     - name: Free Disk Space
-      if: env.FREE_UP_DISK == true
+      if: env.FREE_UP_DISK == 'true'
       uses: endersonmenezes/free-disk-space@main
       with:
         remove_android: true
