@@ -36,7 +36,7 @@ fi
 # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
 if [ -f "$USAGE_FILE" ]; then
-    NEW_USAGE_FILE="$GITHUB_WORKSPACE/Scripts/patch/usage.txt"
+    NEW_USAGE_FILE="./custom_usage.txt"
     if [ -f "$NEW_USAGE_FILE" ]; then
         cat $NEW_USAGE_FILE > $USAGE_FILE
         echo "【LinInfo】配置NSS："
