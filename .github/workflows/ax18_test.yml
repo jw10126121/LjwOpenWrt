@@ -83,7 +83,7 @@ jobs:
         echo "【LinInfo】env.FIRMWARE_RELEASE: ${{ inputs.iRelease_FIRMWARE }}"
 
     - name: config git (修改git下载缓冲大小1)
-      if: ${{ env.FREE_UP_DISK }} == false
+      if: env.FREE_UP_DISK == false
       run: |
         git config --global http.postBuffer 524288000
         git config --global http.lowSpeedLimit 0
@@ -91,12 +91,12 @@ jobs:
         echo "【LinInfo】{} == true"
 
     - name: config git (修改git下载缓冲大小2)
-      if: ${{ env.FREE_UP_DISK }} == 'true'
+      if: env.FREE_UP_DISK == 'true'
       run: |
         echo "【LinInfo】{} == 'true'"
 
     - name: config git (修改git下载缓冲大小3)
-      if: ${{ env.UPLOAD_FIRMWARE }} == true
+      if: env.UPLOAD_FIRMWARE == true
       run: |
         echo "【LinInfo】{} == 'true'"
 
