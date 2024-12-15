@@ -11,7 +11,7 @@ on:
     inputs:
       iCONFIG:
         description: '配置文件：'
-        required: false
+        required: true
         type: string
         default: 'ax18.txt'
       iDIY:
@@ -19,11 +19,19 @@ on:
         required: false
         type: string
         default: 'diyconfig_ax18.sh'
+      # iGENERAL:
+      #   description: '通用配置文件：'
+      #   required: false
+      #   type: string
+      #   default: 'GENERAL.txt'
       iGENERAL:
-        description: '通用配置文件：'
-        required: false
-        type: string
-        default: 'GENERAL.txt'      
+        description: '通用配置文件'
+        required: true
+        default: 'GENERAL.txt'
+        type: choice
+        options:
+          - 'GENERAL.txt'
+          - 'GENERAL_custom.txt'
       iUpdate_bin:
         description: '将固件上传到Artifact'
         required: false
@@ -40,13 +48,18 @@ on:
         type: boolean
         default: true
       lan_addr:
-        description: 'Setting default LAN address'
-        required: true
+        description: '配置LAN-IP'
+        required: false
         default: '192.168.0.1'
         type: choice
         options:
           - '192.168.0.1'
           - '192.168.1.1'
+      iResize_space:
+        description: '云编译磁盘扩容'
+        required: false
+        type: boolean
+        default: false
 
 #环境变量配置
 env:
@@ -64,7 +77,7 @@ env:
   UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
   FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
   IS_RESET_PASSWORD: ${{inputs.iReset_password}}
-  IS_RESIZE_SPACE: false # 磁盘扩容，非必要不使用
+  IS_RESIZE_SPACE: ${{inputs.iResize_space}}
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config
   SCRIPTS_DIR: Scripts
