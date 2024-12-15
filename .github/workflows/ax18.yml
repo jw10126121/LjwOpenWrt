@@ -275,13 +275,12 @@ jobs:
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s || make -j1 V=s
-        echo "【LinInfo】固件编译完成：$DEVICE_SUBTARGET-$DEVICE_PROFILE"
         echo "status=success" >> $GITHUB_OUTPUT
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +""%y%m%d")" >> $GITHUB_ENV
-        echo "FILE_TIME=(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")" >> $GITHUB_ENV
-        export WRT_TIME=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")
-        echo "WRT_TIME=$WRT_TIME" >> $GITHUB_ENV
+        echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+        FILE_TIME=$(date +"%Y-%m-%d %H:%M:%S")
+        echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
+        echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
 
     - name: Machine Information
       run: |
@@ -305,8 +304,8 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir ./upload/
-        cp -f ./.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$WRT_TIME".txt
-        cp -f ./seed.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$WRT_TIME".seed.txt
+        cp -f ./.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$FILE_TIME".txt
+        cp -f ./seed.config ./upload/Config_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$WRT_VER"_"$FILE_TIME".seed.txt
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
         for TYPE in $DEVICE_NAME_LIST ; do
@@ -314,7 +313,7 @@ jobs:
           for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
             EXT=$(basename $FILE | cut -d '.' -f 2-)
             NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-            NEW_FILE="$DEVICE_SUBTARGET"_"$WRT_VER"_"$NAME"_"$WRT_TIME"."$EXT"
+            NEW_FILE="$DEVICE_SUBTARGET"_"$WRT_VER"_"$NAME"_"$FILE_TIME"."$EXT"
             mv -f $FILE ./upload/$NEW_FILE
           done
         done
