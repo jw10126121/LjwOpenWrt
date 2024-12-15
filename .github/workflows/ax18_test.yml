@@ -228,6 +228,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
+        echo "【LinInfo】编译成功"
     - name: Machine Information
       run: |
         cd $OPENWRT_PATH
@@ -238,8 +239,9 @@ jobs:
         echo "======================="
         du -h --max-depth=1
         echo "======================="
+        
     - name: 保存固件到bin目录下 Upload artifact
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == true
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.SOURCE_REPO }}-${{ env.FILE_DATE }}
@@ -249,13 +251,13 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH/bin/targets
-        cat sha256sums
         cp $OPENWRT_PATH/.config build.config
         mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
         tar -zcf Packages.tar.gz packages
         rm -rf packages feeds.buildinfo version.buildinfo
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
         echo "【LinInfo】FIRMWARE_PATH: $FIRMWARE_PATH"
+        
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       uses: actions/upload-artifact@main
