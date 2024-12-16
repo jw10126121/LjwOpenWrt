@@ -271,6 +271,9 @@ jobs:
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+        name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
+        echo "name_config_file=$name_config_file" >> $GITHUB_ENV
+        echo "【LinInfo】配置文件名为：$name_config_file"
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
@@ -316,11 +319,10 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        name_config_file_tmp="Config_$WRT_VER_$DEVICE_SUBTARGET_$DEVICE_NAME_LIST_LIAN_$COMPILE_TIME"
-        cp -f my_config.txt ./upload/"$name_config_file_tmp"_mine.txt
-        cp -f ./.config ./upload/"$name_config_file_tmp"_full.txt
-        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file_tmp".txt
-        cp -f ./seed.config ./upload/"$name_config_file_tmp".seed.txt
+        cp -f my_config.txt ./upload/"$name_config_file"_mine.txt
+        cp -f ./.config ./upload/"$name_config_file"_full.txt
+        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file".txt
+        cp -f ./seed.config ./upload/"$name_config_file".seed.txt
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} ./upload/packages/ \;
         tar -zcf ./upload/Packages.tar.gz ./upload/packages
