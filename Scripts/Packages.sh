@@ -40,12 +40,14 @@ UPDATE_PACKAGE() {
 }
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
-#UPDATE_PACKAGE "argon" "jerrykuku/luci-theme-argon" "master"
+
+# lean版luci-theme-argon用的是lua，不是js，所以用18.06
+UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "18.06"
 #UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
 
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 #UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
-#UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
+UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
 
@@ -61,10 +63,11 @@ UPDATE_PACKAGE "luci-app-advancedplus" "VIKINGYFY/packages" "main" "pkg"
 #UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
 #UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
+# 注意，需要luci-app-nlbwmon支持
 UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 
-# UPDATE_PACKAGE "luci-app-onliner" "yuanfanand/luci-app-onliner" "master"
 
 
 # if [[ $WRT_REPO != *"immortalwrt"* ]]; then
@@ -162,7 +165,7 @@ fi
 
 #     chmod +x ./* && rm -rf ./*.gz
 
-#     cd $PKG_PATCH && echo "openclash date has been updated!"
+#     echo "【LinInfo】openclash date has been updated!"
 # fi
 
 
