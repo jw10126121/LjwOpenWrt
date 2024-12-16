@@ -33,12 +33,15 @@ while getopts "hi:n:p:t:" opt; do
             ;;
         n)
             default_name=$OPTARG
+            echo "input.default_name: $default_name"
             ;;
         i)
             default_ip=$OPTARG
+            echo "input.default_ip: $default_ip"
             ;;
         p)
             is_reset_password=$OPTARG
+            echo "input.is_reset_password: $is_reset_password"
             if [[ "$OPTARG" =~ ^[1-9][0-9]*$ ]] || [ "$OPTARG" = "true" ]; then
                 is_reset_password=true
             else
@@ -47,6 +50,7 @@ while getopts "hi:n:p:t:" opt; do
             ;;
         t)
             default_theme_name=$OPTARG
+            echo "input.default_theme_name: $default_theme_name"
             ;;
         \?)
             echo "无效选项: -$OPTARG" >&2
@@ -56,10 +60,8 @@ while getopts "hi:n:p:t:" opt; do
     esac
 done
 
-echo "default_name: $default_name"
-echo "default_ip: $default_ip"
-echo "is_reset_password: $is_reset_password"
-echo "default_theme_name: $default_theme_name"
+
+
 
 WRT_IP=$default_ip
 WRT_NAME=$default_name
@@ -67,8 +69,6 @@ WRT_THEME=$default_theme_name
 
 CFG_FILE="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
-
-echo "当前网关IP: $WRT_IP"
 
 if [ -f "$CFG_FILE" ]; then
     # 修改默认IP地址
