@@ -199,7 +199,7 @@ jobs:
         if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" ]; then
           echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
-          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" -n "Linjw" -i "${env.DEFAULT_LANIP}" -p "${env.IS_RESET_PASSWORD}" -t "argon"
         else
           echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
         fi
