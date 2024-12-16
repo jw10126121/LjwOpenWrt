@@ -322,7 +322,7 @@ jobs:
         awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file_tmp".txt
         cp -f ./seed.config ./upload/"$name_config_file_tmp".seed.txt
         rm -fr ./bin/targets/
-        rm -fr ./bin/packages
+        rm -fr ./bin/packages/
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
