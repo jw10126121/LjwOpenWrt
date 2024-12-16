@@ -66,7 +66,7 @@ UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 # 注意，需要luci-app-nlbwmon支持
 UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
 
 
 
