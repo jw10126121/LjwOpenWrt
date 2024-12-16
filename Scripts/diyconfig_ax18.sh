@@ -10,7 +10,7 @@ show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
     echo "  -h, --help            显示帮助信息"
-    echo "  -i default_ip         设置默认IP，默认192.168.1.1"
+    echo "  -i default_ip         设置默认IP，默认192.168.0.1"
     echo "  -n default_name       设置主机名，默认Linjw"
     echo "  -p is_reset_password  是否重置密码，默认true"
     echo "  -t default_theme_name 默认主题，默认不修改"
@@ -20,7 +20,7 @@ show_help() {
 [[ "$1" == "-h" || "$1" == "--help" ]] && show_help && exit 0
 
 default_name="Linjw"
-default_ip="192.168.1.1"
+default_ip="192.168.0.1"
 is_reset_password=true
 default_theme_name=''
 
@@ -70,6 +70,15 @@ WRT_THEME=$default_theme_name
 CFG_FILE="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 
+
+# ./package/lean/autocore/files/找出index.htm，并替换时间格式
+if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
+    # 修改本地时间格式
+    sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
+    echo "【LinInfo】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
+fi
+
+
 if [ -f "$CFG_FILE" ]; then
     # 修改默认IP地址
     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
@@ -79,7 +88,9 @@ if [ -f "$CFG_FILE" ]; then
     echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
 fi
 
-
+# 取消主题默认设置
+# find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
+# 设置默认主题
 if [ -n "$default_theme_name" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
     if [ -n "$the_exist_theme" ]; then
@@ -128,6 +139,9 @@ sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-upnp/roo
 # if [ -f "$CFG_FILE_LEDE" ]; then
 # 	sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
 # fi
+
+# 修复 armv8 设备 xfsprogs 报错
+# sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
 #获取IP地址前3段
 WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
