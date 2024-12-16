@@ -36,12 +36,12 @@ on:
         description: '发布firmware'
         required: false
         type: boolean
-        default: true
+        default: false
       iReset_password:
         description: '重置root密码'
         required: false
         type: boolean
-        default: true
+        default: false
       i_lan_ip:
         description: '配置LAN-IP'
         required: false
@@ -61,22 +61,23 @@ env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: ${{inputs.iCONFIG}}
-  DIYCONFIG: ${{inputs.iDIY}}
-  DIY_FEEDS: diy_feeds.sh  # 主要用于更新Feeds
-  GENERAL_CONFIG: ${{inputs.iGENERAL}}  # 通用配置
-  DIYPackages: Packages.sh
+  CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
+  DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
+  DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
+  GENERAL_CONFIG: ${{inputs.iGENERAL}}            # 通用配置
+  DIYPackages: Packages.sh                        # 自定义包配置
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: true
-  UPLOAD_BIN_DIR: ${{inputs.iUpdate_bin}}
-  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}}
-  IS_RESET_PASSWORD: ${{inputs.iReset_password}}
-  IS_RESIZE_SPACE: ${{inputs.iResize_space}}
+  UPLOAD_FIRMWARE_DIR: ${{inputs.iUpdate_bin}}
+  UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
+  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}} # 发布固件
+  IS_RESET_PASSWORD: ${{inputs.iReset_password}}  # 是否把密码重置为空
+  IS_RESIZE_SPACE: ${{inputs.iResize_space}}      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   TZ: Asia/Shanghai
-  CONFIGS_DIR: Config
-  SCRIPTS_DIR: Scripts
-  DEFAULT_LANIP: ${{inputs.i_lan_ip}}
+  CONFIGS_DIR: Config                             # 自定义配置文件夹
+  SCRIPTS_DIR: Scripts                            # 脚本文件夹
+  DEFAULT_LANIP: ${{inputs.i_lan_ip}}             # 默认lanIP
   
 #CI权限
 permissions: write-all
@@ -100,6 +101,7 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
       uses: endersonmenezes/free-disk-space@main
@@ -128,6 +130,7 @@ jobs:
         sudo -E apt-get -y autoremove --purge
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
+
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
       if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
@@ -142,31 +145,45 @@ jobs:
     - name: Check Scripts (搜索脚本并配置权限)
       run: |
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
     - name: config git (修改git下载缓冲大小)
       run: |
         git config --global http.postBuffer 524288000
         git config --global http.lowSpeedLimit 0
         git config --global http.lowSpeedTime 999999
+
     - name: Clone Source Code (克隆源代码)
       run: |
         df -hT $GITHUB_WORKSPACE
+        COMPILE_DATE=$(date +"%y%m%d")
+        COMPILE_TIME=$(date +"%y%m%d%H%M%S")
+        echo "COMPILE_DATE=$COMPILE_DATE" >> $GITHUB_ENV
+        echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
+        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；"
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
-    - name: Install Feeds (安装feeds)
+
+    - name: Update Feeds (更新feeds)
       run: |
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
+
+    - name: Install Feeds (安装feeds)
+      run: |
+        cd $OPENWRT_PATH
         ./scripts/feeds install -a
+
     - name: Custom Packages (自定义包)
       run: |
         cd $OPENWRT_PATH/package
         echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
         chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
         bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+
     - name: Generate Variables (加载配置)
       run: |
         echo '【LinInfo】移除所有.config并添加新的.config'
@@ -174,16 +191,20 @@ jobs:
         rm -rf ./tmp* ./.config*
         cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
         
-    - name: Configuration Customization (加载自定义配置)
+    - name: Configuration Customization (加载自定义设置)
       run: |
-        echo $PWD
         cd $OPENWRT_PATH
+        echo "【LinInfo】当前路径：$PWD"
         cp $GITHUB_WORKSPACE/$SCRIPTS_DIR/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
-        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG" ]; then
-          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
-          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYCONFIG"
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" ]; then
+          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" -n "Linjw" -i "${{env.DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
+        else
+          echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
         fi
+        cp -f .config my_config.txt
+
     - name: defconfig (确认配置)
       working-directory: ./openwrt
       run: |
@@ -191,6 +212,8 @@ jobs:
         ./scripts/diffconfig.sh > seed.config
         echo "【LinInfo】make defconfig后配置文件为："
         echo "$(cat .config)"
+
+
     - name: Read Variables (读取变量)
       run: |
         cd $OPENWRT_PATH
@@ -217,7 +240,7 @@ jobs:
         done < "$path_config_file"
         DEVICE_PROFILE=$(IFS=$'、'; echo "${device_name_list[*]}")
         DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
-        DEVICE_NAME_LIST_LIAN=$(IFS=$'-'; echo "${device_name_list[*]}")
+        DEVICE_NAME_LIST_LIAN=$(IFS=$'_and_'; echo "${device_name_list[*]}")
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
@@ -248,6 +271,7 @@ jobs:
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
@@ -263,11 +287,11 @@ jobs:
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
-        echo "DATE=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
-        echo "FILE_DATE=$(date +"%Y%m%d")" >> $GITHUB_ENV
-        FILE_TIME=$(date +"%Y%m%d%H%M%S")
+        echo "FILE_DATE=$(date +"%y%m%d")" >> $GITHUB_ENV
+        FILE_TIME=$(date +"%y%m%d%H%M%S")
         echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
         echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
+
     - name: Machine Information
       run: |
         cd $OPENWRT_PATH
@@ -292,39 +316,28 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        cp -f ./.config ./upload/Config_"$WRT_VER"_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$FILE_TIME".txt
-        cp -f ./seed.config ./upload/Config_"$WRT_VER"_"$DEVICE_SUBTARGET"_"$DEVICE_NAME_LIST_LIAN"_"$FILE_TIME".seed.txt
-        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
-        find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} ./upload/packages/ \;
-        tar -zcf ./upload/Packages.tar.gz ./upload/packages
-        rm -rf ./upload/packages
-        echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
-        for TYPE in $DEVICE_NAME_LIST ; do
-          echo "【LinInfo】TYPE: $TYPE----------------------------------------------------------------"
-          for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
-            EXT=$(basename $FILE | cut -d '.' -f 2-)
-            NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-            NEW_FILE="$WRT_VER"_"$DEVICE_SUBTARGET"_"$NAME"_"$FILE_TIME"."$EXT"
-            echo "【LinInfo】文件：$FILE"
-            echo "【LinInfo】改名后：$NEW_FILE"
-            mv -f $FILE ./upload/$NEW_FILE
-          done
-        done
-        find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
+        name_config_file_tmp="Config_$WRT_VER_$DEVICE_SUBTARGET_$DEVICE_NAME_LIST_LIAN_$COMPILE_TIME"
+        cp -f my_config.txt ./upload/"$name_config_file_tmp"_mine.txt
+        cp -f ./.config ./upload/"$name_config_file_tmp"_full.txt
+        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file_tmp".txt
+        cp -f ./seed.config ./upload/"$name_config_file_tmp".seed.txt
+        rm -fr ./bin/targets/
+        rm -fr ./bin/packages
+
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
+      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.FILE_DATE }}_Firmware
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == true || env.FIRMWARE_RELEASE == 'true')
       uses: softprops/action-gh-release@v2
       with:
-        name: R${{ env.FILE_DATE }} for ${{ env.DEVICE_SUBTARGET }}
-        tag_name: R${{ env.FILE_DATE }}_${{ env.DEVICE_SUBTARGET }}
+        name: R${{ env.COMPILE_DATE }} for ${{ env.DEVICE_SUBTARGET }}
+        tag_name: R${{ env.COMPILE_DATE }}_${{ env.DEVICE_SUBTARGET }}
         files: ${{ env.OPENWRT_PATH }}/upload/*.*
         body: |
           **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
