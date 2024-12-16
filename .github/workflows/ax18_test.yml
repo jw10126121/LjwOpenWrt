@@ -291,6 +291,9 @@ jobs:
         FILE_TIME=$(date +"%y%m%d%H%M%S")
         echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
         echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
+        name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
+        echo "name_config_file=$name_config_file" >> $GITHUB_ENV
+        echo "【LinInfo】配置文件名为：$name_config_file"
 
     - name: Machine Information
       run: |
@@ -316,11 +319,10 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        name_config_file_tmp="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
-        cp -f my_config.txt ./upload/"$name_config_file_tmp"_mine.txt
-        cp -f ./.config ./upload/"$name_config_file_tmp"_full.txt
-        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file_tmp".txt
-        cp -f ./seed.config ./upload/"$name_config_file_tmp".seed.txt
+        cp -f my_config.txt ./upload/"${{ env.name_config_file }}"_mine.txt
+        cp -f ./.config ./upload/"${{ env.name_config_file }}"_full.txt
+        awk '!/^#/ && !/^$/' ./.config > ./upload/"${{ env.name_config_file }}".txt
+        cp -f ./seed.config ./upload/"${{ env.name_config_file }}".seed.txt
         rm -fr ./bin/targets/
         rm -fr ./bin/packages/
 
