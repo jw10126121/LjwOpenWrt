@@ -316,7 +316,7 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        name_config_file_tmp="Config_$WRT_VER_$DEVICE_SUBTARGET_$DEVICE_NAME_LIST_LIAN_$COMPILE_TIME"
+        name_config_file_tmp="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
         cp -f my_config.txt ./upload/"$name_config_file_tmp"_mine.txt
         cp -f ./.config ./upload/"$name_config_file_tmp"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file_tmp".txt
