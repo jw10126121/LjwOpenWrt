@@ -51,7 +51,8 @@ UPDATE_PACKAGE() {
     fi
 }
 
-#UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
+
+#UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
 # lean版luci-theme-argon用的是lua，不是js，所以用18.06
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "18.06"
@@ -62,6 +63,8 @@ UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
+DELETE_PACKAGE "wrtbwmon"                                                           # 删除插件：wrtbwmon
+DELETE_PACKAGE "luci-app-wrtbwmon"                                                  # 删除插件：luci-app-wrtbwmon
 UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 
