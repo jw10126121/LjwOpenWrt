@@ -173,7 +173,7 @@ jobs:
         if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
           echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
           git reset --hard "${{ env.REPO_Commit_Hash }}"
-        end
+        fi
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
