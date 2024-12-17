@@ -1,0 +1,395 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+#=================================================
+
+name:  IPQ60XX-NOWIFI-FW4
+
+on:
+  #手动编译
+  workflow_dispatch:
+    inputs:
+      iCONFIG:
+        description: '配置文件：'
+        required: true
+        type: string
+        default: 'IPQ60XX-NOWIFI-FW4.txt'
+      iDIY:
+        description: 'DIY脚本：'
+        required: false
+        type: string
+        default: 'diyconfig_ax18.sh'
+      iGENERAL:
+        description: '通用配置文件'
+        required: true
+        default: 'GENERAL.txt'
+        type: choice
+        options:
+          - 'GENERAL.txt'
+          - 'GENERAL_custom.txt'
+      i_lan_ip:
+        description: '配置LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
+      iUpdate_bin:
+        description: '将固件上传到Artifact'
+        required: false
+        type: boolean
+        default: true
+      iRelease_FIRMWARE:
+        description: '发布firmware'
+        required: false
+        type: boolean
+        default: true
+      iReset_password:
+        description: '重置root密码'
+        required: false
+        type: boolean
+        default: false
+      iResize_space:
+        description: '云编译磁盘扩容(编译大文件用)'
+        required: false
+        type: boolean
+        default: false
+      iRepoURL_commit_hash:
+        description: '历史版本HASH'
+        required: false
+        type: string
+        default: ''
+
+#环境变量配置
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  REPO_Commit_Hash: ${{inputs.iRepoURL_commit_hash}}
+  CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
+  DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
+  DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
+  GENERAL_CONFIG: ${{inputs.iGENERAL}}            # 通用配置
+  DIYPackages: Packages.sh                        # 自定义包配置
+  CLASH_KERNEL: amd64
+  CACHE_TOOLCHAIN: true
+  FREE_UP_DISK: true
+  UPLOAD_FIRMWARE_DIR: ${{inputs.iUpdate_bin}}
+  UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
+  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}} # 发布固件
+  IS_RESET_PASSWORD: ${{inputs.iReset_password}}  # 是否把密码重置为空
+  IS_RESIZE_SPACE: ${{inputs.iResize_space}}      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  TZ: Asia/Shanghai
+  CONFIGS_DIR: Config                             # 自定义配置文件夹
+  SCRIPTS_DIR: Scripts                            # 脚本文件夹
+  DEFAULT_LANIP: ${{inputs.i_lan_ip}}             # 默认lanIP
+  
+#CI权限
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+
+    - name: Check Server Performance (检查服务器性能)
+      run: |
+        echo "警告⚠"
+        echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
+        echo -e "已知CPU型号（降序）：7763，8370C，8272CL，8171M，E5-2673 \n"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量：$(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo -e "CPU核心信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "--------------------------内存信息--------------------------"
+        echo "已安装内存详细信息："
+        echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
+    - name: Free Disk Space
+      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
+      uses: endersonmenezes/free-disk-space@main
+      with:
+        remove_android: true
+        remove_dotnet: true
+        remove_haskell: true
+        remove_tool_cache: true
+        remove_swap: true
+        remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
+        remove_packages_one_command: true
+        remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+        testing: false
+
+    - name: Initialization Environment (初始化环境)
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        docker rmi $(docker images -q)
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        sudo -E apt-get -y update
+        sudo -E apt -yqq install dos2unix
+        sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: Combine Disks (合并磁盘)
+      uses: easimon/maximize-build-space@master
+      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
+      with:
+        swap-size-mb: 1024
+        temp-reserve-mb: 100
+        root-reserve-mb: 1024
+
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
+    - name: config git (修改git下载缓冲大小)
+      run: |
+        git config --global http.postBuffer 524288000
+        git config --global http.lowSpeedLimit 0
+        git config --global http.lowSpeedTime 999999
+
+    - name: Clone Source Code (克隆源代码)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+        COMPILE_DATE=$(date +"%y%m%d")
+        COMPILE_TIME=$(date +"%y%m%d%H%M%S")
+        COMPILE_DATE_HOUR=$(date +"%y%m%d%H")
+        echo "COMPILE_DATE=$COMPILE_DATE" >> $GITHUB_ENV
+        echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
+        echo "COMPILE_DATE_HOUR=$COMPILE_DATE_HOUR" >> $GITHUB_ENV
+        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；编译时间(精确到小时)：$COMPILE_DATE_HOUR"
+        echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
+        git_depth='--depth=1'
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          git_depth=''
+        fi
+        git clone ${git_depth} --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
+        cd openwrt
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
+          git reset --hard "${{ env.REPO_Commit_Hash }}"
+        fi
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
+        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+
+    - name: Update Feeds (更新feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+
+    - name: Install Feeds (安装feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds install -a
+
+    - name: Custom Packages (自定义包)
+      run: |
+        cd $OPENWRT_PATH/package
+        echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+        chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+        bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages"
+
+    - name: Generate Variables (加载配置)
+      run: |
+        echo '【LinInfo】移除所有.config并添加新的.config'
+        cd $OPENWRT_PATH
+        rm -rf ./tmp* ./.config*
+        cat $GITHUB_WORKSPACE/$CONFIGS_DIR/$GENERAL_CONFIG $GITHUB_WORKSPACE/$CONFIGS_DIR/$CONFIG_FILE >> .config
+        
+    - name: Configuration Customization (加载自定义设置)
+      run: |
+        cd $OPENWRT_PATH
+        echo "【LinInfo】当前路径：$PWD"
+        cp $GITHUB_WORKSPACE/$SCRIPTS_DIR/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" ]; then
+          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" -n "Linjw" -i "${{env.DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
+        else
+          echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING"
+        fi
+        cp -f .config my_config.txt
+
+    - name: defconfig (确认配置)
+      working-directory: ./openwrt
+      run: |
+        make defconfig
+        ./scripts/diffconfig.sh > seed.config
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat .config)"
+
+
+    - name: Read Variables (读取变量)
+      run: |
+        cd $OPENWRT_PATH
+        the_repo=${REPO_URL%/}
+        export WRT_VER="${the_repo##*/}"-$REPO_BRANCH
+        echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
+        SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
+        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+        path_config_file="$OPENWRT_PATH/.config"
+        device_name_list=()
+        while IFS= read -r line
+        do
+          if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
+            prefix=${BASH_REMATCH[1]} 
+            platform=${BASH_REMATCH[2]}
+            subplatform=${BASH_REMATCH[3]}
+            deviceName=${BASH_REMATCH[4]}
+            device_name_list+=("$deviceName")
+            DEVICE_TARGET=$platform
+            DEVICE_SUBTARGET=$subplatform
+          fi
+        done < "$path_config_file"
+        DEVICE_PROFILE=$(IFS=$'、'; echo "${device_name_list[*]}")
+        DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
+        DEVICE_NAME_LIST_LIAN=$(IFS=$'_and_'; echo "${device_name_list[*]}")
+        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
+        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
+        echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
+        echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
+        dir_linux_version="$OPENWRT_PATH/target/linux/"
+        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
+        KERNEL_PATCHVER=''
+        if [ -n "$dir_linux_device_target" ]; then
+          MAKEFILE_PATH="$dir_linux_device_target/Makefile"
+          if [ -f "$MAKEFILE_PATH" ]; then
+            KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
+          else
+            echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
+          fi
+        fi
+        if [ -n "$KERNEL_PATCHVER" ]; then
+          echo "【LinInfo】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
+        else
+          echo "【LinInfo】主版本KERNEL_PATCHVER为空，取6.1"
+          KERNEL_PATCHVER=6.1
+        fi
+        if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
+          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+          echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
+          echo "【LinInfo】内核版本：$VERSION_KERNEL"
+        else
+          echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
+        fi
+        echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+        name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
+        echo "name_config_file=$name_config_file" >> $GITHUB_ENV
+        echo "【LinInfo】配置文件名为：$name_config_file"
+        mkdir -p ./config_mine
+        cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
+
+    - name: Upload Config (上传配置文件)
+      id: config_upload
+      uses: actions/upload-artifact@master
+      with:
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
+        path: openwrt/config_mine
+
+    - name: Download tools (下载工具包) 
+      working-directory: ./openwrt
+      run: |
+        echo "【LinInfo】下载工具，DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        
+    - name: 编译固件 Build firmware
+      id: compile
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+        echo "FILE_DATE=$(date +"%y%m%d")" >> $GITHUB_ENV
+        FILE_TIME=$(date +"%y%m%d%H%M%S")
+        echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
+        echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
+
+    - name: Machine Information
+      run: |
+        cd $OPENWRT_PATH
+        echo "======================="
+        lscpu | grep -E "name|Core|Thread"
+        echo "======================="
+        df -h
+        echo "======================="
+        du -h --max-depth=1
+        echo "======================="
+        
+    - name: Upload bin directory
+      id: all_upload
+      uses: actions/upload-artifact@master
+      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
+      with:
+        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
+        path: openwrt/bin
+
+    - name: Organize Files(整理文件)
+      id: organize
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
+        cp -f my_config.txt ./upload/"$name_config_file"_mine.txt
+        cp -f ./.config ./upload/"$name_config_file"_full.txt
+        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file".txt
+        cp -f ./seed.config ./upload/"$name_config_file".seed.txt
+        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
+        find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} ./upload/packages/ \;
+        tar -zcf ./upload/Packages.tar.gz ./upload/packages
+        rm -rf ./upload/packages
+        echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
+        for TYPE in $DEVICE_NAME_LIST ; do
+          echo "【LinInfo】TYPE: $TYPE============================================"
+          for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
+            EXT=$(basename $FILE | cut -d '.' -f 2-)
+            NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
+            NEW_FILE="$WRT_VER"_"$DEVICE_SUBTARGET"_"$NAME"_"$COMPILE_TIME"."$EXT"
+            echo "【LinInfo】文件：$FILE"
+            echo "【LinInfo】改名后：$NEW_FILE"
+            echo "【LinInfo】-----------------------------------------------------"
+            mv -f $FILE ./upload/$NEW_FILE
+          done
+        done
+        find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
+
+    - name: Upload Firmware To Artifact(将固件上传到Artifact)
+      id: upload
+      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}_Firmware
+        path: ${{ env.OPENWRT_PATH }}/upload
+
+    - name: Upload Firmware To Release(发布固件)
+      if: steps.compile.outputs.status == 'success' && (env.FIRMWARE_RELEASE == true || env.FIRMWARE_RELEASE == 'true')
+      uses: softprops/action-gh-release@v2
+      with:
+        name: R${{ env.COMPILE_DATE }} for ${{ env.DEVICE_SUBTARGET }}
+        tag_name: R${{ env.COMPILE_DATE }}_${{ env.DEVICE_SUBTARGET }}
+        files: ${{ env.OPENWRT_PATH }}/upload/*.*
+        body: |
+          **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
+          ### 📒 固件信息(无WIFI)
+          - 无WIFI带有线NSS的${{ env.VERSION_KERNEL }}内核固件
+          - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt 固件
+          - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
+          - ⚽ 固件源码: ${{ env.REPO_URL }}
+          - 💝 源码分支: ${{ env.REPO_BRANCH }}
+          - 🌐 默认地址: ${{ env.DEFAULT_LANIP }}
+          - 🔑 默认密码: 无|password
+          ### 🧊 固件版本
+          - 固件内核：${{ env.VERSION_KERNEL }}
+          - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }})更新记录
+          - ${{ env.VERSION_INFO }}
