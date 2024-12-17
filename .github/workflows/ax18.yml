@@ -46,7 +46,7 @@ on:
         description: '重置root密码'
         required: false
         type: boolean
-        default: true
+        default: false
       iResize_space:
         description: '云编译磁盘扩容(编译大文件用)'
         required: false
