@@ -170,9 +170,9 @@ jobs:
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
-        if [ -n ${{ env.REPO_Commit_Hash }} ]; then
-          echo "【LinInfo】回退到指定版本：【${{ env.REPO_Commit_Hash }}"
-          git reset --hard ${{ env.REPO_Commit_Hash }}
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
+          git reset --hard "${{ env.REPO_Commit_Hash }}"
         end
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
