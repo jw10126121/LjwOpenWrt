@@ -42,6 +42,11 @@ on:
         required: false
         type: boolean
         default: true
+      iDesc_mine:
+        description: '编译说明'
+        required: false
+        type: string
+        default: ''
       iReset_password:
         description: '重置root密码'
         required: false
@@ -81,6 +86,7 @@ env:
   CONFIGS_DIR: Config                             # 自定义配置文件夹
   SCRIPTS_DIR: Scripts                            # 脚本文件夹
   DEFAULT_LANIP: ${{inputs.i_lan_ip}}             # 默认lanIP
+  MINE_SAY: ${{inputs.iDesc_mine}} 
   
 #CI权限
 permissions: write-all
@@ -181,6 +187,7 @@ jobs:
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        echo "编译说明：${{ env.MINE_SAY }}"
 
     - name: Update Feeds (更新feeds)
       run: |
