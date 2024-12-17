@@ -15,6 +15,7 @@ DELETE_PACKAGE() {
     local PKG_NAME=$1
 
     rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
+    echo "【LinInfo】删除插件：$PKG_NAME"
 }
 
 
@@ -42,8 +43,9 @@ UPDATE_PACKAGE() {
     # Clone插件
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
     echo "【LinInfo】成功clone插件：$PKG_NAME"
+    echo ""
     if [[ $PKG_SPECIAL == "pkg" ]]; then
-        cp -rf $(find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "$searchType" -prune) ./
+        cp -rf $(find ./$REPO_NAME/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./
         rm -rf ./$REPO_NAME/
     elif [[ $PKG_SPECIAL == "name" ]]; then
         mv -f $REPO_NAME $PKG_NAME
@@ -60,13 +62,14 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 # 注意，需要luci-app-nlbwmon支持
-UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
+# UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
 DELETE_PACKAGE "wrtbwmon"                                                           # 删除插件：wrtbwmon
 DELETE_PACKAGE "luci-app-wrtbwmon"                                                  # 删除插件：luci-app-wrtbwmon
 UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-onliner" "haiibo/openwrt-packages" "master" "pkg" "1"
 
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
@@ -126,7 +129,7 @@ UPDATE_VERSION() {
     done
 }
 
-#UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
+# UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
 UPDATE_VERSION "sing-box"
 # UPDATE_VERSION "tailscale"
 UPDATE_VERSION "alist"
