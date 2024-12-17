@@ -4,6 +4,12 @@
 
 # 运行在openwrt/package目录下
 
+    # 删除原本同名的软件包
+# the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*wrtbwmon*" -prune)
+# echo $the_exist_pkg
+# exit 0
+
+
 #删除软件包
 DELETE_PACKAGE() {
     local PKG_NAME=$1
@@ -29,7 +35,7 @@ UPDATE_PACKAGE() {
 
     # Clone插件
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
-
+    echo "【LinInfo】成功clone插件：$PKG_NAME"
     if [[ $PKG_SPECIAL == "pkg" ]]; then
         cp -rf $(find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune) ./
         rm -rf ./$REPO_NAME/
@@ -67,6 +73,8 @@ UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
+UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg"
+UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg"
 
 
 
