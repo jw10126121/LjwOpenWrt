@@ -55,12 +55,19 @@ on:
         required: false
         type: boolean
         default: false
+      iRepoURL_commit_hash:
+        description: '历史版本'
+        required: false
+        type: string
+        default: ''
+        
 
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  REPO_Commit_Hash: ${{inputs.iRepoURL_commit_hash}}
   CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
   DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
@@ -163,6 +170,10 @@ jobs:
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
+        if [ -n ${{ env.REPO_Commit_Hash }} ]; then
+          echo "【LinInfo】回退到指定版本：【${{ env.REPO_Commit_Hash }}"
+          git reset --hard ${{ env.REPO_Commit_Hash }}
+        end
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
