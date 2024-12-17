@@ -79,42 +79,42 @@ CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # fi
 
 
-# if [ -f "$CFG_FILE" ]; then
-#     # 修改默认IP地址
-#     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-#     echo "【LinInfo】默认IP: $WRT_IP"
-#     # 修改默认主机名
-#     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-#     echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
-# fi
+if [ -f "$CFG_FILE" ]; then
+    # 修改默认IP地址
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+    echo "【LinInfo】默认IP: $WRT_IP"
+    # 修改默认主机名
+    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
+    echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
+fi
 
 # 取消主题默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
 # 设置默认主题
-if [ -n "$default_theme_name" ]; then
-    the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
-    if [ -n "$the_exist_theme" ]; then
-        # 修改默认主题
-        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
-        echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
-        if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
-            echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
-        fi
-        echo "【LinInfo】默认主题：$WRT_THEME"
-    else
-        echo "【LinInfo】不存在主题【$WRT_THEME】，使用默认主题"
-    fi
-else
-    echo "【LinInfo】使用源码默认主题"
-fi
+# if [ -n "$default_theme_name" ]; then
+#     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
+#     if [ -n "$the_exist_theme" ]; then
+#         # 修改默认主题
+#         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+#         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
+#         if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
+#             echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
+#         fi
+#         echo "【LinInfo】默认主题：$WRT_THEME"
+#     else
+#         echo "【LinInfo】不存在主题【$WRT_THEME】，使用默认主题"
+#     fi
+# else
+#     echo "【LinInfo】使用源码默认主题"
+# fi
 
 
 #LEDE平台调整
-# if [ -f "$CFG_FILE_LEDE" ]; then
-# 	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
-# 	sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
-#     echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
-# fi
+if [ -f "$CFG_FILE_LEDE" ]; then
+	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
+	sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
+    echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
+fi
 
 # 清空密码
 # if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
