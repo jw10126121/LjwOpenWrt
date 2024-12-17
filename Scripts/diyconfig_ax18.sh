@@ -79,14 +79,14 @@ CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # fi
 
 
-if [ -f "$CFG_FILE" ]; then
-    # 修改默认IP地址
-    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-    echo "【LinInfo】默认IP: $WRT_IP"
-    # 修改默认主机名
-    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-    echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
-fi
+# if [ -f "$CFG_FILE" ]; then
+#     # 修改默认IP地址
+#     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+#     echo "【LinInfo】默认IP: $WRT_IP"
+#     # 修改默认主机名
+#     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
+#     echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
+# fi
 
 # 取消主题默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
@@ -110,11 +110,11 @@ fi
 
 
 #LEDE平台调整
-if [ -f "$CFG_FILE_LEDE" ]; then
-	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
-	sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
-    echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
-fi
+# if [ -f "$CFG_FILE_LEDE" ]; then
+# 	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
+# 	sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
+#     echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
+# fi
 
 # 清空密码
 # if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
