@@ -27,6 +27,11 @@ on:
         options:
           - 'GENERAL.txt'
           - 'GENERAL_custom.txt'
+      i_lan_ip:
+        description: '配置LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
       iUpdate_bin:
         description: '将固件上传到Artifact'
         required: false
@@ -42,25 +47,23 @@ on:
         required: false
         type: boolean
         default: true
-      i_lan_ip:
-        description: '配置LAN-IP'
-        required: false
-        default: '192.168.0.1'
-        type: choice
-        options:
-          - '192.168.0.1'
-          - '192.168.1.1'
       iResize_space:
-        description: '云编译磁盘扩容'
+        description: '云编译磁盘扩容(编译大文件用)'
         required: false
         type: boolean
         default: false
+      iRepoURL_commit_hash:
+        description: '历史版本HASH'
+        required: false
+        type: string
+        default: ''
 
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  REPO_Commit_Hash: ${{inputs.iRepoURL_commit_hash}}
   CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
   DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
@@ -157,12 +160,22 @@ jobs:
         df -hT $GITHUB_WORKSPACE
         COMPILE_DATE=$(date +"%y%m%d")
         COMPILE_TIME=$(date +"%y%m%d%H%M%S")
+        COMPILE_DATE_HOUR=$(date +"%y%m%d%H")
         echo "COMPILE_DATE=$COMPILE_DATE" >> $GITHUB_ENV
         echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；"
+        echo "COMPILE_DATE_HOUR=$COMPILE_DATE_HOUR" >> $GITHUB_ENV
+        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；编译时间(精确到小时)：$COMPILE_DATE_HOUR"
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
-        git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
+        git_depth='--depth=1'
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          git_depth=''
+        fi
+        git clone ${git_depth} --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
+          git reset --hard "${{ env.REPO_Commit_Hash }}"
+        fi
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
@@ -274,6 +287,15 @@ jobs:
         name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
+        mkdir -p ./config_mine
+        cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
+
+    - name: Upload Config (上传配置文件)
+      id: config_upload
+      uses: actions/upload-artifact@master
+      with:
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
+        path: openwrt/config_mine
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
@@ -311,7 +333,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
       with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.FILE_DATE }}
+        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
         path: openwrt/bin
 
     - name: Organize Files(整理文件)
@@ -347,7 +369,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE }}_Firmware
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Upload Firmware To Release(发布固件)
