@@ -25,9 +25,15 @@ UPDATE_PACKAGE() {
     local PKG_BRANCH=$3
     local PKG_SPECIAL=$4
     local REPO_NAME=$(echo $PKG_REPO | cut -d '/' -f 2)
+    local SEARCH_TYPE_SURE=$5
+
+    searchType="*$PKG_NAME*"
+    if [[ $SEARCH_TYPE_SURE == "1" ]]; then
+        searchType="$PKG_NAME"
+    fi
 
     # 删除原本同名的软件包
-    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune)
+    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
     if [ -n "$the_exist_pkg" ]; then
         echo "【LinInfo】删除同名插件：$the_exist_pkg"
         rm -rf $the_exist_pkg
@@ -37,7 +43,7 @@ UPDATE_PACKAGE() {
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
     echo "【LinInfo】成功clone插件：$PKG_NAME"
     if [[ $PKG_SPECIAL == "pkg" ]]; then
-        cp -rf $(find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune) ./
+        cp -rf $(find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "$searchType" -prune) ./
         rm -rf ./$REPO_NAME/
     elif [[ $PKG_SPECIAL == "name" ]]; then
         mv -f $REPO_NAME $PKG_NAME
@@ -49,13 +55,20 @@ UPDATE_PACKAGE() {
 
 # lean版luci-theme-argon用的是lua，不是js，所以用18.06
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "18.06"
-#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
-
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-#UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
+# 注意，需要luci-app-nlbwmon支持
+UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
+UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
+UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
+
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
+#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
+#UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
 
 # if [[ $WRT_REPO == *"lede"* ]]; then
 #   UPDATE_PACKAGE "alist" "sbwml/luci-app-alist" "main" # 2024年12月3日测试依旧报错
@@ -68,13 +81,7 @@ UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 # UPDATE_PACKAGE "luci-app-advancedplus" "VIKINGYFY/packages" "main" "pkg"
 #UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
 #UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
-UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
-# 注意，需要luci-app-nlbwmon支持
-UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
-UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
-UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg"
-UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg"
+
 
 
 
