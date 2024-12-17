@@ -22,7 +22,7 @@ show_help() {
 default_name="Linjw"
 default_ip="192.168.0.1"
 is_reset_password=true
-default_theme_name=''
+default_theme_name='argon'
 
 # 脚本主体
 while getopts "hi:n:p:t:" opt; do
@@ -97,10 +97,12 @@ if [ -n "$default_theme_name" ]; then
         # 修改默认主题
         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
-        echo "【LinInfo】默认主题名：$WRT_THEME"
+        echo "【LinInfo】默认主题：$WRT_THEME"
     else
         echo "【LinInfo】不存在主题【$WRT_THEME】，使用默认主题"
     fi
+else
+    echo "【LinInfo】使用源码默认主题"
 fi
 
 
