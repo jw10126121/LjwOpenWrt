@@ -176,6 +176,8 @@ jobs:
           echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
           git reset --hard "${{ env.REPO_Commit_Hash }}"
         fi
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
@@ -233,8 +235,6 @@ jobs:
         the_repo=${REPO_URL%/}
         export WRT_VER="${the_repo##*/}"-$REPO_BRANCH
         echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
-        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
-        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         SOURCE_REPO="$(echo $REPO_URL | awk -F '/' '{print $(NF)}')"
         echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
         path_config_file="$OPENWRT_PATH/.config"
