@@ -162,6 +162,12 @@ if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]
     echo "OpenVPN Server has been fixed the default gateway address!"
 fi
 
-echo "CONFIG_PACKAGE_luci=y" >> ./.config
-echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
+
+if ! grep -q "^CONFIG_PACKAGE_luci=y" "./.config"; then
+    echo "CONFIG_PACKAGE_luci=y" >> ./.config
+fi
+
+if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "./.config"; then
+    echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
+fi
 
