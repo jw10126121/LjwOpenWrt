@@ -274,13 +274,15 @@ jobs:
         name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
+        mkdir -p ./config_mine
+        cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
 
     - name: Upload Config
       id: config_upload
       uses: actions/upload-artifact@master
       with:
         name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.FILE_DATE }}
-        path: openwrt/.config
+        path: openwrt/config_mine
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
