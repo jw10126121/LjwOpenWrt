@@ -95,7 +95,7 @@ if [ -n "$default_theme_name" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题
-        # sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
         if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
             echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
