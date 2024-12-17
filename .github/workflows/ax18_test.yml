@@ -296,7 +296,7 @@ jobs:
       id: config_upload
       uses: actions/upload-artifact@master
       with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.FILE_DATE }}
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_TIME }}
         path: openwrt/config_mine
 
     - name: Download tools (下载工具包) 
@@ -335,7 +335,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
       with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.FILE_DATE }}
+        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_TIME }}
         path: openwrt/bin
 
     - name: Organize Files(整理文件)
