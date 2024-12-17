@@ -168,7 +168,11 @@ jobs:
         echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
         echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；"
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
-        git clone --depth=1 --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
+        git_depth='--depth=1'
+        if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
+          git_depth=''
+        fi
+        git clone ${git_depth} --single-branch --branch $REPO_BRANCH $REPO_URL openwrt
         cd openwrt
         if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
           echo "【LinInfo】回退到指定版本：${{ env.REPO_Commit_Hash }}"
