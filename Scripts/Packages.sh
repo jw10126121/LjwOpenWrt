@@ -62,14 +62,14 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 # 注意，需要luci-app-nlbwmon支持
-UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
+# UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
 DELETE_PACKAGE "wrtbwmon"                                                           # 删除插件：wrtbwmon
 DELETE_PACKAGE "luci-app-wrtbwmon"                                                  # 删除插件：luci-app-wrtbwmon
 UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
-# UPDATE_PACKAGE "luci-app-onliner" "haiibo/openwrt-packages" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-onliner" "haiibo/openwrt-packages" "master" "pkg" "1"
 #UPDATE_PACKAGE "luci-app-wizard" "haiibo/openwrt-packages" "master" "pkg" "1"
 
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
