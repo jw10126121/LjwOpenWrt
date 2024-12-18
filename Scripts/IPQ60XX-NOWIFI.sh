@@ -60,7 +60,7 @@ while getopts "hi:n:p:t:" opt; do
     esac
 done
 
-
+# 配置ip、配置默认时间格式显示，配置添加主题，配置密码清空，配置OpenVPN修复，不配置默认主题，不配置NSS显示问题
 
 
 WRT_IP=$default_ip
@@ -72,28 +72,28 @@ CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 
 
 # ./package/lean/autocore/files/找出index.htm，并替换时间格式
-# if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
-#     # 修改本地时间格式
-#     sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
-#     echo "【LinInfo】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
-# fi
+if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
+    # 修改本地时间格式
+    sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
+    echo "【LinInfo】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
+fi
 
 
-# if [ -f "$CFG_FILE" ]; then
-#     # 修改默认IP地址
-#     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-#     echo "【LinInfo】默认IP: $WRT_IP"
-#     # 修改默认主机名
-#     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-#     echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
-# fi
+if [ -f "$CFG_FILE" ]; then
+    # 修改默认IP地址
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
+    echo "【LinInfo】默认IP: $WRT_IP"
+    # 修改默认主机名
+    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
+    echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
+fi
 
-# #LEDE平台调整
-# if [ -f "$CFG_FILE_LEDE" ]; then
-#     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
-#     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
-#     echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
-# fi
+#LEDE平台调整
+if [ -f "$CFG_FILE_LEDE" ]; then
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
+    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
+    echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
+fi
 
 # 取消主题默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
@@ -103,7 +103,7 @@ if [ -n "$default_theme_name" ]; then
     echo "【LinInfo】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
-        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+        # sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         # 旧版修改主题方法，现在应该是找不到了
         # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
@@ -120,10 +120,10 @@ fi
 
 
 # 清空密码
-# if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
-#     sed -i 's/^root:.*:/root:::0:99999:7:::/' "./package/base-files/files/etc/shadow"
-#     echo "【LinInfo】密码已清空"
-# fi
+if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
+    sed -i 's/^root:.*:/root:::0:99999:7:::/' "./package/base-files/files/etc/shadow"
+    echo "【LinInfo】密码已清空"
+fi
 
 # 配置NSS
 # USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
@@ -151,22 +151,22 @@ fi
 # 修复 armv8 设备 xfsprogs 报错
 # sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
-##获取IP地址前3段
-# WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
-##修复Openvpnserver无法连接局域网和外网问题
-# if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
-#    echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
-#    echo "OpenVPN Server has been fixed and is now accessible on the network!"
-# fi
-#
-##修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
-# if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
-#     echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-#     echo "OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
-#     sed -i "s/192.168.1.1/$WRT_IPPART.1/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-#     sed -i "s/192.168.1.0/$WRT_IPPART.0/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-#     echo "OpenVPN Server has been fixed the default gateway address!"
-# fi
+#获取IP地址前3段
+WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
+#修复Openvpnserver无法连接局域网和外网问题
+if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
+   echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
+   echo "OpenVPN Server has been fixed and is now accessible on the network!"
+fi
+
+#修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
+if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
+    echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+    echo "OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
+    sed -i "s/192.168.1.1/$WRT_IPPART.1/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+    sed -i "s/192.168.1.0/$WRT_IPPART.0/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+    echo "OpenVPN Server has been fixed the default gateway address!"
+fi
 
 
 if ! grep -q "^CONFIG_PACKAGE_luci=y" "./.config"; then
