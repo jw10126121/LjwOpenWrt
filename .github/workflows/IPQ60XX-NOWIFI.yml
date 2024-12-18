@@ -302,6 +302,8 @@ jobs:
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
           bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" "./.config" "./config_mine/what_my_say.txt" "${{ env.MINE_SAY }}"
         fi
+        cp -f "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIYPackages" "./config_mine/$DIYPackages"
+        cp -f "$GITHUB_WORKSPACE/$SCRIPTS_DIR/$DIY_SETTING" "./config_mine/$DIY_SETTING"
 
     - name: Upload Config (上传配置文件)
       id: config_upload
