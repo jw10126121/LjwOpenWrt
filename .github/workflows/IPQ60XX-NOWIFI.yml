@@ -9,17 +9,17 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
-      iCONFIG:
+      iCONFIG_FILE:
         description: '配置文件：'
         required: true
         type: string
         default: 'IPQ60XX-NOWIFI.txt'
-      iDIY:
+      iDIY_SETTING:
         description: 'DIY脚本：'
         required: false
         type: string
         default: 'diyconfig_ax18.sh'
-      iGENERAL:
+      iGENERAL_CONFIG:
         description: '通用配置文件'
         required: true
         default: 'GENERAL.txt'
@@ -27,37 +27,37 @@ on:
         options:
           - 'GENERAL.txt'
           - 'GENERAL_custom.txt'
-      i_lan_ip:
+      iDEFAULT_LANIP:
         description: '配置LAN-IP'
         required: false
         type: string
         default: '192.168.0.1'
-      iUpdate_bin:
+      iUPLOAD_FIRMWARE_DIR:
         description: '将固件上传到Artifact'
         required: false
         type: boolean
         default: true
-      iRelease_FIRMWARE:
+      iFIRMWARE_RELEASE:
         description: '发布firmware'
         required: false
         type: boolean
         default: true
-      iDesc_mine:
+      iWHAT_MY_SAY:
         description: '编译说明'
         required: false
         type: string
         default: ''
-      iReset_password:
+      iIS_RESET_PASSWORD:
         description: '重置root密码'
         required: false
         type: boolean
         default: false
-      iResize_space:
+      iIS_RESIZE_SPACE:
         description: '云编译磁盘扩容(编译大文件用)'
         required: false
         type: boolean
         default: false
-      iRepoURL_commit_hash:
+      iREPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
         type: string
@@ -68,25 +68,25 @@ env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  REPO_Commit_Hash: ${{inputs.iRepoURL_commit_hash}}
-  CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
-  DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
+  REPO_Commit_Hash: ${{inputs.iREPO_Commit_Hash}}
+  CONFIG_FILE: ${{inputs.iCONFIG_FILE}}                # 配置文件
+  DIY_SETTING: ${{inputs.iDIY_SETTING}}                   # 自定义配置
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
-  GENERAL_CONFIG: ${{inputs.iGENERAL}}            # 通用配置
+  GENERAL_CONFIG: ${{inputs.iGENERAL_CONFIG}}            # 通用配置
   DIYPackages: Packages.sh                        # 自定义包配置
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: true
-  UPLOAD_FIRMWARE_DIR: ${{inputs.iUpdate_bin}}
+  UPLOAD_FIRMWARE_DIR: ${{inputs.iUPLOAD_FIRMWARE_DIR}}
   UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
-  FIRMWARE_RELEASE: ${{inputs.iRelease_FIRMWARE}} # 发布固件
-  IS_RESET_PASSWORD: ${{inputs.iReset_password}}  # 是否把密码重置为空
-  IS_RESIZE_SPACE: ${{inputs.iResize_space}}      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  FIRMWARE_RELEASE: ${{inputs.iFIRMWARE_RELEASE}} # 发布固件
+  IS_RESET_PASSWORD: ${{inputs.iIS_RESET_PASSWORD}}  # 是否把密码重置为空
+  IS_RESIZE_SPACE: ${{inputs.iIS_RESIZE_SPACE}}      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config                             # 自定义配置文件夹
   SCRIPTS_DIR: Scripts                            # 脚本文件夹
-  DEFAULT_LANIP: ${{inputs.i_lan_ip}}             # 默认lanIP
-  MINE_SAY: ${{inputs.iDesc_mine}} 
+  DEFAULT_LANIP: ${{inputs.iDEFAULT_LANIP}}             # 默认lanIP
+  MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
   
 #CI权限
 permissions: write-all
@@ -297,6 +297,11 @@ jobs:
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
         cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" ]; then
+          echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" "./.config" "./config_mine/what_my_say.txt" "${{ env.MINE_SAY }}"
+        fi
 
     - name: Upload Config (上传配置文件)
       id: config_upload
@@ -349,6 +354,7 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
+        cp -f ./config_mine/what_my_say.txt ./upload/what_my_say.txt
         cp -f my_config.txt ./upload/"$name_config_file"_mine.txt
         cp -f ./.config ./upload/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file".txt
