@@ -102,8 +102,10 @@ if [ -n "$default_theme_name" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
     echo "【LinInfo】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
-        # 修改默认主题
+        # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+        # 旧版修改主题方法，现在应该是找不到了
+        # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
         if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
             echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
