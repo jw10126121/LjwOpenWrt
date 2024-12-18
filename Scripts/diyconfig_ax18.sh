@@ -150,7 +150,7 @@ fi
 
 #获取IP地址前3段
 WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
-修复Openvpnserver无法连接局域网和外网问题
+#修复Openvpnserver无法连接局域网和外网问题
 if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
    echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
    echo "OpenVPN Server has been fixed and is now accessible on the network!"
