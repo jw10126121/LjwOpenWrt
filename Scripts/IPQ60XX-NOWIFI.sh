@@ -131,18 +131,18 @@ if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_re
 fi
                                                          
 # 配置NSS
-# USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
-# if [ -f "$USAGE_FILE" ]; then
-#     NEW_USAGE_FILE="./custom_usage.txt"
-#     if [ -f "$NEW_USAGE_FILE" ]; then
-#         cat $NEW_USAGE_FILE > $USAGE_FILE
-#         echo "【LinInfo】配置NSS完成"
-#     else
-#         echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
-#     fi
-# else
-#     echo "【LinInfo】NSS不存在：$USAGE_FILE"
-# fi
+USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
+NEW_USAGE_FILE="./custom_usage.txt"
+if [ -f "$USAGE_FILE" ]; then
+    if [ -f "$NEW_USAGE_FILE" ]; then
+        cat $NEW_USAGE_FILE > $USAGE_FILE
+        echo "【LinInfo】配置NSS完成"
+    else
+        echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
+    fi
+else
+    echo "【LinInfo】NSS不存在：$USAGE_FILE"
+fi
 
 # 调整位置
 #sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
