@@ -103,7 +103,7 @@ if [ -n "$default_theme_name" ]; then
     echo "【LinInfo】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
-        # sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         # 旧版修改主题方法，现在应该是找不到了
         # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
@@ -122,9 +122,14 @@ fi
 # 清空密码
 if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
     sed -i 's/^root:.*:/root:::0:99999:7:::/' "./package/base-files/files/etc/shadow"
-    echo "【LinInfo】密码已清空"
+    echo "【LinInfo】密码已清空：./package/base-files/files/etc/shadow"
 fi
-
+# 清空密码
+if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_reset_password" == "true" ]]; then
+    sed -i '/\/etc\/shadow$/{/root::0:0:99999:7:::/d;/root:::0:99999:7:::/d}' "./package/lean/default-settings/files/zzz-default-settings"
+    echo "【LinInfo】LEAN密码已清空：./package/lean/default-settings/files/zzz-default-settings"
+fi
+                                                         
 # 配置NSS
 # USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
 # if [ -f "$USAGE_FILE" ]; then
