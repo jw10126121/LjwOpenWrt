@@ -18,7 +18,7 @@ on:
         description: 'DIY脚本：'
         required: false
         type: string
-        default: 'diyconfig_ax18.sh'
+        default: 'IPQ60XX-NOWIFI.sh'
       iGENERAL_CONFIG:
         description: '通用配置文件'
         required: true
