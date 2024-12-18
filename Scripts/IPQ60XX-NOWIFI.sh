@@ -103,7 +103,7 @@ if [ -n "$default_theme_name" ]; then
     echo "【LinInfo】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
-        # sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         # 旧版修改主题方法，现在应该是找不到了
         # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
         echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
@@ -131,18 +131,18 @@ if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_re
 fi
                                                          
 # # 配置NSS
-# USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
-# NEW_USAGE_FILE="./custom_usage.txt"
-# if [ -f "$USAGE_FILE" ]; then
-#     if [ -f "$NEW_USAGE_FILE" ]; then
-#         cat $NEW_USAGE_FILE > $USAGE_FILE
-#         echo "【LinInfo】配置NSS完成"
-#     else
-#         echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
-#     fi
-# else
-#     echo "【LinInfo】NSS不存在：$USAGE_FILE"
-# fi
+USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
+NEW_USAGE_FILE="./custom_usage.txt"
+if [ -f "$USAGE_FILE" ]; then
+    if [ -f "$NEW_USAGE_FILE" ]; then
+        cat $NEW_USAGE_FILE > $USAGE_FILE
+        echo "【LinInfo】配置NSS完成"
+    else
+        echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
+    fi
+else
+    echo "【LinInfo】NSS不存在：$USAGE_FILE"
+fi
 
 # 调整位置
 #sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
