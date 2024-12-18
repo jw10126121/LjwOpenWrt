@@ -27,6 +27,11 @@ on:
         options:
           - 'GENERAL.txt'
           - 'GENERAL_custom.txt'
+      iDIY_Packages:
+        description: 'DIY包配置：'
+        required: false
+        type: string
+        default: 'Packages.sh'
       iDEFAULT_LANIP:
         description: '配置LAN-IP'
         required: false
@@ -73,7 +78,7 @@ env:
   DIY_SETTING: ${{inputs.iDIY_SETTING}}                   # 自定义配置
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
   GENERAL_CONFIG: ${{inputs.iGENERAL_CONFIG}}            # 通用配置
-  DIYPackages: Packages.sh                        # 自定义包配置
+  DIYPackages: ${{inputs.iDIY_Packages}}                     # 自定义包配置
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   FREE_UP_DISK: true
