@@ -70,6 +70,7 @@ DELETE_PACKAGE "luci-app-wrtbwmon"                                              
 UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-onliner" "haiibo/openwrt-packages" "master" "pkg" "1"
+#UPDATE_PACKAGE "luci-app-wizard" "haiibo/openwrt-packages" "master" "pkg" "1"
 
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
