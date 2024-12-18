@@ -167,11 +167,11 @@ jobs:
         df -hT $GITHUB_WORKSPACE
         COMPILE_DATE=$(date +"%y%m%d")
         COMPILE_TIME=$(date +"%y%m%d%H%M%S")
-        COMPILE_DATE_HOUR=$(date +"%y%m%d%H")
+        COMPILE_DATE_HOUR=$(date +"%y%m%d%H%M")
         echo "COMPILE_DATE=$COMPILE_DATE" >> $GITHUB_ENV
         echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
         echo "COMPILE_DATE_HOUR=$COMPILE_DATE_HOUR" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；编译时间(精确到小时)：$COMPILE_DATE_HOUR"
+        echo "【LinInfo】编译日期：$COMPILE_DATE；编译时间：$COMPILE_TIME；编译时间(精确到分钟)：$COMPILE_DATE_HOUR"
         echo "【LinInfo】克隆源代码：【$REPO_BRANCH】$REPO_URL"
         git_depth='--depth=1'
         if [ -n "${{ env.REPO_Commit_Hash }}" ]; then
