@@ -57,7 +57,7 @@ UPDATE_PACKAGE() {
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
 # lean版luci-theme-argon用的是lua，不是js，所以用18.06
-UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "18.06"
+# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "18.06"
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
