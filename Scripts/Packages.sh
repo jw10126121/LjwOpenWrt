@@ -4,12 +4,6 @@
 
 # 运行在openwrt/package目录下
 
-    # 删除原本同名的软件包
-# the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "*wrtbwmon*" -prune)
-# echo $the_exist_pkg
-# exit 0
-
-
 #删除软件包
 DELETE_PACKAGE() {
     local PKG_NAME=$1
@@ -58,17 +52,9 @@ UPDATE_PACKAGE_FROM_REPO() {
     local PKG_NAME=$1
     local PKG_REPO=$2
     local PKG_BRANCH=$3
-    # local PKG_SPECIAL=$4
-    local REPO_NAME=$(echo $PKG_REPO | cut -d '/' -f 2)
-    local SEARCH_TYPE_SURE=$4
-
-    searchType="*$PKG_NAME*"
-    if [[ $SEARCH_TYPE_SURE == "1" ]]; then
-        searchType="$PKG_NAME"
-    fi
 
     # 删除原本同名的软件包
-    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
+    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
     if [ -n "$the_exist_pkg" ]; then
         echo "【LinInfo】删除同名插件包库：$the_exist_pkg"
         rm -rf $the_exist_pkg
@@ -78,13 +64,6 @@ UPDATE_PACKAGE_FROM_REPO() {
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git" $PKG_NAME
     echo "【LinInfo】成功clone插件包库：$PKG_NAME"
     echo ""
-    # if [[ $PKG_SPECIAL == "pkg" ]]; then
-    #     cp -rf $(find ./$REPO_NAME/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./
-    #     rm -rf ./$REPO_NAME/
-    # elif [[ $PKG_SPECIAL == "name" ]]; then
-    #     mv -f $REPO_NAME $PKG_NAME
-    #     echo "【LinInfo】重命名插件：$PKG_NAME <= $REPO_NAME"
-    # fi
 }
 
 REMOVE_PACKAGE_FROM_REPO() {
@@ -118,20 +97,21 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+# UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
 
 DELETE_PACKAGE "wrtbwmon"
 DELETE_PACKAGE "luci-app-wrtbwmon"
 DELETE_PACKAGE "luci-app-onliner"
 DELETE_PACKAGE "luci-app-netwizard"
-DELETE_PACKAGE "homebox"
-DELETE_PACKAGE "luci-app-netspeedtest"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master" "1"
+# DELETE_PACKAGE "homebox"
+# DELETE_PACKAGE "luci-app-netspeedtest"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master"
 MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
 MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo"
 MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
 MOVE_PACKAGE_FROM_LIST "luci-app-netwizard" "custom_packages_haiibo"
-MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
-MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
+# MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
+# MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 
 # UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
