@@ -268,7 +268,7 @@ jobs:
         echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
-        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print)
+        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
         KERNEL_PATCHVER=''
         if [ -n "$dir_linux_device_target" ]; then
           MAKEFILE_PATH="$dir_linux_device_target/Makefile"
