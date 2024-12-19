@@ -102,6 +102,27 @@ CONFIG_PACKAGE_ip6tables=y
 CONFIG_PACKAGE_ip6tables-extra=y
 CONFIG_PACKAGE_ip6tables-mod-nat=y
 
+###### FW4 ##########
+# CONFIG_PACKAGE_kmod-ipt-ipset=n
+# CONFIG_PACKAGE_kmod-nf-conntrack=y
+# CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
+# CONFIG_PACKAGE_kmod-nf-conntrack6=y
+# FW4下，不能用ssr-plus
+# CONFIG_PACKAGE_luci-app-ssr-plus=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n
+# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n
+# CONFIG_PACKAGE_luci-app-homeproxy=y
+
+###### FW3 ##########
+# CONFIG_PACKAGE_luci-app-ssr-plus=y
+# CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y
+# CONFIG_PACKAGE_luci-app-homeproxy=n
+
 
 #----------------------------------- LEAN源码默认加入的配置，如果不需要，要设置=n -----------------------------------
 
