@@ -127,7 +127,7 @@ fi
 # 清空密码
 if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_reset_password" == "true" ]]; then
     sed -i '/\/etc\/shadow$/{/root::0:0:99999:7:::/d;/root:::0:99999:7:::/d}' "./package/lean/default-settings/files/zzz-default-settings"
-    echo "【LinInfo】LEAN密码已清空：./package/lean/default-settings/files/zzz-default-settings"
+    echo "【LinInfo】LEAN配置密码已清空：./package/lean/default-settings/files/zzz-default-settings"
 fi
                                                          
 # # 配置NSS
