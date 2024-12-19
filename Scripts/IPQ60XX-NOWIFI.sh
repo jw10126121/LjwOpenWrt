@@ -5,6 +5,9 @@
 # Author: Linjw
 #=================================================
 
+
+
+
 # 显示帮助信息的函数
 show_help() {
     echo "Usage: $0 [options]"
@@ -132,26 +135,49 @@ fi
                                                          
 # # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
-NEW_USAGE_FILE="./custom_usage.txt"
-if [ -f "$USAGE_FILE" ]; then
-    if [ -f "$NEW_USAGE_FILE" ]; then
-        cat $NEW_USAGE_FILE > $USAGE_FILE
-        echo "【LinInfo】配置NSS完成"
-    else
-        echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
-    fi
+sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
+    if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
+        connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
+        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage} ECM: ${connection_count}"\
+    else\
+        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
+    fi' "$USAGE_FILE"
+if [ $? -eq 0 ]; then
+    echo "【LinInfo】配置NSS显示执行完成"
 else
-    echo "【LinInfo】NSS不存在：$USAGE_FILE"
+    echo "【LinInfo】配置NSS显示执行完成"
+fi
+# 方法二
+# NEW_USAGE_FILE="./custom_usage.txt"
+# if [ -f "$USAGE_FILE" ]; then
+#     if [ -f "$NEW_USAGE_FILE" ]; then
+#         cat $NEW_USAGE_FILE > $USAGE_FILE
+#         echo "【LinInfo】配置NSS完成"
+#     else
+#         echo "【LinInfo】不存在新NSS配置：$NEW_USAGE_FILE"
+#     fi
+# else
+#     echo "【LinInfo】NSS不存在：$USAGE_FILE"
+# fi
+
+
+if [[ -f "./package/lean/default-settings/files/zzz-default-settings" ]]; then
+    # 配置编译日期
+    date_version=$(date +"%y.%m.%d")
+    DISTRIB_REVISION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
+    sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/R${date_version} by Linjw/" ./package/lean/default-settings/files/zzz-default-settings
+    # DISTRIB_DESCRIPTION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}')
+    # sed -i "/DISTRIB_DESCRIPTION=/s/${DISTRIB_DESCRIPTION}/Linjw /" ./package/lean/default-settings/files/zzz-default-settings
 fi
 
 # 调整位置
-#sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
-#sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
-#sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/ -type f -name "luci-app-upnp.json")
-# sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-alist/root/usr/share/luci/menu.d/ -type f -name "luci-app-alist.json")
-# if [ -f "$CFG_FILE_LEDE" ]; then
-# 	sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
-# fi
+sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
+sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
+sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/ -type f -name "luci-app-upnp.json")
+sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-alist/root/usr/share/luci/menu.d/ -type f -name "luci-app-alist.json")
+if [ -f "$CFG_FILE_LEDE" ]; then
+	sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
+fi
 
 # 修复 armv8 设备 xfsprogs 报错
 # sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile

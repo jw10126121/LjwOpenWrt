@@ -53,25 +53,90 @@ UPDATE_PACKAGE() {
     fi
 }
 
+#安装和更新同一个仓库下的软件包
+UPDATE_PACKAGE_FROM_REPO() {
+    local PKG_NAME=$1
+    local PKG_REPO=$2
+    local PKG_BRANCH=$3
+    # local PKG_SPECIAL=$4
+    local REPO_NAME=$(echo $PKG_REPO | cut -d '/' -f 2)
+    local SEARCH_TYPE_SURE=$4
+
+    searchType="*$PKG_NAME*"
+    if [[ $SEARCH_TYPE_SURE == "1" ]]; then
+        searchType="$PKG_NAME"
+    fi
+
+    # 删除原本同名的软件包
+    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
+    if [ -n "$the_exist_pkg" ]; then
+        echo "【LinInfo】删除同名插件包库：$the_exist_pkg"
+        rm -rf $the_exist_pkg
+    fi
+
+    # Clone插件
+    git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git" $PKG_NAME
+    echo "【LinInfo】成功clone插件包库：$PKG_NAME"
+    echo ""
+    # if [[ $PKG_SPECIAL == "pkg" ]]; then
+    #     cp -rf $(find ./$REPO_NAME/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./
+    #     rm -rf ./$REPO_NAME/
+    # elif [[ $PKG_SPECIAL == "name" ]]; then
+    #     mv -f $REPO_NAME $PKG_NAME
+    #     echo "【LinInfo】重命名插件：$PKG_NAME <= $REPO_NAME"
+    # fi
+}
+
+REMOVE_PACKAGE_FROM_REPO() {
+    local PKG_NAME=$1
+        # 删除原本同名的软件包
+    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
+    if [ -n "$the_exist_pkg" ]; then
+        echo "【LinInfo】删除同名插件包库：$the_exist_pkg"
+        rm -rf $the_exist_pkg
+    fi
+}
+
+MOVE_PACKAGE_FROM_LIST() {
+    local PKG_NAME=$1
+    local LIST_REPO=$2
+
+    found=$(find ./"$LIST_REPO"/*/ -maxdepth 1 -type d -iname "$PKG_NAME" -print)
+    if [ $? -eq 0 ]; then
+        cp -rf $found ./
+        echo "【LinInfo】复制插件包库${LIST_REPO}的${PKG_NAME}到package中"
+    else
+        echo "【LinInfo】未找到插件包库${LIST_REPO}的${PKG_NAME}"
+    fi
+}
+
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
-# lean版luci-theme-argon用的是lua，不是js，所以用18.06
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
-UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
-# 注意，需要luci-app-nlbwmon支持
-# UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "openwrt-18.06"
-DELETE_PACKAGE "wrtbwmon"                                                           # 删除插件：wrtbwmon
-DELETE_PACKAGE "luci-app-wrtbwmon"                                                  # 删除插件：luci-app-wrtbwmon
-UPDATE_PACKAGE "wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
-UPDATE_PACKAGE "luci-app-wrtbwmon" "haiibo/openwrt-packages" "master" "pkg" "1"
-UPDATE_PACKAGE "luci-app-onliner" "haiibo/openwrt-packages" "master" "pkg" "1"
-#UPDATE_PACKAGE "luci-app-wizard" "haiibo/openwrt-packages" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 
+DELETE_PACKAGE "wrtbwmon"
+DELETE_PACKAGE "luci-app-wrtbwmon"
+DELETE_PACKAGE "luci-app-onliner"
+DELETE_PACKAGE "luci-app-netwizard"
+DELETE_PACKAGE "homebox"
+DELETE_PACKAGE "luci-app-netspeedtest"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master" "1"
+MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
+MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo"
+MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
+MOVE_PACKAGE_FROM_LIST "luci-app-netwizard" "custom_packages_haiibo"
+MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
+MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
+
+# UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
+# # 注意，需要luci-app-nlbwmon支持
+# # UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
 #UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
 #UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
 #UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
