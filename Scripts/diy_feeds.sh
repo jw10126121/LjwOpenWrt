@@ -8,9 +8,19 @@
 openwrt_root="openwrt"
 feed_config_name='feeds.conf.default'
 
+version_firewall=$1
+if [[ -z $version_firewall ]]; then
+	version_firewall="3"
+fi
 
-# cd "$openwrt_root"
 sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
+
+if [[ $version_firewall == "4" ]]; then
+	# rm -rf ./package/qca
+	echo "src-git nss_packages https://github.com/qosmio/nss-packages.git" >> ./feeds.conf.default
+	echo "src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git" >> ./feeds.conf.default
+fi
+
 
 configGit() {
 
