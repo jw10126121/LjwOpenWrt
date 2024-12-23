@@ -384,7 +384,7 @@ jobs:
             mv -f $FILE ./upload/$NEW_FILE
           done
         done
-        find ./bin/targets/ -type f -exec mv -f {} ./upload/ \;
+        find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
