@@ -298,7 +298,7 @@ jobs:
         if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" ]; then
           echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
           chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
-          TO_MY_SAY_DETAIL="${{ env.MINE_SAY }} \
+          TO_MY_SAY_DETAIL_tmp="${{ env.MINE_SAY }} \
           支持型号：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE \
           内核版本：${{env.VERSION_KERNEL}} \
           默认IP：${{env.DEFAULT_LANIP}} \
@@ -307,6 +307,7 @@ jobs:
           GIT_REPO_BRANCH：$REPO_BRANCH \
           GIT_HASH：$REPO_GIT_HASH \
           编译开始时间：${COMPILE_TIME}"
+          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" "./.config" "./config_mine/what_my_say.txt" "$TO_MY_SAY_DETAIL"
         fi
 
