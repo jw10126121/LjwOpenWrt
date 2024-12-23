@@ -68,7 +68,7 @@ WRT_NAME=$default_name
 WRT_THEME=$default_theme_name
 
 
-bash "$(cd $(dirname $0) && pwd)/diy_config.sh" -n "$default_name" -i "$default_ip" -p is_reset_password -t "$default_theme_name"
+bash "$(cd $(dirname $0) && pwd)/diy_config.sh" -n "$default_name" -i "$default_ip" -p $is_reset_password -t "$default_theme_name"
 
 # # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"

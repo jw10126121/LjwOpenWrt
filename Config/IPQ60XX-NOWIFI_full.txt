@@ -5181,8 +5181,8 @@ CONFIG_PACKAGE_luci-app-hd-idle=m
 # CONFIG_PACKAGE_luci-app-mosdns is not set
 # CONFIG_PACKAGE_luci-app-msd_lite is not set
 # CONFIG_PACKAGE_luci-app-music-remote-center is not set
-CONFIG_PACKAGE_luci-app-mwan3=y
-CONFIG_PACKAGE_luci-app-mwan3helper=y
+CONFIG_PACKAGE_luci-app-mwan3=m
+CONFIG_PACKAGE_luci-app-mwan3helper=m
 # CONFIG_PACKAGE_luci-app-mwol is not set
 # CONFIG_PACKAGE_luci-app-n2n is not set
 # CONFIG_PACKAGE_luci-app-natmap is not set
@@ -5325,7 +5325,6 @@ CONFIG_PACKAGE_luci-app-wechatpush=y
 # CONFIG_PACKAGE_luci-app-wechatpush_Host_Information_Detection is not set
 # CONFIG_PACKAGE_luci-app-wifischedule is not set
 CONFIG_PACKAGE_luci-app-wol=y
-# CONFIG_PACKAGE_luci-app-wolplus is not set
 CONFIG_PACKAGE_luci-app-wrtbwmon=y
 # CONFIG_PACKAGE_luci-app-xfrpc is not set
 # CONFIG_PACKAGE_luci-app-xinetd is not set
@@ -5625,9 +5624,9 @@ CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
 # CONFIG_PACKAGE_luci-i18n-mwan3-tr is not set
 # CONFIG_PACKAGE_luci-i18n-mwan3-uk is not set
 # CONFIG_PACKAGE_luci-i18n-mwan3-vi is not set
-CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=m
 # CONFIG_PACKAGE_luci-i18n-mwan3-zh-tw is not set
-CONFIG_PACKAGE_luci-i18n-mwan3helper-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-mwan3helper-zh-cn=m
 # CONFIG_PACKAGE_luci-i18n-nlbwmon-ar is not set
 # CONFIG_PACKAGE_luci-i18n-nlbwmon-bg is not set
 # CONFIG_PACKAGE_luci-i18n-nlbwmon-bn is not set
@@ -6344,7 +6343,7 @@ CONFIG_PACKAGE_mosdns=y
 # CONFIG_PACKAGE_pdns-ixfrdist is not set
 # CONFIG_PACKAGE_pdns-recursor is not set
 # CONFIG_PACKAGE_pdns-tools is not set
-CONFIG_PACKAGE_pdnsd-alt=y
+CONFIG_PACKAGE_pdnsd-alt=m
 # CONFIG_PACKAGE_stubby is not set
 # CONFIG_PACKAGE_tor-hs is not set
 # CONFIG_PACKAGE_torsocks is not set
@@ -6511,7 +6510,7 @@ CONFIG_PACKAGE_ip-full=y
 # CONFIG_PACKAGE_lldpd is not set
 # CONFIG_PACKAGE_mcproxy is not set
 # CONFIG_PACKAGE_mrmctl is not set
-CONFIG_PACKAGE_mwan3=y
+CONFIG_PACKAGE_mwan3=m
 # CONFIG_PACKAGE_nstat is not set
 # CONFIG_PACKAGE_olsrd is not set
 # CONFIG_PACKAGE_pbr is not set
