@@ -176,9 +176,10 @@ CONFIG_PACKAGE_luci-app-filetransfer=y
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y
 CONFIG_PACKAGE_luci-lib-fs=y
 
-CONFIG_PACKAGE_cpufreq=y
-CONFIG_PACKAGE_luci-app-cpufreq=y
-CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=y
+
+CONFIG_PACKAGE_luci-app-cpufreq=m
+CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
+#CONFIG_PACKAGE_cpufreq=m
 
 CONFIG_PACKAGE_luci-app-ttyd=y
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
@@ -186,11 +187,11 @@ CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
 
 #----------------------------------- 网络存储 -------------------------------
 
-CONFIG_PACKAGE_luci-app-vsftpd=y
-CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=y
+CONFIG_PACKAGE_luci-app-vsftpd=m
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-samba4=y
-CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
+CONFIG_PACKAGE_luci-app-samba4=m
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m
 
 CONFIG_PACKAGE_luci-app-hd-idle=m
 CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
@@ -198,14 +199,14 @@ CONFIG_PACKAGE_hd-idle=m
 
 #----------------------------------- VPN -----------------------------------
 
-CONFIG_PACKAGE_luci-app-openvpn=y
-CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=y
+CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-openvpn-server=y
-CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=y
-CONFIG_PACKAGE_liblzo=y
-CONFIG_PACKAGE_openvpn-easy-rsa=y
-CONFIG_PACKAGE_openvpn-openssl=y
+CONFIG_PACKAGE_luci-app-openvpn-server=m
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
+#CONFIG_PACKAGE_liblzo=y
+#CONFIG_PACKAGE_openvpn-easy-rsa=y
+#CONFIG_PACKAGE_openvpn-openssl=y
 
 CONFIG_PACKAGE_luci-app-zerotier=y
 CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y
@@ -227,8 +228,8 @@ CONFIG_PACKAGE_socat=y
 CONFIG_PACKAGE_luci-app-turboacc=y
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-arpbind=y
-#CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=y
+#CONFIG_PACKAGE_luci-app-arpbind=m
+#CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 
 CONFIG_PACKAGE_firewall=y
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y
@@ -255,7 +256,7 @@ CONFIG_PACKAGE_luci-app-pushbot=y
 #CONFIG_PACKAGE_iputils-arping=y
 #CONFIG_PACKAGE_jq=y
 
-CONFIG_PACKAGE_luci-app-wechatpush=y
+CONFIG_PACKAGE_luci-app-wechatpush=m
 #CONFIG_PACKAGE_luci-app-serverchan=y
 #会自动加入以下依赖
 #CONFIG_PACKAGE_iputils-arping=y
@@ -297,12 +298,12 @@ CONFIG_PACKAGE_luci-app-watchcat=y
 CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y
 CONFIG_PACKAGE_watchcat=y
 
-CONFIG_PACKAGE_luci-app-nlbwmon=y
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=y
+CONFIG_PACKAGE_luci-app-nlbwmon=m
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-wrtbwmon=y
-CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=y
-CONFIG_PACKAGE_wrtbwmon=y
+CONFIG_PACKAGE_luci-app-wrtbwmon=m
+CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
+CONFIG_PACKAGE_wrtbwmon=m
 
 # 最新版为0.61，所以不用源码自带的0.51
 CONFIG_PACKAGE_frpc=m
