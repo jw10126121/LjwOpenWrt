@@ -21,18 +21,24 @@ echo "" >> $desc_file
 echo "### --- --- --- 集成的插件 --- --- --- ###" >> $desc_file
 grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' >> $desc_file
 
-echo "" >> $desc_file
-echo "### --- --- --- 安装包插件 --- --- --- ###" >> $desc_file
-grep "^CONFIG_PACKAGE_luci-app-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//' >> $desc_file
+pkg_list_package=$(grep "^CONFIG_PACKAGE_luci-app-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
+if [ -n "$pkg_list_package" ]; then
+	echo "### --- --- --- 安装包插件 --- --- --- ###" >> $desc_file
+	echo $pkg_list_package >> $desc_file
+fi
 
-echo "" >> $desc_file
-echo "### --- --- --- 包含的主题 --- --- --- ###" >> $desc_file
-grep "^CONFIG_PACKAGE_luci-theme-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' >> $desc_file
+theme_list=$(grep "^CONFIG_PACKAGE_luci-theme-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' )
+if [ -n "$theme_list" ]; then
+	echo "### --- --- --- 包含的主题 --- --- --- ###" >> $desc_file
+	echo $theme_list >> $desc_file
+fi
 
-
-echo "" >> $desc_file
-echo "### --- --- --- 安装包主题 --- --- --- ###" >> $desc_file
-grep "^CONFIG_PACKAGE_luci-theme-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//' >> $desc_file
+theme_list_package=$(grep "^CONFIG_PACKAGE_luci-theme-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
+if [ -n "$theme_list_package" ]; then
+	echo "" >> $desc_file
+	echo "### --- --- --- 安装包主题 --- --- --- ###" >> $desc_file
+	echo $theme_list_package >> $desc_file
+fi
 
 
 echo "" >> $desc_file
