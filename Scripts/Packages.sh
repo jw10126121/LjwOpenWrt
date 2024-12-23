@@ -97,6 +97,8 @@ UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+UPDATE_PACKAGE "luci-app-wizard" "kiddin9/luci-app-wizard" "master"
+UPDATE_PACKAGE "luci-app-wolplus" "siwind/luci-app-wolplus" "master"
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
 
 DELETE_PACKAGE "wrtbwmon"
