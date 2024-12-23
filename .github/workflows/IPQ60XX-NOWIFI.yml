@@ -87,6 +87,7 @@ env:
   SCRIPTS_DIR: Scripts                            # 脚本文件夹
   DEFAULT_LANIP: ${{inputs.iDEFAULT_LANIP}}             # 默认lanIP
   MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
+  UPLOAD_COWTRANSFER: true
   
 #CI权限
 permissions: write-all
@@ -236,7 +237,6 @@ jobs:
         echo "【LinInfo】make defconfig后配置文件为："
         echo "$(cat .config)"
 
-
     - name: Read Variables (读取变量)
       run: |
         cd $OPENWRT_PATH
@@ -385,6 +385,16 @@ jobs:
           done
         done
         find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to cowtransfer
+      id: cowtransfer
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress "${{ env.OPENWRT_PATH }}/upload" 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
