@@ -387,14 +387,15 @@ jobs:
         find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload firmware to cowtransfer
-      id: cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+    - name: Upload firmware to wss
+      id: wss
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress "${{ env.OPENWRT_PATH }}/upload" 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        echo "::set-output name=url::$(cat cowtransfer.log | grep https | cut -f3 -d" ")"
+        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
+        the_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        echo "下载地址：$the_download_url"
+        echo "url=${the_download_url}" >> $GITHUB_OUTPUT
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
