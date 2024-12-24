@@ -161,7 +161,7 @@ jobs:
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
         cp -r ./scripts/ ./upload/packages/
-        tar -zcf ./upload/Packages.tar.gz -C ./upload packages
+        tar -zcf ./upload/Packages.tar.gz -C ./upload/packages * --transform 's,^./upload/packages/,,'
         rm -rf ./upload/packages
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -183,7 +183,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "运行编译固件完成： \n${the_download_url}"
+                "content": "运行编译固件完成： \n${{ env.the_download_url }}"
              }
           }
 
