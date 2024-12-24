@@ -369,7 +369,7 @@ jobs:
         cp -f ./seed.config ./upload/"$name_config_file".seed.txt
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} ./upload/packages/ \;
-        tar -zcf ./upload/Packages.tar.gz ./upload/packages
+        tar -zcf ./upload/Packages_${name_config_file}.tar.gz -C ./upload packages
         rm -rf ./upload/packages
         echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
         for TYPE in $DEVICE_NAME_LIST ; do
