@@ -166,7 +166,7 @@ jobs:
         # 将 ./upload/packages 目录下的所有内容复制到临时目录
         cp -r ./upload/packages/* "$TMP_DIR"
         # 在临时目录中创建压缩文件
-        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" .
+        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR"
         # 清理临时目录
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
