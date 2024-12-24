@@ -52,11 +52,6 @@ on:
         required: false
         type: string
         default: ''
-      iIS_RESET_PASSWORD:
-        description: '重置root密码'
-        required: false
-        type: boolean
-        default: false
       iTOKEN_DINGDING:
         description: '钉钉TOKEN'
         required: false
@@ -85,7 +80,6 @@ env:
   UPLOAD_FIRMWARE_DIR: ${{inputs.iUPLOAD_FIRMWARE_DIR}}
   UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   FIRMWARE_RELEASE: ${{inputs.iFIRMWARE_RELEASE}} # 发布固件
-  IS_RESET_PASSWORD: ${{inputs.iIS_RESET_PASSWORD}}  # 是否把密码重置为空
   IS_RESIZE_SPACE: false      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config                             # 自定义配置文件夹
