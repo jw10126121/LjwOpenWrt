@@ -191,12 +191,24 @@ jobs:
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         echo "编译说明内容：${{ env.MINE_SAY }}"
 
-    - name: Upload firmware to WeTransfer
-      id: wetransfer
+    - name: Organize Files(整理文件)
+      id: organize
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
+        cp -f ./scripts/* ./upload/packages/
+        tar -zcf ./upload/Packages.tar.gz -C ./upload packages
+        rm -rf ./upload/packages
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to wss
+      id: wss
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${OPENWRT_PATH} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        the_download_url=$(cat wetransfer.log | grep https | cut -f3 -d" ")
-        echo $the_download_url
-        echo "::set-output name=url::$the_download_url"
+        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
+        the_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        echo "下载地址：$the_download_url"
+        echo "url=${the_download_url}" >> $GITHUB_OUTPUT
+
+
