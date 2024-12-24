@@ -160,7 +160,7 @@ jobs:
       id: organize
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        cp ./scripts/* ./upload/packages/
+        cp -r ./scripts/ ./upload/packages/
         tar -zcf ./upload/Packages.tar.gz -C ./upload packages
         rm -rf ./upload/packages
         echo "status=success" >> $GITHUB_OUTPUT
