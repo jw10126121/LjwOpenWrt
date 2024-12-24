@@ -160,8 +160,15 @@ jobs:
       id: organize
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        rsync -av --relative ./scripts/ ./upload/packages/
-        tar -zcf ./upload/Packages.tar.gz -C ./upload packages --transform 's,^packages/,,'
+        cp -r ./scripts/* ./upload/packages/
+        # 创建一个临时目录
+        TMP_DIR=$(mktemp -d)
+        # 将 ./upload/packages 目录下的所有内容复制到临时目录
+        cp -r ./upload/packages/* "$TMP_DIR"
+        # 在临时目录中创建压缩文件
+        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" .
+        # 清理临时目录
+        rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
         echo "status=success" >> $GITHUB_OUTPUT
 
