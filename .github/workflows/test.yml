@@ -52,8 +52,8 @@ on:
         required: false
         type: boolean
         default: false
-      iRepoURL_commit_hash:
-        description: '历史版本HASH'
+      iDINGDINGTOKEN:
+        description: '钉钉TOKEN'
         required: false
         type: string
         default: ''
@@ -63,7 +63,7 @@ env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  REPO_Commit_Hash: ${{inputs.iRepoURL_commit_hash}}
+  DINGDINGTOKEN: ${{inputs.iDINGDINGTOKEN}}
   CONFIG_FILE: ${{inputs.iCONFIG}}                # 配置文件
   DIY_SETTING: ${{inputs.iDIY}}                   # 自定义配置
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
@@ -94,11 +94,11 @@ jobs:
     - name: Send dingding notify
       uses: zcong1993/actions-ding@master
       with:
-        dingToken: "c6952c2946adb0b97d741623975c8f4cc41cffd0b0441f6bcbb164c86bde1338"
+        dingToken: ${{ env.DINGDINGTOKEN }}
         body: |
           {
             "msgtype": "text",
             "text": {
-                "content": "路由器推送测试"
+                "content": "运行路由器推送测试"
              }
           }
