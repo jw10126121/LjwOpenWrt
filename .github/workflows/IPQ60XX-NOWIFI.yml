@@ -52,11 +52,11 @@ on:
         required: false
         type: string
         default: ''
-      iIS_RESET_PASSWORD:
-        description: '重置root密码'
+      iTOKEN_DINGDING:
+        description: '钉钉TOKEN'
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: ''
       iREPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
@@ -80,14 +80,14 @@ env:
   UPLOAD_FIRMWARE_DIR: ${{inputs.iUPLOAD_FIRMWARE_DIR}}
   UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   FIRMWARE_RELEASE: ${{inputs.iFIRMWARE_RELEASE}} # 发布固件
-  IS_RESET_PASSWORD: ${{inputs.iIS_RESET_PASSWORD}}  # 是否把密码重置为空
+  IS_RESET_PASSWORD: true     # 是否把密码重置为空
   IS_RESIZE_SPACE: false      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   TZ: Asia/Shanghai
   CONFIGS_DIR: Config                             # 自定义配置文件夹
   SCRIPTS_DIR: Scripts                            # 脚本文件夹
   DEFAULT_LANIP: ${{inputs.iDEFAULT_LANIP}}             # 默认lanIP
   MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
-  UPLOAD_COWTRANSFER: true
+  TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
   
 #CI权限
 permissions: write-all
@@ -368,8 +368,10 @@ jobs:
         awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file".txt
         cp -f ./seed.config ./upload/"$name_config_file".seed.txt
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
-        find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} ./upload/packages/ \;
-        tar -zcf ./upload/Packages_${name_config_file}.tar.gz -C ./upload packages
+        TMP_DIR=$(mktemp -d)
+        find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
+        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
+        rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
         echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
         for TYPE in $DEVICE_NAME_LIST ; do
@@ -388,14 +390,28 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to wss
-      id: wss
+      id: upload_url
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
         the_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
         echo "下载地址：$the_download_url"
-        echo "url=${the_download_url}" >> $GITHUB_OUTPUT
+        echo "the_download_url=${the_download_url}" >> $GITHUB_OUTPUT
+        echo "the_download_url=${the_download_url}" >> $GITHUB_ENV
+        
+    - name: Send dingding notify
+      uses: zcong1993/actions-ding@master
+      if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.the_download_url != ''
+      with:
+        dingToken: ${{ env.TOKEN_DINGDING }}
+        body: |
+          {
+            "msgtype": "text",
+            "text": {
+                "content": "运行编译固件任务完成： \n设备：${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}\n下载URL：${{ env.the_download_url }}"
+             }
+          }
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
