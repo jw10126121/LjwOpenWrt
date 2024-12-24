@@ -193,7 +193,6 @@ jobs:
 
     - name: Organize Files(整理文件)
       id: organize
-      if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
         cp -f ./scripts/* ./upload/packages/
@@ -203,7 +202,6 @@ jobs:
 
     - name: Upload firmware to wss
       id: wss
-      if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
