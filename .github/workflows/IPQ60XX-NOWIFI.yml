@@ -14,8 +14,32 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
+      iWRT_DEFAULT_LANIP:
+        description: '配置LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
+      iWRT_RELEASE_FIRMWARE:
+        description: '发布firmware'
+        required: false
+        type: boolean
+        default: true
+      iTOKEN_DINGDING:
+        description: '钉钉TOKEN'
+        required: false
+        type: string
+        default: ''
+      iWHAT_MY_SAY:
+        description: '编译说明'
+        required: false
+        type: string
+        default: ''
       PACKAGE:
         description: '手动调整插件包，仅限一个。'
+        required: false
+        type: string
+      iWRT_REPO_Commit_Hash:
+        description: '指定Commit'
         required: false
         type: string
       TEST:
@@ -23,10 +47,6 @@ on:
         default: false
         required: false
         type: boolean
-      iWRT_REPO_Commit_Hash:
-        description: '指定Commit。'
-        required: false
-        type: string
 
 
 #CI权限
@@ -65,31 +85,39 @@ jobs:
       WRT_DIY_SETTING: IPQ60XX.sh
       # DIY包配置
       WRT_DIYPackages: Packages.sh
-
-
+      # FEED配置
+      WRT_DIY_FEEDS: diy_feeds.sh
+      # 是否发布
+      WRT_RELEASE_FIRMWARE: ${{ inputs.iWRT_RELEASE_FIRMWARE }} # 发布固件
+      # 默认LAN-IP
+      WRT_DEFAULT_LANIP: ${{ inputs.iWRT_DEFAULT_LANIP }}
+      # 钉钉TOKEN，用于推送下载文件
+      TOKEN_DINGDING: ${{ inputs.iTOKEN_DINGDING }}
+      # 编译说明
+      WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
       
       # ----------- 以下为备用
       #编译平台
-      WRT_TARGET: ${{matrix.TARGET}}
+      # WRT_TARGET: ${{matrix.TARGET}}
       #默认主题
-      WRT_THEME: argon
+      # WRT_THEME: argon
       #默认主机名
-      WRT_NAME: ${{matrix.REPO_INFO.NAME}}
+      # WRT_NAME: ${{matrix.REPO_INFO.NAME}}
       #默认地址
-      WRT_IP: 192.168.10.1
+      # WRT_IP: 192.168.10.1
       #默认密码，仅作提示，修改无用
-      WRT_PW: password
+      # WRT_PW: password
       #源码链接
-      WRT_REPO: https://github.com/${{matrix.REPO_INFO.SOURCE}}.git
+      # WRT_REPO: https://github.com/${{matrix.REPO_INFO.SOURCE}}.git
       #源码分支
-      WRT_BRANCH: ${{matrix.REPO_INFO.BRANCH || 'main'}}
+      # WRT_BRANCH: ${{matrix.REPO_INFO.BRANCH || 'main'}}
       #源码名称
-      WRT_SOURCE: ${{matrix.REPO_INFO.SOURCE}}
+      # WRT_SOURCE: ${{matrix.REPO_INFO.SOURCE}}
       #源码COMMIT
-      WRT_COMMIT: ${{inputs.COMMIT}}
+      # WRT_COMMIT: ${{inputs.COMMIT}}
       #后缀名称
-      WRT_SUFFIX: ${{matrix.REPO_INFO.SUFFIX}}
+      # WRT_SUFFIX: ${{matrix.REPO_INFO.SUFFIX}}
       #插件调整
-      WRT_PACKAGE: ${{inputs.PACKAGE}}
+      # WRT_PACKAGE: ${{inputs.PACKAGE}}
       #仅输出配置文件
-      WRT_TEST: ${{inputs.TEST}}
+      # WRT_TEST: ${{inputs.TEST}}
