@@ -78,7 +78,7 @@ jobs:
       #max-parallel: 2
       matrix:
         TARGET: [IPQ60XX-NOWIFI, IPQ60XX-NOWIFI_lite, MT6000]
-        SOURCE: [https://github.com/coolsnowwolf/lede]
+        SOURCE: ['https://github.com/coolsnowwolf/lede']
         BRANCH: [master]
         DIYSETTING: [IPQ60XX, IPQ60XX, IPQ60XX]
         # REPO_INFO:
