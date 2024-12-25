@@ -369,7 +369,19 @@ jobs:
         cp -f ./seed.config ./upload/"$name_config_file".seed.txt
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         TMP_DIR=$(mktemp -d)
+        mkdir -p $TMP_DIR/openclash_packages
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
+        OPENCLASH_DIR="$TMP_DIR/openclash_packages"
+        openclash_packages_pre="coreutils-nohup_ libcap-bin_ libgmp10_ libruby3.1_ libyaml_ luci-app-openclash_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
+        for pkg in $openclash_packages_pre; do
+            for ext in ipk apk; do
+                file=$(find "$TMP_DIR" -name "${pkg}*.$ext" 2>/dev/null)
+                if [ -n "$file" ]; then
+                    cp -r "$file" "$OPENCLASH_DIR"
+                    echo "【LinInfo】复制文件 $file 到： $OPENCLASH_DIR"
+                fi
+            done
+        done
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
