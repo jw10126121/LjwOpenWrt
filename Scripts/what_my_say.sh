@@ -33,7 +33,7 @@ fi
 theme_list=$(grep "^CONFIG_PACKAGE_luci-theme-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//')
 if [ -n "$theme_list" ]; then
 	echo "" >> $desc_file
-	echo "### --- --- --- 包含的主题 --- --- --- ###" >> $desc_file
+	echo "### --- --- --- 集成的主题 --- --- --- ###" >> $desc_file
 	for item in $theme_list; do
         echo "$item" >> $desc_file
     done
