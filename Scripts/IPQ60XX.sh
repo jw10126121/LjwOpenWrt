@@ -75,7 +75,7 @@ USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
 sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
     if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
         connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
-        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage} ECM: ${connection_count}"\
+        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"\
     else\
         echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
     fi' "$USAGE_FILE"
@@ -97,6 +97,7 @@ fi
 #     echo "【LinInfo】NSS不存在：$USAGE_FILE"
 # fi
 
+CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 
 # 调整位置
 sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
