@@ -14,6 +14,11 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
+      TARGET_CONFIG:
+        description: '选个配置'
+        required: true
+        type: string
+        default: 'IPQ60XX-NOWIFI'
       iCONFIG_FILE:
         description: '配置文件：'
         required: true
@@ -72,7 +77,7 @@ jobs:
       fail-fast: false
       #max-parallel: 2
       matrix:
-        TARGET: [IPQ60XX-WIFI-NO]
+        TARGET: [IPQ60XX-NOWIFI]
         REPO_INFO:
           - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
           #- {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
@@ -81,7 +86,7 @@ jobs:
           #- {SOURCE: immortalwrt/immortalwrt, BRANCH: openwrt-24.10, NAME: ImmortalWRT, SUFFIX: IMM}
 
     #调用公用编译核心ALL-CORE.yml
-    uses: ./.github/workflows/ALL-CORE.yml
+    uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
       WRT_REPO_URL: https://github.com/coolsnowwolf/lede
