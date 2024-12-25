@@ -76,7 +76,7 @@ env:
   WRT_REPO_Commit_Hash: ${{inputs.iWRT_REPO_Commit_Hash}}
   WRT_CONFIG: ${{inputs.iCONFIG_FILE}}           # 配置文件
   WRT_DIY_SETTING: ${{inputs.iWRT_DIY_SETTING}}           # 自定义配置
-  WRT_DIY_FEEDS: WRT_DIY_FEEDS.sh                         # 主要用于更新Feeds
+  WRT_DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
   WRT_GENERAL_CONFIG: ${{inputs.iWRT_GENERAL_CONFIG}}     # 通用配置
   WRT_DIYPackages: ${{inputs.iDIY_Packages}}          # 自定义包配置
   UPLOAD_FIRMWARE_DIR: true
