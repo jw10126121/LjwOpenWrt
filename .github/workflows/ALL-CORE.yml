@@ -3,7 +3,7 @@
 # Lisence: MIT
 #=================================================
 
-name:  IPQ60XX-NOWIFI
+name:  ALL-CORE
 
 on:
   #手动编译
@@ -18,15 +18,12 @@ on:
         description: 'DIY脚本：'
         required: false
         type: string
-        default: 'IPQ60XX-NOWIFI.sh'
+        default: 'IPQ60XX.sh'
       iGENERAL_CONFIG:
         description: '通用配置文件'
         required: true
+        type: string
         default: 'GENERAL.txt'
-        type: choice
-        options:
-          - 'GENERAL.txt'
-          - 'GENERAL_custom.txt'
       iDIY_Packages:
         description: 'DIY包配置：'
         required: false
@@ -37,11 +34,6 @@ on:
         required: false
         type: string
         default: '192.168.0.1'
-      iUPLOAD_FIRMWARE_DIR:
-        description: '将固件上传到Artifact'
-        required: false
-        type: boolean
-        default: true
       iFIRMWARE_RELEASE:
         description: '发布firmware'
         required: false
@@ -62,6 +54,19 @@ on:
         required: false
         type: string
         default: ''
+      # iUPLOAD_FIRMWARE_DIR:
+      #   description: '将固件上传到Artifact'
+      #   required: false
+      #   type: boolean
+      #   default: true
+      # iGENERAL_CONFIG:
+      #   description: '通用配置文件'
+      #   required: true
+      #   default: 'GENERAL.txt'
+      #   type: choice
+      #   options:
+      #     - 'GENERAL.txt'
+      #     - 'GENERAL_custom.txt'
 
 #环境变量配置
 env:
@@ -74,7 +79,7 @@ env:
   DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
   GENERAL_CONFIG: ${{inputs.iGENERAL_CONFIG}}     # 通用配置
   DIYPackages: ${{inputs.iDIY_Packages}}          # 自定义包配置
-  UPLOAD_FIRMWARE_DIR: ${{inputs.iUPLOAD_FIRMWARE_DIR}}
+  UPLOAD_FIRMWARE_DIR: true
   FIRMWARE_RELEASE: ${{inputs.iFIRMWARE_RELEASE}} # 发布固件
   CONFIGS_DIR: Config                             # 自定义配置文件夹
   SCRIPTS_DIR: Scripts                            # 脚本文件夹
@@ -183,7 +188,7 @@ jobs:
           git fetch --depth=1 origin ${{ env.REPO_Commit_Hash }}
           git checkout ${{ env.REPO_Commit_Hash }}
         fi
-        REPO_GIT_HASH=$(git log -1 --pretty=format:'%h')
+        REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
         echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}"
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
@@ -297,21 +302,28 @@ jobs:
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
         cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
-        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" ]; then
-          echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
-          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh"
-          TO_MY_SAY_DETAIL_tmp="${{ env.MINE_SAY }}\n \
-          支持型号：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}\n\
+        cp -f ./.config ./config_mine/"$name_config_file"_full.txt
+        awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
+        cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
+        if [ -e "$GITHUB_WORKSPACE/$SCRIPTS_DIR/readme.sh" ]; then
+          echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$SCRIPTS_DIR/readme.sh"
+          chmod +x "$GITHUB_WORKSPACE/$SCRIPTS_DIR/readme.sh"
+          TO_MY_SAY_DETAIL_tmp="
+          ${{ env.MINE_SAY }}\n\
+          支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
+          支持设备：${DEVICE_PROFILE}\n\
           内核版本：${VERSION_KERNEL}\n\
           默认IP：${{env.DEFAULT_LANIP}}\n\
           默认密码：无|password\n\
-          GIT_REPO：${REPO_URL}\n\
-          GIT_REPO_BRANCH：${REPO_BRANCH}\n\
-          GIT_HASH：${REPO_GIT_HASH}\n\
-          编译开始时间：${COMPILE_TIME}\n"
+          源码：${REPO_URL}\n\
+          源码分支：${REPO_BRANCH}\n\
+          源码HASH：${REPO_GIT_HASH}\n\
+          编译开始时间：${COMPILE_TIME}
+          "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/what_my_say.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
+          bash "$GITHUB_WORKSPACE/$SCRIPTS_DIR/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
         fi
+
 
     - name: Upload Config (上传配置文件)
       id: config_upload
@@ -364,18 +376,14 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        cp -f ./config_mine/readme.txt ./upload/readme.txt
-        cp -f my_config.txt ./upload/"$name_config_file"_mine.txt
-        cp -f ./.config ./upload/"$name_config_file"_full.txt
-        awk '!/^#/ && !/^$/' ./.config > ./upload/"$name_config_file".txt
-        cp -f ./seed.config ./upload/"$name_config_file".seed.txt
+        cp -f ./config_mine/* ./upload/
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         TMP_DIR=$(mktemp -d)
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
         openclash_packages_pre="coreutils-nohup_ libcap-bin_ libgmp10_ libruby3.1_ libyaml_ luci-app-openclash_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
         ssrplus_packages_pre="resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_"
-        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/packages_list.sh "$TMP_DIR" "ssrplus_packages" "${ssrplus_packages_pre}"
-        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/packages_list.sh "$TMP_DIR" "openclash_packages" "${openclash_packages_pre}"
+        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/packages_list.sh "$TMP_DIR" "packages_ssrplus" "${ssrplus_packages_pre}"
+        bash $GITHUB_WORKSPACE/$SCRIPTS_DIR/packages_list.sh "$TMP_DIR" "packages_openclash" "${openclash_packages_pre}"
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
@@ -401,10 +409,10 @@ jobs:
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
-        the_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
         echo "下载地址：$the_download_url"
-        echo "the_download_url=${the_download_url}" >> $GITHUB_OUTPUT
-        echo "the_download_url=${the_download_url}" >> $GITHUB_ENV
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
         
     - name: Send dingding notify
       uses: zcong1993/actions-ding@master
