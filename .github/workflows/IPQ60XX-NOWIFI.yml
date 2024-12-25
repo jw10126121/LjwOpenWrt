@@ -1,0 +1,95 @@
+#CI项目
+name: IPQ60XX-NOWIFI
+
+#CI计划
+on:
+  #自动清理：每天早上5点
+  # schedule:
+  #  - cron: 0 21 * * *
+  #自动编译：当Auto-Clean运行完成后
+  #workflow_run:
+  #  workflows: ["Auto-Clean"]
+  #  types:
+  #   - completed
+  #手动编译
+  workflow_dispatch:
+    inputs:
+      PACKAGE:
+        description: '手动调整插件包，仅限一个。'
+        required: false
+        type: string
+      TEST:
+        description: '仅输出配置文件，不编译固件。'
+        default: false
+        required: false
+        type: boolean
+      iWRT_REPO_Commit_Hash:
+        description: '指定Commit。'
+        required: false
+        type: string
+
+
+#CI权限
+permissions: write-all
+
+#CI任务
+jobs:
+  config:
+    name: ${{matrix.TARGET}}
+    strategy:
+      fail-fast: false
+      #max-parallel: 2
+      matrix:
+        TARGET: [IPQ60XX-WIFI-NO]
+        REPO_INFO:
+          - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
+          #- {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
+          #- {SOURCE: VIKINGYFY/immortalwrt, BRANCH: main, NAME: OWRT, SUFFIX: IMM}
+          #- {SOURCE: LiBwrt-op/openwrt-6.x, BRANCH: openwrt-24.10, NAME: LibWRT, SUFFIX: IMM}
+          #- {SOURCE: immortalwrt/immortalwrt, BRANCH: openwrt-24.10, NAME: ImmortalWRT, SUFFIX: IMM}
+
+    #调用公用编译核心ALL-CORE.yml
+    uses: ./.github/workflows/ALL-CORE.yml
+    with:
+      # 源码
+      WRT_REPO_URL: https://github.com/coolsnowwolf/lede
+      # 编译分支
+      WRT_REPO_BRANCH: master
+      # 编译指定版本
+      WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
+      # DIY配置文件
+      WRT_CONFIG: IPQ60XX-NOWIFI.txt
+      # 通用配置
+      WRT_GENERAL_CONFIG: GENERAL.txt
+      # DIY脚本
+      WRT_DIY_SETTING: IPQ60XX.sh
+      # DIY包配置
+      WRT_DIYPackages: Packages.sh
+
+
+      
+      # ----------- 以下为备用
+      #编译平台
+      WRT_TARGET: ${{matrix.TARGET}}
+      #默认主题
+      WRT_THEME: argon
+      #默认主机名
+      WRT_NAME: ${{matrix.REPO_INFO.NAME}}
+      #默认地址
+      WRT_IP: 192.168.10.1
+      #默认密码，仅作提示，修改无用
+      WRT_PW: password
+      #源码链接
+      WRT_REPO: https://github.com/${{matrix.REPO_INFO.SOURCE}}.git
+      #源码分支
+      WRT_BRANCH: ${{matrix.REPO_INFO.BRANCH || 'main'}}
+      #源码名称
+      WRT_SOURCE: ${{matrix.REPO_INFO.SOURCE}}
+      #源码COMMIT
+      WRT_COMMIT: ${{inputs.COMMIT}}
+      #后缀名称
+      WRT_SUFFIX: ${{matrix.REPO_INFO.SUFFIX}}
+      #插件调整
+      WRT_PACKAGE: ${{inputs.PACKAGE}}
+      #仅输出配置文件
+      WRT_TEST: ${{inputs.TEST}}
