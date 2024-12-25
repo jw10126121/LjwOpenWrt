@@ -80,7 +80,6 @@ jobs:
         TARGET: [IPQ60XX-NOWIFI, IPQ60XX-NOWIFI_lite, MT6000]
         SOURCE: ['https://github.com/coolsnowwolf/lede']
         BRANCH: [master]
-        DIYSETTING: [IPQ60XX, IPQ60XX, IPQ60XX]
         # REPO_INFO:
         #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
         #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
@@ -102,7 +101,7 @@ jobs:
       # 通用配置
       WRT_GENERAL_CONFIG: GENERAL.txt
       # DIY脚本
-      WRT_DIY_SETTING: ${{ matrix.DIYSETTING }}.sh
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置
       WRT_DIYPackages: Packages.sh
       # FEED配置
