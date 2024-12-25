@@ -78,20 +78,23 @@ jobs:
       #max-parallel: 2
       matrix:
         TARGET: [IPQ60XX-NOWIFI, IPQ60XX-NOWIFI_lite, MT6000]
-        REPO_INFO:
-          - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
-          #- {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
-          #- {SOURCE: VIKINGYFY/immortalwrt, BRANCH: main, NAME: OWRT, SUFFIX: IMM}
-          #- {SOURCE: LiBwrt-op/openwrt-6.x, BRANCH: openwrt-24.10, NAME: LibWRT, SUFFIX: IMM}
-          #- {SOURCE: immortalwrt/immortalwrt, BRANCH: openwrt-24.10, NAME: ImmortalWRT, SUFFIX: IMM}
+        SOURCE: [https://github.com/coolsnowwolf/lede]
+        BRANCH: [master]
+        DIYSETTING: [IPQ60XX, IPQ60XX, IPQ60XX]
+        # REPO_INFO:
+        #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
+        #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
+        #   - {SOURCE: VIKINGYFY/immortalwrt, BRANCH: main, NAME: OWRT, SUFFIX: IMM}
+        #   - {SOURCE: LiBwrt-op/openwrt-6.x, BRANCH: openwrt-24.10, NAME: LibWRT, SUFFIX: IMM}
+        #   - {SOURCE: immortalwrt/immortalwrt, BRANCH: openwrt-24.10, NAME: ImmortalWRT, SUFFIX: IMM}
 
     #调用公用编译核心ALL-CORE.yml
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      WRT_REPO_URL: https://github.com/coolsnowwolf/lede
+      WRT_REPO_URL: ${{ matrix.SOURCE }}
       # 编译分支
-      WRT_REPO_BRANCH: master
+      WRT_REPO_BRANCH: ${{ matrix.BRANCH }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
       # DIY配置文件
@@ -99,7 +102,7 @@ jobs:
       # 通用配置
       WRT_GENERAL_CONFIG: GENERAL.txt
       # DIY脚本
-      WRT_DIY_SETTING: IPQ60XX.sh
+      WRT_DIY_SETTING: ${{ matrix.DIYSETTING }}.sh
       # DIY包配置
       WRT_DIYPackages: Packages.sh
       # FEED配置
