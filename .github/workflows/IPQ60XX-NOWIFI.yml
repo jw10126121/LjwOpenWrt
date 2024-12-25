@@ -14,6 +14,26 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
+      iCONFIG_FILE:
+        description: '配置文件：'
+        required: true
+        type: string
+        default: 'IPQ60XX-NOWIFI.txt'
+      iWRT_DIY_SETTING:
+        description: 'DIY脚本：'
+        required: false
+        type: string
+        default: 'IPQ60XX.sh'
+      iWRT_GENERAL_CONFIG:
+        description: '通用配置文件'
+        required: true
+        type: string
+        default: 'GENERAL.txt'
+      iDIY_Packages:
+        description: 'DIY包配置：'
+        required: false
+        type: string
+        default: 'Packages.sh'
       iWRT_DEFAULT_LANIP:
         description: '配置LAN-IP'
         required: false
@@ -24,29 +44,21 @@ on:
         required: false
         type: boolean
         default: true
-      iTOKEN_DINGDING:
-        description: '钉钉TOKEN'
-        required: false
-        type: string
-        default: ''
       iWHAT_MY_SAY:
         description: '编译说明'
         required: false
         type: string
         default: ''
-      PACKAGE:
-        description: '手动调整插件包，仅限一个。'
+      iTOKEN_DINGDING:
+        description: '钉钉TOKEN'
         required: false
         type: string
+        default: ''
       iWRT_REPO_Commit_Hash:
-        description: '指定Commit'
+        description: '历史版本HASH'
         required: false
         type: string
-      TEST:
-        description: '仅输出配置文件，不编译固件。'
-        default: false
-        required: false
-        type: boolean
+        default: ''
 
 
 #CI权限
