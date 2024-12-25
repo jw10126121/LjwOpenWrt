@@ -416,7 +416,7 @@ jobs:
         
     - name: Send dingding notify
       uses: zcong1993/actions-ding@master
-      if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.the_download_url != ''
+      if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.bin_download_url != ''
       with:
         dingToken: ${{ env.TOKEN_DINGDING }}
         body: |
@@ -425,7 +425,7 @@ jobs:
             "text": {
                 "content": "运行编译固件任务完成： \n\
                 适配设备：${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}\n\
-                下载地址：${{ env.the_download_url }}\n\
+                下载地址：${{ env.bin_download_url }}\n\
                 说明信息：$(cat $GITHUB_WORKSPACE/$OPENWRT_PATH/upload/readme.txt)"
              }
           }
