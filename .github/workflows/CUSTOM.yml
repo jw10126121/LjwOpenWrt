@@ -100,7 +100,7 @@ jobs:
       # 默认LAN-IP
       WRT_DEFAULT_LANIP: ${{ inputs.iWRT_DEFAULT_LANIP }}
       # 钉钉TOKEN，用于推送下载文件
-      TOKEN_DINGDING: ${{ secrets.TOKEN_DING_RUNNING }}
+      TOKEN_DINGDING: ''
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
       
