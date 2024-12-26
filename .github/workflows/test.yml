@@ -118,47 +118,31 @@ jobs:
         git config --global http.lowSpeedLimit 0
         git config --global http.lowSpeedTime 999999
 
+    - name: Check ENV (检查环境)
+      run: |
+        WRT_HAS_WIFI=true
+        WRT_HAS_WIFI_TEXT="带WIFI"
+        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|WIFI-NO"; then
+          WRT_HAS_WIFI=false
+          WRT_HAS_WIFI_TEXT="无WIFI"
+        fi
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
+        echo "WIFI信息：$WRT_HAS_WIFI_TEXT"
+        
     - name: Upload firmware to wss
       id: upload_url
       if: true && !cancelled()
       continue-on-error: true
       run: |
-        # curl -fsSL git.io/file-transfer | sh
-        # ./transfer wss -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
-        # bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
-        # echo "下载地址：$the_download_url"
-        # echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
-        # echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
-        echo "编辑发送content: "
-        notify_content="\
-        运行编译固件任务完成： \n\
-        适配设备：11111\n\
-        下载地址：${{ env.bin_download_url }}\n\
-        随便找一个内容：$(cat $GITHUB_WORKSPACE/Scripts/Packages.sh)\n\
-        "
-        echo "notify_content=${notify_content}" >> $GITHUB_ENV
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer muse -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
+        cat wss.log
+        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        echo "下载地址：$the_download_url"
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
         
-    - name: Send dingding notify
-      uses: zcong1993/actions-ding@master
-      continue-on-error: true
-      if: env.TOKEN_DINGDING != ''
-      with:
-        dingToken: ${{ env.TOKEN_DINGDING }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "${{ env.notify_content }}"
-             }
-          }
 
-    - name: STEP1
-      continue-on-error: true
-      run: |
-        echo "STEP1"
-        exit 1;
 
-    - name: STEP2
-      run: |
-        echo "STEP2: "
         
