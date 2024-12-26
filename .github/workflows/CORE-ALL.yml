@@ -156,8 +156,8 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE
         COMPILE_DATE=$(date +"%y%m%d")
-        COMPILE_TIME=$(date +"%y%m%d%H%M%S")
-        COMPILE_DATE_HOUR=$(date +"%y%m%d%H%M")
+        COMPILE_TIME=$(date +"D%y%m%dT%H%M%S")
+        COMPILE_DATE_HOUR=$(date +"D%y%m%dT%H%M")
         echo "COMPILE_DATE=$COMPILE_DATE" >> $GITHUB_ENV
         echo "COMPILE_TIME=$COMPILE_TIME" >> $GITHUB_ENV
         echo "COMPILE_DATE_HOUR=$COMPILE_DATE_HOUR" >> $GITHUB_ENV
@@ -311,7 +311,7 @@ jobs:
       id: config_upload
       uses: actions/upload-artifact@master
       with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
         path: openwrt/config_mine
 
     - name: Download tools (下载工具包) 
@@ -352,7 +352,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
       with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}
+        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
         path: openwrt/bin
 
     - name: Organize Files(整理文件)
@@ -438,15 +438,15 @@ jobs:
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}_Firmware
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
       uses: softprops/action-gh-release@v2
       with:
-        name: R${{ env.COMPILE_DATE_HOUR }} for ${{ env.DEVICE_SUBTARGET }}
-        tag_name: R${{ env.COMPILE_DATE_HOUR }}_${{ env.DEVICE_SUBTARGET }}
+        name: ${{ env.COMPILE_DATE_HOUR }} for ${{ env.DEVICE_SUBTARGET }}
+        tag_name: ${{ env.COMPILE_DATE_HOUR }}_${{ env.DEVICE_SUBTARGET }}
         files: ${{ env.OPENWRT_PATH }}/upload/*.*
         body: |
           **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
