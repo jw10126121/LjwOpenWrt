@@ -121,6 +121,7 @@ jobs:
     - name: Upload firmware to wss
       id: upload_url
       if: true && !cancelled()
+      continue-on-error: true
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
@@ -131,16 +132,19 @@ jobs:
         
     - name: Send dingding notify
       uses: zcong1993/actions-ding@master
+      continue-on-error: true
       if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.bin_download_url != ''
       with:
+        run: |
+          echo "开始推送"
+          the_title="这是标题"
+          echo "the_title=${the_title}" >> $GITHUB_ENV
         dingToken: ${{ env.TOKEN_DINGDING }}
         body: |
           {
             "msgtype": "text",
             "text": {
-                "content": "运行编译固件任务完成： \n\
-                适配设备：22222222222222n\
-                下载地址：${{ env.bin_download_url }}"
+                "content": "运行编译固件任务完成： \n适配设备：${ the_title }\n下载地址：${{ env.bin_download_url }}"
              }
           }
 
