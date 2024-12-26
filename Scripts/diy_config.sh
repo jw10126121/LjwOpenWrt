@@ -131,6 +131,20 @@ if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_re
     echo "【LinInfo】LEAN配置密码已清空：./package/lean/default-settings/files/zzz-default-settings"
 fi
 
+WIFI_NAME=linAP
+WIFI_PASSWORD=88888888
+
+# # 修改wifi国家
+# sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx}.type=mac80211 \n\t\t\t set wireless.radio\${devidx}.country=\"CN\"/g' ./kernel/mac80211/files/lib/wifi/mac80211.sh
+# # 修改wifi名
+# sed -i "s/set wireless.default_radio\\${devidx}.ssid=OpenWrt/set wireless.default_radio\\${devidx}.ssid=${WIFI_NAME}/g" ./kernel/mac80211/files/lib/wifi/mac80211.sh
+# # 修改wifi密码
+# sed -i "s/set wireless.default_radio\\${devidx}.encryption=none/set wireless.default_radio\\${devidx}.encryption=psk-mixed \\n\\t\\t\\t set wireless.default_radio\\${devidx}.key=${WIFI_PASSWORD}/g" ./kernel/mac80211/files/lib/wifi/mac80211.sh
+# 修改2.4G wifi信道
+# sed -i 's/channel=\"11\"/channel=\"1\"/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
+# 修改5G wifi信道
+# sed -i 's/channel=\"36\"/channel=\"153\"/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
+
 # 调整位置
 sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
 sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
