@@ -85,7 +85,7 @@ env:
   WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
   WRT_DEFAULT_LANIP: ${{inputs.iWRT_DEFAULT_LANIP}}       # 默认lanIP
   WRT_MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
-  TOKEN_DINGDING: ${{secrets.TOKEN_DINGDING}}
+  TOKEN_DING_RUNNING: ${{secrets.TOKEN_DINGDING}}
   TZ: Asia/Shanghai                               # 默认时区
   IS_RESET_PASSWORD: true                         # 是否把密码重置为空
   UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
@@ -99,44 +99,50 @@ env:
 #CI权限
 permissions: write-all
 
-#CI任务
 jobs:
-  config:
-    name: ${{matrix.TARGET}}
-    strategy:
-      fail-fast: false
-      #max-parallel: 2
-      matrix:
-        TARGET: [IPQ60XX-NOWIFI]
-        SOURCE: ['https://github.com/coolsnowwolf/lede']
-        BRANCH: [master]
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
 
-    #调用公用编译核心ALL-CORE.yml
-    uses: ./.github/workflows/CORE-ALL.yml
-    with:
-      # 源码
-      WRT_REPO_URL: ${{ matrix.SOURCE }}
-      # 编译分支
-      WRT_REPO_BRANCH: ${{ matrix.BRANCH }}
-      # 编译指定版本
-      WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
-      # DIY配置文件
-      WRT_CONFIG: ${{ inputs.iWRT_CONFIG }}
-      # 通用配置
-      WRT_GENERAL_CONFIG: GENERAL.txt
-      # DIY脚本
-      WRT_DIY_SETTING: ${{ inputs.iWRT_DIY_SETTING }}
-      # DIY包配置
-      WRT_DIYPackages: ${{ inputs.iWRT_DIYPackages }}
-      # FEED配置
-      WRT_DIY_FEEDS: diy_feeds.sh
-      # 是否发布
-      WRT_RELEASE_FIRMWARE: ${{ inputs.iWRT_RELEASE_FIRMWARE }} # 发布固件
-      # 默认LAN-IP
-      WRT_DEFAULT_LANIP: ${{ inputs.iWRT_DEFAULT_LANIP }}
-      # 钉钉TOKEN，用于推送下载文件
-      WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
-      # 编译说明
-      WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
-      
-      
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
+    - name: config git (修改git下载缓冲大小)
+      run: |
+        git config --global http.postBuffer 524288000
+        git config --global http.lowSpeedLimit 0
+        git config --global http.lowSpeedTime 999999
+
+    - name: Check ENV (检查环境)
+      run: |
+        WRT_HAS_WIFI=true
+        WRT_HAS_WIFI_TEXT="带WIFI"
+        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|WIFI-NO"; then
+          WRT_HAS_WIFI=false
+          WRT_HAS_WIFI_TEXT="无WIFI"
+        fi
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
+        echo "WIFI信息：$WRT_HAS_WIFI_TEXT"
+        
+    - name: Send dingding notify
+      continue-on-error: true
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{ env.TOKEN_DING_RUNNING}}
+        body: |
+          {
+            "msgtype": "text",
+            "text": {
+                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{env.TOKEN_DING_RUNNING}}"
+             }
+          }
+        
+
+
+        
