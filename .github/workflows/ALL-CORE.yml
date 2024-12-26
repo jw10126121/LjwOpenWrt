@@ -15,13 +15,14 @@ on:
   workflow_dispatch:
     inputs:
       TARGET_CONFIG:
-        description: '选个配置'
+        description: '选择配置（可多选）'
         required: true
         type: choice
         options:
-          - IPQ60XX-NOWIFI
-          - MT6000
-          - IPQ60XX-NOWIFI_lite
+          - label: IPQ60XX-NOWIFI
+            value: IPQ60XX-NOWIFI
+          - label: MT6000
+            value: MT6000
         default: IPQ60XX-NOWIFI
       iCONFIG_FILE:
         description: '配置文件：'
