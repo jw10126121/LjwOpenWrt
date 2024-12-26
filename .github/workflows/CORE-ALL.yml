@@ -335,6 +335,7 @@ jobs:
         echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
 
     - name: Machine Information
+      continue-on-error: true
       run: |
         cd $OPENWRT_PATH
         echo "======================="
@@ -346,6 +347,7 @@ jobs:
         echo "======================="
         
     - name: Upload bin directory
+      continue-on-error: true
       id: all_upload
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
@@ -387,6 +389,7 @@ jobs:
 
     - name: Upload firmware to wss
       id: upload_url
+      continue-on-error: true
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
@@ -395,8 +398,28 @@ jobs:
         echo "下载地址：$the_download_url"
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
+
+    - name: Create Notification Content (创建推送内容)
+      id: notification_content
+      continue-on-error: true
+      run: |
+        echo "【LinInfo】配置通知content"
+        notify_content="\
+        支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
+        支持设备：${DEVICE_PROFILE}\n\
+        内核版本：${VERSION_KERNEL}\n\
+        默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
+        默认密码：无|password\n\
+        源码：${WRT_REPO_URL}\n\
+        源码分支：${WRT_REPO_BRANCH}\n\
+        源码HASH：${REPO_GIT_HASH}\n\
+        编译开始时间：${COMPILE_TIME}\n\
+        下载地址：${{env.bin_download_url}}\
+        "
+        echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
     - name: Send dingding notify
+      continue-on-error: true
       uses: zcong1993/actions-ding@master
       if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.bin_download_url != ''
       with:
@@ -405,15 +428,13 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "运行编译固件任务完成： \n\
-                适配设备：${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_R${{ env.COMPILE_DATE_HOUR }}\n\
-                下载地址：${{ env.bin_download_url }}\n\
-                说明信息：$(cat $GITHUB_WORKSPACE/$OPENWRT_PATH/upload/readme.txt)"
+                "content": "${{ env.notify_content }}"
              }
           }
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload
+      continue-on-error: true
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
       uses: actions/upload-artifact@main
       with:
