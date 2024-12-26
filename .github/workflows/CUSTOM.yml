@@ -1,5 +1,5 @@
 #CI项目
-name: IPQ60XX-NOWIFI
+name: CUSTOM
 
 #CI计划
 on:
@@ -14,12 +14,7 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
-      TARGET_CONFIG:
-        description: '选个配置'
-        required: true
-        type: string
-        default: 'IPQ60XX-NOWIFI'
-      iCONFIG_FILE:
+      iWRT_CONFIG:
         description: '配置文件：'
         required: true
         type: string
@@ -29,12 +24,7 @@ on:
         required: false
         type: string
         default: 'IPQ60XX.sh'
-      iWRT_GENERAL_CONFIG:
-        description: '通用配置文件'
-        required: true
-        type: string
-        default: 'GENERAL.txt'
-      iDIY_Packages:
+      iWRT_DIYPackages:
         description: 'DIY包配置：'
         required: false
         type: string
@@ -64,6 +54,11 @@ on:
         required: false
         type: string
         default: ''
+      # iWRT_GENERAL_CONFIG:
+      #   description: '通用配置文件'
+      #   required: true
+      #   type: string
+      #   default: 'GENERAL.txt'
 
 
 #CI权限
@@ -77,15 +72,9 @@ jobs:
       fail-fast: false
       #max-parallel: 2
       matrix:
-        TARGET: [IPQ60XX-NOWIFI, IPQ60XX-NOWIFI_lite, MT6000]
+        TARGET: [IPQ60XX-NOWIFI]
         SOURCE: ['https://github.com/coolsnowwolf/lede']
         BRANCH: [master]
-        # REPO_INFO:
-        #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE, SUFFIX: LEDE}
-        #   - {SOURCE: coolsnowwolf/lede, BRANCH: master, NAME: LEDE-FW4, SUFFIX: LEDE-FW4}
-        #   - {SOURCE: VIKINGYFY/immortalwrt, BRANCH: main, NAME: OWRT, SUFFIX: IMM}
-        #   - {SOURCE: LiBwrt-op/openwrt-6.x, BRANCH: openwrt-24.10, NAME: LibWRT, SUFFIX: IMM}
-        #   - {SOURCE: immortalwrt/immortalwrt, BRANCH: openwrt-24.10, NAME: ImmortalWRT, SUFFIX: IMM}
 
     #调用公用编译核心ALL-CORE.yml
     uses: ./.github/workflows/CORE-ALL.yml
@@ -97,13 +86,13 @@ jobs:
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
       # DIY配置文件
-      WRT_CONFIG: ${{ matrix.TARGET }}.txt
+      WRT_CONFIG: ${{ inputs.iWRT_CONFIG }}
       # 通用配置
       WRT_GENERAL_CONFIG: GENERAL.txt
       # DIY脚本
-      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      WRT_DIY_SETTING: ${{ inputs.iWRT_DIY_SETTING }}
       # DIY包配置
-      WRT_DIYPackages: Packages.sh
+      WRT_DIYPackages: ${{ inputs.iWRT_DIYPackages }}
       # FEED配置
       WRT_DIY_FEEDS: diy_feeds.sh
       # 是否发布
@@ -115,28 +104,3 @@ jobs:
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
       
-      # ----------- 以下为备用
-      #编译平台
-      # WRT_TARGET: ${{matrix.TARGET}}
-      #默认主题
-      # WRT_THEME: argon
-      #默认主机名
-      # WRT_NAME: ${{matrix.REPO_INFO.NAME}}
-      #默认地址
-      # WRT_IP: 192.168.10.1
-      #默认密码，仅作提示，修改无用
-      # WRT_PW: password
-      #源码链接
-      # WRT_REPO: https://github.com/${{matrix.REPO_INFO.SOURCE}}.git
-      #源码分支
-      # WRT_BRANCH: ${{matrix.REPO_INFO.BRANCH || 'main'}}
-      #源码名称
-      # WRT_SOURCE: ${{matrix.REPO_INFO.SOURCE}}
-      #源码COMMIT
-      # WRT_COMMIT: ${{inputs.COMMIT}}
-      #后缀名称
-      # WRT_SUFFIX: ${{matrix.REPO_INFO.SUFFIX}}
-      #插件调整
-      # WRT_PACKAGE: ${{inputs.PACKAGE}}
-      #仅输出配置文件
-      # WRT_TEST: ${{inputs.TEST}}
