@@ -130,18 +130,18 @@ jobs:
         echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
         echo "WIFI信息：$WRT_HAS_WIFI_TEXT"
         
-    - name: Upload firmware to wss
-      id: upload_url
-      if: true && !cancelled()
+    - name: Send dingding notify
       continue-on-error: true
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer muse -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
-        cat wss.log
-        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
-        echo "下载地址：$the_download_url"
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
+      uses: zcong1993/actions-ding@master
+      with:
+        dingToken: ${{secrets.TOKEN_DING_RUNNING}}
+        body: |
+          {
+            "msgtype": "text",
+            "text": {
+                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{secrets.TOKEN_DING_RUNNING}}"
+             }
+          }
         
 
 
