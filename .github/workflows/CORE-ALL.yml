@@ -42,7 +42,7 @@ on:
       WRT_MINE_SAY:
         required: true
         type: string
-      TOKEN_DINGDING:
+      WRT_TOKEN_DINGDING:
         required: false
         type: string
       # UPLOAD_FIRMWARE_DIR:
