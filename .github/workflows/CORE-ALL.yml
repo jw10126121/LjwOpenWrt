@@ -53,6 +53,7 @@ on:
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  TOKEN_DINGDING: ${{secrets.TOKEN_DINGDING}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
@@ -64,7 +65,6 @@ env:
   WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}} # 发布固件
   WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}       # 默认lanIP
   WRT_MINE_SAY: ${{inputs.WRT_MINE_SAY}} 
-  TOKEN_DINGDING: ${{secrets.TOKEN_DINGDING}}
   WRT_DIR_CONFIGS: Config                             # 自定义配置文件夹
   WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
   UPLOAD_FIRMWARE_DIR: true
@@ -107,6 +107,9 @@ jobs:
       run: |
         echo "TOKEN_DINGDING: ${{env.TOKEN_DINGDING}}"
         echo "WRT_TOKEN_DINGDING: ${{inputs.WRT_TOKEN_DINGDING}}"
+        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}"]; then
+            echo "TOKEN_DINGDING=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
+        fi
         WRT_HAS_WIFI=true
         WRT_HAS_WIFI_TEXT="带WIFI"
         if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
