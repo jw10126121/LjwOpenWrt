@@ -1,9 +1,10 @@
 #!/bin/bash
 
+### --- 取参 --- ###
 
 ACTION_DIR=$1
-# PACKAGE_NAME=$2
-# PACKAGE_PRE_LIST=$3
+
+### --- 方法 --- ###
 
 # 整理依赖包列表
 UPDATE_PACKAGE_LIST() {
@@ -44,6 +45,7 @@ DELETE_PACKAGE_LIST() {
 
 }
 
+### --- 执行 --- ###
 
 openclash_packages_pre="coreutils-nohup_ libcap-bin_ libgmp10_ libruby3.1_ libyaml_ luci-app-openclash_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
 ssrplus_packages_pre="resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_"
