@@ -52,18 +52,19 @@ ssrplus_packages_pre="resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ luci-ap
 sqm_packages_pre="luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_"
 openvpnserver_packages_pre="luci-app-openvpn-server_ luci-i18n-openvpn-server-zh-cn_ liblzo_ openvpn-easy-rsa_ openvpn-openssl_"
 samba4_packages_pre="luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_"
-
+mwan3_packages_pre="luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_"
 
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$openclash_packages_pre" "package_openclash"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$ssrplus_packages_pre" "package_ssrplus" 
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$sqm_packages_pre" "package_sqm"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$openvpnserver_packages_pre" "package_openvpnserver"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$samba4_packages_pre" "package_samba4"
+UPDATE_PACKAGE_LIST "$ACTION_DIR" "$mwan3_packages_pre" "package_mwan3"
 
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$openclash_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$ssrplus_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$sqm_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$openvpnserver_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$samba4_packages_pre"
-
+DELETE_PACKAGE_LIST "$ACTION_DIR" "$mwan3_packages_pre"
 
