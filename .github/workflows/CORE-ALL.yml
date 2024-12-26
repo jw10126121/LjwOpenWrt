@@ -52,7 +52,6 @@ on:
         
 #环境变量配置
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   TOKEN_DINGDING: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
@@ -124,8 +123,6 @@ jobs:
         
     - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
       run: |
-        echo "【LinInfo】TOKEN_DINGDING: ${{env.TOKEN_DINGDING}}"
-        echo "【LinInfo】WRT_TOKEN_DINGDING: ${{inputs.WRT_TOKEN_DINGDING}}"
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "TOKEN_DINGDING=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
@@ -316,30 +313,9 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
-          echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
-          chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
-          TO_MY_SAY_DETAIL_tmp="
-          ${{ env.WRT_MINE_SAY }}\n\
-          固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
-          支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
-          支持设备：${DEVICE_PROFILE}\n\
-          内核版本：${VERSION_KERNEL}\n\
-          默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
-          默认密码：无|password\n\
-          是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
-          源码：${WRT_REPO_URL}\n\
-          源码分支：${WRT_REPO_BRANCH}\n\
-          源码HASH：${REPO_GIT_HASH}\n\
-          编译开始时间：${COMPILE_TIME}
-          "
-          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
-        fi
-        echo "【LinInfo】配置通知content"
-        notify_start_content="\
+        notify_content="\
         【Linjw】\n\
-        固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
+        固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         支持设备：${DEVICE_PROFILE}\n\
         内核版本：${VERSION_KERNEL}\n\
@@ -351,7 +327,17 @@ jobs:
         源码HASH：${REPO_GIT_HASH}\n\
         编译开始时间：${COMPILE_TIME}\n\
         "
-        echo "notify_start_content=${notify_start_content}" >> $GITHUB_ENV
+        echo "notify_content=${notify_content}" >> $GITHUB_ENV
+        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
+          echo "【LinInfo】输出内容脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
+          chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
+          TO_MY_SAY_DETAIL_tmp="
+          ${{ env.WRT_MINE_SAY }}\n\
+          ${notify_content}
+          "
+          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
+        fi
 
     - name: Send dingding notify
       continue-on-error: true
@@ -363,7 +349,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "${{ env.notify_start_content }}"
+                "content": "${{ env.notify_content }}"
              }
           }
           
@@ -462,18 +448,7 @@ jobs:
       run: |
         echo "【LinInfo】配置通知content"
         notify_content="\
-        【Linjw】\n\
-        固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
-        支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
-        支持设备：${DEVICE_PROFILE}\n\
-        内核版本：${VERSION_KERNEL}\n\
-        默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
-        默认密码：无 | password\n\
-        是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
-        源码：${WRT_REPO_URL}\n\
-        源码分支：${WRT_REPO_BRANCH}\n\
-        源码HASH：${REPO_GIT_HASH}\n\
-        编译开始时间：${COMPILE_TIME}\n\
+        ${{env.notify_content}}\n\
         编译完成时间：${FILE_TIME}\n\
         下载地址：${{env.bin_download_url}}\
         "
