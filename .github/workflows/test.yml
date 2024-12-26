@@ -131,9 +131,10 @@ jobs:
         # echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
         echo "编辑发送content: "
         notify_content="\
-          运行编译固件任务完成： \n\
-          适配设备：11111\n\
-          下载地址：${{ env.bin_download_url }}\n\
+        运行编译固件任务完成： \n\
+        适配设备：11111\n\
+        下载地址：${{ env.bin_download_url }}\n\
+        随便找一个内容：$(cat $GITHUB_WORKSPACE/Scripts/Packages.sh)\n\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
