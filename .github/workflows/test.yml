@@ -140,7 +140,7 @@ jobs:
             "text": {
                 "content": "运行编译固件任务完成： \n\
                 适配设备：22222222222222n\
-                下载地址：${{ bin_download_url }}"
+                下载地址：${{ env.bin_download_url }}"
              }
           }
 
@@ -152,5 +152,5 @@ jobs:
 
     - name: STEP2
       run: |
-        echo "STEP2: ${{ success() }}"
+        echo "STEP2: "
         
