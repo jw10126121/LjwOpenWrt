@@ -105,11 +105,6 @@ jobs:
           
     - name: Check ENV (检查环境)
       run: |
-        echo "TOKEN_DINGDING: ${{env.TOKEN_DINGDING}}"
-        echo "WRT_TOKEN_DINGDING: ${{inputs.WRT_TOKEN_DINGDING}}"
-        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}"]; then
-            echo "TOKEN_DINGDING=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
-        fi
         WRT_HAS_WIFI=true
         WRT_HAS_WIFI_TEXT="带WIFI"
         if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
@@ -126,7 +121,16 @@ jobs:
         fi
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
         echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
-
+        
+    - name: Check ENV (检查环境)
+      run: |
+        echo "【LinInfo】TOKEN_DINGDING: ${{env.TOKEN_DINGDING}}"
+        echo "【LinInfo】WRT_TOKEN_DINGDING: ${{inputs.WRT_TOKEN_DINGDING}}"
+        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
+            echo "TOKEN_DINGDING=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
+            echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
+        fi
+        
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
       uses: endersonmenezes/free-disk-space@main
