@@ -3,47 +3,9 @@ name: ALL-CORE
 
 #CI计划
 on:
-  #自动清理：每天早上5点
-  # schedule:
-  #  - cron: 0 21 * * *
-  #自动编译：当Auto-Clean运行完成后
-  #workflow_run:
-  #  workflows: ["Auto-Clean"]
-  #  types:
-  #   - completed
   #手动编译
   workflow_dispatch:
     inputs:
-      TARGET_CONFIG:
-        description: '选择配置（可多选）'
-        required: true
-        type: choice
-        options:
-          - label: IPQ60XX-NOWIFI
-            value: IPQ60XX-NOWIFI
-          - label: MT6000
-            value: MT6000
-        default: IPQ60XX-NOWIFI
-      iCONFIG_FILE:
-        description: '配置文件：'
-        required: true
-        type: string
-        default: 'IPQ60XX-NOWIFI.txt'
-      iWRT_DIY_SETTING:
-        description: 'DIY脚本：'
-        required: false
-        type: string
-        default: 'IPQ60XX.sh'
-      iWRT_GENERAL_CONFIG:
-        description: '通用配置文件'
-        required: true
-        type: string
-        default: 'GENERAL.txt'
-      iDIY_Packages:
-        description: 'DIY包配置：'
-        required: false
-        type: string
-        default: 'Packages.sh'
       iWRT_DEFAULT_LANIP:
         description: '配置LAN-IP'
         required: false
@@ -85,12 +47,18 @@ jobs:
         TARGET_CONFIG:
           - IPQ60XX-NOWIFI
           - MT6000
+          - IPQ60XX-NOWIFI_lite
         include:
           - TARGET_CONFIG: IPQ60XX-NOWIFI
             WRT_CONFIG: IPQ60XX-NOWIFI.txt
             WRT_DIY_SETTING: IPQ60XX.sh
             WRT_GENERAL_CONFIG: GENERAL.txt
-            
+
+          - TARGET_CONFIG: IPQ60XX-NOWIFI_lite
+            WRT_CONFIG: IPQ60XX-NOWIFI_lite.txt
+            WRT_DIY_SETTING: IPQ60XX.sh
+            WRT_GENERAL_CONFIG: GENERAL.txt
+
           - TARGET_CONFIG: MT6000
             WRT_CONFIG: MT6000.txt
             WRT_DIY_SETTING: IPQ60XX.sh
@@ -128,29 +96,4 @@ jobs:
       TOKEN_DINGDING: ${{ inputs.iTOKEN_DINGDING }}
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
-        # 源码
-        # WRT_REPO_URL: ${{ matrix.SOURCE }}
-        # # 编译分支
-        # WRT_REPO_BRANCH: ${{ matrix.BRANCH }}
-        # # 编译指定版本
-        # WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
-        # # DIY配置文件
-        # WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
-        # # 通用配置
-        # WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}
-        # # DIY脚本
-        # WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
-        # # DIY包配置
-        # WRT_DIYPackages: Packages.sh
-        # # FEED配置
-        # WRT_DIY_FEEDS: diy_feeds.sh
-        # # 是否发布
-        # WRT_RELEASE_FIRMWARE: ${{ inputs.iWRT_RELEASE_FIRMWARE }} # 发布固件
-        # # 默认LAN-IP
-        # WRT_DEFAULT_LANIP: ${{ inputs.iWRT_DEFAULT_LANIP }}
-        # # 钉钉TOKEN，用于推送下载文件
-        # TOKEN_DINGDING: ${{ inputs.iTOKEN_DINGDING }}
-        # # 编译说明
-        # WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
-      
 
