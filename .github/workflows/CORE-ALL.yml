@@ -105,6 +105,7 @@ jobs:
 
     - name: Check ENV (检查环境)
       run: |
+        echo "TOKEN_DINGDING：${{ env.TOKEN_DINGDING }}"
         WRT_HAS_WIFI=true
         WRT_HAS_WIFI_TEXT="带WIFI"
         if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
