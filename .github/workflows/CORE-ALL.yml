@@ -102,7 +102,7 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-
+          
     - name: Check ENV (检查环境)
       run: |
         WRT_HAS_WIFI=true
@@ -327,8 +327,37 @@ jobs:
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
         fi
+        echo "【LinInfo】配置通知content"
+        notify_start_content="\
+        【Linjw】\n\
+        固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
+        支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
+        支持设备：${DEVICE_PROFILE}\n\
+        内核版本：${VERSION_KERNEL}\n\
+        默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
+        默认密码：无 | password\n\
+        是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
+        源码：${WRT_REPO_URL}\n\
+        源码分支：${WRT_REPO_BRANCH}\n\
+        源码HASH：${REPO_GIT_HASH}\n\
+        编译开始时间：${COMPILE_TIME}\n\
+        "
+        echo "notify_start_content=${notify_start_content}" >> $GITHUB_ENV
 
-
+    - name: Send dingding notify
+      continue-on-error: true
+      uses: zcong1993/actions-ding@master
+      if: env.TOKEN_DINGDING != ''
+      with:
+        dingToken: ${{ env.TOKEN_DINGDING }}
+        body: |
+          {
+            "msgtype": "text",
+            "text": {
+                "content": "${{ env.notify_start_content }}"
+             }
+          }
+          
     - name: Upload Config (上传配置文件)
       id: config_upload
       uses: actions/upload-artifact@master
@@ -414,7 +443,7 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
         bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
-        echo "下载地址：$the_download_url"
+        echo "下载地址：$bin_download_url"
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
 
