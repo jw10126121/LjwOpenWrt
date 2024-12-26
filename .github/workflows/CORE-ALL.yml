@@ -309,6 +309,7 @@ jobs:
           内核版本：${VERSION_KERNEL}\n\
           默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
           默认密码：无|password\n\
+          是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
           源码：${WRT_REPO_URL}\n\
           源码分支：${WRT_REPO_BRANCH}\n\
           源码HASH：${REPO_GIT_HASH}\n\
@@ -376,10 +377,7 @@ jobs:
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         TMP_DIR=$(mktemp -d)
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        openclash_packages_pre="coreutils-nohup_ libcap-bin_ libgmp10_ libruby3.1_ libyaml_ luci-app-openclash_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
-        ssrplus_packages_pre="resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_"
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/packages_list.sh "$TMP_DIR" "packages_ssrplus" "${ssrplus_packages_pre}"
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/packages_list.sh "$TMP_DIR" "packages_openclash" "${openclash_packages_pre}"
+        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/packages_list.sh "$TMP_DIR"
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
@@ -422,6 +420,7 @@ jobs:
         内核版本：${VERSION_KERNEL}\n\
         默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
         默认密码：无|password\n\
+        是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
         源码：${WRT_REPO_URL}\n\
         源码分支：${WRT_REPO_BRANCH}\n\
         源码HASH：${REPO_GIT_HASH}\n\
