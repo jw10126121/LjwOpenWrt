@@ -120,7 +120,7 @@ jobs:
 
     - name: Upload firmware to wss
       id: upload_url
-      if: !cancelled()
+      if: true && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
