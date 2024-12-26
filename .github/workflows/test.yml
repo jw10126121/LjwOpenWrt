@@ -85,7 +85,7 @@ env:
   WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
   WRT_DEFAULT_LANIP: ${{inputs.iWRT_DEFAULT_LANIP}}       # 默认lanIP
   WRT_MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
-  TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
+  TOKEN_DING_RUNNING: ${{secrets.TOKEN_DING_RUNNING}}
   TZ: Asia/Shanghai                               # 默认时区
   IS_RESET_PASSWORD: true                         # 是否把密码重置为空
   UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
@@ -134,12 +134,12 @@ jobs:
       continue-on-error: true
       uses: zcong1993/actions-ding@master
       with:
-        dingToken: ${{secrets.TOKEN_DING_RUNNING}}
+        dingToken: ${{ env.TOKEN_DING_RUNNING}}
         body: |
           {
             "msgtype": "text",
             "text": {
-                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{secrets.TOKEN_DING_RUNNING}}"
+                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{env.TOKEN_DING_RUNNING}}"
              }
           }
         
