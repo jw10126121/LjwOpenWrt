@@ -1,1 +1,156 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+#=================================================
 
+name:  test
+
+on:
+  #手动编译
+  workflow_dispatch:
+    inputs:
+      iCONFIG_FILE:
+        description: '配置文件：'
+        required: true
+        type: string
+        default: 'IPQ60XX-NOWIFI.txt'
+      iWRT_DIY_SETTING:
+        description: 'DIY脚本：'
+        required: false
+        type: string
+        default: 'IPQ60XX.sh'
+      iWRT_GENERAL_CONFIG:
+        description: '通用配置文件'
+        required: true
+        type: string
+        default: 'GENERAL.txt'
+      iDIY_Packages:
+        description: 'DIY包配置：'
+        required: false
+        type: string
+        default: 'Packages.sh'
+      iWRT_DEFAULT_LANIP:
+        description: '配置LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
+      iWRT_RELEASE_FIRMWARE:
+        description: '发布firmware'
+        required: false
+        type: boolean
+        default: true
+      iWHAT_MY_SAY:
+        description: '编译说明'
+        required: false
+        type: string
+        default: ''
+      iTOKEN_DINGDING:
+        description: '钉钉TOKEN'
+        required: false
+        type: string
+        default: ''
+      iWRT_REPO_Commit_Hash:
+        description: '历史版本HASH'
+        required: false
+        type: string
+        default: ''
+      # iUPLOAD_FIRMWARE_DIR:
+      #   description: '将固件上传到Artifact'
+      #   required: false
+      #   type: boolean
+      #   default: true
+      # iWRT_GENERAL_CONFIG:
+      #   description: '通用配置文件'
+      #   required: true
+      #   default: 'GENERAL.txt'
+      #   type: choice
+      #   options:
+      #     - 'GENERAL.txt'
+      #     - 'GENERAL_custom.txt'
+
+#环境变量配置
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  WRT_REPO_URL: https://github.com/coolsnowwolf/lede
+  WRT_REPO_BRANCH: master
+  WRT_REPO_Commit_Hash: ${{inputs.iWRT_REPO_Commit_Hash}}
+  WRT_CONFIG: ${{inputs.iCONFIG_FILE}}           # 配置文件
+  WRT_DIY_SETTING: ${{inputs.iWRT_DIY_SETTING}}           # 自定义配置
+  WRT_DIY_FEEDS: diy_feeds.sh                         # 主要用于更新Feeds
+  WRT_GENERAL_CONFIG: ${{inputs.iWRT_GENERAL_CONFIG}}     # 通用配置
+  WRT_DIYPackages: ${{inputs.iDIY_Packages}}          # 自定义包配置
+  UPLOAD_FIRMWARE_DIR: true
+  WRT_RELEASE_FIRMWARE: ${{inputs.iWRT_RELEASE_FIRMWARE}} # 发布固件
+  WRT_DIR_CONFIGS: Config                             # 自定义配置文件夹
+  WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
+  WRT_DEFAULT_LANIP: ${{inputs.iWRT_DEFAULT_LANIP}}       # 默认lanIP
+  WRT_MINE_SAY: ${{inputs.iWHAT_MY_SAY}} 
+  TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
+  TZ: Asia/Shanghai                               # 默认时区
+  IS_RESET_PASSWORD: true                         # 是否把密码重置为空
+  UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
+  IS_RESIZE_SPACE: false                          # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  CACHE_TOOLCHAIN: true
+  CLASH_KERNEL: amd64
+  FREE_UP_DISK: true
+
+
+  
+#CI权限
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
+    - name: config git (修改git下载缓冲大小)
+      run: |
+        git config --global http.postBuffer 524288000
+        git config --global http.lowSpeedLimit 0
+        git config --global http.lowSpeedTime 999999
+
+    - name: Upload firmware to wss
+      id: upload_url
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wss -s -p 16 --no-progress "$GITHUB_WORKSPACE/Scripts/" 2>&1 | tee wss.log
+        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        echo "下载地址：$the_download_url"
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
+        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
+        
+    - name: Send dingding notify
+      uses: zcong1993/actions-ding@master
+      if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.bin_download_url != ''
+      with:
+        dingToken: ${{ env.TOKEN_DINGDING }}
+        body: |
+          {
+            "msgtype": "text",
+            "text": {
+                "content": "运行编译固件任务完成： \n\
+                适配设备：22222222222222n\
+                下载地址：${{ bin_download_url }}"
+             }
+          }
+
+    - name: STEP1
+      continue-on-error: true
+      run: |
+        echo "STEP1"
+        exit 1;
+
+    - name: STEP2
+      run: |
+        echo "STEP2: ${{ success() }}"
+        
