@@ -53,7 +53,7 @@ on:
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  TOKEN_DINGDING: ${{secrets.TOKEN_DINGDING}}
+  TOKEN_DINGDING: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
@@ -122,7 +122,7 @@ jobs:
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
         echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
         
-    - name: Check ENV (检查环境)
+    - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
       run: |
         echo "【LinInfo】TOKEN_DINGDING: ${{env.TOKEN_DINGDING}}"
         echo "【LinInfo】WRT_TOKEN_DINGDING: ${{inputs.WRT_TOKEN_DINGDING}}"
