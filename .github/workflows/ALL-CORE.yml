@@ -104,7 +104,7 @@ jobs:
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
       # DIY配置文件
-      WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
+      WRT_CONFIG: ${{ matrix.WRT_CONFIG }}
       # 通用配置
       WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}
       # DIY脚本
