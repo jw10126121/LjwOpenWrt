@@ -87,8 +87,14 @@ jobs:
         include:
           - TARGET_CONFIG: IPQ60XX-NOWIFI
             WRT_CONFIG: IPQ60XX-NOWIFI.txt
+            WRT_DIY_SETTING: IPQ60XX.sh
+            WRT_GENERAL_CONFIG: GENERAL.txt
+            
           - TARGET_CONFIG: MT6000
             WRT_CONFIG: MT6000.txt
+            WRT_DIY_SETTING: IPQ60XX.sh
+            WRT_GENERAL_CONFIG: GENERAL.txt
+
         # TARGET: [IPQ60XX-NOWIFI]
         # SOURCE: ['https://github.com/coolsnowwolf/lede']
         # BRANCH: [master]
@@ -106,9 +112,9 @@ jobs:
       # DIY配置文件
       WRT_CONFIG: ${{ matrix.WRT_CONFIG }}
       # 通用配置
-      WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}
+      WRT_GENERAL_CONFIG: ${{ matrix.WRT_GENERAL_CONFIG }}
       # DIY脚本
-      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      WRT_DIY_SETTING: ${{ matrix.WRT_DIY_SETTING }}
       # DIY包配置
       WRT_DIYPackages: Packages.sh
       # FEED配置
