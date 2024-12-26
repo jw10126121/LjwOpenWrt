@@ -107,12 +107,20 @@ jobs:
       run: |
         WRT_HAS_WIFI=true
         WRT_HAS_WIFI_TEXT="带WIFI"
-        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|WIFI-NO"; then
+        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
           WRT_HAS_WIFI=false
           WRT_HAS_WIFI_TEXT="无WIFI"
         fi
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
         echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
+        WRT_HAS_LITE=false
+        WRT_HAS_LITE_TEXT=""
+        if echo "$WRT_CONFIG" | grep -q "lite\|LITE"; then
+          WRT_HAS_LITE=true
+          WRT_HAS_LITE_TEXT="[精简版]"
+        fi
+        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
+        echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
 
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
@@ -304,6 +312,7 @@ jobs:
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
+          固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
           支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
           支持设备：${DEVICE_PROFILE}\n\
           内核版本：${VERSION_KERNEL}\n\
@@ -343,7 +352,7 @@ jobs:
         make -j$(nproc) V=s || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=$(date +"%y%m%d")" >> $GITHUB_ENV
-        FILE_TIME=$(date +"%y%m%d%H%M%S")
+        FILE_TIME=$(date +"D%y%m%dT%H%M%S")
         echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
         echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
 
@@ -377,7 +386,7 @@ jobs:
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         TMP_DIR=$(mktemp -d)
         find ./bin/packages -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/packages_list.sh "$TMP_DIR"
+        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/Organize_Packages.sh "$TMP_DIR"
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
@@ -415,16 +424,19 @@ jobs:
       run: |
         echo "【LinInfo】配置通知content"
         notify_content="\
+        【Linjw】\n\
+        固件说明：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         支持设备：${DEVICE_PROFILE}\n\
         内核版本：${VERSION_KERNEL}\n\
         默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
-        默认密码：无|password\n\
+        默认密码：无 | password\n\
         是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
         源码：${WRT_REPO_URL}\n\
         源码分支：${WRT_REPO_BRANCH}\n\
         源码HASH：${REPO_GIT_HASH}\n\
         编译开始时间：${COMPILE_TIME}\n\
+        编译完成时间：${FILE_TIME}\n\
         下载地址：${{env.bin_download_url}}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
@@ -463,7 +475,7 @@ jobs:
           **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
           ### 📒 固件信息(${{ env.WRT_HAS_WIFI_TEXT }})
           - ${{ env.WRT_HAS_WIFI_TEXT }}带有线NSS的${{ env.VERSION_KERNEL }}内核固件
-          - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt 固件
+          - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt ${{ env.WRT_HAS_LITE_TEXT }}固件
           - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
           - ⚽ 固件源码: ${{ env.WRT_REPO_URL }}
           - 💝 源码分支: ${{ env.WRT_REPO_BRANCH }}
