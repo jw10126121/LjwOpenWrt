@@ -75,6 +75,7 @@ env:
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
   FREE_UP_DISK: true
+  WRT_HAS_WIFI: true
 
 
   
@@ -101,6 +102,17 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
+
+    - name: Check ENV (检查环境)
+      run: |
+        WRT_HAS_WIFI=true
+        WRT_HAS_WIFI_TEXT="带WIFI"
+        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|WIFI-NO"; then
+          WRT_HAS_WIFI=false
+          WRT_HAS_WIFI_TEXT="无WIFI"
+        fi
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
 
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
@@ -450,14 +462,14 @@ jobs:
         files: ${{ env.OPENWRT_PATH }}/upload/*.*
         body: |
           **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
-          ### 📒 固件信息(无WIFI)
-          - 无WIFI带有线NSS的${{ env.VERSION_KERNEL }}内核固件
+          ### 📒 固件信息(${{ env.WRT_HAS_WIFI_TEXT }})
+          - ${{ env.WRT_HAS_WIFI_TEXT }}带有线NSS的${{ env.VERSION_KERNEL }}内核固件
           - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt 固件
           - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
           - ⚽ 固件源码: ${{ env.WRT_REPO_URL }}
           - 💝 源码分支: ${{ env.WRT_REPO_BRANCH }}
           - 🌐 默认地址: ${{ env.WRT_DEFAULT_LANIP }}
-          - 🔑 默认密码: 无|password
+          - 🔑 默认密码: 无 | password
           ### 🧊 固件版本
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
