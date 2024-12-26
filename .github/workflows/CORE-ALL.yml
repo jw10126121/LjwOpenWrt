@@ -64,7 +64,7 @@ env:
   WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}} # 发布固件
   WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}       # 默认lanIP
   WRT_MINE_SAY: ${{inputs.WRT_MINE_SAY}} 
-  TOKEN_DINGDING: ${{inputs.TOKEN_DINGDING}}
+  TOKEN_DINGDING: ${{ secrets.TOKEN_DING_RUNNING }}
   WRT_DIR_CONFIGS: Config                             # 自定义配置文件夹
   WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
   UPLOAD_FIRMWARE_DIR: true
