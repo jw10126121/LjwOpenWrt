@@ -10,7 +10,7 @@ npu_usage="$(grep '%' "$NSS_PATH"/cpu_load_ubi | awk -F ' ' '{print $2}')"
 if [ -d "$NSS_PATH" ]; then
 	if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then
 		connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)
-		echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage} ECM: ${connection_count}"
+		echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"
 	else
 		echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"
 	fi
