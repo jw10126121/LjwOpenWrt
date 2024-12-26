@@ -36,7 +36,7 @@
 
 ### LEDE: 
 
-<https://github.com/ftkey/OpenWRT-CI/releases>
+<https://github.com/jw10126121/LjwOpenWrt/releases>
     
 ### OWRT: 
 <https://github.com/VIKINGYFY/OpenWRT-CI/releases>
