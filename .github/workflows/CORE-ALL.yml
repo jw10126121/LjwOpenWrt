@@ -69,7 +69,7 @@ env:
   UPLOAD_FIRMWARE_DIR: true
   TZ: Asia/Shanghai                               # 默认时区
   IS_RESET_PASSWORD: true                         # 是否把密码重置为空
-  UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
+  UPLOAD_BIN_DIR: true                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   IS_RESIZE_SPACE: false                          # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
