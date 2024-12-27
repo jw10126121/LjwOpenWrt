@@ -88,7 +88,11 @@ jobs:
     steps:
 
     - name: Check Server Performance (检查服务器性能)
+      env:
+          TOKEN_DINGDING_RUNNING: ${{ secrets.DINGDING_TOKEN }}
       run: |
+        echo "TOKEN: ${{env.TOKEN_DINGDING_RUNNING}}"
+        echo "secrets_TOKEN: ${{secrets.DINGDING_TOKEN}}"
         echo "编译说明：${{ env.WRT_MINE_SAY }}"
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
