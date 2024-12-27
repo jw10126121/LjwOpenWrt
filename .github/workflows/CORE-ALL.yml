@@ -283,6 +283,8 @@ jobs:
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
+        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $path_config_file)
+        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
         KERNEL_PATCHVER=''
@@ -319,6 +321,7 @@ jobs:
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         支持设备：${DEVICE_PROFILE}\n\
+        设备架构：${DEVICE_ARCH}\n\
         内核版本：${VERSION_KERNEL}\n\
         默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
         默认密码：无 | password\n\
