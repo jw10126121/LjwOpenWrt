@@ -75,6 +75,7 @@ env:
   CLASH_KERNEL: amd64
   FREE_UP_DISK: true
   WRT_HAS_WIFI: true
+  UPLOAD_BIN_DIR_WSS: false
 
 
   
@@ -88,11 +89,7 @@ jobs:
     steps:
 
     - name: Check Server Performance (检查服务器性能)
-      env:
-          TOKEN_DINGDING_RUNNING: ${{ secrets.DINGDING_TOKEN }}
       run: |
-        echo "TOKEN: ${{env.TOKEN_DINGDING_RUNNING}}"
-        echo "secrets_TOKEN: ${{secrets.DINGDING_TOKEN}}"
         echo "编译说明：${{ env.WRT_MINE_SAY }}"
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
@@ -405,9 +402,10 @@ jobs:
         name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
         path: openwrt/bin
         
-    - name: Upload firmware to wss
+    - name: Upload bin to wss
       id: all_upload_wss
       continue-on-error: true
+      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR_WSS == true || env.UPLOAD_BIN_DIR_WSS == 'true')
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/bin/" 2>&1 | tee wss_all.log
