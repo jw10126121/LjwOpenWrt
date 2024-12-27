@@ -423,11 +423,11 @@ jobs:
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
         cp -f ./config_mine/* ./upload/
-        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
-        find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec echo "【LinInfo】移动文件: {}" \; -exec mv -f {} "$TMP_DIR" \;
         find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec echo "【LinInfo】移动文件: {}" \; -exec mv -f {} "$TMP_DIR" \;
+        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
+        find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/Organize_Packages.sh "$TMP_DIR"
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
@@ -508,6 +508,7 @@ jobs:
           - ${{ env.WRT_HAS_WIFI_TEXT }}带有线NSS的${{ env.VERSION_KERNEL }}内核固件
           - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt ${{ env.WRT_HAS_LITE_TEXT }}固件
           - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
+          - 💻 设备架构：${{ env.DEVICE_ARCH }}
           - ⚽ 固件源码: ${{ env.WRT_REPO_URL }}
           - 💝 源码分支: ${{ env.WRT_REPO_BRANCH }}
           - 🌐 默认地址: ${{ env.WRT_DEFAULT_LANIP }}
