@@ -400,6 +400,17 @@ jobs:
       with:
         name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
         path: openwrt/bin
+        
+    - name: Upload firmware to wss
+      id: all_upload_wss
+      continue-on-error: true
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/bin/" 2>&1 | tee wss_all.log
+        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        echo "下载地址：$bin_download_url_all"
+        echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_OUTPUT
+        echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_ENV
 
     - name: Organize Files(整理文件)
       id: organize
