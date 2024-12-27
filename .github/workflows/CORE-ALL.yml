@@ -332,7 +332,7 @@ jobs:
         编译开始时间：${COMPILE_TIME}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
-        echo "【LinInfo】\n${notify_content}"
+        echo -e "【LinInfo】\n${notify_content}"
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
