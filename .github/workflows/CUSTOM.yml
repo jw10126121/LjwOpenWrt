@@ -67,7 +67,7 @@ permissions: write-all
 #CI任务
 jobs:
   config:
-    name: ${{matrix.TARGET}}
+    name: ${{inputs.iWRT_CONFIG}}
     strategy:
       fail-fast: false
       #max-parallel: 2
