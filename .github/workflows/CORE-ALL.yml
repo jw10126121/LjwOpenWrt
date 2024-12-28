@@ -424,8 +424,8 @@ jobs:
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
         cp -f ./config_mine/* ./upload/
         TMP_DIR=$(mktemp -d)
-        find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec echo "【LinInfo】移动文件: {}" \; -exec mv -f {} "$TMP_DIR" \;
-        find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec echo "【LinInfo】移动文件: {}" \; -exec mv -f {} "$TMP_DIR" \;
+        find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
+        find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
         find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
         find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/Organize_Packages.sh "$TMP_DIR"
