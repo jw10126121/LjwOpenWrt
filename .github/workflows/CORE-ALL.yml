@@ -52,7 +52,7 @@ on:
         
 #环境变量配置
 env:
-  TOKEN_DINGDING: ${{secrets.DINGDING_TOKEN}}
+  DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
@@ -125,7 +125,7 @@ jobs:
     - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
       run: |
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
-            echo "TOKEN_DINGDING=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
+            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
         
@@ -346,9 +346,9 @@ jobs:
     - name: Send dingding notify
       continue-on-error: true
       uses: zcong1993/actions-ding@master
-      if: env.TOKEN_DINGDING != ''
+      if: env.DINGDING_TOKEN != ''
       with:
-        dingToken: ${{ env.TOKEN_DINGDING }}
+        dingToken: ${{ env.DINGDING_TOKEN }}
         body: |
           {
             "msgtype": "text",
@@ -475,9 +475,9 @@ jobs:
     - name: Send dingding notify
       continue-on-error: true
       uses: zcong1993/actions-ding@master
-      if: env.TOKEN_DINGDING != '' && steps.upload_url.outputs.bin_download_url != ''
+      if: env.DINGDING_TOKEN != '' && steps.upload_url.outputs.bin_download_url != ''
       with:
-        dingToken: ${{ env.TOKEN_DINGDING }}
+        dingToken: ${{ env.DINGDING_TOKEN }}
         body: |
           {
             "msgtype": "text",
