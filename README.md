@@ -5,19 +5,20 @@
 
 只编译: 
 
-    ipq60xx_DEVICE_cmiot_ax18=y # 和目AX18
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y         # 和目AX18、兆能M2
 
 可编译: 
 
-    ipq60xx_DEVICE_cmiot_ax18=y # 和目AX18
-    ipq60xx_DEVICE_glinet_gl-ax1800=y # GL.iNet GL-AX1800
-    ipq60xx_DEVICE_glinet_gl-axt1800=y # GL.iNet GL-AXT1800
-    ipq60xx_DEVICE_jdcloud_re-ss-01=y # 京东云RE-SS-01 (亚瑟)
-    ipq60xx_DEVICE_jdcloud_re-cs-02=y # 京东云RE-CS-02 (雅典娜)
-    ipq60xx_DEVICE_qihoo_360v6=y # 奇虎360V6
-    ipq60xx_DEVICE_redmi_ax5-jdcloud=y # 红米AX5（京东云版）
-    ipq60xx_DEVICE_redmi_ax5=y # 红米AX5
-    ipq60xx_DEVICE_xiaomi_ax1800=y # 小米AX1800
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=y   # gl-ax1800
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-axt1800=y  # l-axt1800
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=y   # 京东云亚瑟
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=y   # 京东云雅典娜
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=y   # 京东云太乙
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_linksys_mr7350=y     # MR7350
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_qihoo_360v6=y        # 360V6
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_redmi_ax5-jdcloud=y  # 京东云红米AX5
+    CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=y      # 小米AX1800、红米AX5
+
 
 
 ## 云编译OpenWRT固件
@@ -65,18 +66,19 @@
 <details><summary>CONFIG_PACKAGE_luci-app-xxx=y</summary>
     
     ```
-    CONFIG_PACKAGE_luci-app-ssr-plus=y // LEDE
-    CONFIG_PACKAGE_luci-app-advancedplus=y  # 高级设置
-    CONFIG_PACKAGE_luci-app-alist=y  # Alist网络服务
-    CONFIG_PACKAGE_luci-app-cpufreq=y  # CPU频率策略控制
-    CONFIG_PACKAGE_luci-app-ddns=y  # 动态DNS客户端
-    CONFIG_PACKAGE_luci-app-openvpn-server=y  # OpenVPN服务器
-    CONFIG_PACKAGE_luci-app-samba4=y  # Samba文件共享
-    CONFIG_PACKAGE_luci-app-socat=y  # Socat端口转发工具
-    CONFIG_PACKAGE_luci-app-ttyd=y  # Web终端
-    CONFIG_PACKAGE_luci-app-wolplus=y  # 网络唤醒
-    CONFIG_PACKAGE_luci-app-zerotier=y  # ZeroTier虚拟网络
-    CONFIG_PACKAGE_luci-theme-argon=y  # Argon主题
+    CONFIG_PACKAGE_luci-app-ssr-plus=y       # SSR-Plus
+    # CONFIG_PACKAGE_luci-app-advancedplus=y   # 高级设置
+    CONFIG_PACKAGE_luci-app-alist=y          # Alist网络服务
+    CONFIG_PACKAGE_luci-app-cpufreq=y        # CPU频率策略控制
+    CONFIG_PACKAGE_luci-app-ddns=y           # 动态DNS客户端
+    CONFIG_PACKAGE_luci-app-openvpn-server=y # OpenVPN服务器
+    CONFIG_PACKAGE_luci-app-samba4=y         # Samba文件共享
+    CONFIG_PACKAGE_luci-app-socat=y          # Socat端口转发工具
+    CONFIG_PACKAGE_luci-app-ttyd=y           # Web终端
+    CONFIG_PACKAGE_luci-app-wol=y            # 网络唤醒
+    # CONFIG_PACKAGE_luci-app-wolplus=y        # 网络唤醒
+    CONFIG_PACKAGE_luci-app-zerotier=y       # ZeroTier虚拟网络
+    CONFIG_PACKAGE_luci-theme-argon=y        # Argon主题
     ```
 
 </details>
@@ -91,7 +93,7 @@
 
 
 
-## THKS
+## 感谢
 
 ftkey | VIKINGYFY | LiBwrt-op | ZqinKing | laipeng668 | ImmortalWRT | LEDE | MORE AND MORE
 
