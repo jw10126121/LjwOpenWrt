@@ -134,12 +134,12 @@ jobs:
       continue-on-error: true
       uses: zcong1993/actions-ding@master
       with:
-        dingToken: ${{ env.DINGDING_TOKEN}}
+        dingToken: ${{ secrets.DINGDING_TOKEN}}
         body: |
           {
             "msgtype": "text",
             "text": {
-                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{env.DINGDING_TOKEN}}"
+                "content": "Linjw，运行测试，DINGDINGTOKEN: ${{secrets.DINGDING_TOKEN}}"
              }
           }
         
