@@ -55,6 +55,7 @@ samba4_packages_pre="luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls
 mwan3_packages_pre="luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_"
 alist_packages_pre="luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_"
 wrtbwmon_packages_pre="luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_"
+netdata_packages_pre="luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_"
 
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$openclash_packages_pre" "package_openclash"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$ssrplus_packages_pre" "package_ssrplus" 
@@ -64,6 +65,7 @@ UPDATE_PACKAGE_LIST "$ACTION_DIR" "$samba4_packages_pre" "package_samba4"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$mwan3_packages_pre" "package_mwan3"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$alist_packages_pre" "package_alist"
 UPDATE_PACKAGE_LIST "$ACTION_DIR" "$wrtbwmon_packages_pre" "package_wrtbwmon"
+UPDATE_PACKAGE_LIST "$ACTION_DIR" "$netdata_packages_pre" "package_netdata"
 
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$openclash_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$ssrplus_packages_pre"
@@ -73,4 +75,5 @@ DELETE_PACKAGE_LIST "$ACTION_DIR" "$samba4_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$mwan3_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$alist_packages_pre"
 DELETE_PACKAGE_LIST "$ACTION_DIR" "$wrtbwmon_packages_pre"
+DELETE_PACKAGE_LIST "$ACTION_DIR" "$netdata_packages_pre"
 
