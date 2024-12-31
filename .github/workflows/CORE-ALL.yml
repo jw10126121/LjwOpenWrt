@@ -55,7 +55,7 @@ on:
         
 #环境变量配置
 env:
-  DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
+  DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
@@ -93,7 +93,6 @@ jobs:
 
     - name: Check Server Performance (检查服务器性能)
       run: |
-        echo "编译说明：${{ env.WRT_MINE_SAY }}"
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
         echo -e "已知CPU型号（降序）：7763，8370C，8272CL，8171M，E5-2673 \n"
@@ -108,8 +107,9 @@ jobs:
           
     - name: Check ENV (检查环境)
       run: |
+        echo "编译说明：${{ env.WRT_MINE_SAY }}"
         WRT_HAS_WIFI=true
-        WRT_HAS_WIFI_TEXT="带WIFI"
+        WRT_HAS_WIFI_TEXT="有WIFI"
         if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
           WRT_HAS_WIFI=false
           WRT_HAS_WIFI_TEXT="无WIFI"
@@ -127,8 +127,8 @@ jobs:
         
     - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
       run: |
-        echo "钉钉TOKEN: ${{secrets.DINGDING_TOKEN}}"
-        echo "钉钉TOKEN: ${{env.DINGDING_TOKEN}}"
+        echo "钉钉TOKEN_secrets: ${{secrets.DINGDING_TOKEN}}"
+        echo "钉钉TOKEN_env: ${{env.DINGDING_TOKEN}}"
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
@@ -176,6 +176,7 @@ jobs:
 
     - name: Check Scripts (搜索脚本并配置权限)
       run: |
+        echo "【LinInfo】配置脚本执行权限..."
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: config git (修改git下载缓冲大小)
@@ -313,7 +314,7 @@ jobs:
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
         echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
-        name_config_file="Config_${WRT_VER}_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${COMPILE_TIME}"
+        name_config_file="Config_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${WRT_VER}_${COMPILE_TIME}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
@@ -324,11 +325,11 @@ jobs:
         notify_content="\
         【Linjw】\n\
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
-        支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         支持设备：${DEVICE_PROFILE}\n\
+        支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         设备架构：${DEVICE_ARCH}\n\
         内核版本：${VERSION_KERNEL}\n\
-        默认IP：${{env.WRT_DEFAULT_LANIP}}\n\
+        默认LAN-IP：${{env.WRT_DEFAULT_LANIP}}\n\
         默认密码：无 | password\n\
         是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
         源码：${WRT_REPO_URL}\n\
@@ -347,158 +348,7 @@ jobs:
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
         fi
-
-    - name: Send dingding notify
-      continue-on-error: true
-      uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != ''
-      with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "编译开始：\n${{ env.notify_content }}"
-             }
-          }
-          
-    - name: Upload Config (上传配置文件)
-      id: config_upload
-      uses: actions/upload-artifact@master
-      with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
-        path: openwrt/config_mine
-
-    - name: Download tools (下载工具包) 
-      working-directory: ./openwrt
-      run: |
-        echo "【LinInfo】下载工具，DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
-        make download -j8
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
-        
-    - name: 编译固件 Build firmware
-      id: compile
-      working-directory: ./openwrt
-      run: |
-        echo -e "$(nproc) thread build."
-        make -j$(nproc) V=s || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-        echo "FILE_DATE=$(date +"%y%m%d")" >> $GITHUB_ENV
-        FILE_TIME=$(date +"D%y%m%dT%H%M%S")
-        echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
-
-    - name: Machine Information
-      continue-on-error: true
-      run: |
-        cd $OPENWRT_PATH
-        echo "======================="
-        lscpu | grep -E "name|Core|Thread"
-        echo "======================="
-        df -h
-        echo "======================="
-        du -h --max-depth=1
-        echo "======================="
-        
-    - name: Upload bin directory
-      continue-on-error: true
-      id: all_upload
-      uses: actions/upload-artifact@master
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR == true || env.UPLOAD_BIN_DIR == 'true')
-      with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}
-        path: openwrt/bin
-        
-    - name: Upload all bin datas to wss
-      id: all_upload_wss
-      continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_BIN_DIR_WSS == true || env.UPLOAD_BIN_DIR_WSS == 'true')
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/bin/" 2>&1 | tee wss_all.log
-        bin_download_url=$(cat wss_all.log | grep "Download Link: " | cut -f3 -d" ")
-        echo "下载地址：$bin_download_url_all"
-        echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_OUTPUT
-        echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_ENV
-
-    - name: Organize Files(整理文件)
-      id: organize
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
-        cp -f ./config_mine/* ./upload/
-        TMP_DIR=$(mktemp -d)
-        find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
-        find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/Organize_Packages.sh "$TMP_DIR"
-        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
-        rm -rf "$TMP_DIR"
-        rm -rf ./upload/packages
-        echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
-        for TYPE in $DEVICE_NAME_LIST ; do
-          echo "【LinInfo】TYPE: $TYPE============================================"
-          for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
-            EXT=$(basename $FILE | cut -d '.' -f 2-)
-            NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-            NEW_FILE="$WRT_VER"_"$DEVICE_SUBTARGET"_"$NAME"_"$COMPILE_TIME"."$EXT"
-            echo "【LinInfo】文件：$FILE"
-            echo "【LinInfo】改名后：$NEW_FILE"
-            echo "【LinInfo】-----------------------------------------------------"
-            mv -f $FILE ./upload/$NEW_FILE
-          done
-        done
-        find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: Upload bin to wss
-      id: upload_url
-      continue-on-error: true
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
-        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
-        echo "下载地址：$bin_download_url"
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
-
-    - name: Create Notification Content (创建推送内容)
-      id: notification_content
-      continue-on-error: true
-      run: |
-        echo "【LinInfo】配置通知content"
-        notify_content="\
-        ${{env.notify_content}}\n\
-        编译完成时间：${FILE_TIME}\n\
-        下载地址：${{env.bin_download_url}}\
-        "
-        echo "notify_content=${notify_content}" >> $GITHUB_ENV
-        
-    - name: Send dingding notify
-      continue-on-error: true
-      uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != '' && steps.upload_url.outputs.bin_download_url != ''
-      with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "${{ env.notify_content }}"
-             }
-          }
-
-    - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      id: upload
-      continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_FIRMWARE_DIR == true || env.UPLOAD_FIRMWARE_DIR == 'true')
-      uses: actions/upload-artifact@main
-      with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.COMPILE_DATE_HOUR }}_Firmware
-        path: ${{ env.OPENWRT_PATH }}/upload
+        echo "release_desc=$(cat ./config_mine/readme.txt)" >> $GITHUB_ENV
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
@@ -522,3 +372,5 @@ jobs:
           - 固件内核：${{ env.VERSION_KERNEL }}
           - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
           - ${{ env.VERSION_INFO }}
+          ### ---- ####
+          ${{ env.release_desc }}
