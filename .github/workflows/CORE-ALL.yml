@@ -45,6 +45,9 @@ on:
       WRT_TOKEN_DINGDING:
         required: false
         type: string
+    secrets:
+      DINGDING_TOKEN: 
+        required: false
       # UPLOAD_FIRMWARE_DIR:
       #   required: false
       #   type: boolean
@@ -52,7 +55,7 @@ on:
         
 #环境变量配置
 env:
-  DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
+  # DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
