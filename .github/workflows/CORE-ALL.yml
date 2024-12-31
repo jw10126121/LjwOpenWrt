@@ -175,12 +175,18 @@ jobs:
         编译开始时间：${COMPILE_TIME}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
+        FILE_TIME="11111111111111"
 
     - name: Prepare Release Body (准备发布内容)
       run: |
         config_file=$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/IPQ60XX-NOWIFI_full.txt
         desc_file=release_body.txt
+        echo "## --- 编译说明1 --- ##" >> $desc_file
+        echo "### --- 编译说明2 --- ###" >> $desc_file
+        echo "#### --- 编译说明3 --- ####" >> $desc_file
+        echo "##### --- 编译说明4 --- #####" >> $desc_file
         echo -e "${{ env.notify_content }}" >> $desc_file
+        echo "编译完成时间：${ FILE_TIME }" >> $desc_file
         echo "" >> $desc_file
         echo "### --- 集成的插件 --- ###" >> $desc_file
         grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' >> $desc_file
