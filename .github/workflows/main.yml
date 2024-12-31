@@ -19,11 +19,6 @@ on:
         required: false
         type: string
         default: 'IPQ60XX.sh'
-      # WRT_GENERAL_CONFIG:
-      #   description: '通用配置文件'
-      #   required: true
-      #   type: string
-      #   default: 'GENERAL.txt'
       WRT_DIYPackages:
         description: 'DIY包配置'
         required: false
@@ -59,6 +54,11 @@ on:
       #   required: false
       #   type: string
       #   default: ''
+      # WRT_GENERAL_CONFIG:
+      #   description: '通用配置文件'
+      #   required: true
+      #   type: string
+      #   default: 'GENERAL.txt'
 
   # workflow_call:
   #   inputs:
