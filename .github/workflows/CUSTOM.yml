@@ -12,12 +12,12 @@ on:
         type: string
         default: 'IPQ60XX-NOWIFI.txt'
       iWRT_DIY_SETTING:
-        description: 'DIY脚本：'
+        description: 'DIY脚本'
         required: false
         type: string
         default: 'IPQ60XX.sh'
       iWRT_DIYPackages:
-        description: 'DIY包配置：'
+        description: 'DIY包配置'
         required: false
         type: string
         default: 'Packages.sh'
@@ -38,7 +38,7 @@ on:
         default: ''
       iWRT_REPO_URL:
         description: '源码'
-        required: false
+        required: true
         type: string
         default: 'https://github.com/coolsnowwolf/lede'
       iWRT_REPO_Commit_Hash:
@@ -100,6 +100,7 @@ jobs:
       WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
-    # secrets:
+    secrets:
+      # 钉钉TOKEN
       DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
       
