@@ -162,26 +162,11 @@ jobs:
         echo "release_desc=$(cat $readme_demo)" >> $GITHUB_ENV
 
     - name: Upload Firmware To Release(发布固件)
-      if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
       uses: softprops/action-gh-release@v2
       with:
-        name: ${{ env.COMPILE_DATE_HOUR }} for ${{ env.DEVICE_SUBTARGET }}
-        tag_name: ${{ env.COMPILE_DATE_HOUR }}_${{ env.DEVICE_SUBTARGET }}
-        files: ${{ env.OPENWRT_PATH }}/upload/*.*
+        name: test_1111
+        tag_name: test_2222
+        files: $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
         body: |
-          **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
-          ### 📒 固件信息(${{ env.WRT_HAS_WIFI_TEXT }})
-          - ${{ env.WRT_HAS_WIFI_TEXT }}带有线NSS的${{ env.VERSION_KERNEL }}内核固件
-          - 💻 这是 ${{ env.DEVICE_SUBTARGET }} 平台使用的 OpenWrt ${{ env.WRT_HAS_LITE_TEXT }}固件
-          - 💻 适配设备: ${{ env.DEVICE_PROFILE }}
-          - 💻 设备架构：${{ env.DEVICE_ARCH }}
-          - ⚽ 固件源码: ${{ env.WRT_REPO_URL }}
-          - 💝 源码分支: ${{ env.WRT_REPO_BRANCH }}
-          - 🌐 默认地址: ${{ env.WRT_DEFAULT_LANIP }}
-          - 🔑 默认密码: 无 | password
-          ### 🧊 固件版本
-          - 固件内核：${{ env.VERSION_KERNEL }}
-          - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
-          - ${{ env.VERSION_INFO }}
           ### ---- ####
           ${{ env.release_desc }}
