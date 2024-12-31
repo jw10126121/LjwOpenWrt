@@ -6,15 +6,16 @@
 name:  main
 
 on:
+  workflow_call:
   workflow_dispatch:
     inputs:
       WRT_CONFIG:
-        description: '配置文件：'
+        description: '配置文件'
         required: true
         type: string
         default: 'IPQ60XX-NOWIFI.txt'
       WRT_DIY_SETTING:
-        description: 'DIY脚本：'
+        description: 'DIY脚本'
         required: false
         type: string
         default: 'IPQ60XX.sh'
@@ -24,7 +25,7 @@ on:
       #   type: string
       #   default: 'GENERAL.txt'
       WRT_DIYPackages:
-        description: 'DIY包配置：'
+        description: 'DIY包配置'
         required: false
         type: string
         default: 'Packages.sh'
@@ -33,6 +34,11 @@ on:
         required: false
         type: string
         default: '192.168.0.1'
+      WRT_REPO_URL:
+        description: '源码'
+        required: false
+        type: string
+        default: 'https://github.com/coolsnowwolf/lede'
       WRT_RELEASE_FIRMWARE:
         description: '发布firmware'
         required: false
@@ -43,16 +49,17 @@ on:
         required: false
         type: string
         default: ''
-      # DINGDING_TOKEN:
-      #   description: '钉钉TOKEN'
-      #   required: false
-      #   type: string
-      #   default: ''
       WRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
         type: string
         default: ''
+      # DINGDING_TOKEN:
+      #   description: '钉钉TOKEN'
+      #   required: false
+      #   type: string
+      #   default: ''
+
   # workflow_call:
   #   inputs:
   #     WRT_REPO_URL:
