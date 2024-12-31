@@ -161,12 +161,10 @@ jobs:
         readme_demo=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
         echo "release_desc_file=$readme_demo" >> $GITHUB_ENV
 
-    - name: Upload Firmware To Release(发布固件)
+    - name: Release Firmware
       uses: softprops/action-gh-release@v2
       with:
-        name: test_1111
         tag_name: test_2222
         files: $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
-        body: |
-          ### ---- ####
-          body_path: ${{ env.release_desc_file }}
+        body_path: ${{ env.release_desc_file }}
+        
