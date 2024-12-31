@@ -55,7 +55,7 @@ on:
         
 #环境变量配置
 env:
-  # DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
+  DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
@@ -127,6 +127,8 @@ jobs:
         
     - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
       run: |
+        echo "钉钉TOKEN: ${{secrets.DINGDING_TOKEN}}"
+        echo "钉钉TOKEN: ${{env.DINGDING_TOKEN}}"
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
