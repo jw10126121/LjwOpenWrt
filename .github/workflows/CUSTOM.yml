@@ -3,19 +3,11 @@ name: CUSTOM
 
 #CI计划
 on:
-  #自动清理：每天早上5点
-  # schedule:
-  #  - cron: 0 21 * * *
-  #自动编译：当Auto-Clean运行完成后
-  #workflow_run:
-  #  workflows: ["Auto-Clean"]
-  #  types:
-  #   - completed
   #手动编译
   workflow_dispatch:
     inputs:
       iWRT_CONFIG:
-        description: '配置文件：'
+        description: '配置文件'
         required: true
         type: string
         default: 'IPQ60XX-NOWIFI.txt'
@@ -30,7 +22,7 @@ on:
         type: string
         default: 'Packages.sh'
       iWRT_DEFAULT_LANIP:
-        description: '配置LAN-IP'
+        description: '默认LAN-IP'
         required: false
         type: string
         default: '192.168.0.1'
@@ -44,16 +36,21 @@ on:
         required: false
         type: string
         default: ''
-      iTOKEN_DINGDING:
-        description: '钉钉TOKEN'
+      iWRT_REPO_URL:
+        description: '源码'
         required: false
         type: string
-        default: ''
+        default: 'https://github.com/coolsnowwolf/lede'
       iWRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
         type: string
         default: ''
+      # iTOKEN_DINGDING:
+      #   description: '钉钉TOKEN'
+      #   required: false
+      #   type: string
+      #   default: ''
       # iWRT_GENERAL_CONFIG:
       #   description: '通用配置文件'
       #   required: true
@@ -80,9 +77,9 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      WRT_REPO_URL: ${{ matrix.SOURCE }}
+      WRT_REPO_URL: ${{ inputs.iWRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
       # 编译分支
-      WRT_REPO_BRANCH: ${{ matrix.BRANCH }}
+      WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
       # DIY配置文件
@@ -103,6 +100,6 @@ jobs:
       WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
-    secrets:
-      DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
+    # secrets:
+      DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
       
