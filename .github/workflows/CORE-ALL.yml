@@ -180,7 +180,7 @@ jobs:
       run: |
         config_file=$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/IPQ60XX-NOWIFI_full.txt
         desc_file=release_body.txt
-        echo "${{ env.notify_content }}" >> $desc_file
+        echo -e "${{ env.notify_content }}" >> $desc_file
         echo "" >> $desc_file
         echo "### --- 集成的插件 --- ###" >> $desc_file
         grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' >> $desc_file
