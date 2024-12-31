@@ -159,7 +159,7 @@ jobs:
     - name: Clone Source Code (克隆源代码)
       run: |
         readme_demo=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
-        echo "release_desc=$(cat $readme_demo)" >> $GITHUB_ENV
+        echo "release_desc_file=$readme_demo" >> $GITHUB_ENV
 
     - name: Upload Firmware To Release(发布固件)
       uses: softprops/action-gh-release@v2
@@ -169,4 +169,4 @@ jobs:
         files: $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
         body: |
           ### ---- ####
-          ${{ env.release_desc }}
+          body_path: ${{ env.release_desc_file }}
