@@ -430,6 +430,20 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
+        rm -fr "./config_mine/readme.txt"
+        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
+          chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
+          TO_MY_SAY_DETAIL_tmp="
+          ${{ env.WRT_MINE_SAY }}\n\
+          ${{ env.release_content }}\n\
+          编译开始时间：${{ env.COMPILE_TIME }}\n\
+          编译完成时间：${{ env.FILE_TIME }}\
+          "
+          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
+        fi
+        release_desc_file=$OPENWRT_PATH/config_mine/readme.txt
+        echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         cp -f ./config_mine/* ./upload/
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
@@ -506,41 +520,8 @@ jobs:
 
     - name: Prepare Release Body (准备发布内容)
       run: |
-        config_file=${{ env.OPENWRT_PATH }}/config_mine/"${{ env.name_config_file }}"_full.txt
-        desc_file=release_body.txt
-        echo "## --- 编译说明 --- ##" >> $desc_file
-        echo -e "${{ env.release_content }}" >> $desc_file
-        echo "编译开始时间：${{ env.COMPILE_TIME }}" >> $desc_file
-        echo "编译完成时间：${{ env.FILE_TIME }}" >> $desc_file
-        echo "" >> $desc_file
-        echo "#### --- 集成的插件 --- ####" >> $desc_file
-        grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//' >> $desc_file
-        pkg_list_package=$(grep "^CONFIG_PACKAGE_luci-app-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
-        if [ -n "$pkg_list_package" ]; then
-          echo "" >> $desc_file
-          echo "#### --- 安装包插件 --- ####" >> $desc_file
-          for item in $pkg_list_package; do
-              echo "$item" >> $desc_file
-            done
-        fi
-        theme_list=$(grep "^CONFIG_PACKAGE_luci-theme-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//')
-        if [ -n "$theme_list" ]; then
-          echo "" >> $desc_file
-          echo "#### --- 集成的主题 --- ####" >> $desc_file
-          for item in $theme_list; do
-                echo "$item" >> $desc_file
-            done
-        fi
-        theme_list_package=$(grep "^CONFIG_PACKAGE_luci-theme-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
-        if [ -n "$theme_list_package" ]; then
-          echo "" >> $desc_file
-          echo "#### --- 安装包主题 --- ####" >> $desc_file
-            for item in $theme_list_package; do
-                echo "$item" >> $desc_file
-            done
-        fi
-        echo "" >> $desc_file
-        echo "release_desc_file=${desc_file}" >> $GITHUB_ENV
+        echo "【LinInfo】发布内容："
+        echo "${cat ${{ env.release_desc_file }}}"
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
