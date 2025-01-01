@@ -137,8 +137,9 @@ jobs:
     - name: Read Variables (读取变量)
       run: |
         release_desc_file=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
-        release_content=$(echo -e ${release_desc_file})
-        echo "release_content=$(echo -e ${release_desc_file})" >> $GITHUB_ENV
+        release_content=$(cat ${release_desc_file})
+        echo "${release_content}"
+        echo "release_content=${release_content}" >> $GITHUB_ENV
 
     - name: Send dingding notify
       continue-on-error: true
