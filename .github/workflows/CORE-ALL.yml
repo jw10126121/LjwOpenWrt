@@ -322,7 +322,7 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        notify_content="\
+        release_content="\
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持设备：${DEVICE_PROFILE}\n\
         支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
@@ -335,13 +335,13 @@ jobs:
         源码分支：${WRT_REPO_BRANCH}\n\
         源码HASH：${REPO_GIT_HASH}\
         "
-        echo "notify_content=${notify_content}" >> $GITHUB_ENV
-        echo -e "【LinInfo】\n${notify_content}"
+        echo "release_content=${release_content}" >> $GITHUB_ENV
+        echo -e "【LinInfo】\n${release_content}"
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
-          ${notify_content}\n\
+          ${release_content}\n\
           编译开始时间：${COMPILE_TIME}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
@@ -361,7 +361,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "编译开始：\n${{ env.notify_content }}"
+                "content": "编译开始：${{ env.COMPILE_TIME }}\n${{ env.release_content }}"
              }
           }
           
@@ -474,7 +474,7 @@ jobs:
       run: |
         echo "【LinInfo】配置通知content"
         notify_content="\
-        ${{env.notify_content}}\n\
+        ${{env.release_content}}\n\
         编译开始时间：${COMPILE_TIME}\n\
         编译完成时间：${FILE_TIME}\n\
         下载地址：${{env.bin_download_url}}\
@@ -509,7 +509,7 @@ jobs:
         config_file=${{ env.OPENWRT_PATH }}/config_mine/"${{ env.name_config_file }}"_full.txt
         desc_file=release_body.txt
         echo "## --- 编译说明 --- ##" >> $desc_file
-        echo -e "${{ env.notify_content }}" >> $desc_file
+        echo -e "${{ env.release_content }}" >> $desc_file
         echo "编译开始时间：${{ env.COMPILE_TIME }}" >> $desc_file
         echo "编译完成时间：${{ env.FILE_TIME }}" >> $desc_file
         echo "" >> $desc_file
