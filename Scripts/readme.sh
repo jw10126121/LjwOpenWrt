@@ -15,7 +15,7 @@ rm -fr $desc_file
 # 编译说明
 if [ -n "$compile_desc" ]; then
 	echo "" >> $desc_file
-	echo "#### --- 编译说明 --- ####" >> $desc_file
+	echo "### --- 编译说明 --- ###" >> $desc_file
 	echo "$compile_desc" >> $desc_file
 fi
 
