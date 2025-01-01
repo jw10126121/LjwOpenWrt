@@ -326,7 +326,7 @@ jobs:
     - name: Cache Config (缓存配置文件)
       run: |
         cd $OPENWRT_PATH
-        export name_config_file="Config_${DEVICE_SUBTARGET}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.COMPILE_TIME }}"
+        export name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.COMPILE_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
