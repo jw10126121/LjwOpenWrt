@@ -137,7 +137,9 @@ jobs:
     - name: Read Variables (读取变量)
       run: |
         release_desc_file=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
-        release_content=$(cat ${release_desc_file})
+        release_content=cat <<EOF
+        $(cat "$release_desc_file")
+        EOF
         echo "${release_content}"
         echo "release_content=${release_content}" >> $GITHUB_ENV
 
