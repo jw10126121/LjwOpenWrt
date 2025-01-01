@@ -138,9 +138,9 @@ jobs:
       run: |
         release_desc_file=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
         release_content=$(<"$release_desc_file") # 读取文件内容
-        echo "${release_content}"
-        release_content_base64=$( cat "$release_desc_file" | base64 )
-        echo "release_content_base64=$release_content_base64" >> $GITHUB_ENV
+        echo "release_content_base64=$(echo -n "$release_content" | base64)" >> $GITHUB_ENV # 将Base64编码的内容写入环境变量文件
+        release_content=$(echo -n "$release_content_base64" | base64 --decode)
+        echo "release_content=$release_content" >> $GITHUB_ENV # 将解码后的内容写入环境变量文件
 
     - name: Send dingding notify
       continue-on-error: true
@@ -152,6 +152,6 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-            "content": "编译开始：${{ env.COMPILE_TIME }}\n${{ decodeBase64(env.release_content_base64) }}"
+            "content": "编译开始：${{ env.COMPILE_TIME }}\n${{ env.release_content }}"
              }
           }
