@@ -206,7 +206,7 @@ jobs:
         fi
         export REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
-        echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}"
+        echo "【LinInfo】GIT HASH：${ REPO_GIT_HASH }"
         export VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
@@ -285,14 +285,14 @@ jobs:
         DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
         DEVICE_NAME_LIST_LIAN=$(IFS=$'_and_'; echo "${device_name_list[*]}")
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $path_config_file)
-        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
+        echo "DEVICE_TARGET=${ DEVICE_TARGET }" >> $GITHUB_ENV
+        echo "DEVICE_SUBTARGET=${ DEVICE_SUBTARGET }" >> $GITHUB_ENV
+        echo "DEVICE_PROFILE=${ DEVICE_PROFILE }" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
-        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
+        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "${ DEVICE_TARGET }" -print -prune)
         KERNEL_PATCHVER=''
         MAKEFILE_PATH="$dir_linux_device_target/Makefile"
         if [ -f "$MAKEFILE_PATH" ]; then
@@ -313,7 +313,7 @@ jobs:
         else
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
-        echo "【LinInfo】编译DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+        echo "【LinInfo】编译DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
 
     - name: Cache Toolchain(缓存工具链)
       if: env.CACHE_TOOLCHAIN == 'true'
@@ -326,7 +326,7 @@ jobs:
     - name: Cache Config (缓存配置文件)
       run: |
         cd $OPENWRT_PATH
-        export name_config_file="Config_${DEVICE_SUBTARGET}_${DEVICE_NAME_LIST_LIAN}_${WRT_VER}_${COMPILE_TIME}"
+        export name_config_file="Config_${DEVICE_SUBTARGET}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.COMPILE_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
@@ -336,25 +336,25 @@ jobs:
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
         export system_content="\
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
-        支持设备：${ DEVICE_PROFILE }\n\
-        支持平台：${ DEVICE_TARGET}-${DEVICE_SUBTARGET }\n\
-        设备架构：${ DEVICE_ARCH }\n\
-        内核版本：${ VERSION_KERNEL }\n\
+        支持设备：${{ env.DEVICE_PROFILE }}\n\
+        支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
+        设备架构：${{ env.DEVICE_ARCH }}\n\
+        内核版本：${{ env.VERSION_KERNEL }}\n\
         默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\
         默认密码：无 | password\n\
         是否WIFI：${{ env.WRT_HAS_WIFI_TEXT }}\n\
-        源码地址：${ WRT_REPO_URL }\n\
-        源码分支：${ WRT_REPO_BRANCH }\n\
-        源码hash：${ REPO_GIT_HASH }\
+        源码地址：${{ env.WRT_REPO_URL }}\n\
+        源码分支：${{ env.WRT_REPO_BRANCH }}\n\
+        源码hash：${{ env.REPO_GIT_HASH }}\
         "
-        echo "system_content=${system_content}" >> $GITHUB_ENV
-        echo -e "【LinInfo】\n${system_content}"
+        echo "system_content=${ system_content }" >> $GITHUB_ENV
+        echo -e "【LinInfo】\n${ system_content }"
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
-          ${system_content}\n\
-          编译开始：${COMPILE_TIME}\
+          ${{ env.system_content }}\n\
+          编译开始：${{ env.COMPILE_TIME }}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
@@ -395,7 +395,7 @@ jobs:
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
-        echo "【LinInfo】下载工具，DEVICE：$DEVICE_TARGET-$DEVICE_SUBTARGET-$DEVICE_PROFILE"
+        echo "【LinInfo】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -410,7 +410,7 @@ jobs:
         echo "FILE_DATE=$(date +"%y%m%d")" >> $GITHUB_ENV
         FILE_TIME=$(date +"D%y%m%dT%H%M%S")
         echo "FILE_TIME=$FILE_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】$DEVICE_SUBTARGET-$DEVICE_PROFILE编译完成，完成时间：$FILE_TIME"
+        echo "【LinInfo】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$FILE_TIME"
 
     - name: Machine Information
       continue-on-error: true
@@ -475,13 +475,13 @@ jobs:
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
-        echo "【LinInfo】设备信息：$DEVICE_NAME_LIST"
-        for TYPE in $DEVICE_NAME_LIST ; do
+        echo "【LinInfo】设备信息：${{ env.DEVICE_NAME_LIST }}"
+        for TYPE in ${{ env.DEVICE_NAME_LIST }} ; do
           echo "【LinInfo】TYPE: $TYPE============================================"
           for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
             EXT=$(basename $FILE | cut -d '.' -f 2-)
             NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-            NEW_FILE="$DEVICE_SUBTARGET"_"$NAME"_"$WRT_VER"_"$COMPILE_TIME"."$EXT"
+            NEW_FILE="${{ env.DEVICE_SUBTARGET }}"_"$NAME"_"${{ env.WRT_VER }}"_"${{ env.COMPILE_TIME }}"."$EXT"
             echo "【LinInfo】文件：$FILE"
             echo "【LinInfo】改名后：$NEW_FILE"
             echo "【LinInfo】-----------------------------------------------------"
@@ -514,7 +514,7 @@ jobs:
         echo 'EOF' >> $GITHUB_ENV
         notify_content="\
         临时下载地址：${{env.bin_download_url}}\n\n\
-        ${{env.system_content}}\
+        ${{ env.system_content }}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
