@@ -322,38 +322,33 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        release_content="\
+        system_content="\
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持设备：${DEVICE_PROFILE}\n\
         支持平台：${DEVICE_TARGET}-${DEVICE_SUBTARGET}\n\
         设备架构：${DEVICE_ARCH}\n\
         内核版本：${VERSION_KERNEL}\n\
-        默认LAN-IP：${{env.WRT_DEFAULT_LANIP}}\n\
+        默认地址：${{env.WRT_DEFAULT_LANIP}}\n\
         默认密码：无 | password\n\
         是否WIFI：${{env.WRT_HAS_WIFI_TEXT}}\n\
-        源码：${WRT_REPO_URL}\n\
+        源码地址：${WRT_REPO_URL}\n\
         源码分支：${WRT_REPO_BRANCH}\n\
-        源码HASH：${REPO_GIT_HASH}\
+        源码hash：${REPO_GIT_HASH}\
         "
-        echo "release_content=${release_content}" >> $GITHUB_ENV
-        echo -e "【LinInfo】\n${release_content}"
+        echo "system_content=${system_content}" >> $GITHUB_ENV
+        echo -e "【LinInfo】\n${system_content}"
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
-          ${release_content}\n\
-          编译开始时间：${COMPILE_TIME}\
+          ${system_content}\n\
+          编译开始：${COMPILE_TIME}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
         fi
-        release_desc_file=$OPENWRT_PATH/config_mine/readme.txt
+        release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
-        # 把内容保存到环境变量release_content中
-        #echo 'release_content_tmp<<EOF' >> $GITHUB_ENV
-        #cat "${{ env.release_desc_file}}" >> $GITHUB_ENV
-        #echo 'EOF' >> $GITHUB_ENV
-
 
     - name: Send dingding notify
       continue-on-error: true
@@ -365,7 +360,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "编译开始：${{ env.COMPILE_TIME }}\n\n${{ env.release_content }}"
+                "content": "编译开始：${{ env.COMPILE_TIME }}\n\n${{ env.system_content }}"
              }
           }
           
@@ -424,7 +419,7 @@ jobs:
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/bin/" 2>&1 | tee wss_all.log
-        bin_download_url=$(cat wss_all.log | grep "Download Link: " | cut -f3 -d" ")
+        bin_download_url_all=$(cat wss_all.log | grep "Download Link: " | cut -f3 -d" ")
         echo "下载地址：$bin_download_url_all"
         echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_OUTPUT
         echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_ENV
@@ -440,12 +435,12 @@ jobs:
           chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
-          ${{ env.release_content }}\n\
-          编译开始时间：${{ env.COMPILE_TIME }}\n\
-          编译完成时间：${{ env.FILE_TIME }}\
+          ${{ env.system_content }}\n\
+          编译开始：${{ env.COMPILE_TIME }}\n\
+          编译完成：${{ env.FILE_TIME }}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL"
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
         fi
         release_desc_file=$OPENWRT_PATH/config_mine/readme.txt
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
@@ -492,13 +487,13 @@ jobs:
       continue-on-error: true
       run: |
         echo "【LinInfo】配置通知content"
-        # 把内容保存到环境变量release_content中
-        echo 'release_content<<EOF' >> $GITHUB_ENV
+        # 把内容保存到环境变量system_content中
+        echo 'system_content<<EOF' >> $GITHUB_ENV
         cat "${{ env.release_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
         notify_content="\
-        临时下载地址：${{env.bin_download_url}}\n\
-        ${{env.release_content}}\
+        临时下载地址：${{env.bin_download_url}}\n\n\
+        ${{env.system_content}}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
@@ -530,8 +525,8 @@ jobs:
         echo "【LinInfo】发布内容: ${{ env.release_desc_file }}"
         the_release_content=$(cat ${{ env.release_desc_file }})
         echo "${the_release_content}"
-        # 把内容保存到环境变量release_content中
-        #echo 'release_content<<EOF' >> $GITHUB_ENV
+        # 把内容保存到环境变量system_content中
+        #echo 'system_content<<EOF' >> $GITHUB_ENV
         #cat "$release_desc_file" >> $GITHUB_ENV
         #echo 'EOF' >> $GITHUB_ENV
 
