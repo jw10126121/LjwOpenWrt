@@ -204,10 +204,10 @@ jobs:
           git fetch --depth=1 origin ${{ env.WRT_REPO_Commit_Hash }}
           git checkout ${{ env.WRT_REPO_Commit_Hash }}
         fi
-        export REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
+        REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
-        echo "【LinInfo】GIT HASH：${{env.REPO_GIT_HASH}}"
-        export VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
+        echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}"
+        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
@@ -263,11 +263,11 @@ jobs:
       run: |
         cd $OPENWRT_PATH
         the_repo=${WRT_REPO_URL%/}
-        export WRT_VER="${the_repo##*/}"-$WRT_REPO_BRANCH
+        WRT_VER="${the_repo##*/}"-$WRT_REPO_BRANCH
         echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
-        export SOURCE_REPO="$(echo $WRT_REPO_URL | awk -F '/' '{print $(NF)}')"
+        SOURCE_REPO="$(echo $WRT_REPO_URL | awk -F '/' '{print $(NF)}')"
         echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
-        export path_config_file="$OPENWRT_PATH/.config"
+        path_config_file="$OPENWRT_PATH/.config"
         device_name_list=()
         while IFS= read -r line
         do
@@ -307,7 +307,7 @@ jobs:
           KERNEL_PATCHVER=6.1
         fi
         if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
-          export VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
           echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
           echo "【LinInfo】内核版本：$VERSION_KERNEL"
         else
@@ -326,7 +326,7 @@ jobs:
     - name: Cache Config (缓存配置文件)
       run: |
         cd $OPENWRT_PATH
-        export name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.COMPILE_TIME }}"
+        name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.COMPILE_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【LinInfo】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
@@ -334,7 +334,7 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        export system_content="\
+        system_content="\
         固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
         支持设备：${{ env.DEVICE_PROFILE }}\n\
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
@@ -359,7 +359,7 @@ jobs:
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
         fi
-        export release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
+        release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "release_desc_file=$release_desc_file" >> $GITHUB_ENV
 
     - name: Send dingding notify
