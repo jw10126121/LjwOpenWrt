@@ -131,8 +131,8 @@ if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_re
     echo "【LinInfo】LEAN配置密码已清空：./package/lean/default-settings/files/zzz-default-settings"
 fi
 
-WIFI_NAME=linAP
-WIFI_PASSWORD=88888888
+WIFI_NAME=LEDE
+WIFI_PASSWORD=12345678
 
 # # 修改wifi国家
 # sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx}.type=mac80211 \n\t\t\t set wireless.radio\${devidx}.country=\"CN\"/g' ./kernel/mac80211/files/lib/wifi/mac80211.sh
@@ -172,6 +172,12 @@ if [[ -f "./package/lean/default-settings/files/zzz-default-settings" ]]; then
     # DISTRIB_DESCRIPTION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}')
     # sed -i "/DISTRIB_DESCRIPTION=/s/${DISTRIB_DESCRIPTION}/Linjw /" ./package/lean/default-settings/files/zzz-default-settings
 fi
+
+sed -i "s/^CONFIG_FEED_helloworld=y/CONFIG_FEED_helloworld=n/g" ./.config
+
+sed -i "s/^CONFIG_FEED_sqm_scripts_nss=y/CONFIG_FEED_sqm_scripts_nss=n/g" ./.config
+
+sed -i "s/^CONFIG_FEED_nss_packages=y/CONFIG_FEED_nss_packages=n/g" ./.config
 
 
 if ! grep -q "^CONFIG_PACKAGE_luci=y" "./.config"; then
