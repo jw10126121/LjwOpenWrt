@@ -137,10 +137,9 @@ jobs:
     - name: Read Variables (读取变量)
       run: |
         release_desc_file=$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt
-        release_content=$(<"$release_desc_file") # 读取文件内容
-        echo "release_content_base64=$(echo -n "$release_content" | base64)" >> $GITHUB_ENV # 将Base64编码的内容写入环境变量文件
-        release_content=$(echo -n "$release_content_base64" | base64 --decode)
-        echo "release_content=$release_content" >> $GITHUB_ENV # 将解码后的内容写入环境变量文件
+        echo 'release_content<<EOF' >> $GITHUB_ENV
+        cat "$release_desc_file" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
 
     - name: Send dingding notify
       continue-on-error: true
