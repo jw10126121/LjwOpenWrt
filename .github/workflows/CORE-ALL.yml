@@ -313,7 +313,7 @@ jobs:
         else
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
-        echo "【LinInfo】编译DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
+        echo "【LinInfo】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
 
     - name: Cache Toolchain(缓存工具链)
       if: env.CACHE_TOOLCHAIN == 'true'
@@ -360,7 +360,7 @@ jobs:
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
         fi
         export release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
-        echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
+        echo "release_desc_file=$release_desc_file" >> $GITHUB_ENV
 
     - name: Send dingding notify
       continue-on-error: true
