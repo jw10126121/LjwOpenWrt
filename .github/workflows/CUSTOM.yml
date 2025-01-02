@@ -1,5 +1,5 @@
 #CI项目
-name: CUSTOM
+name: ${{inputs.iWRT_CONFIG}}
 
 #CI计划
 on:
