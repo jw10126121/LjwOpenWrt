@@ -45,6 +45,9 @@ on:
       WRT_TOKEN_DINGDING:
         required: false
         type: string
+      WRT_USE_APK:
+        required: false
+        type: boolean
     secrets:
       DINGDING_TOKEN: 
         required: false
@@ -80,6 +83,7 @@ env:
   FREE_UP_DISK: true
   WRT_HAS_WIFI: true
   UPLOAD_BIN_DIR_WSS: false
+  WRT_USE_APK: ${{inputs.WRT_USE_APK || false }}
   
 #CI权限
 permissions: write-all
@@ -325,14 +329,15 @@ jobs:
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
         system_content="\
-        固件类型：${{ env.WRT_HAS_LITE_TEXT }}\n\
+        固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
         支持设备：${{ env.DEVICE_PROFILE }}\n\
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
         内核版本：${{ env.VERSION_KERNEL }}\n\
+        包管理器：${{ env.WRT_USE_APK == 'true' && 'APK' || 'IPKG' }}\n\
         默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\
         默认密码：无 | password\n\
-        是否WIFI：${{ env.WRT_HAS_WIFI_TEXT }}\n\
+        是否WIFI：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}\n\
         源码地址：${{ env.WRT_REPO_URL }}\n\
         源码分支：${{ env.WRT_REPO_BRANCH }}\n\
         源码hash：${{ env.REPO_GIT_HASH }}\
