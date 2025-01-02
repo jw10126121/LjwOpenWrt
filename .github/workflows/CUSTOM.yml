@@ -100,6 +100,8 @@ jobs:
       WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
+      # 是否使用APK包管理器
+      WRT_USE_APK: false
     secrets:
       # 钉钉TOKEN
       DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
