@@ -63,27 +63,35 @@ env:
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
-  WRT_CONFIG: ${{inputs.WRT_CONFIG}}           # 配置文件
-  WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}           # 自定义配置
-  WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }}                         # 主要用于更新Feeds
-  WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}     # 通用配置
-  WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}          # 自定义包配置
-  WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}} # 发布固件
-  WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}       # 默认lanIP
+  WRT_CONFIG: ${{inputs.WRT_CONFIG}}                          # 配置文件
+  WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
+  WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
+  WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}        # 通用配置
+  WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}                # 自定义包配置
+  WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}}      # 发布固件
+  WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}            # 默认lanIP
   WRT_MINE_SAY: ${{inputs.WRT_MINE_SAY}} 
-  WRT_DIR_CONFIGS: Config                             # 自定义配置文件夹
-  WRT_DIR_SCRIPTS: Scripts                            # 脚本文件夹
+  WRT_DIR_CONFIGS: Config                                     # 自定义配置文件夹
+  WRT_DIR_SCRIPTS: Scripts                                    # 脚本文件夹
   UPLOAD_FIRMWARE_DIR: true
-  TZ: Asia/Shanghai                               # 默认时区
-  IS_RESET_PASSWORD: true                         # 是否把密码重置为空
-  UPLOAD_BIN_DIR: false                           # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
-  IS_RESIZE_SPACE: false                          # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  TZ: Asia/Shanghai                                           # 默认时区
+  IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
+  UPLOAD_BIN_DIR: false                                       # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
+  IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
   FREE_UP_DISK: true
   WRT_HAS_WIFI: true
   UPLOAD_BIN_DIR_WSS: false
   WRT_USE_APK: ${{inputs.WRT_USE_APK || false }}
+  OPENWRT_PATH: './openwrt'
+  DEVICE_TARGET: ''
+  DEVICE_SUBTARGET: ''
+  DEVICE_PROFILE: ''
+  DEVICE_NAME_LIST: ''
+  DEVICE_NAME_LIST_LIAN: ''
+  DEVICE_ARCH: ''
+
   
 #CI权限
 permissions: write-all
@@ -258,8 +266,11 @@ jobs:
       run: |
         make defconfig > /dev/null 2>&1
         ./scripts/diffconfig.sh > seed.config
+        # 从配置文件中获取架构, 一般是defconfig后获取
+        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $OPENWRT_PATH/.config)
+        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         echo "【LinInfo】make defconfig后配置文件为："
-        echo "$(cat .config)"
+        echo "$(cat seed.config)"
 
     - name: Read Variables (读取变量)
       run: |
@@ -286,12 +297,13 @@ jobs:
         DEVICE_PROFILE=$(IFS=$'、'; echo "${device_name_list[*]}")
         DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
         DEVICE_NAME_LIST_LIAN=$(IFS=$'_and_'; echo "${device_name_list[*]}")
-        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $path_config_file)
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
+        # 从配置文件中获取架构, 一般是defconfig后获取
+        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $path_config_file)
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
@@ -329,8 +341,8 @@ jobs:
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
         system_content="\
-        固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
         支持设备：${{ env.DEVICE_PROFILE }}\n\
+        固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
         内核版本：${{ env.VERSION_KERNEL }}\n\
@@ -394,18 +406,18 @@ jobs:
         key: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_HASH }}
         restore-keys: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
         path: |
-          ./openwrt/.ccache
-          ./openwrt/staging_dir/host*
-          ./openwrt/staging_dir/tool*
+          $OPENWRT_PATH/.ccache
+          $OPENWRT_PATH/staging_dir/host*
+          $OPENWRT_PATH/staging_dir/tool*
 
     - name: Update Caches
       if: env.CACHE_TOOLCHAIN == 'true'
       run: |
-        if [ -d "./openwrt/staging_dir" ]; then
-          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+        if [ -d "$OPENWRT_PATH/staging_dir" ]; then
+          find "$OPENWRT_PATH/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
             find "$DIR" -type f -exec touch {} +
           done
-          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
+          mkdir -p $OPENWRT_PATH/tmp && echo "1" > $OPENWRT_PATH/tmp/.build
           echo "【LinInfo】toolchain skiped done!"
         else
           echo "【LinInfo】caches missed!"
