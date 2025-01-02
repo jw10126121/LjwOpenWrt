@@ -542,7 +542,9 @@ jobs:
         echo 'EOF' >> $GITHUB_ENV
         notify_content="\
         临时下载地址：${{env.bin_download_url}}\n\n\
-        ${{ env.system_content }}\
+        ${{ env.system_content }}\n\
+        编译开始：${{ env.START_TIME }}\n\
+        编译完成：${{ env.END_TIME }}\
         "
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
