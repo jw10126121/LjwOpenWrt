@@ -70,9 +70,6 @@ CONFIG_PACKAGE_luci-lua-runtime=y	# Luci Lua运行时环境
 CONFIG_PACKAGE_openssh-sftp-server=y	# SSH连接和文件传输，SSH保持不断开且能读取文件
 CONFIG_PACKAGE_luci-proto-bonding=y	# 链路聚合，配置和管理链路聚合
 CONFIG_PACKAGE_luci-proto-relay=y	# 无线中继，配置和管理无线中继
-CONFIG_PACKAGE_ddns-scripts_aliyun=y	# DDNS_阿里云
-CONFIG_PACKAGE_ddns-scripts-dnspod=y	# DDNS_dnspod
-CONFIG_PACKAGE_ddns-scripts-cloudflare=y # DDNS_cloudflare
 CONFIG_PACKAGE_curl=y			# curl
 CONFIG_PACKAGE_jq=y			# jq
 
