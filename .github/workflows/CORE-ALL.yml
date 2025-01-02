@@ -394,18 +394,18 @@ jobs:
         key: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_HASH }}
         restore-keys: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
         path: |
-          $OPENWRT_PATH/.ccache
-          $OPENWRT_PATH/staging_dir/host*
-          $OPENWRT_PATH/staging_dir/tool*
+          ./openwrt/.ccache
+          ./openwrt/staging_dir/host*
+          ./openwrt/staging_dir/tool*
 
     - name: Update Caches
       if: env.CACHE_TOOLCHAIN == 'true'
       run: |
-        if [ -d "$OPENWRT_PATH/staging_dir" ]; then
-          find "$OPENWRT_PATH/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+        if [ -d "./openwrt/staging_dir" ]; then
+          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
             find "$DIR" -type f -exec touch {} +
           done
-          mkdir -p $OPENWRT_PATH/tmp && echo "1" > $OPENWRT_PATH/tmp/.build
+          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
           echo "【LinInfo】toolchain skiped done!"
         else
           echo "【LinInfo】caches missed!"
