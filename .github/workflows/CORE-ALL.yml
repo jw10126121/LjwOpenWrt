@@ -74,7 +74,6 @@ env:
   WRT_DIR_CONFIGS: Config                                     # 自定义配置文件夹
   WRT_DIR_SCRIPTS: Scripts                                    # 脚本文件夹
   UPLOAD_FIRMWARE_DIR: true
-  TZ: Asia/Shanghai                                           # 默认时区
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
@@ -116,7 +115,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
           
-    - name: Check ENV (检查配置环境)
+    - name: Initialization Values (初始化变量)
       run: |
         echo "编译说明：${{ env.WRT_MINE_SAY }}"
         WRT_HAS_WIFI=true
@@ -135,43 +134,75 @@ jobs:
         fi
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
         echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
-        
-    - name: Check DINGDING_TOKEN (检查钉钉TOKEN)
-      run: |
-        echo "钉钉TOKEN_env: ${{env.DINGDING_TOKEN}}"
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
-        
+        df -hT $GITHUB_WORKSPACE
+        START_DATE=$(date +"D%y%m%d")
+        START_TIME=$(date +"D%y%m%d_T%H%M%S")
+        START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
+        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
+        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
+        echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
+        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
+        echo "【LinInfo】编译说明内容："
+        echo "${{ env.WRT_MINE_SAY }}"
+
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-      uses: endersonmenezes/free-disk-space@main
+      uses: FirelightFlagboy/gh-runner-free-disk-space@main
       with:
-        testing: false
-        remove_android: true
-        remove_dotnet: true
-        remove_haskell: true
-        remove_tool_cache: true
-        remove_swap: true
-        remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
-        remove_packages_one_command: true
-        remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+        android: true
+        dotnet: true
+        haskell: true
+        docker-images: true
+        large-packages: true
+        swap-storage: true
+        tool-cache: false
 
     - name: Initialization Environment (初始化环境)
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        docker rmi $(docker images -q)
-        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
-        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-        sudo -E apt-get -y update
+        sudo -E apt -yqq update
+        sudo -E apt -yqq full-upgrade
+        sudo -E apt -yqq autoremove --purge
+        sudo -E apt -yqq autoclean
+        sudo -E apt -yqq clean
         sudo -E apt -yqq install dos2unix libfuse-dev
-        sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
         sudo -E systemctl daemon-reload
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get -y clean
-        sudo timedatectl set-timezone "$TZ"
+        sudo -E timedatectl set-timezone "Asia/Shanghai"
+        
+    # - name: Free Disk Space
+    #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
+    #   uses: endersonmenezes/free-disk-space@main
+    #   with:
+    #     testing: false
+    #     remove_android: true
+    #     remove_dotnet: true
+    #     remove_haskell: true
+    #     remove_tool_cache: true
+    #     remove_swap: true
+    #     remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
+    #     remove_packages_one_command: true
+    #     remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+    #
+    # - name: Initialization Environment (初始化环境)
+    #   env:
+    #     DEBIAN_FRONTEND: noninteractive
+    #   run: |
+    #     docker rmi $(docker images -q)
+    #     sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+    #     sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+    #     sudo -E apt-get -y update
+    #     sudo -E apt -yqq install dos2unix libfuse-dev
+    #     sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
+    #     sudo -E systemctl daemon-reload
+    #     sudo -E apt-get -y autoremove --purge
+    #     sudo -E apt-get -y clean
+    #     sudo timedatectl set-timezone "Asia/Shanghai"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
@@ -197,14 +228,6 @@ jobs:
 
     - name: Clone Source Code (克隆源代码)
       run: |
-        df -hT $GITHUB_WORKSPACE
-        START_DATE=$(date +"D%y%m%d")
-        START_TIME=$(date +"D%y%m%d_T%H%M%S")
-        START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
-        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
-        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
         echo "【LinInfo】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
         cd openwrt
@@ -219,9 +242,12 @@ jobs:
         echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}"
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
+        
+    - name: diy Feeds (自定义feeds)
+      run: |
+        cd $OPENWRT_PATH
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
         echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
-        echo "编译说明内容：${{ env.WRT_MINE_SAY }}"
 
     - name: Update Feeds (更新feeds)
       run: |
@@ -233,28 +259,25 @@ jobs:
         cd $OPENWRT_PATH
         ./scripts/feeds install -a
 
-    - name: Custom Packages (自定义包)
+    - name: diy Packages (自定义包)
       run: |
         cd $OPENWRT_PATH/package
         echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
-        chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
-    - name: Generate Variables (加载配置)
+    - name: diy config (自定义配置)
       run: |
         echo '【LinInfo】移除所有.config并添加新的.config'
         cd $OPENWRT_PATH
         rm -rf ./.config*
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
         
-    - name: Configuration Customization (加载自定义设置)
+    - name: diy settings (加载自定义设置)
       run: |
         cd $OPENWRT_PATH
-        echo "【LinInfo】当前路径：$PWD"
         cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
           echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
-          chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
         else
           echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
@@ -262,7 +285,7 @@ jobs:
         cp -f .config my_config.txt
 
     - name: defconfig (确认配置)
-      working-directory: ./openwrt
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         make defconfig > /dev/null 2>&1
         ./scripts/diffconfig.sh > seed.config
@@ -329,7 +352,7 @@ jobs:
         fi
         echo "【LinInfo】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
 
-    - name: Cache Config (缓存配置文件)
+    - name: Check Config (缓存配置文件)
       run: |
         cd $OPENWRT_PATH
         name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
@@ -532,7 +555,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload bin to wss
-      id: upload_url
+      id: upload_wss
       continue-on-error: true
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
@@ -563,7 +586,7 @@ jobs:
     - name: Send dingding notify
       continue-on-error: true
       uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != '' && steps.upload_url.outputs.bin_download_url != ''
+      if: env.DINGDING_TOKEN != '' && steps.upload_wss.outputs.bin_download_url != ''
       with:
         dingToken: ${{ env.DINGDING_TOKEN }}
         body: |
@@ -575,7 +598,7 @@ jobs:
           }
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      id: upload
+      id: upload_artifact
       continue-on-error: true
       if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE != 'true' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@main
