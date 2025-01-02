@@ -55,6 +55,7 @@ on:
         
 #环境变量配置
 env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
