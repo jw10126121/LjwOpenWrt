@@ -1,4 +1,5 @@
-
+#CI项目
+name: CUSTOM
 
 #CI计划
 on:
@@ -55,9 +56,6 @@ on:
       #   required: true
       #   type: string
       #   default: 'GENERAL.txt'
-
-#CI项目
-name: ${{inputs.iWRT_CONFIG}}
 
 #CI权限
 permissions: write-all
