@@ -21,7 +21,7 @@ UPDATE_PACKAGE_LIST() {
 	        file=$(find "$ACTION_DIR" -name "${pkg}*.$ext" 2>/dev/null)
 	        if [ -n "$file" ]; then
 	            cp -r "$file" "$PACKAGE_DIRNAME"
-	            echo "【LinInfo】复制文件 $file 到： $PACKAGE_DIRNAME"
+	            # echo "【LinInfo】复制文件 $file 到： $PACKAGE_DIRNAME"
 	        fi
 	    done
 	done

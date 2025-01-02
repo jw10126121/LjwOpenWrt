@@ -38,15 +38,15 @@ while getopts "hi:n:p:t:" opt; do
             ;;
         n)
             default_name=$OPTARG
-            echo "input.default_name: $default_name"
+            # echo "input.default_name: $default_name"
             ;;
         i)
             default_ip=$OPTARG
-            echo "input.default_ip: $default_ip"
+            # echo "input.default_ip: $default_ip"
             ;;
         p)
             is_reset_password=$OPTARG
-            echo "input.is_reset_password: $is_reset_password"
+            # echo "input.is_reset_password: $is_reset_password"
             if [[ "$OPTARG" =~ ^[1-9][0-9]*$ ]] || [ "$OPTARG" = "true" ]; then
                 is_reset_password=true
             else
@@ -55,7 +55,7 @@ while getopts "hi:n:p:t:" opt; do
             ;;
         t)
             default_theme_name=$OPTARG
-            echo "input.default_theme_name: $default_theme_name"
+            # echo "input.default_theme_name: $default_theme_name"
             ;;
         \?)
             echo "无效选项: -$OPTARG" >&2
@@ -119,6 +119,9 @@ else
     echo "【LinInfo】使用源码默认主题"
 fi
 
+# 修复 armv8 设备 xfsprogs 报错
+# sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
+
 
 # 清空密码
 if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
@@ -156,8 +159,6 @@ sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-alist/root/u
 if [ -f "$CFG_FILE_LEDE" ]; then
     sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
 fi
-
-
 
 # 配置编译信息
 if [[ -f "./package/lean/default-settings/files/zzz-default-settings" ]]; then
