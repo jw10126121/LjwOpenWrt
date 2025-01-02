@@ -140,6 +140,7 @@ jobs:
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
       uses: endersonmenezes/free-disk-space@main
       with:
+        testing: false
         remove_android: true
         remove_dotnet: true
         remove_haskell: true
@@ -148,7 +149,6 @@ jobs:
         remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
         remove_packages_one_command: true
         remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
-        testing: false
 
     - name: Initialization Environment (初始化环境)
       env:
@@ -158,7 +158,7 @@ jobs:
         sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
         sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
         sudo -E apt-get -y update
-        sudo -E apt -yqq install dos2unix
+        sudo -E apt -yqq install dos2unix libfuse-dev
         sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
         sudo -E systemctl daemon-reload
         sudo -E apt-get -y autoremove --purge
@@ -236,7 +236,7 @@ jobs:
       run: |
         echo '【LinInfo】移除所有.config并添加新的.config'
         cd $OPENWRT_PATH
-        rm -rf ./tmp* ./.config*
+        rm -rf ./.config*
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
         
     - name: Configuration Customization (加载自定义设置)

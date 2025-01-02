@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# PKG_PATCH="$GITHUB_WORKSPACE/openwrt/package/"
 
 # 运行在openwrt/package目录下
 
@@ -178,14 +177,14 @@ UPDATE_VERSION() {
 }
 
 # UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
-UPDATE_VERSION "sing-box"
+# UPDATE_VERSION "sing-box"
 # UPDATE_VERSION "tailscale"
 UPDATE_VERSION "alist"
 #修复Openvpnserver一键生成证书
 UPDATE_VERSION "openvpn-easy-rsa" 
 
 
-#预置HomeProxy数据
+# 预置HomeProxy数据
 if [ -d *"homeproxy"* ]; then
     HP_RULES="surge"
     HP_PATCH="./homeproxy/root/etc/homeproxy"
@@ -206,38 +205,64 @@ if [ -d *"homeproxy"* ]; then
     echo "【LinInfo】homeproxy date has been updated!"
 fi
 
+# 移除Shadowsocks组件
+PW_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
+if [ -f "$PW_FILE" ]; then
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' $PW_FILE
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' $PW_FILE
+    sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $PW_FILE
+
+    echo "【LinInfo】passwall has been fixed!"
+fi
+
+SP_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-ssr-plus/Makefile")
+if [ -f "$SP_FILE" ]; then
+    sed -i '/default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/libev/d' $SP_FILE
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' $SP_FILE
+    sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $SP_FILE
+
+    echo "s【LinInfo】sr-plus has been fixed!"
+fi
+
+# 修复TailScale配置文件冲突
+TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
+if [ -f "$TS_FILE" ]; then
+    sed -i '/\/files/d' $TS_FILE
+
+    echo "【LinInfo】tailscale has been fixed!"
+fi
 
 #预置OpenClash内核和数据
-if [ -d *"openclash"* ]; then
-    CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
-    # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
-    CORE_TYPE="arm64"
-    CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
+# if [ -d *"openclash"* ]; then
+#     CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
+#     # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
+#     CORE_TYPE="arm64"
+#     CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
 
-    CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
-    CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
-    CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
+#     CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
+#     CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
+#     CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
 
-    GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
-    GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
-    GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
+#     GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
+#     GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
+#     GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
 
-    cd ./luci-app-openclash/root/etc/openclash/
+#     cd ./luci-app-openclash/root/etc/openclash/
 
-    curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
-    curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
-    curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
+#     curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
+#     curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
+#     curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
 
-    mkdir ./core/ && cd ./core/
+#     mkdir ./core/ && cd ./core/
 
-    curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
-    curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
-    curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
+#     curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
+#     curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
+#     curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
 
-    chmod +x ./* && rm -rf ./*.gz
+#     chmod +x ./* && rm -rf ./*.gz
 
-    echo "【LinInfo】openclash date has been updated!"
-fi
+#     echo "【LinInfo】openclash date has been updated!"
+# fi
 
 
 
