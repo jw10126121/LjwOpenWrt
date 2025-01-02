@@ -127,6 +127,7 @@ env:
   FREE_UP_DISK: true
   WRT_HAS_WIFI: true
   UPLOAD_BIN_DIR_WSS: false
+  WRT_USE_APK: false
 
 
   
