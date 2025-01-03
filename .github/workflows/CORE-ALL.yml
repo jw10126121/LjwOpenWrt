@@ -175,7 +175,7 @@ jobs:
         remove_packages_one_command: true
         remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
     
-    - name: Check Disk (打印磁盘)
+    - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
 
@@ -193,7 +193,7 @@ jobs:
         sudo -E systemctl daemon-reload
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Check Disk (打印磁盘)
+    - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
 
@@ -423,10 +423,10 @@ jobs:
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
         内核版本：${{ env.VERSION_KERNEL }}\n\
-        包管理器：${{ env.WRT_USE_APK == 'true' && 'APK' || 'IPKG' }}\n\
+        包管理器：${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipkg' }}\n\
         默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\
         默认密码：无 | password\n\
-        是否WIFI：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}\n\
+        是否wifi：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}\n\
         源码地址：${{ env.WRT_REPO_URL }}\n\
         源码分支：${{ env.WRT_REPO_BRANCH }}\n\
         源码hash：${{ env.REPO_GIT_HASH }}\
@@ -483,7 +483,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     
-    - name: Check Disk (打印磁盘)
+    - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
 
@@ -498,10 +498,6 @@ jobs:
         END_TIME=$(date +"D%y%m%d_T%H%M%S")
         echo "END_TIME=$END_TIME" >> $GITHUB_ENV
         echo "【LinInfo】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$END_TIME"
-
-    - name: Check Disk (打印磁盘)
-      run: |
-        df -hT $GITHUB_WORKSPACE
 
     - name: Machine Information
       continue-on-error: true
@@ -557,6 +553,8 @@ jobs:
         fi
         release_desc_file=$OPENWRT_PATH/config_mine/readme.txt
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
+        KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
+        echo "【LinInfo】编译完成获取内核版本：$KVER"
         cp -f ./config_mine/* ./upload/
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
@@ -583,7 +581,7 @@ jobs:
         find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Check Disk (打印磁盘)
+    - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
 
