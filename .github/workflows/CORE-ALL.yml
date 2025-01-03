@@ -150,17 +150,17 @@ jobs:
         echo "【LinInfo】编译说明内容："
         echo "${{ env.WRT_MINE_SAY }}"
 
-    - name: Free Disk Space
-      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-      uses: FirelightFlagboy/gh-runner-free-disk-space@main
-      with:
-        android: true
-        dotnet: true
-        haskell: true
-        docker-images: true
-        large-packages: true
-        swap-storage: true
-        tool-cache: false
+    # - name: Free Disk Space
+    #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
+    #   uses: FirelightFlagboy/gh-runner-free-disk-space@main
+    #   with:
+    #     android: true
+    #     dotnet: true
+    #     haskell: true
+    #     docker-images: true
+    #     large-packages: true
+    #     swap-storage: true
+    #     tool-cache: false
         
     - name: Free Disk Space
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
