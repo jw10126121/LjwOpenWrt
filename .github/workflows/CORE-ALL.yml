@@ -191,7 +191,7 @@ jobs:
         sudo -E apt -yqq install dos2unix libfuse-dev
         sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
         sudo -E systemctl daemon-reload
-        sudo -E timedatectl set-timezone "Asia/Shanghai"
+        sudo -E timedatectl set-timezone 'Asia/Shanghai'
 
     - name: Check Disk (磁盘信息)
       run: |
@@ -479,7 +479,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo "【LinInfo】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
-        make download -j8
+        make download -j$(($(nproc) * 2))
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     
