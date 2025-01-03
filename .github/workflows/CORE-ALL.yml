@@ -119,7 +119,6 @@ jobs:
           
     - name: Initialization Values (初始化变量)
       run: |
-        echo "编译说明：${{ env.WRT_MINE_SAY }}"
         WRT_HAS_WIFI=true
         WRT_HAS_WIFI_TEXT="有WIFI"
         if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
@@ -147,34 +146,34 @@ jobs:
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
         echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
         echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
-        echo "【LinInfo】编译说明内容："
+        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && '' || '无' }}"
         echo "${{ env.WRT_MINE_SAY }}"
 
+    - name: Free Disk Space (清理磁盘)
+      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
+      uses: FirelightFlagboy/gh-runner-free-disk-space@main
+      with:
+        android: true
+        dotnet: true
+        haskell: true
+        docker-images: true
+        large-packages: true
+        swap-storage: true
+        tool-cache: true
+        
     # - name: Free Disk Space
     #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-    #   uses: FirelightFlagboy/gh-runner-free-disk-space@main
+    #   uses: endersonmenezes/free-disk-space@main
     #   with:
-    #     android: true
-    #     dotnet: true
-    #     haskell: true
-    #     docker-images: true
-    #     large-packages: true
-    #     swap-storage: true
-    #     tool-cache: false
-        
-    - name: Free Disk Space
-      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-      uses: endersonmenezes/free-disk-space@main
-      with:
-        testing: false
-        remove_android: true
-        remove_dotnet: true
-        remove_haskell: true
-        remove_tool_cache: true
-        remove_swap: true
-        remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
-        remove_packages_one_command: true
-        remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+    #     testing: false
+    #     remove_android: true
+    #     remove_dotnet: true
+    #     remove_haskell: true
+    #     remove_tool_cache: true
+    #     remove_swap: true
+    #     remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
+    #     remove_packages_one_command: true
+    #     remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
     
     - name: Check Disk (打印磁盘)
       run: |
@@ -319,18 +318,18 @@ jobs:
         key: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
         restore-keys: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
         path: |
-          ./openwrt/.ccache
-          ./openwrt/staging_dir/host*
-          ./openwrt/staging_dir/tool*
+          ${{ env.OPENWRT_PATH }}/.ccache
+          ${{ env.OPENWRT_PATH }}/staging_dir/host*
+          ${{ env.OPENWRT_PATH }}/staging_dir/tool*
 
     - name: Update Caches
       if: env.CACHE_TOOLCHAIN == 'true'
       run: |
-        if [ -d "./openwrt/staging_dir" ]; then
-          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+        if [ -d "${{ env.OPENWRT_PATH }}/staging_dir" ]; then
+          find "${{ env.OPENWRT_PATH }}/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
             find "$DIR" -type f -exec touch {} +
           done
-          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
+          mkdir -p ${{ env.OPENWRT_PATH }}/tmp && echo "1" > ${{ env.OPENWRT_PATH }}/tmp/.build
           echo "【LinInfo】toolchain skiped done!"
         else
           echo "【LinInfo】caches missed!"
@@ -483,7 +482,11 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
+    
+    - name: Check Disk (打印磁盘)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+
     - name: 编译固件 Build firmware
       id: compile
       working-directory: ./openwrt
@@ -495,6 +498,10 @@ jobs:
         END_TIME=$(date +"D%y%m%d_T%H%M%S")
         echo "END_TIME=$END_TIME" >> $GITHUB_ENV
         echo "【LinInfo】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$END_TIME"
+
+    - name: Check Disk (打印磁盘)
+      run: |
+        df -hT $GITHUB_WORKSPACE
 
     - name: Machine Information
       continue-on-error: true
@@ -575,6 +582,10 @@ jobs:
         done
         find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
         echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Check Disk (打印磁盘)
+      run: |
+        df -hT $GITHUB_WORKSPACE
 
     - name: Upload bin to wss
       id: upload_wss
