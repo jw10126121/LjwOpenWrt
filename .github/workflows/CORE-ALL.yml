@@ -90,6 +90,8 @@ env:
   DEVICE_NAME_LIST: ''
   DEVICE_NAME_LIST_LIAN: ''
   DEVICE_ARCH: ''
+  REPO_GIT_HASH: ''
+  REPO_GIT_hash_simple: ''
 
   
 #CI权限
@@ -138,7 +140,6 @@ jobs:
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
-        df -hT $GITHUB_WORKSPACE
         START_DATE=$(date +"D%y%m%d")
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
         START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
@@ -160,6 +161,24 @@ jobs:
         large-packages: true
         swap-storage: true
         tool-cache: false
+        
+    - name: Free Disk Space
+      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
+      uses: endersonmenezes/free-disk-space@main
+      with:
+        testing: false
+        remove_android: true
+        remove_dotnet: true
+        remove_haskell: true
+        remove_tool_cache: true
+        remove_swap: true
+        remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
+        remove_packages_one_command: true
+        remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
+    
+    - name: Check Disk (打印磁盘)
+      run: |
+        df -hT $GITHUB_WORKSPACE
 
     - name: Initialization Environment (初始化环境)
       env:
@@ -174,21 +193,11 @@ jobs:
         sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
         sudo -E systemctl daemon-reload
         sudo -E timedatectl set-timezone "Asia/Shanghai"
-        
-    # - name: Free Disk Space
-    #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-    #   uses: endersonmenezes/free-disk-space@main
-    #   with:
-    #     testing: false
-    #     remove_android: true
-    #     remove_dotnet: true
-    #     remove_haskell: true
-    #     remove_tool_cache: true
-    #     remove_swap: true
-    #     remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
-    #     remove_packages_one_command: true
-    #     remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift /var/lib/mysql* /var/log/azure*"
-    #
+
+    - name: Check Disk (打印磁盘)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+
     # - name: Initialization Environment (初始化环境)
     #   env:
     #     DEBIAN_FRONTEND: noninteractive
@@ -238,62 +247,15 @@ jobs:
           git checkout ${{ env.WRT_REPO_Commit_Hash }}
         fi
         REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
+        REPO_GIT_hash_simple=$(git log -1 --pretty=format:'%h')
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
-        echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}"
+        echo "REPO_GIT_hash_simple=$REPO_GIT_hash_simple" >> $GITHUB_ENV
+        echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}，hash: ${REPO_GIT_hash_simple}"
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
-        
-    - name: diy Feeds (自定义feeds)
-      run: |
-        cd $OPENWRT_PATH
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
-        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
-
-    - name: Update Feeds (更新feeds)
-      run: |
-        cd $OPENWRT_PATH
-        ./scripts/feeds update -a
-
-    - name: Install Feeds (安装feeds)
-      run: |
-        cd $OPENWRT_PATH
-        ./scripts/feeds install -a
-
-    - name: diy Packages (自定义包)
-      run: |
-        cd $OPENWRT_PATH/package
-        echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
-        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
-
-    - name: diy config (自定义配置)
-      run: |
-        echo '【LinInfo】移除所有.config并添加新的.config'
-        cd $OPENWRT_PATH
-        rm -rf ./.config*
+        # 临时导入config，为了获取设备信息
+        [ -f ./.config ] && rm -rf ./.config
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
-        
-    - name: diy settings (加载自定义设置)
-      run: |
-        cd $OPENWRT_PATH
-        cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
-        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
-          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
-        else
-          echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
-        fi
-        cp -f .config my_config.txt
-
-    - name: defconfig (确认配置)
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
-        make defconfig > /dev/null 2>&1
-        ./scripts/diffconfig.sh > seed.config
-        # 从配置文件中获取架构, 一般是defconfig后获取
-        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $OPENWRT_PATH/.config)
-        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
-        echo "【LinInfo】make defconfig后配置文件为："
-        echo "$(cat seed.config)"
 
     - name: Read Variables (读取变量)
       run: |
@@ -325,9 +287,6 @@ jobs:
         echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
         echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
-        # 从配置文件中获取架构, 一般是defconfig后获取
-        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $path_config_file)
-        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         dir_linux_version="$OPENWRT_PATH/target/linux/"
         dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
         KERNEL_PATCHVER=''
@@ -351,6 +310,102 @@ jobs:
           echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
         echo "【LinInfo】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
+
+    - name: Check Caches
+      id: check-cache
+      if: env.CACHE_TOOLCHAIN == 'true'
+      uses: actions/cache@main
+      with:
+        key: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
+        restore-keys: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
+        path: |
+          ./openwrt/.ccache
+          ./openwrt/staging_dir/host*
+          ./openwrt/staging_dir/tool*
+
+    - name: Update Caches
+      if: env.CACHE_TOOLCHAIN == 'true'
+      run: |
+        if [ -d "./openwrt/staging_dir" ]; then
+          find "./openwrt/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
+            find "$DIR" -type f -exec touch {} +
+          done
+          mkdir -p ./openwrt/tmp && echo "1" > ./openwrt/tmp/.build
+          echo "【LinInfo】toolchain skiped done!"
+        else
+          echo "【LinInfo】caches missed!"
+        fi
+        if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
+          the_cache_key="${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}"
+          CACHE_LIST_ALL=$(gh cache list --key "$the_cache_key")
+          echo "【LinInfo】CACHE_LIST_ALL：${CACHE_LIST_ALL[@]}"   
+          CACHE_LIST=$(gh cache list --key "$the_cache_key" | cut -f 1)
+          for CACHE_KEY in $CACHE_LIST; do
+            gh cache delete $CACHE_KEY
+            echo "【LinInfo】caches cleanup done：$CACHE_KEY"
+          done
+          echo "【LinInfo】caches cleanup done：${CACHE_LIST[@]}"
+        fi
+        
+    - name: diy Feeds (自定义feeds)
+      run: |
+        cd $OPENWRT_PATH
+        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
+        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
+
+    - name: Update Feeds (更新feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+
+    - name: Install Feeds (安装feeds)
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds install -a
+
+    - name: diy Packages (自定义包)
+      run: |
+        cd $OPENWRT_PATH/package
+        echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
+
+    - name: diy config (自定义配置)
+      run: |
+        echo '【LinInfo】移除所有.config并添加新的.config'
+        cd $OPENWRT_PATH
+        [ -f ./.config ] && rm -rf ./.config
+        cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
+        
+    - name: diy settings (加载自定义设置)
+      run: |
+        cd $OPENWRT_PATH
+        cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
+        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
+          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
+        else
+          echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
+        fi
+        cp -f .config my_config.txt
+
+    - name: defconfig (确认配置)
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        make defconfig > /dev/null 2>&1
+        ./scripts/diffconfig.sh > seed.config
+        # 从配置文件中获取架构, 一般是defconfig后获取
+        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $OPENWRT_PATH/.config)
+        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
+        echo "【LinInfo】make defconfig后配置文件为："
+        echo "$(cat seed.config)"
+
+    - name: Read Variables (读取变量)
+      run: |
+        cd $OPENWRT_PATH
+        # 从配置文件中获取架构, 一般是defconfig后获取
+        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
+        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
+        echo "【LinInfo】编译DEVICE架构：${DEVICE_ARCH}"
 
     - name: Check Config (缓存配置文件)
       run: |
@@ -420,39 +475,6 @@ jobs:
     #     ccache: false
     #     mixkey: ${{ env.DEVICE_TARGET }}-${{ env.WRT_VER }}-${{ env.DEVICE_SUBTARGET }}
     #     prefix: ${{ env.OPENWRT_PATH }}
-
-    - name: Check Caches
-      id: check-cache
-      if: env.CACHE_TOOLCHAIN == 'true'
-      uses: actions/cache@main
-      with:
-        key: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_HASH }}
-        restore-keys: ${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
-        path: |
-          $OPENWRT_PATH/.ccache
-          $OPENWRT_PATH/staging_dir/host*
-          $OPENWRT_PATH/staging_dir/tool*
-
-    - name: Update Caches
-      if: env.CACHE_TOOLCHAIN == 'true'
-      run: |
-        if [ -d "$OPENWRT_PATH/staging_dir" ]; then
-          find "$OPENWRT_PATH/staging_dir" -type d -name "stamp" -not -path "*target*" | while read -r DIR; do
-            find "$DIR" -type f -exec touch {} +
-          done
-          mkdir -p $OPENWRT_PATH/tmp && echo "1" > $OPENWRT_PATH/tmp/.build
-          echo "【LinInfo】toolchain skiped done!"
-        else
-          echo "【LinInfo】caches missed!"
-        fi
-        if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
-          CACHE_LIST=$(gh cache list --key "${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}" | cut -f 1)
-          for CACHE_KEY in $CACHE_LIST; do
-            gh cache delete $CACHE_KEY
-            echo "【LinInfo】caches cleanup done：$CACHE_KEY"
-          done
-          echo "caches cleanup done：$CACHE_LIST"
-        fi
 
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
