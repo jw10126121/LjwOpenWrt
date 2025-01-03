@@ -116,38 +116,6 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-          
-    - name: Initialization Values (初始化变量)
-      run: |
-        WRT_HAS_WIFI=true
-        WRT_HAS_WIFI_TEXT="有WIFI"
-        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
-          WRT_HAS_WIFI=false
-          WRT_HAS_WIFI_TEXT="无WIFI"
-        fi
-        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
-        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
-        WRT_HAS_LITE=false
-        WRT_HAS_LITE_TEXT="[常规版]"
-        if echo "$WRT_CONFIG" | grep -q "lite\|LITE"; then
-          WRT_HAS_LITE=true
-          WRT_HAS_LITE_TEXT="[精简版]"
-        fi
-        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
-        echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
-        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
-            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
-            echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
-        fi
-        START_DATE=$(date +"D%y%m%d")
-        START_TIME=$(date +"D%y%m%d_T%H%M%S")
-        START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
-        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
-        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
-        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && '' || '无' }}"
-        echo "${{ env.WRT_MINE_SAY }}"
 
     # - name: Free Disk Space (清理磁盘)
     #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
@@ -211,6 +179,38 @@ jobs:
     #     sudo -E apt-get -y autoremove --purge
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone "Asia/Shanghai"
+
+    - name: Initialization Values (初始化变量)
+      run: |
+        WRT_HAS_WIFI=true
+        WRT_HAS_WIFI_TEXT="有WIFI"
+        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
+          WRT_HAS_WIFI=false
+          WRT_HAS_WIFI_TEXT="无WIFI"
+        fi
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
+        WRT_HAS_LITE=false
+        WRT_HAS_LITE_TEXT="[常规版]"
+        if echo "$WRT_CONFIG" | grep -q "lite\|LITE"; then
+          WRT_HAS_LITE=true
+          WRT_HAS_LITE_TEXT="[精简版]"
+        fi
+        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
+        echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
+        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
+            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
+            echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
+        fi
+        START_DATE=$(date +"D%y%m%d")
+        START_TIME=$(date +"D%y%m%d_T%H%M%S")
+        START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
+        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
+        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
+        echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
+        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
+        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && '' || '无' }}"
+        echo "${{ env.WRT_MINE_SAY }}"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
