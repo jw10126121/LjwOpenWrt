@@ -228,7 +228,6 @@ fi
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
 if [ -f "$TS_FILE" ]; then
     sed -i '/\/files/d' $TS_FILE
-
     echo "【LinInfo】tailscale has been fixed!"
 fi
 
