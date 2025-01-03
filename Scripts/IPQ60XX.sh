@@ -119,10 +119,10 @@ package_version="23.05"
 path_node_makefile="./feeds/packages/lang/node"
 path_node_dir_bak="./feeds/packages/lang/bak_node"
 [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-[ -d "$path_node_makefile" ] && mv -rf "$path_node_makefile" "$path_node_dir_bak"
+[ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak"
 git clone https://github.com/sbwml/feeds_packages_lang_node-prebuilt -b "packages-$package_version" $path_node_makefile
 if [ -d "$path_node_makefile" ]; then
-    echo "【LinInfo】替换lang_node编译成功：${path_node_makefile}"
+    echo "【LinInfo】替换lang_node成功：${path_node_makefile}"
     [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
 else
     echo "【LinInfo】替换lang_node编译失败，还原lang_node"
