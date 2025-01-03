@@ -114,28 +114,32 @@ if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]
     echo "OpenVPN Server has been fixed the default gateway address!"
 fi
 
+
 # 修复lang_node编译问题
-package_version="23.05"
-path_node_makefile="./feeds/packages/lang/node"
-path_node_dir_bak="./feeds/packages/lang/bak_node"
-if [ -d "$path_node_dir_bak" ]; then
-    rm -fr "$path_node_dir_bak"
-    echo "【LinInfo】删除备份的lang_node：${path_node_dir_bak}"
+package_version=$(grep 'openwrt-' "./feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+if [ -n "$package_version" ]; then
+    path_node_makefile="./feeds/packages/lang/node"
+    path_node_dir_bak="./feeds/packages/lang/bak_node"
+    if [ -d "$path_node_dir_bak" ]; then
+        rm -fr "$path_node_dir_bak"
+        echo "【LinInfo】删除备份的lang_node：${path_node_dir_bak}"
+    fi
+
+    if [ -d "$path_node_makefile" ]; then
+        mv -f "$path_node_makefile" "$path_node_dir_bak"
+        echo "【LinInfo】移动lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+    fi
+
+    git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+
+    if [ -d "$path_node_makefile" ]; then
+        echo "【LinInfo】替换lang_node成功：${path_node_makefile}"
+        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+    else
+        mv -f "$path_node_dir_bak" "$path_node_makefile"
+        echo "【LinInfo】替换lang_node编译失败，还原lang_node"
+    fi
 fi
 
-if [ -d "$path_node_makefile" ]; then
-    mv -f "$path_node_makefile" "$path_node_dir_bak"
-    echo "【LinInfo】移动lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
-fi
-
-git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
-
-if [ -d "$path_node_makefile" ]; then
-    echo "【LinInfo】替换lang_node成功：${path_node_makefile}"
-    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-else
-    mv -f "$path_node_dir_bak" "$path_node_makefile"
-    echo "【LinInfo】替换lang_node编译失败，还原lang_node"
-fi
 
 
