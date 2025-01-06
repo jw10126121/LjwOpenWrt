@@ -6,6 +6,7 @@
 name:  main
 
 on:
+  push:
   workflow_call:
   workflow_dispatch:
     inputs:
@@ -175,8 +176,12 @@ jobs:
         type: markdown
         content: |
           # GitHub Action Notification
-          > ${GITHUB_WORKFLOW} workflow triggered by ${GITHUB_ACTOR}
-          > [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
+          - Workflow: ${GITHUB_WORKFLOW}
+          - Event: ${GITHUB_EVENT_NAME}
+          - Actor: ${GITHUB_ACTOR}
+          - Repository: ${GITHUB_REPOSITORY}
+          - Commit: ${GITHUB_SHA}
+          - [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
         
     # - name: Send dingding notify
     #   continue-on-error: true
