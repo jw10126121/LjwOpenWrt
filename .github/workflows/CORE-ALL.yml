@@ -450,7 +450,7 @@ jobs:
         echo 'system_content_note<<EOF' >> $GITHUB_ENV
         cat "${readme_desc_file}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
-        echo 'system_content_note: ${{ env.system_content_note }}' > /dev/null 2>&1
+        echo 'system_content_note: ${{ env.system_content_note }}' > /dev/null 2>&1 # 读一下，防止下个步骤读不到
         sleep 1
 
     - name: Send dingding notify
@@ -612,17 +612,17 @@ jobs:
       continue-on-error: true
       run: |
         echo "【LinInfo】配置通知content"
-        # 把内容保存到环境变量system_content_note中
+        # 把内容保存到环境变量readme_file_note中
         readme_file_note=$(cat "${{ env.readme_desc_file }}")
         echo 'readme_file_note<<EOF' >> $GITHUB_ENV
         cat "${{env.readme_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
-        echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
+        echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1 # 读一下，防止下个步骤读不到
         sleep 1
         notify_content="临时下载地址：${{env.bin_download_url}}\n\
         ${readme_file_note}"
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
-        echo 'notify_content: ${{ env.notify_content }}' > /dev/null 2>&1
+        echo 'notify_content: ${{ env.notify_content }}' > /dev/null 2>&1 # 读一下，防止下个步骤读不到
         sleep 1
         
     - name: Send dingding notify
@@ -654,10 +654,6 @@ jobs:
         echo "【LinInfo】发布内容: ${{ env.release_desc_file }}"
         the_release_content=$(cat ${{ env.release_desc_file }})
         echo "${the_release_content}"
-        # 把内容保存到环境变量system_content中
-        #echo 'system_content<<EOF' >> $GITHUB_ENV
-        #cat "$readme_desc_file" >> $GITHUB_ENV
-        #echo 'EOF' >> $GITHUB_ENV
 
     - name: Upload Firmware To Release(发布固件)
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
