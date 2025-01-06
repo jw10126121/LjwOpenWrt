@@ -437,7 +437,7 @@ jobs:
         echo -e "【LinInfo】\n$system_content"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
         [ -f "$readme_script" ] && chmod +x "$readme_script"
-        TO_MY_SAY_DETAIL_tmp="${{env.system_content}}\n\
+        TO_MY_SAY_DETAIL_tmp="${system_content}\n\
         编译开始：${{ env.START_TIME }}"
         TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
