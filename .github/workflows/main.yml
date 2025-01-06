@@ -168,6 +168,23 @@ jobs:
         echo 'EOF' >> $GITHUB_ENV
         # echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
         # sleep 1
+        echo "::set-output name=readme_content::${readme_file_note}"
+
+    - name: Prepare JSON
+      id: prepare_json
+      run: |
+        readme_content="${{ steps.read_readme.outputs.readme_content }}"
+        json_content=$(cat <<EOF
+        {
+          "msgtype": "markdown",
+          "markdown": {
+            "title": "路由器",
+            "text": "${readme_content}"
+          }
+        }
+        EOF
+        )
+        echo "::set-output name=json_content::${json_content}"
 
     - name: Send dingding notify
       continue-on-error: true
@@ -175,16 +192,7 @@ jobs:
       if: env.DINGDING_TOKEN != ''
       with:
         dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "markdown",
-            "markdown": {
-              "title": "路由器GitHub Action Notification",
-              "text": |
-                #### 路由器 ####
-                > - ${{ env.readme_file_note }}
-              }
-          }
+        body: ${{ steps.prepare_json.outputs.json_content }}
         
     # - name: Send dingding notify
     #   continue-on-error: true
