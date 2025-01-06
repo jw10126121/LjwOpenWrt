@@ -644,13 +644,6 @@ jobs:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
-    - name: Get Artifact Download URL （获取Artifact下载地址）
-      id: get_artifact_url
-      continue-on-error: true
-      run: |
-        echo "ARTIFACT_URL=$(gh run list -w ${{ github.workflow }} -b ${{ github.run_id }} --json artifacts -q '.[0].artifacts[0].archiveDownloadUrl')" >> $GITHUB_ENV
-        echo "【LinInfo】ARTIFACT_URL：$ARTIFACT_URL"
-
     - name: Prepare Release Body (准备发布内容)
       run: |
         echo "【LinInfo】发布内容: ${{ env.release_desc_file }}"
@@ -682,9 +675,4 @@ jobs:
         #   - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
         #   - ${{ env.VERSION_INFO }}
 
-    - name: Get Release Asset URL
-      continue-on-error: true
-      run: |
-        echo "RELEASE_ASSET_URL=$(echo ${{ steps.release.outputs.assets }} | jq -r '.[0].browser_download_url')" >> $GITHUB_ENV
-        echo "【LinInfo】RELEASE_ASSET_URL：$RELEASE_ASSET_URL"
 
