@@ -139,7 +139,7 @@ jobs:
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
-        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && '' || '无' }}"
+        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
         echo "${{ env.WRT_MINE_SAY }}"
 
     # - name: Free Disk Space (清理磁盘)
@@ -209,11 +209,9 @@ jobs:
       run: |
         START_DATE=$(date +"D%y%m%d")
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
-        START_DATE_HOUR=$(date +"D%y%m%d_T%H%M")
         echo "START_DATE=$START_DATE" >> $GITHUB_ENV
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "START_DATE_HOUR=$START_DATE_HOUR" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_DATE_HOUR"
+        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_TIME"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
@@ -420,8 +418,7 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        system_content="\n\
-        支持设备：${{ env.DEVICE_PROFILE }}\n\
+        system_content="支持设备：${{ env.DEVICE_PROFILE }}\n\
         固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
@@ -432,22 +429,21 @@ jobs:
         是否wifi：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}\n\
         源码地址：${{ env.WRT_REPO_URL }}\n\
         源码分支：${{ env.WRT_REPO_BRANCH }}\n\
-        源码hash：${{ env.REPO_GIT_HASH }}\
-        "
+        源码hash：${{ env.REPO_GIT_HASH }}"
         echo "system_content=$system_content" >> $GITHUB_ENV
         echo -e "【LinInfo】\n$system_content"
-        if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" ]; then
-          chmod +x "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
-          TO_MY_SAY_DETAIL_tmp="
-          ${{ env.WRT_MINE_SAY }}\n\
-          ${{ env.system_content }}\n\
-        编译开始：${{ env.START_TIME }}\
-          "
-          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
-        fi
+        readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
+        [ -f "$readme_script" ] && chmod +x "$readme_script"
+        TO_MY_SAY_DETAIL_tmp="${{ env.system_content }}\n\
+        编译开始：${{ env.START_TIME }}"
+        TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
+        [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
         release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "release_desc_file=$release_desc_file" >> $GITHUB_ENV
+        # 把内容保存到环境变量system_content中
+        echo 'system_content_note<<EOF' >> $GITHUB_ENV
+        cat "$release_desc_file" >> $GITHUB_ENV
+        echo 'EOF' >> $GITHUB_ENV
 
     - name: Send dingding notify
       continue-on-error: true
@@ -459,7 +455,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "编译开始：${{ env.START_TIME }}\n\n${{ env.system_content }}"
+                "content": "编译开始：${{ env.START_TIME }}\n\n${{ env.system_content_note }}"
              }
           }
           
@@ -469,7 +465,7 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@master
       with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_DATE_HOUR }}
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: openwrt/config_mine
 
     # - name: Cache Toolchain (缓存工具链)
@@ -523,7 +519,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR == true || env.UPLOAD_ALL_BIN_DIR == 'true')
       with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_DATE_HOUR }}
+        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: openwrt/bin
         
     - name: Upload all bin datas to wss
@@ -547,18 +543,13 @@ jobs:
         # 重新配置readme.txt(加入编译完成时间)
         rm -fr "./config_mine/readme.txt"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
-        if [ -e "$readme_script" ]; then
-          chmod +x "$readme_script"
-          TO_MY_SAY_DETAIL_tmp="
-          ${{ env.WRT_MINE_SAY }}\n\
-          ${{ env.system_content }}\n\
+        [ -f "$readme_script" ] && chmod +x "$readme_script"
+        TO_MY_SAY_DETAIL_tmp="${{ env.system_content }}\n\
         编译开始：${{ env.START_TIME }}\n\
-        编译完成：${{ env.END_TIME }}\
-          "
-          TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-          bash "$readme_script" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
-        fi
-        release_desc_file=$OPENWRT_PATH/config_mine/readme.txt
+        编译完成：${{ env.END_TIME }}"
+        TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
+        [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
+        release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
         echo "【LinInfo】编译完成获取内核版本：$KVER"
@@ -614,12 +605,10 @@ jobs:
         echo 'system_content<<EOF' >> $GITHUB_ENV
         cat "${{env.release_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
-        notify_content="\
-        临时下载地址：${{env.bin_download_url}}\n\n\
+        notify_content="临时下载地址：${{env.bin_download_url}}\n\n\
         ${{ env.system_content }}\n\
         编译开始：${{ env.START_TIME }}\n\
-        编译完成：${{ env.END_TIME }}\
-        "
+        编译完成：${{ env.END_TIME }}"
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
     - name: Send dingding notify
@@ -643,7 +632,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE != 'true' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_DATE_HOUR }}_Firmware
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Prepare Release Body (准备发布内容)
@@ -660,8 +649,8 @@ jobs:
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
       uses: softprops/action-gh-release@v2
       with:
-        name: ${{ env.START_DATE_HOUR }} for ${{ env.DEVICE_SUBTARGET }}
-        tag_name: ${{ env.START_DATE_HOUR }}_${{ env.DEVICE_SUBTARGET }}
+        name: ${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}
+        tag_name: ${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}
         files: ${{ env.OPENWRT_PATH }}/upload/*.*
         body_path: ${{ env.release_desc_file }}
         # body: |

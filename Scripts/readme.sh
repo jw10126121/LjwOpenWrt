@@ -1,22 +1,79 @@
 #!/bin/bash
 
 
+show_help() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  -h, --help            显示帮助信息"
+    echo "  -c config_file        配置文件"
+    echo "  -o desc_file          输出文件"
+    echo "  -s system_desc        固件说明"
+    echo "  -a author_note 		  其他说明"
+    echo "  -r is_release 	      是否发布"
+}
 
-config_file=$1
+[[ "$1" == "-h" || "$1" == "--help" ]] && show_help && exit 0
 
-desc_file=$2
+# 配置文件
+config_file=".config"
+# 说明文件
+desc_file="readme.txt"
+# 编译说明
+system_desc=""
+# 作者说明
+author_note=""
+# 是否发布
+is_release=false
 
-compile_desc=$3
+# 脚本主体
+while getopts "hc:o:s:a:r:" opt; do
+    case $opt in
+        h)
+            show_help
+            exit 0
+            ;;
+        c)
+            config_file=$OPTARG
+            ;;
+        o)
+            desc_file=$OPTARG
+            ;;
+        s)
+            system_desc=$OPTARG
+            ;;
+        a)
+            author_note=$OPTARG
+            ;;
+        r)
+            is_release=$OPTARG
+            if [[ "$OPTARG" =~ ^[1-9][0-9]*$ ]] || [ "$OPTARG" = "true" ]; then
+                is_release=true
+            else
+                is_release=false
+            fi
+            ;;
+        \?)
+            echo "无效选项: -$OPTARG" >&2
+            show_help >&2
+            exit 1
+            ;;
+    esac
+done
 
-is_release=$4 || 'false'
-
-rm -fr $desc_file
+[ -f "$desc_file" ] && rm -fr "$desc_file"
 
 # 编译说明
-if [ -n "$compile_desc" ]; then
+if [ -n "$system_desc" ]; then
 	echo "" >> $desc_file
 	echo "### --- 编译说明 --- ###" >> $desc_file
-	echo "$compile_desc" >> $desc_file
+	echo "$system_desc" >> $desc_file
+fi
+
+# 其他说明
+if [ -n "$author_note" ]; then
+	echo "" >> $desc_file
+	echo "### --- 其他说明 --- ###" >> $desc_file
+	echo "$author_note" >> $desc_file
 fi
 
 pkg_list=$(grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//')
@@ -83,6 +140,5 @@ if [ -n "$theme_list_package" ]; then
 		echo "</details>" >> $desc_file
 	fi
 fi
-
 
 echo "" >> $desc_file
