@@ -448,8 +448,10 @@ jobs:
         echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
         # 把内容保存到环境变量system_content_note中
         echo 'system_content_note<<EOF' >> $GITHUB_ENV
-        cat "$readme_desc_file" >> $GITHUB_ENV
+        cat "${readme_desc_file}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
+        echo 'system_content_note: ${{ env.system_content_note }}' > /dev/null 2>&1
+        sleep 1
 
     - name: Send dingding notify
       continue-on-error: true
@@ -615,9 +617,13 @@ jobs:
         echo 'readme_file_note<<EOF' >> $GITHUB_ENV
         cat "${{env.readme_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
+        echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
+        sleep 1
         notify_content="临时下载地址：${{env.bin_download_url}}\n\
         ${readme_file_note}"
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
+        echo 'notify_content: ${{ env.notify_content }}' > /dev/null 2>&1
+        sleep 1
         
     - name: Send dingding notify
       continue-on-error: true
