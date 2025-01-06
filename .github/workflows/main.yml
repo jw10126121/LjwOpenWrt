@@ -162,7 +162,7 @@ jobs:
       run: |
         readme_desc_file="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt"
         echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
-        readme_file_content=$(cat "${readme_desc_file}" | jq -R .)
+        readme_file_content=$(cat "${readme_desc_file}" | sed 's/[&/\`]/\\&/g')
         echo "readme_file_note=${readme_file_content}" >> $GITHUB_ENV
 
         
