@@ -117,32 +117,22 @@ fi
 
 # 修复lang_node编译问题
 package_version=$(grep 'openwrt-' "./feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
-version_include=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "./include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-op_version="${package_version:-$version_include}"
+include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "./include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+op_version="${package_version:-$include_version}"
 if [ -n "$op_version" ]; then  
-    # if [ -d "$path_node_dir_bak" ]; then
-    #     rm -fr "$path_node_dir_bak"
-    #     echo "【LinInfo】删除备份的lang_node：${path_node_dir_bak}"
-    # fi
-
-    # if [ -d "$path_node_makefile" ]; then
-    #     mv -f "$path_node_makefile" "$path_node_dir_bak"
-    #     echo "【LinInfo】移动lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
-    # fi
     path_node_makefile="./feeds/packages/lang/node"
     path_node_dir_bak="./feeds/packages/lang/bak_node"
     [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak"
-    echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
 
     git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
 
     if [ -d "$path_node_makefile" ]; then
-        echo "【LinInfo】替换lang_node成功：${path_node_makefile}"
+        echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
         [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
     else
         mv -f "$path_node_dir_bak" "$path_node_makefile"
-        echo "【LinInfo】替换lang_node编译失败，还原lang_node"
+        echo "【LinInfo】替换lang_node for openwrt_${op_version}失败，还原lang_node"
     fi
 else
     echo "【LinInfo】openwrt版本号未知"
