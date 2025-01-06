@@ -160,6 +160,7 @@ jobs:
       uses: actions/checkout@master    
 
     - name: 检查变量
+      id: read_readme
       run: |
         readme_desc_file="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt"
         readme_file_note=$(cat $readme_desc_file)
