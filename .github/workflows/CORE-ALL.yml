@@ -517,7 +517,6 @@ jobs:
       continue-on-error: true
       id: all_upload
       timeout-minutes: 25
-      continue-on-error: true
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR == true || env.UPLOAD_ALL_BIN_DIR == 'true')
       with:
