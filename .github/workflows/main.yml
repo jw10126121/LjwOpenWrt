@@ -165,7 +165,7 @@ jobs:
         cat "${readme_desc_file}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
         echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
-        sleep 1
+        # sleep 1
 
         
     - name: Send dingding notify
