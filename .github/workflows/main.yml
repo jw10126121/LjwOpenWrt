@@ -162,8 +162,8 @@ jobs:
       run: |
         readme_desc_file="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt"
         echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
-        readme_file_content=$(cat "${readme_desc_file}")
-        echo "readme_file_note=$(echo "$readme_file_content" | jq -R .)" >> $GITHUB_ENV
+        readme_file_content=$(cat "${readme_desc_file}" | jq -R .)
+        echo "readme_file_note=${readme_file_content}" >> $GITHUB_ENV
 
         
     - name: Send dingding notify
