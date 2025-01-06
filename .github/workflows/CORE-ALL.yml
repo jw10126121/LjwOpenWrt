@@ -462,6 +462,8 @@ jobs:
           
     - name: Upload Config (上传配置文件)
       id: config_upload
+      timeout-minutes: 5
+      continue-on-error: true
       uses: actions/upload-artifact@master
       with:
         name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_DATE_HOUR }}
@@ -514,6 +516,8 @@ jobs:
     - name: Upload bin directory
       continue-on-error: true
       id: all_upload
+      timeout-minutes: 25
+      continue-on-error: true
       uses: actions/upload-artifact@master
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR == true || env.UPLOAD_ALL_BIN_DIR == 'true')
       with:
@@ -522,6 +526,7 @@ jobs:
         
     - name: Upload all bin datas to wss
       id: all_upload_wss
+      timeout-minutes: 25
       continue-on-error: true
       if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR_WSS == true || env.UPLOAD_ALL_BIN_DIR_WSS == 'true')
       run: |
@@ -588,6 +593,7 @@ jobs:
     - name: Upload bin to wss
       id: upload_wss
       continue-on-error: true
+      timeout-minutes: 25
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
@@ -630,6 +636,7 @@ jobs:
 
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload_artifact
+      timeout-minutes: 30
       continue-on-error: true
       if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE != 'true' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@main
