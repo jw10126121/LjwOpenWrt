@@ -438,11 +438,11 @@ jobs:
         编译开始：${{ env.START_TIME }}"
         TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
-        release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
-        echo "release_desc_file=$release_desc_file" >> $GITHUB_ENV
+        readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
+        echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
         # 把内容保存到环境变量system_content中
         echo 'system_content_note<<EOF' >> $GITHUB_ENV
-        cat "$release_desc_file" >> $GITHUB_ENV
+        cat "$readme_desc_file" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
 
     - name: Send dingding notify
@@ -549,7 +549,10 @@ jobs:
         编译完成：${{ env.END_TIME }}"
         TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
-        release_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
+        [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./readme_release.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'true'
+        readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
+        echo "readme_desc_file=${readme_desc_file}" >> $GITHUB_ENV
+        release_desc_file="$OPENWRT_PATH/readme_release.txt"
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
         echo "【LinInfo】编译完成获取内核版本：$KVER"
@@ -603,7 +606,7 @@ jobs:
         echo "【LinInfo】配置通知content"
         # 把内容保存到环境变量system_content中
         echo 'system_content<<EOF' >> $GITHUB_ENV
-        cat "${{env.release_desc_file}}" >> $GITHUB_ENV
+        cat "${{env.readme_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
         notify_content="临时下载地址：${{env.bin_download_url}}\n\n\
         ${{ env.system_content }}\n\
@@ -642,7 +645,7 @@ jobs:
         echo "${the_release_content}"
         # 把内容保存到环境变量system_content中
         #echo 'system_content<<EOF' >> $GITHUB_ENV
-        #cat "$release_desc_file" >> $GITHUB_ENV
+        #cat "$readme_desc_file" >> $GITHUB_ENV
         #echo 'EOF' >> $GITHUB_ENV
 
     - name: Upload Firmware To Release(发布固件)
