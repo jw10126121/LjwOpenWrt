@@ -92,7 +92,10 @@ env:
   DEVICE_ARCH: ''
   REPO_GIT_HASH: ''
   REPO_GIT_hash_simple: ''
-
+  system_content_note: ''
+  system_content: ''
+  readme_desc_file: ''
+  release_desc_file: ''
   
 #CI权限
 permissions: write-all
@@ -211,7 +214,7 @@ jobs:
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
         echo "START_DATE=$START_DATE" >> $GITHUB_ENV
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；编译时间(精确到分钟)：$START_TIME"
+        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
@@ -434,13 +437,13 @@ jobs:
         echo -e "【LinInfo】\n$system_content"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
         [ -f "$readme_script" ] && chmod +x "$readme_script"
-        TO_MY_SAY_DETAIL_tmp="${system_content}\n\
+        TO_MY_SAY_DETAIL_tmp="${{env.system_content}}\n\
         编译开始：${{ env.START_TIME }}"
         TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
         readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
-        # 把内容保存到环境变量system_content中
+        # 把内容保存到环境变量system_content_note中
         echo 'system_content_note<<EOF' >> $GITHUB_ENV
         cat "$readme_desc_file" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
@@ -455,7 +458,7 @@ jobs:
           {
             "msgtype": "text",
             "text": {
-                "content": "编译开始：${{ env.START_TIME }}\n\n${{ env.system_content_note }}"
+                "content": "编译开始：${{ env.START_TIME }}\n${{ env.system_content_note }}"
              }
           }
           
@@ -476,13 +479,8 @@ jobs:
     #     mixkey: ${{ env.DEVICE_TARGET }}-${{ env.WRT_VER }}-${{ env.DEVICE_SUBTARGET }}
     #     prefix: ${{ env.OPENWRT_PATH }}
 
-    - name: exitAction
-      run: |
-        exit 1
-
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
-      if: success()
       run: |
         echo "【LinInfo】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j$(($(nproc) * 2))
@@ -609,14 +607,12 @@ jobs:
       continue-on-error: true
       run: |
         echo "【LinInfo】配置通知content"
-        # 把内容保存到环境变量system_content中
-        echo 'system_content<<EOF' >> $GITHUB_ENV
+        # 把内容保存到环境变量system_content_note中
+        echo 'readme_file_note<<EOF' >> $GITHUB_ENV
         cat "${{env.readme_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
-        notify_content="临时下载地址：${{env.bin_download_url}}\n\n\
-        ${{ env.system_content }}\n\
-        编译开始：${{ env.START_TIME }}\n\
-        编译完成：${{ env.END_TIME }}"
+        notify_content="临时下载地址：${{env.bin_download_url}}\n\
+        ${{ env.readme_file_note }}"
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         
     - name: Send dingding notify
