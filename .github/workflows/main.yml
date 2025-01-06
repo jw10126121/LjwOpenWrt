@@ -180,8 +180,10 @@ jobs:
             "msgtype": "markdown",
             "markdown": {
               "title": "GitHub Action Notification",
-              "text": "路由器\n #### GitHub Action Notification\n> - **Workflow**: ${GITHUB_WORKFLOW}\n> - **Event**: ${GITHUB_EVENT_NAME}\n> - **Actor**: ${GITHUB_ACTOR}\n> - **Repository**: ${GITHUB_REPOSITORY}\n> - **Commit**: ${GITHUB_SHA}\n> - [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
-            }
+              "text": |
+                #### GitHub Action Notification
+                > - ${{ env.readme_file_note }}
+              }
           }
         
     # - name: Send dingding notify
