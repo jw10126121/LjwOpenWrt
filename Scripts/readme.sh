@@ -79,14 +79,16 @@ fi
 pkg_list=$(grep "^CONFIG_PACKAGE_luci-app-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//')
 if [ -n "$pkg_list" ]; then
 	echo "" >> $desc_file
+    line_end_text=''
 	if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "<details><summary>--- 集成的插件 ---</summary>" >> $desc_file
+        line_end_text='<br>'
 	else
 		echo "#### --- 集成的插件 --- ####" >> $desc_file
 	fi
 	
 	for item in $pkg_list; do
-    	echo "$item" >> $desc_file
+    	echo "${item}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
@@ -96,13 +98,15 @@ fi
 pkg_list_package=$(grep "^CONFIG_PACKAGE_luci-app-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
 if [ -n "$pkg_list_package" ]; then
 	echo "" >> $desc_file
+    line_end_text=''
 	if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "<details><summary>--- 安装包插件 ---</summary>" >> $desc_file
+        line_end_text='<br>'
 	else
 		echo "#### --- 安装包插件 --- ####" >> $desc_file
 	fi
 	for item in $pkg_list_package; do
-    	echo "$item" >> $desc_file
+    	echo "${item}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
@@ -112,13 +116,15 @@ fi
 theme_list=$(grep "^CONFIG_PACKAGE_luci-theme-.*=y$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=y$//')
 if [ -n "$theme_list" ]; then
 	echo "" >> $desc_file
+    line_end_text=''
 	if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "<details><summary>--- 集成的主题 ---</summary>" >> $desc_file
+        line_end_text='<br>'
 	else
 		echo "#### --- 集成的主题 --- ####" >> $desc_file
 	fi
 	for item in $theme_list; do
-        echo "$item" >> $desc_file
+        echo "${item}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
@@ -128,13 +134,15 @@ fi
 theme_list_package=$(grep "^CONFIG_PACKAGE_luci-theme-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
 if [ -n "$theme_list_package" ]; then
 	echo "" >> $desc_file
+    line_end_text=''
 	if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "<details><summary>--- 安装包主题 ---</summary>" >> $desc_file
+        line_end_text='<br>'
 	else
 		echo "#### --- 安装包主题 --- ####" >> $desc_file
 	fi
     for item in $theme_list_package; do
-        echo "$item" >> $desc_file
+        echo "${item}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
