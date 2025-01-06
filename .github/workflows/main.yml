@@ -169,14 +169,26 @@ jobs:
         # echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
         # sleep 1
 
-    - name: Send DingTalk Notification
-      uses: fifsky/dingtalk-action@master
+    - name: Send dingding notify
+      continue-on-error: true
+      uses: zcong1993/actions-ding@master
+      if: env.DINGDING_TOKEN != ''
       with:
-        url: https://oapi.dingtalk.com/robot/send?access_token=${{ env.DINGDING_TOKEN }}
-        type: markdown
-        content: |
-          # GitHub Action Notification
-          - Workflow: 1111
+        dingToken: ${{ env.DINGDING_TOKEN }}
+        body: |
+          {
+            "msgtype": "markdown",
+            "markdown": {
+              "title": "GitHub Action Notification",
+              "text": "#### GitHub Action Notification\n> \
+              - **Workflow**: ${GITHUB_WORKFLOW}\n> \
+              - **Event**: ${GITHUB_EVENT_NAME}\n> \
+              - **Actor**: ${GITHUB_ACTOR}\n> \
+              - **Repository**: ${GITHUB_REPOSITORY}\n> \
+              - **Commit**: ${GITHUB_SHA}\n> \
+              - [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            }
+          }
         
     # - name: Send dingding notify
     #   continue-on-error: true
