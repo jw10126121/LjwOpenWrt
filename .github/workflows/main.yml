@@ -168,18 +168,27 @@ jobs:
         # echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
         # sleep 1
 
-        
-    - name: Send dingding notify
-      continue-on-error: true
-      uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != ''
+    - name: Send DingTalk Notification
+      uses: fifsky/dingtalk-action@master
       with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "编译开始：\n${{ env.readme_file_note }}"
-             }
-          }
+        url: https://oapi.dingtalk.com/robot/send?access_token=${{ env.DINGDING_TOKEN }}
+        type: markdown
+        content: |
+          # GitHub Action Notification
+          > ${GITHUB_WORKFLOW} workflow triggered by ${GITHUB_ACTOR}
+          > [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
+        
+    # - name: Send dingding notify
+    #   continue-on-error: true
+    #   uses: zcong1993/actions-ding@master
+    #   if: env.DINGDING_TOKEN != ''
+    #   with:
+    #     dingToken: ${{ env.DINGDING_TOKEN }}
+    #     body: |
+    #       {
+    #         "msgtype": "text",
+    #         "text": {
+    #             "content": "编译开始：\n${{ env.readme_file_note }}"
+    #          }
+    #       }
   
