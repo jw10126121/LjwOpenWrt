@@ -163,7 +163,7 @@ jobs:
         readme_desc_file="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt"
         readme_file_note=$(cat $readme_desc_file)
         echo 'readme_file_note<<EOF' >> $GITHUB_ENV
-        cat "${readme_desc_file}" >> $GITHUB_ENV
+        "$readme_file_note" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
         # echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
         # sleep 1
