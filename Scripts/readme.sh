@@ -38,6 +38,7 @@ fi
 
 pkg_list_package=$(grep "^CONFIG_PACKAGE_luci-app-.*=m$" $config_file | sed 's/^CONFIG_PACKAGE_//' | sed 's/=m$//')
 if [ -n "$pkg_list_package" ]; then
+	echo "" >> $desc_file
 	if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "<details><summary>--- 安装包插件 ---</summary>" >> $desc_file
 	else

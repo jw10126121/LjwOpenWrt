@@ -420,7 +420,7 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        system_content="\
+        system_content="\n\
         支持设备：${{ env.DEVICE_PROFILE }}\n\
         固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
@@ -441,7 +441,7 @@ jobs:
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
           ${{ env.system_content }}\n\
-          编译开始：${{ env.START_TIME }}\
+        编译开始：${{ env.START_TIME }}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
@@ -552,8 +552,8 @@ jobs:
           TO_MY_SAY_DETAIL_tmp="
           ${{ env.WRT_MINE_SAY }}\n\
           ${{ env.system_content }}\n\
-          编译开始：${{ env.START_TIME }}\n\
-          编译完成：${{ env.END_TIME }}\
+        编译开始：${{ env.START_TIME }}\n\
+        编译完成：${{ env.END_TIME }}\
           "
           TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
           bash "$readme_script" "./.config" "./config_mine/readme.txt" "$TO_MY_SAY_DETAIL" 'false'
@@ -612,7 +612,7 @@ jobs:
         echo "【LinInfo】配置通知content"
         # 把内容保存到环境变量system_content中
         echo 'system_content<<EOF' >> $GITHUB_ENV
-        cat "${{ env.release_desc_file}}" >> $GITHUB_ENV
+        cat "${{env.release_desc_file}}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
         notify_content="\
         临时下载地址：${{env.bin_download_url}}\n\n\
