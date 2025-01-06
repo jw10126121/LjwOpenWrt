@@ -116,9 +116,11 @@ fi
 
 
 # 修复lang_node编译问题
-package_version=$(grep 'openwrt-' "./feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+config_version=$(grep CONFIG_VERSION_NUMBER .config | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
 include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "./include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-op_version="${package_version:-$include_version}"
+package_version=$(grep 'openwrt-' "./feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+op_version="${config_version:-${include_version:-${package_version}}}"
+echo "【LinInfo】openwrt版本号：${op_version}；config_version：${config_version}；include_version：${include_version}；package_version：${package_version}"
 if [ -n "$op_version" ]; then  
     path_node_makefile="./feeds/packages/lang/node"
     path_node_dir_bak="./feeds/packages/lang/bak_node"
