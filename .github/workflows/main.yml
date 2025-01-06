@@ -176,12 +176,7 @@ jobs:
         type: markdown
         content: |
           # GitHub Action Notification
-          - Workflow: ${GITHUB_WORKFLOW}
-          - Event: ${GITHUB_EVENT_NAME}
-          - Actor: ${GITHUB_ACTOR}
-          - Repository: ${GITHUB_REPOSITORY}
-          - Commit: ${GITHUB_SHA}
-          - [View on GitHub](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})
+          - Workflow: 1111
         
     # - name: Send dingding notify
     #   continue-on-error: true
