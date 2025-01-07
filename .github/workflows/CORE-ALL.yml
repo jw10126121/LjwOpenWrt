@@ -126,30 +126,22 @@ jobs:
     - name: Check Values (设置变量)
       run: |
         WRT_HAS_WIFI=true
-        WRT_HAS_WIFI_TEXT="有WIFI"
-        # [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; WRT_HAS_WIFI_TEXT="无WIFI"; }
-        if echo "$WRT_CONFIG" | grep -q "NOWIFI\|WIFINO\|NO-WIFI\|WIFI-NO"; then
-          WRT_HAS_WIFI=false
-          WRT_HAS_WIFI_TEXT="无WIFI"
-        fi
+        [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
-        echo "WRT_HAS_WIFI_TEXT=$WRT_HAS_WIFI_TEXT" >> $GITHUB_ENV
+
         WRT_HAS_LITE=false
-        WRT_HAS_LITE_TEXT="[常规版]"
-        if echo "$WRT_CONFIG" | grep -q "lite\|LITE"; then
-          WRT_HAS_LITE=true
-          WRT_HAS_LITE_TEXT="[精简版]"
-        fi
+        [[ "${WRT_CONFIG,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
-        echo "WRT_HAS_LITE_TEXT=$WRT_HAS_LITE_TEXT" >> $GITHUB_ENV
+
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
             echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
-        echo "【LinInfo】读取文件名配置：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}"
-        echo "【LinInfo】读取文件名配置：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}"
+
+        echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
+        echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
         echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
-        echo "${{ env.WRT_MINE_SAY }}"
+        [ -n "${{ env.WRT_MINE_SAY }}" ] && echo "${{ env.WRT_MINE_SAY }}"
 
     # - name: Free Disk Space (清理磁盘)
     #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
