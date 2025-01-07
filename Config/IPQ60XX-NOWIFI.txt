@@ -272,10 +272,9 @@ CONFIG_PACKAGE_luci-app-ddns-go=m
 CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m
 CONFIG_PACKAGE_ddns-go=m
 
-# 最新版为0.61，所以不用源码自带的0.51
-CONFIG_PACKAGE_frpc=m
-CONFIG_PACKAGE_luci-app-frpc=m
-CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=m
+CONFIG_PACKAGE_frpc=y
+CONFIG_PACKAGE_luci-app-frpc=y
+CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
 
 CONFIG_PACKAGE_luci-app-frps=m
 CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
