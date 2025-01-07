@@ -115,6 +115,27 @@ MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
 # MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 
+
+path_frp_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "frp" -prune)
+path_frp_default_bak="${path_frp_default}_bak"
+[ -d "$path_frp_default_bak" ] && rm -fr "$path_frp_default_bak"
+[ -d "$path_frp_default" ] && mv -f ${path_frp_default} ${path_frp_default_bak} && echo "【LinInfo】备份frp：${path_frp_default} -> ${path_frp_default_bak}"
+git clone --depth=1 --single-branch -b main https://github.com/user1121114685/frp.git ${path_frp_default}
+if [ -d ${path_frp_default} ]; then
+     echo "【LinInfo】替换frp成功：${path_frp_default}"
+     [ -d "$path_frp_default_bak" ] && rm -fr "$path_frp_default_bak"
+else
+    mv -f "${path_frp_default_bak}" "${path_frp_default}"
+    echo "【LinInfo】替换frp失败，还原frp"
+fi
+
+DELETE_PACKAGE "luci-app-frpc"
+DELETE_PACKAGE "luci-app-frps"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp" "superzjg/luci-app-frpc_frps" "main"
+MOVE_PACKAGE_FROM_LIST "luci-app-frpc" "custom_packages_superzjg_frp"
+MOVE_PACKAGE_FROM_LIST "luci-app-frps" "custom_packages_superzjg_frp"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp"
+
 # UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 # # 注意，需要luci-app-nlbwmon支持
 # # UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
@@ -135,12 +156,11 @@ REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 #UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
 #UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
-
-
-
 # if [[ $WRT_REPO != *"immortalwrt"* ]]; then
 #   UPDATE_PACKAGE "qmi-wwan" "immortalwrt/wwan-packages" "master" "pkg"
 # fi
+
+
 
 #更新软件包版本
 UPDATE_VERSION() {
