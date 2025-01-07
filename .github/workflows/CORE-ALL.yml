@@ -141,7 +141,9 @@ jobs:
         echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
         echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
         echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
-        [ -n "${{ env.WRT_MINE_SAY }}" ] && echo "${{ env.WRT_MINE_SAY }}"
+        if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
+            echo "${{ env.WRT_MINE_SAY }}"
+        fi
 
     # - name: Free Disk Space (清理磁盘)
     #   if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
