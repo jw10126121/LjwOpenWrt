@@ -123,38 +123,58 @@ MOVE_PACKAGE_FROM_LIST() {
 }
 
 
+
+
+
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
-#DELETE_PACKAGE "luci-theme-argon"
-#UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
-#MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
-#REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
+# DELETE_PACKAGE "luci-theme-argon"
+# UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
+# MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
+# REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
 
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
-UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-#UPDATE_PACKAGE "luci-app-wolplus" "siwind/luci-app-wolplus" "master"
+#UPDATE_PACKAGE "luci-app-wolplus" "animegasan/luci-app-wolplus" "master"
+DELETE_PACKAGE "luci-app-wolplus"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_sundaqiang" "sundaqiang/openwrt-packages" "master"
+MOVE_PACKAGE_FROM_LIST "luci-app-wolplus" "custom_packages_sundaqiang"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_sundaqiang"
+
+DELETE_PACKAGE "luci-theme-design"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_kenzok8" "kenzok8/openwrt-packages" "master"
+MOVE_PACKAGE_FROM_LIST "luci-theme-design" "custom_packages_kenzok8"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_kenzok8"
+
 
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+
 DELETE_PACKAGE "wrtbwmon"
 DELETE_PACKAGE "luci-app-wrtbwmon"
 DELETE_PACKAGE "luci-app-onliner"
 #DELETE_PACKAGE "luci-app-netwizard"
 # DELETE_PACKAGE "homebox"
 # DELETE_PACKAGE "luci-app-netspeedtest"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master"
-MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
-MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo"
-MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
+# UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master"
+# MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
+# MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo"
+# MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
 #MOVE_PACKAGE_FROM_LIST "luci-app-netwizard" "custom_packages_haiibo"  # 测试不能用，不加
 # MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
 # MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
+# REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 
+UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "master" "pkg" "1"
+
+
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
 
 
