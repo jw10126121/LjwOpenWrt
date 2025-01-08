@@ -1,7 +1,11 @@
 # Openwrt-CI
 
 
-如需自定义, 请fork.
+如需自定义, 请fork后修改相应配置。
+
+目前支持配置：IPQ60XX-NOWIFI、IPQ60XX-NOWIFI_lite、MT6000
+
+如需修改机型配置，请查看配置文件并修改，例：
 
 只编译: 
 
@@ -20,17 +24,21 @@
     CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=y      # 小米AX1800、红米AX5
 
 
-
 ## 云编译OpenWRT固件
 [![CUSTOM](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml)
+[![DEFAULT](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml)
 
 ## 编译时间
 手动编译
 
-## 固件信息
+## 固件信息(更新信息请看固件下载页)
 ### LEDE: 
-    带NSS的6.1内核固件，默认主题为Argon；默认使用iptable防火墙（fw3）。
-    默认管理地址：192.168.0.1 默认用户：root 无默认密码
+    带NSS的6.1内核固件：
+    默认主题为Argon；
+    默认使用iptable防火墙（fw3）
+    默认管理地址：192.168.0.1 
+    默认用户：root 
+    默认密码：无 | password
 
 ## 固件下载
 只编译LEDE，如需OWRT、LibWRT,请前往对应的仓库下载.
@@ -49,7 +57,7 @@
     LEDE: https://github.com/coolsnowwolf/lede.git     
     OWRT: https://github.com/VIKINGYFY/immortalwrt.git 
     LibWRT: https://github.com/LiBwrt-op/openwrt-6.x.git 
-    
+
 ## 刷机方法:
 ### LEDE:
     Hugo Uboot + 原厂CDT + 双分区GPT
@@ -60,38 +68,6 @@
     Hugo Uboot + 原厂CDT + 单/双分区GPT
     Uboot 刷入squashfs-factory.bin #第一次刷完5分钟,之后重启15秒开机。
     Luci 刷入squashfs-sysupgrade.bin #不保留配置开机1分钟开机。
-
-
-## 软件包
-<details><summary>CONFIG_PACKAGE_luci-app-xxx=y</summary>
-    
-    ```
-    CONFIG_PACKAGE_luci-app-ssr-plus=y       # SSR-Plus
-    # CONFIG_PACKAGE_luci-app-advancedplus=y   # 高级设置
-    CONFIG_PACKAGE_luci-app-alist=y          # Alist网络服务
-    CONFIG_PACKAGE_luci-app-cpufreq=y        # CPU频率策略控制
-    CONFIG_PACKAGE_luci-app-ddns=y           # 动态DNS客户端
-    CONFIG_PACKAGE_luci-app-openvpn-server=y # OpenVPN服务器
-    CONFIG_PACKAGE_luci-app-samba4=y         # Samba文件共享
-    CONFIG_PACKAGE_luci-app-socat=y          # Socat端口转发工具
-    CONFIG_PACKAGE_luci-app-ttyd=y           # Web终端
-    CONFIG_PACKAGE_luci-app-wol=y            # 网络唤醒
-    # CONFIG_PACKAGE_luci-app-wolplus=y        # 网络唤醒
-    CONFIG_PACKAGE_luci-app-zerotier=y       # ZeroTier虚拟网络
-    CONFIG_PACKAGE_luci-theme-argon=y        # Argon主题
-    ```
-
-</details>
-<details><summary>CONFIG_PACKAGE_luci-app-xxx=n</summary>
-    
-    ```
-    
-    ```
-
-</details>
-
-
-
 
 ## 感谢
 
