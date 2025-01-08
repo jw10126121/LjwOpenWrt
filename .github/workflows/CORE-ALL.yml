@@ -367,7 +367,7 @@ jobs:
     - name: diy Packages (自定义包)
       run: |
         cd $OPENWRT_PATH/package
-        echo "【LinInfo】设置自定义包：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
+        echo "【LinInfo】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
     - name: diy config (自定义配置)

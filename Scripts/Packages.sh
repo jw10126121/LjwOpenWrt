@@ -20,6 +20,7 @@ echo "【LinInfo】工作目录：${current_dir}"
 current_dirname=$(basename "${current_dir}")
 
 openwrt_workdir="$(readlink -f ..)"
+package_workdir="${openwrt_workdir}/package"
 
 #删除软件包
 DELETE_PACKAGE() {
