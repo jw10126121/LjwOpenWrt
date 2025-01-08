@@ -23,6 +23,7 @@ on:
       WRT_DIY_SETTING:
         required: true
         type: string
+        default: 'diy_config.sh'
       WRT_DIY_FEEDS:
         required: true
         type: string

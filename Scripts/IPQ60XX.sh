@@ -62,28 +62,22 @@ while getopts "hi:n:p:t:" opt; do
 done
 
 
-
-WRT_IP=$default_ip
-WRT_NAME=$default_name
-WRT_THEME=$default_theme_name
-
-
 bash "$(cd $(dirname $0) && pwd)/diy_config.sh" -n "$default_name" -i "$default_ip" -p $is_reset_password -t "$default_theme_name"
 
 # # 配置NSS
-USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
-sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
-    if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
-        connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
-        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"\
-    else\
-        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
-    fi' "$USAGE_FILE"
-if [ $? -eq 0 ]; then
-    echo "【LinInfo】配置NSS显示执行完成"
-else
-    echo "【LinInfo】配置NSS显示执行完成"
-fi
+# USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
+# sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
+#     if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
+#         connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
+#         echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"\
+#     else\
+#         echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
+#     fi' "$USAGE_FILE"
+# if [ $? -eq 0 ]; then
+#     echo "【LinInfo】配置NSS显示执行完成"
+# else
+#     echo "【LinInfo】配置NSS显示执行完成"
+# fi
 # 方法二
 # NEW_USAGE_FILE="./custom_usage.txt"
 # if [ -f "$USAGE_FILE" ]; then
@@ -97,48 +91,49 @@ fi
 #     echo "【LinInfo】NSS不存在：$USAGE_FILE"
 # fi
 
-#获取IP地址前3段
-WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
-#修复Openvpnserver无法连接局域网和外网问题
-if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
-   echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
-   echo "OpenVPN Server has been fixed and is now accessible on the network!"
-fi
+# #获取IP地址前3段
+# WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
+# #修复Openvpnserver无法连接局域网和外网问题
+# if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
+#    echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
+#    echo "【LinInfo】OpenVPN Server has been fixed and is now accessible on the network!"
+# fi
 
-#修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
-if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
-    echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-    echo "OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
-    sed -i "s/192.168.1.1/$WRT_IPPART.1/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-    sed -i "s/192.168.1.0/$WRT_IPPART.0/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-    echo "OpenVPN Server has been fixed the default gateway address!"
-fi
+# #修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
+# if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
+#     echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+#     echo "【LinInfo】OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
+#     sed -i "s/192.168.1.1/$WRT_IPPART.1/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+#     sed -i "s/192.168.1.0/$WRT_IPPART.0/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
+#     echo "【LinInfo】OpenVPN Server has been fixed the default gateway address!"
+# fi
 
 
-# 修复lang_node编译问题
-config_version=$(grep CONFIG_VERSION_NUMBER .config | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "./include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-package_version=$(grep 'openwrt-' "./feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
-op_version="${config_version:-${include_version:-${package_version}}}"
-echo "【LinInfo】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
-if [ -n "$op_version" ]; then  
-    path_node_makefile="./feeds/packages/lang/node"
-    path_node_dir_bak="./feeds/packages/lang/bak_node"
-    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+# version_workdir="."
+# # 修复lang_node编译问题
+# config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+# include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+# package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+# op_version="${config_version:-${include_version:-${package_version}}}"
+# echo "【LinInfo】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
+# if [ -n "$op_version" ]; then  
+#     path_node_makefile="${version_workdir}/feeds/packages/lang/node"
+#     path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
+#     [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+#     [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
 
-    git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+#     git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
 
-    if [ -d "$path_node_makefile" ]; then
-        echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
-        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    else
-        mv -f "$path_node_dir_bak" "$path_node_makefile"
-        echo "【LinInfo】替换lang_node for openwrt_${op_version}失败，还原lang_node"
-    fi
-else
-    echo "【LinInfo】openwrt版本号未知"
-fi
+#     if [ -d "$path_node_makefile" ]; then
+#         echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
+#         [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+#     else
+#         mv -f "$path_node_dir_bak" "$path_node_makefile"
+#         echo "【LinInfo】替换lang_node for openwrt_${op_version}失败，还原lang_node"
+#     fi
+# else
+#     echo "【LinInfo】openwrt版本号未知"
+# fi
 
 
 

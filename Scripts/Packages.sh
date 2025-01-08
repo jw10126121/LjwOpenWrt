@@ -2,15 +2,48 @@
 
 
 # 运行在openwrt/package目录下
+current_script_dir=$(cd $(dirname $0) && pwd)
+echo "【LinInfo】脚本目录：${current_script_dir}"
+
+if [ $(basename "$(pwd)") != 'package' ]; then
+    if [ -d "./package" ]; then
+        cd ./package
+    else
+        echo "【LinInfo】请在package目录下执行，当前工作目录：$(pwd)" 
+        exit 0;
+    fi
+fi
+
+current_dir=$(pwd)
+current_script_dir=$(cd $(dirname $0) && pwd)
+echo "【LinInfo】工作目录：${current_dir}"
+current_dirname=$(basename "${current_dir}")
+
+openwrt_workdir="$(readlink -f ..)"
 
 #删除软件包
 DELETE_PACKAGE() {
     local PKG_NAME=$1
-
     rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
     echo "【LinInfo】删除插件：$PKG_NAME"
 }
 
+# 删除并备份插件(包名是文件夹名)
+DELETE_AND_BACKUP_PACKAGE() {
+    local PKG_NAME=$1
+    path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
+    path_default_bak="${path_default}_bak"
+    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份${PKG_NAME}：${path_default} -> ${path_default_bak}"
+}
+
+# 删除备份的包(包名是文件夹名)
+DELETE_BACKUP_PACKAGE() {
+    local PKG_NAME=$1
+    path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
+    path_default_bak="${path_default}_bak"
+    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+}
 
 #安装和更新软件包
 UPDATE_PACKAGE() {
@@ -46,7 +79,7 @@ UPDATE_PACKAGE() {
     fi
 }
 
-#安装和更新同一个仓库下的软件包
+# 安装和更新同一个仓库下的软件包
 UPDATE_PACKAGE_FROM_REPO() {
     local PKG_NAME=$1
     local PKG_REPO=$2
@@ -117,17 +150,19 @@ REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 
-path_frp_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "frp" -prune)
-path_frp_default_bak="${path_frp_default}_bak"
-[ -d "$path_frp_default_bak" ] && rm -fr "$path_frp_default_bak"
-[ -d "$path_frp_default" ] && mv -f ${path_frp_default} ${path_frp_default_bak} && echo "【LinInfo】备份frp：${path_frp_default} -> ${path_frp_default_bak}"
-git clone --depth=1 --single-branch -b main https://github.com/user1121114685/frp.git ${path_frp_default}
-if [ -d ${path_frp_default} ]; then
-     echo "【LinInfo】替换frp成功：${path_frp_default}"
-     [ -d "$path_frp_default_bak" ] && rm -fr "$path_frp_default_bak"
+
+package_name="frp"
+path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
+path_default_bak="${path_default}_bak"
+[ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+[ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份frp：${path_default} -> ${path_default_bak}"
+git clone --depth=1 --single-branch -b main https://github.com/user1121114685/frp.git ${path_default}
+if [ -d ${path_default} ]; then
+     echo "【LinInfo】替换${package_name}成功：${path_default}"
+     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
 else
-    mv -f "${path_frp_default_bak}" "${path_frp_default}"
-    echo "【LinInfo】替换frp失败，还原frp"
+    mv -f "${path_default_bak}" "${path_default}"
+    echo "【LinInfo】替换${package_name}失败，还原${package_name}"
 fi
 
 DELETE_PACKAGE "luci-app-frpc"
@@ -136,6 +171,33 @@ UPDATE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp" "superzjg/luci-app-frpc_
 MOVE_PACKAGE_FROM_LIST "luci-app-frpc" "custom_packages_superzjg_frp"
 MOVE_PACKAGE_FROM_LIST "luci-app-frps" "custom_packages_superzjg_frp"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp"
+
+version_workdir="${openwrt_workdir}"
+
+# 修复lang_node编译问题
+config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+op_version="${config_version:-${include_version:-${package_version}}}"
+echo "【LinInfo】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
+if [ -n "$op_version" ]; then  
+    path_node_makefile="${version_workdir}/feeds/packages/lang/node"
+    path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
+    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+
+    git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+
+    if [ -d "$path_node_makefile" ]; then
+        echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
+        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+    else
+        mv -f "$path_node_dir_bak" "$path_node_makefile"
+        echo "【LinInfo】替换lang_node for openwrt_${op_version}失败，还原lang_node"
+    fi
+else
+    echo "【LinInfo】openwrt版本号未知"
+fi
 
 # UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
 # # 注意，需要luci-app-nlbwmon支持

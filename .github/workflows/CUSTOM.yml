@@ -6,56 +6,50 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
-      iWRT_CONFIG:
+      WRT_CONFIG:
         description: '配置文件'
         required: true
         type: string
         default: 'IPQ60XX-NOWIFI.txt'
-      iWRT_DIY_SETTING:
-        description: 'DIY脚本'
+      WRT_DIY_SETTING:
+        description: 'diy_setting脚本'
         required: false
         type: string
-        default: 'IPQ60XX.sh'
-      iWRT_DIYPackages:
+        default: 'diy_config.sh'
+      WRT_DIYPackages:
         description: 'DIY包配置'
         required: false
         type: string
         default: 'Packages.sh'
-      iWRT_DEFAULT_LANIP:
+      WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
         type: string
         default: '192.168.0.1'
-      iWRT_RELEASE_FIRMWARE:
+      WRT_RELEASE_FIRMWARE:
         description: '发布firmware'
         required: false
         type: boolean
         default: true
-      iWHAT_MY_SAY:
+      WHAT_MY_SAY:
         description: '编译说明'
         required: false
         type: string
         default: ''
-      iWRT_REPO_URL:
+      WRT_REPO_URL:
         description: '源码'
         required: true
         type: string
         default: 'https://github.com/coolsnowwolf/lede'
-      iWRT_REPO_Commit_Hash:
+      WRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
         type: string
         default: ''
-      # iTOKEN_DINGDING:
-      #   description: '钉钉TOKEN'
-      #   required: false
-      #   type: string
-      #   default: ''
-      # iWRT_GENERAL_CONFIG:
-      #   description: '通用配置文件'
-      #   required: true
-      #   type: string
-      #   default: 'GENERAL.txt'
+    secrets:
+      DINGDING_TOKEN: 
+        required: false
+        default: ${{ secrets.DINGDING_TOKEN }}
 
 #CI权限
 permissions: write-all
@@ -63,7 +57,7 @@ permissions: write-all
 #CI任务
 jobs:
   config:
-    name: ${{inputs.iWRT_CONFIG}}
+    name: ${{inputs.WRT_CONFIG}}
     strategy:
       fail-fast: false
       #max-parallel: 2
@@ -76,29 +70,29 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      WRT_REPO_URL: ${{ inputs.iWRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
       # 编译分支
       WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
       # 编译指定版本
-      WRT_REPO_Commit_Hash: ${{ inputs.iWRT_REPO_Commit_Hash }}
+      WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件
-      WRT_CONFIG: ${{ inputs.iWRT_CONFIG }}
+      WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
       # 通用配置
       WRT_GENERAL_CONFIG: GENERAL.txt
       # DIY脚本
-      WRT_DIY_SETTING: ${{ inputs.iWRT_DIY_SETTING }}
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置
-      WRT_DIYPackages: ${{ inputs.iWRT_DIYPackages }}
+      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
       # FEED配置
       WRT_DIY_FEEDS: diy_feeds.sh
       # 是否发布
-      WRT_RELEASE_FIRMWARE: ${{ inputs.iWRT_RELEASE_FIRMWARE }} # 发布固件
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }} # 发布固件
       # 默认LAN-IP
-      WRT_DEFAULT_LANIP: ${{ inputs.iWRT_DEFAULT_LANIP }}
+      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
       # 钉钉TOKEN，用于推送下载文件
       WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
       # 编译说明
-      WRT_MINE_SAY: ${{ inputs.iWHAT_MY_SAY }}
+      WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
       # 是否使用APK包管理器
       WRT_USE_APK: false
     secrets:
