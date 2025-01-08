@@ -13,7 +13,7 @@ on:
           - IPQ60XX-NOWIFI.txt
           - IPQ60XX-NOWIFI_lite.txt
           - MT6000.txt
-        default: 'MT6000.txt'
+        default: 'IPQ60XX-NOWIFI.txt'
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
         required: false
