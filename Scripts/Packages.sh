@@ -134,7 +134,7 @@ REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-UPDATE_PACKAGE "luci-app-wolplus" "siwind/luci-app-wolplus" "master"
+#UPDATE_PACKAGE "luci-app-wolplus" "siwind/luci-app-wolplus" "master"
 
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
