@@ -125,7 +125,12 @@ MOVE_PACKAGE_FROM_LIST() {
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
-UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+#UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+DELETE_PACKAGE "luci-theme-argon"
+UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
+MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
+
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
@@ -151,10 +156,7 @@ REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 
-DELETE_PACKAGE "luci-theme-argon"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
-MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
+
 
 package_name="frp"
 path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
