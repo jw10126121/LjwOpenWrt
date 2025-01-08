@@ -153,7 +153,7 @@ UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 
 DELETE_PACKAGE "luci-theme-argon"
 UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
-MOVE_PACKAGE_FROM_LIST "luci-app-argon" "custom_packages_sbwml_argon"
+MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
 
 package_name="frp"
