@@ -1,21 +1,31 @@
 #CI项目
 name: DEFAULT
 
-#CI计划
 on:
   #手动编译
   workflow_dispatch:
     inputs:
-      choose_config:
-        description: '部署环境'
+      WRT_CONFIG:
+        description: '配置文件'
         required: true
         type: choice
         options:
-          - IPQ60XX-NOWIFI
-          - IPQ60XX-NOWIFI_lite
-          - MT6000
+          - IPQ60XX-NOWIFI.txt
+          - IPQ60XX-NOWIFI_lite.txt
+          - MT6000.txt
+        default: 'MT6000.txt'
+      WRT_DIY_SETTING:
+        description: 'diy_setting脚本'
+        required: false
+        type: string
+        default: 'diy_config.sh'
+      WRT_DIYPackages:
+        description: 'DIY包配置'
+        required: false
+        type: string
+        default: 'Packages.sh'
       WRT_DEFAULT_LANIP:
-        description: '配置LAN-IP'
+        description: '默认LAN-IP'
         required: false
         type: string
         default: '192.168.0.1'
@@ -29,12 +39,20 @@ on:
         required: false
         type: string
         default: ''
+      WRT_REPO_URL:
+        description: '源码'
+        required: true
+        type: string
+        default: 'https://github.com/coolsnowwolf/lede'
       WRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
         type: string
         default: ''
-
+    secrets:
+      DINGDING_TOKEN: 
+        required: false
+        default: ${{ secrets.DINGDING_TOKEN }}
 
 #CI权限
 permissions: write-all
@@ -42,69 +60,46 @@ permissions: write-all
 #CI任务
 jobs:
   config:
-    name: ${{ inputs.choose_config }}
-    runs-on: ubuntu-latest
-    outputs:
-      TARGET_CONFIG: ${{ steps.set_config.outputs.TARGET_CONFIG }}
-      WRT_CONFIG: ${{ steps.set_config.outputs.WRT_CONFIG }}
-      WRT_DIY_SETTING: ${{ steps.set_config.outputs.WRT_DIY_SETTING }}
-      WRT_GENERAL_CONFIG: ${{ steps.set_config.outputs.WRT_GENERAL_CONFIG }}
+    name: ${{inputs.WRT_CONFIG}}
+    strategy:
+      fail-fast: false
+      #max-parallel: 2
+      matrix:
+        TARGET: [IPQ60XX-NOWIFI]
+        SOURCE: ['https://github.com/coolsnowwolf/lede']
+        BRANCH: [master]
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    #调用公用编译核心ALL-CORE.yml
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      # 源码
+      WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      # 编译分支
+      WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
+      # 编译指定版本
+      WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
+      # DIY配置文件
+      WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
+      # 通用配置
+      WRT_GENERAL_CONFIG: GENERAL.txt
+      # DIY脚本
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      # DIY包配置
+      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
+      # FEED配置
+      WRT_DIY_FEEDS: diy_feeds.sh
+      # 是否发布
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }} # 发布固件
+      # 默认LAN-IP
+      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
+      # 钉钉TOKEN，用于推送下载文件
+      WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
+      # 编译说明
+      WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
+      # 是否使用APK包管理器
+      WRT_USE_APK: false
+    secrets:
+      # 钉钉TOKEN
+      DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
+      
 
-      - name: ${{ inputs.choose_config }}
-        id: set_config
-        run: |
-          case ${{ inputs.choose_config }} in
-            IPQ60XX-NOWIFI)
-              echo "TARGET_CONFIG=IPQ60XX-NOWIFI" >> $GITHUB_ENV
-              echo "WRT_CONFIG=IPQ60XX-NOWIFI.txt" >> $GITHUB_ENV
-              echo "WRT_DIY_SETTING=diy_config.sh" >> $GITHUB_ENV
-              echo "WRT_GENERAL_CONFIG=GENERAL.txt" >> $GITHUB_ENV
-              ;;
-            IPQ60XX-NOWIFI_lite)
-              echo "TARGET_CONFIG=IPQ60XX-NOWIFI_lite" >> $GITHUB_ENV
-              echo "WRT_CONFIG=IPQ60XX-NOWIFI_lite.txt" >> $GITHUB_ENV
-              echo "WRT_DIY_SETTING=diy_config.sh" >> $GITHUB_ENV
-              echo "WRT_GENERAL_CONFIG=GENERAL.txt" >> $GITHUB_ENV
-              ;;
-            MT6000)
-              echo "TARGET_CONFIG=MT6000" >> $GITHUB_ENV
-              echo "WRT_CONFIG=MT6000.txt" >> $GITHUB_ENV
-              echo "WRT_DIY_SETTING=diy_config.sh" >> $GITHUB_ENV
-              echo "WRT_GENERAL_CONFIG=GENERAL.txt" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "Invalid configuration selected"
-              exit 1
-              ;;
-          esac
-
-      - name: 
-        uses: ./.github/workflows/CUSTOM.yml
-        with:
-          WRT_REPO_URL: https://github.com/coolsnowwolf/lede
-          # 编译分支
-          WRT_REPO_BRANCH: master
-          # 编译指定版本
-          WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
-          # DIY配置文件
-          WRT_CONFIG: ${{ env.WRT_CONFIG }}
-          # 通用配置
-          WRT_GENERAL_CONFIG: ${{ env.WRT_GENERAL_CONFIG }}
-          # DIY脚本
-          WRT_DIY_SETTING: ${{ env.WRT_DIY_SETTING }}
-          # DIY包配置
-          WRT_DIYPackages: Packages.sh
-          # FEED配置
-          WRT_DIY_FEEDS: diy_feeds.sh
-          # 是否发布
-          WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }} # 发布固件
-          # 默认LAN-IP
-          WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
-          # 钉钉TOKEN，用于推送下载文件
-          # WRT_TOKEN_DINGDING: ${{ secrets.TOKEN_DINGDING }}
-          # 编译说明
-          WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
