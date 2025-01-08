@@ -159,7 +159,7 @@ DELETE_PACKAGE "luci-app-onliner"
 # DELETE_PACKAGE "luci-app-netspeedtest"
 # UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master"
 # MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
-# MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo"
+# MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo" # 1.6.3版本，luci看不到菜单，弃用
 # MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
 #MOVE_PACKAGE_FROM_LIST "luci-app-netwizard" "custom_packages_haiibo"  # 测试不能用，不加
 # MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
@@ -168,7 +168,7 @@ DELETE_PACKAGE "luci-app-onliner"
 
 UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg" "1"
 UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg" "1"
-UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "master" "pkg" "1"
+UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg" "1"
 
 
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
