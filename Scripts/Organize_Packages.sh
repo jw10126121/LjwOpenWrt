@@ -56,7 +56,7 @@ mwan3_packages_pre="luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_"
 alist_packages_pre="luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_"
 wrtbwmon_packages_pre="luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_"
 netdata_packages_pre="luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_"
-rclone_packages_pre="luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_"
+rclone_packages_pre="luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_"
 frps_packages_pre="luci-app-frps_ frps_"
 frpc_packages_pre="luci-app-frpc_ frpc_"
 
