@@ -108,6 +108,3 @@ jobs:
           # WRT_TOKEN_DINGDING: ${{ secrets.TOKEN_DINGDING }}
           # 编译说明
           WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
-        secrets:
-          # 钉钉TOKEN
-          DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
