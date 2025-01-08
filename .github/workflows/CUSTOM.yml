@@ -46,10 +46,6 @@ on:
         required: false
         type: string
         default: ''
-    secrets:
-      DINGDING_TOKEN: 
-        required: false
-        default: ${{ secrets.DINGDING_TOKEN }}
 
 #CI权限
 permissions: write-all
