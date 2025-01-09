@@ -185,11 +185,20 @@ fi
 
 # 配置编译信息
 if [[ -f "${file_default_settings}" ]]; then
-    # 配置编译日期
-    date_version=$(date +"%y.%m.%d")
+    # 获取版本号
+    version_workdir="."
+    config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+    include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+    op_version="${config_version:-${include_version}}"
     DISTRIB_REVISION=$(cat "${file_default_settings}" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
     if [[ -n $DISTRIB_REVISION ]]; then
-        TO_DISTRIB_REVISION="R${date_version} by Linjw"
+        if [ -n "${op_version}" ]; then
+            show_version_text="v${op_version} by Lin"
+            TO_DISTRIB_REVISION="${show_version_text}"
+        else
+            date_version=$(date +"%y.%m.%d")
+            TO_DISTRIB_REVISION="R${date_version} by Lin"
+        fi
         sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/${TO_DISTRIB_REVISION}/" "${file_default_settings}"
         echo "【LinInfo】编译信息修改为：${TO_DISTRIB_REVISION}"
     fi
