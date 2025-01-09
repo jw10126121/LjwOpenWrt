@@ -168,7 +168,11 @@ DELETE_PACKAGE "luci-app-onliner"
 # REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 
 
-UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg" "1"
+# UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg" "1"
+
+UPDATE_PACKAGE_FROM_REPO "custom_packages_danchexiaoyang_app_onliner" "danchexiaoyang/luci-app-onliner" "main"
+MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_danchexiaoyang_app_onliner"
+REMOVE_PACKAGE_FROM_REPO "custom_packages_danchexiaoyang_app_onliner"
 
 UPDATE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_wrtbwmon" "brvphoenix/wrtbwmon" "master"
 MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_brvphoenix_wrtbwmon"
@@ -178,8 +182,6 @@ UPDATE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_app_wrtbwmon" "brvphoenix/l
 MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_brvphoenix_app_wrtbwmon"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_app_wrtbwmon"
 
-
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
