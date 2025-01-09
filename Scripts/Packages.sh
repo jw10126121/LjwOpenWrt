@@ -201,7 +201,9 @@ safe_update_package() {
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon-config" "master"
 # UPDATE_PACKAGE "luci-theme-argon" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
+# UPDATE_PACKAGE "luci-theme-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
 
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
@@ -211,7 +213,7 @@ UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
 
 # lean源码不可用：luci-theme-design
-update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
+# update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
 
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
@@ -367,7 +369,7 @@ if [ -f "$SP_FILE" ]; then
     sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' $SP_FILE
     sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $SP_FILE
 
-    echo "s【LinInfo】sr-plus has been fixed!"
+    echo "【LinInfo】ssr-plus has been fixed!"
 fi
 
 # 修复TailScale配置文件冲突
@@ -376,6 +378,16 @@ if [ -f "$TS_FILE" ]; then
     sed -i '/\/files/d' $TS_FILE
     echo "【LinInfo】tailscale has been fixed!"
 fi
+
+# #修改argon主题字体和颜色
+# if [ -d *"luci-theme-argon"* ]; then
+#     cd ./luci-theme-argon/
+
+#     sed -i '/font-weight:/ {/normal\|!important/! s/\(font-weight:\s*\)[^;]*;/\1normal;/}' $(find ./luci-theme-argon -type f -iname "*.css")
+#     sed -i "s/#5e72e4/#31a1a1/; s/#483d8b/#31a1a1/; s/'0.2'/'0.5'/; s/'none'/'bing'/" ./luci-app-argon-config/root/etc/config/argon
+
+#     echo "【LinInfo】theme-argon has been fixed!"
+# fi
 
 #预置OpenClash内核和数据
 # if [ -d *"openclash"* ]; then

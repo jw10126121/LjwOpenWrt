@@ -72,6 +72,7 @@ WRT_THEME=$default_theme_name
 
 CFG_FILE="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
+file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
 
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
@@ -119,6 +120,26 @@ else
     echo "【LinInfo】使用源码默认主题"
 fi
 
+# 修改argon主题颜色
+# if ! grep -q "uci commit argon" $file_default_settings; then
+#     # 创建一个临时文件来保存要插入的内容
+#     temp_file=$(mktemp)
+#     # 将要插入的内容写入临时文件
+# cat <<EOF > "$temp_file"
+
+# if [ ! -f /etc/config/argon ]; then
+#     touch /etc/config/argon
+#     uci add argon global
+# fi
+# uci set argon.@global[0].primary='#31A1A1'
+# uci set argon.@global[0].transparency='0.3'
+# uci commit argon
+# EOF
+#     # 使用sed命令在uci commit system之后插入内容
+#     sed -i "/uci commit system/r $temp_file" "${file_default_settings}"
+#     rm "$temp_file"
+# fi
+
 # 修复 armv8 设备 xfsprogs 报错
 # sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
@@ -129,13 +150,13 @@ if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "tru
     echo "【LinInfo】密码已清空：./package/base-files/files/etc/shadow"
 fi
 # 清空密码
-if [[ -f "./package/lean/default-settings/files/zzz-default-settings" && "$is_reset_password" == "true" ]]; then
-    sed -i '/\/etc\/shadow$/{/root::0:0:99999:7:::/d;/root:::0:99999:7:::/d}' "./package/lean/default-settings/files/zzz-default-settings"
-    echo "【LinInfo】LEAN配置密码已清空：./package/lean/default-settings/files/zzz-default-settings"
+if [[ -f "${file_default_settings}" && "$is_reset_password" == "true" ]]; then
+    sed -i '/\/etc\/shadow$/{/root::0:0:99999:7:::/d;/root:::0:99999:7:::/d}' "${file_default_settings}"
+    echo "【LinInfo】LEAN配置密码已清空：${file_default_settings}"
 fi
 
 WIFI_NAME=LEDE
-WIFI_PASSWORD=12345678
+WIFI_PASSWORD=88888888
 
 # # 修改wifi国家
 # sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx}.type=mac80211 \n\t\t\t set wireless.radio\${devidx}.country=\"CN\"/g' ./kernel/mac80211/files/lib/wifi/mac80211.sh
@@ -161,13 +182,13 @@ if [ -f "$CFG_FILE_LEDE" ]; then
 fi
 
 # 配置编译信息
-if [[ -f "./package/lean/default-settings/files/zzz-default-settings" ]]; then
+if [[ -f "${file_default_settings}" ]]; then
     # 配置编译日期
     date_version=$(date +"%y.%m.%d")
-    DISTRIB_REVISION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
+    DISTRIB_REVISION=$(cat "${file_default_settings}" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
     if [[ -n $DISTRIB_REVISION ]]; then
         TO_DISTRIB_REVISION="R${date_version} by Linjw"
-        sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/${TO_DISTRIB_REVISION}/" ./package/lean/default-settings/files/zzz-default-settings
+        sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/${TO_DISTRIB_REVISION}/" "${file_default_settings}"
         echo "【LinInfo】编译信息修改为：${TO_DISTRIB_REVISION}"
     fi
     # DISTRIB_DESCRIPTION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}')
