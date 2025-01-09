@@ -317,9 +317,9 @@ UPDATE_VERSION() {
         if [[ $NEW_VER =~ ^[0-9].* ]] && dpkg --compare-versions "$OLD_VER" lt "$NEW_VER"; then
             sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$NEW_VER/g" "$PKG_FILE"
             sed -i "s/PKG_HASH:=.*/PKG_HASH:=$NEW_HASH/g" "$PKG_FILE"
-            echo "$PKG_FILE $NEW_VER version has been updated!"
+            echo "【LinInfo】$PKG_FILE $NEW_VER version has been updated!"
         else
-            echo "$PKG_FILE $NEW_VER version is already the latest!"
+            echo "【LinInfo】$PKG_FILE $NEW_VER version is already the latest!"
         fi
     done
 }
@@ -379,15 +379,12 @@ if [ -f "$TS_FILE" ]; then
     echo "【LinInfo】tailscale has been fixed!"
 fi
 
-# #修改argon主题字体和颜色
-# if [ -d *"luci-theme-argon"* ]; then
-#     cd ./luci-theme-argon/
-
-#     sed -i '/font-weight:/ {/normal\|!important/! s/\(font-weight:\s*\)[^;]*;/\1normal;/}' $(find ./luci-theme-argon -type f -iname "*.css")
-#     sed -i "s/#5e72e4/#31a1a1/; s/#483d8b/#31a1a1/; s/'0.2'/'0.5'/; s/'none'/'bing'/" ./luci-app-argon-config/root/etc/config/argon
-
-#     echo "【LinInfo】theme-argon has been fixed!"
-# fi
+ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
+# 修改argon主题进度条颜色与主题色一致
+if [ -n "${ARGON_DIR}" ]; then
+    find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
+    echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+fi
 
 #预置OpenClash内核和数据
 # if [ -d *"openclash"* ]; then

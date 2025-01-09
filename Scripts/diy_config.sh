@@ -120,25 +120,27 @@ else
     echo "【LinInfo】使用源码默认主题"
 fi
 
+theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # 修改argon主题颜色
-# if ! grep -q "uci commit argon" $file_default_settings; then
-#     # 创建一个临时文件来保存要插入的内容
-#     temp_file=$(mktemp)
-#     # 将要插入的内容写入临时文件
-# cat <<EOF > "$temp_file"
+if [ -n "$theme_argon_dir" ] && ! grep -q "uci commit argon" $file_default_settings; then
+    temp_file=$(mktemp)
+cat <<EOF > "$temp_file"
 
-# if [ ! -f /etc/config/argon ]; then
-#     touch /etc/config/argon
-#     uci add argon global
-# fi
-# uci set argon.@global[0].primary='#31A1A1'
-# uci set argon.@global[0].transparency='0.3'
-# uci commit argon
-# EOF
-#     # 使用sed命令在uci commit system之后插入内容
-#     sed -i "/uci commit system/r $temp_file" "${file_default_settings}"
-#     rm "$temp_file"
-# fi
+if [ ! -f /etc/config/argon ]; then
+    touch /etc/config/argon
+    uci add argon global
+fi
+uci set argon.@global[0].primary='#31A1A1'
+uci set argon.@global[0].transparency='0.3'
+uci commit argon
+EOF
+    sed -i "/uci commit system/r $temp_file" "${file_default_settings}"
+    rm "$temp_file"
+fi
+
+if grep -q "uci commit argon" $file_default_settings; then
+    echo "【LinInfo】修改argon主题色成功"
+fi
 
 # 修复 armv8 设备 xfsprogs 报错
 # sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
