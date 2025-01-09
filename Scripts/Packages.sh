@@ -142,10 +142,11 @@ UPDATE_PACKAGE_FROM_REPO "custom_packages_sundaqiang" "sundaqiang/openwrt-packag
 MOVE_PACKAGE_FROM_LIST "luci-app-wolplus" "custom_packages_sundaqiang"
 REMOVE_PACKAGE_FROM_REPO "custom_packages_sundaqiang"
 
-DELETE_PACKAGE "luci-theme-design"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_kenzok8" "kenzok8/openwrt-packages" "master"
-MOVE_PACKAGE_FROM_LIST "luci-theme-design" "custom_packages_kenzok8"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_kenzok8"
+# # lean源码不可用：luci-theme-design
+# DELETE_PACKAGE "luci-theme-design"
+# UPDATE_PACKAGE_FROM_REPO "custom_packages_kenzok8" "kenzok8/openwrt-packages" "master"
+# MOVE_PACKAGE_FROM_LIST "luci-theme-design" "custom_packages_kenzok8"
+# REMOVE_PACKAGE_FROM_REPO "custom_packages_kenzok8"
 
 
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
