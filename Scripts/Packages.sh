@@ -48,17 +48,11 @@ DELETE_BACKUP_PACKAGE() {
 
 #安装和更新软件包
 UPDATE_PACKAGE() {
-    local PKG_NAME=$1
-    local PKG_REPO=$2
-    local PKG_BRANCH=$3
-    local PKG_SPECIAL=$4
-    local REPO_NAME=$(echo $PKG_REPO | cut -d '/' -f 2)
-    local SEARCH_TYPE_SURE=$5
-
-    searchType="*$PKG_NAME*"
-    if [[ $SEARCH_TYPE_SURE == "1" ]]; then
-        searchType="$PKG_NAME"
-    fi
+    PKG_NAME=$1
+    PKG_REPO=$2
+    PKG_BRANCH=$3
+    PKG_SPECIAL=$4
+    searchType="$PKG_NAME"
 
     # 删除原本同名的软件包
     the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
@@ -67,13 +61,24 @@ UPDATE_PACKAGE() {
         rm -rf $the_exist_pkg
     fi
 
-    # Clone插件
-    git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
+    if [[ $PKG_REPO == https://github.com* ]]; then
+        the_full_repo=$PKG_REPO
+    else
+        the_full_repo="https://github.com/${PKG_REPO}.git"
+    fi
+
+    REPO_URL_git=${the_full_repo%.git}; 
+    REPO_NAME=${REPO_URL_git##*/}
+
+    git clone --depth=1 --single-branch --branch $PKG_BRANCH "${the_full_repo}" "${REPO_NAME}"
     echo "【LinInfo】成功clone插件：$PKG_NAME"
-    echo ""
     if [[ $PKG_SPECIAL == "pkg" ]]; then
-        cp -rf $(find ./$REPO_NAME/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./
-        rm -rf ./$REPO_NAME/
+        search_result_pkg_dir=$(find ./${REPO_NAME}/*/ -maxdepth 1 -type d -iname "$searchType" -prune)
+        if [ -n "${search_result_pkg_dir}" ]; then
+            mv -f "$REPO_NAME" "${REPO_NAME}_bak"
+            cp -rf $(find ./${REPO_NAME}_bak/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./$searchType
+            rm -rf ./${REPO_NAME}_bak/
+        fi
     elif [[ $PKG_SPECIAL == "name" ]]; then
         mv -f $REPO_NAME $PKG_NAME
         echo "【LinInfo】重命名插件：$PKG_NAME <= $REPO_NAME"
@@ -122,7 +127,57 @@ MOVE_PACKAGE_FROM_LIST() {
     fi
 }
 
+update_package_list() {
 
+    pkg_name_list=($1)
+    pkg_repo=$2
+    pkg_branch=$3
+
+        # 使用for循环遍历数组
+    for pkg_name in "${pkg_name_list[@]}"; do
+        DELETE_PACKAGE "$pkg_name"
+    done
+
+    if [[ $pkg_repo == http* ]]; then
+        the_full_repo=$pkg_repo
+    else
+        the_full_repo="https://github.com/${pkg_repo}.git"
+    fi
+
+    # 获取仓库名
+    REPO_URL_git=${the_full_repo%.git}; 
+    REPO_NAME_LAST=${REPO_URL_git##*/}
+
+    # 获取用户名_仓库名
+    REPO_NAME=${the_full_repo#*//}      # 删除前面的协议部分
+    REPO_NAME=${REPO_NAME#*/}       # 删除第一个/后面的内容，保留用户名和仓库名
+    REPO_NAME=${REPO_NAME%.git}     # 删除后面的.git
+    REPO_NAME=${REPO_NAME//\//_}    # 将所有的/替换为_
+    if [ -n "$REPO_NAME" ]; then
+        REPO_NAME="PkgList_${REPO_NAME}"
+    else
+
+        REPO_NAME="PkgList_${REPO_NAME_LAST}"
+    fi
+
+    exist_pkg_list=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$REPO_NAME" -prune)
+    if [ -n "$exist_pkg_list" ]; then
+        echo "【LinInfo】删除同名插件包库：${exist_pkg_list}"
+        rm -rf "${exist_pkg_list}"
+    fi
+    echo "【LinInfo】下载插件库${REPO_NAME}：【${pkg_branch}】${the_full_repo}"
+    git clone --depth=1 --single-branch --branch $pkg_branch "${the_full_repo}" ${REPO_NAME}
+    echo "【LinInfo】成功clone插件包库：${REPO_NAME}"
+
+    # 使用for循环遍历数组
+    for pkg_name in "${pkg_name_list[@]}"; do
+        MOVE_PACKAGE_FROM_LIST "${pkg_name}" "${REPO_NAME}"
+    done
+
+    echo "【LinInfo】删除插件包库：${REPO_NAME}"
+    rm -rf ${REPO_NAME}
+
+}
 
 
 
@@ -137,10 +192,10 @@ UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 #UPDATE_PACKAGE "luci-app-wolplus" "animegasan/luci-app-wolplus" "master"
-DELETE_PACKAGE "luci-app-wolplus"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_sundaqiang" "sundaqiang/openwrt-packages" "master"
-MOVE_PACKAGE_FROM_LIST "luci-app-wolplus" "custom_packages_sundaqiang"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_sundaqiang"
+
+# 从插件库列表中下载插件
+update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
+
 
 # # lean源码不可用：luci-theme-design
 # DELETE_PACKAGE "luci-theme-design"
@@ -152,35 +207,14 @@ REMOVE_PACKAGE_FROM_REPO "custom_packages_sundaqiang"
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
 
+
 DELETE_PACKAGE "wrtbwmon"
 DELETE_PACKAGE "luci-app-wrtbwmon"
 DELETE_PACKAGE "luci-app-onliner"
-#DELETE_PACKAGE "luci-app-netwizard"
-# DELETE_PACKAGE "homebox"
-# DELETE_PACKAGE "luci-app-netspeedtest"
-# UPDATE_PACKAGE_FROM_REPO "custom_packages_haiibo" "haiibo/openwrt-packages" "master"
-# MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_haiibo"
-# MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_haiibo" # 1.6.3版本，luci看不到菜单，弃用
-# MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_haiibo"
-#MOVE_PACKAGE_FROM_LIST "luci-app-netwizard" "custom_packages_haiibo"  # 测试不能用，不加
-# MOVE_PACKAGE_FROM_LIST "homebox" "custom_packages_haiibo"
-# MOVE_PACKAGE_FROM_LIST "luci-app-netspeedtest" "custom_packages_haiibo"
-# REMOVE_PACKAGE_FROM_REPO "custom_packages_haiibo"
 
-
-# UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg" "1"
-
-UPDATE_PACKAGE_FROM_REPO "custom_packages_danchexiaoyang_app_onliner" "danchexiaoyang/luci-app-onliner" "main"
-MOVE_PACKAGE_FROM_LIST "luci-app-onliner" "custom_packages_danchexiaoyang_app_onliner"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_danchexiaoyang_app_onliner"
-
-UPDATE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_wrtbwmon" "brvphoenix/wrtbwmon" "master"
-MOVE_PACKAGE_FROM_LIST "wrtbwmon" "custom_packages_brvphoenix_wrtbwmon"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_wrtbwmon"
-
-UPDATE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_app_wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
-MOVE_PACKAGE_FROM_LIST "luci-app-wrtbwmon" "custom_packages_brvphoenix_app_wrtbwmon"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_brvphoenix_app_wrtbwmon"
+UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg"
+UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg"
+UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg"
 
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
@@ -202,12 +236,14 @@ else
     echo "【LinInfo】替换${package_name}失败，还原${package_name}"
 fi
 
-DELETE_PACKAGE "luci-app-frpc"
-DELETE_PACKAGE "luci-app-frps"
-UPDATE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp" "superzjg/luci-app-frpc_frps" "main"
-MOVE_PACKAGE_FROM_LIST "luci-app-frpc" "custom_packages_superzjg_frp"
-MOVE_PACKAGE_FROM_LIST "luci-app-frps" "custom_packages_superzjg_frp"
-REMOVE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp"
+# DELETE_PACKAGE "luci-app-frpc"
+# DELETE_PACKAGE "luci-app-frps"
+# UPDATE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp" "superzjg/luci-app-frpc_frps" "main"
+# MOVE_PACKAGE_FROM_LIST "luci-app-frpc" "custom_packages_superzjg_frp"
+# MOVE_PACKAGE_FROM_LIST "luci-app-frps" "custom_packages_superzjg_frp"
+# REMOVE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp"
+
+update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
 version_workdir="${openwrt_workdir}"
 
