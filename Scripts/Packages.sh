@@ -179,15 +179,29 @@ update_package_list() {
 
 }
 
+safe_update_package() {
+    package_name=$1
+    pkg_repo=$2
+    pkg_branch=$3
+    path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
+    path_default_bak="${path_default}_bak"
+    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份frp：${path_default} -> ${path_default_bak}"
+    git clone --depth=1 --single-branch -b "${pkg_branch}" "${pkg_repo}" ${path_default}
+    if [ -d ${path_default} ]; then
+         echo "【LinInfo】替换${package_name}成功：${path_default}"
+         [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+    else
+        mv -f "${path_default_bak}" "${path_default}"
+        echo "【LinInfo】替换${package_name}失败，还原${package_name}"
+    fi
+}
 
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
 UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
-# DELETE_PACKAGE "luci-theme-argon"
-# UPDATE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon" "sbwml/luci-theme-argon" "openwrt-24.10"
-# MOVE_PACKAGE_FROM_LIST "luci-theme-argon" "custom_packages_sbwml_argon"
-# REMOVE_PACKAGE_FROM_REPO "custom_packages_sbwml_argon"
+# UPDATE_PACKAGE "luci-theme-argon" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
 
 #UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
@@ -196,13 +210,8 @@ UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 # 从插件库列表中下载插件
 update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
 
-
-# # lean源码不可用：luci-theme-design
-# DELETE_PACKAGE "luci-theme-design"
-# UPDATE_PACKAGE_FROM_REPO "custom_packages_kenzok8" "kenzok8/openwrt-packages" "master"
-# MOVE_PACKAGE_FROM_LIST "luci-theme-design" "custom_packages_kenzok8"
-# REMOVE_PACKAGE_FROM_REPO "custom_packages_kenzok8"
-
+# lean源码不可用：luci-theme-design
+update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
 
 # UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
 # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
@@ -220,29 +229,10 @@ UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg"
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
+# 替换frp
+safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
 
-
-package_name="frp"
-path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
-path_default_bak="${path_default}_bak"
-[ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-[ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份frp：${path_default} -> ${path_default_bak}"
-git clone --depth=1 --single-branch -b main https://github.com/user1121114685/frp.git ${path_default}
-if [ -d ${path_default} ]; then
-     echo "【LinInfo】替换${package_name}成功：${path_default}"
-     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-else
-    mv -f "${path_default_bak}" "${path_default}"
-    echo "【LinInfo】替换${package_name}失败，还原${package_name}"
-fi
-
-# DELETE_PACKAGE "luci-app-frpc"
-# DELETE_PACKAGE "luci-app-frps"
-# UPDATE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp" "superzjg/luci-app-frpc_frps" "main"
-# MOVE_PACKAGE_FROM_LIST "luci-app-frpc" "custom_packages_superzjg_frp"
-# MOVE_PACKAGE_FROM_LIST "luci-app-frps" "custom_packages_superzjg_frp"
-# REMOVE_PACKAGE_FROM_REPO "custom_packages_superzjg_frp"
-
+# 更新luci-app-frpc luci-app-frps
 update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
 version_workdir="${openwrt_workdir}"
