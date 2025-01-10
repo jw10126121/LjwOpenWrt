@@ -394,9 +394,9 @@ if [ -n "${ARGON_DIR}" ]; then
     echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 fi
 
-# 目前仅lean源码测试过
+# 目前仅lean源码测试过，V佬源码也支持
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
-if [ "$is_code_lean" = 'true' ] && [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
+if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
     pushbot_action_file="${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
     sed -i 's/local cputemp=`soc_temp`/local cputemp=`tempinfo`/' "${pushbot_action_file}"
     sed -i 's/CPU：\${cputemp}℃/\${cputemp}/' "${pushbot_action_file}"
