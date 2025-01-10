@@ -22,6 +22,14 @@ current_dirname=$(basename "${current_dir}")
 openwrt_workdir="$(readlink -f ..)"
 package_workdir="${openwrt_workdir}/package"
 
+is_code_lean=true
+file_default_settings="./lean/default-settings/files/zzz-default-settings"
+if [ -f "$file_default_settings" ]; then
+  is_code_lean=true
+else
+  is_code_lean=false
+fi
+
 #删除软件包
 DELETE_PACKAGE() {
     local PKG_NAME=$1
@@ -384,6 +392,15 @@ ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 if [ -n "${ARGON_DIR}" ]; then
     find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
     echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+fi
+
+# 目前仅lean源码测试过
+pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
+if [ "$is_code_lean" = 'true' ] && [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
+    pushbot_action_file="${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
+    sed -i 's/local cputemp=`soc_temp`/local cputemp=`tempinfo`/' "${pushbot_action_file}"
+    sed -i 's/CPU：\${cputemp}℃/\${cputemp}/' "${pushbot_action_file}"
+    echo "【LinInfo】app-pushbot has been fixed：pushbot显示wifi温度！"
 fi
 
 #预置OpenClash内核和数据

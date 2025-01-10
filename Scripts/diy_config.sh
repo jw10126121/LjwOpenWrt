@@ -74,6 +74,13 @@ CFG_FILE="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
 
+is_code_lean=true
+if [ -f "$file_default_settings" ]; then
+  is_code_lean=true
+else
+  is_code_lean=false
+fi
+
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
