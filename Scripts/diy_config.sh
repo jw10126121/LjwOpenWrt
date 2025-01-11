@@ -128,14 +128,20 @@ else
 fi
 
 # 修改luci响应时间
-# temp_file_holdoff=$(mktemp)
-# cat <<EOF > "$temp_file"
+if ! grep -q "uci set luci.apply.holdoff" $file_default_settings; then
+    temp_file_holdoff=$(mktemp)
+cat <<EOF > "$temp_file_holdoff"
 
-# uci set luci.apply.holdoff='3'
-# uci commit luci
-# EOF
-# sed -i "/uci commit system/r $temp_file_holdoff" "${file_default_settings}"
-# rm "$temp_file_holdoff"
+uci set luci.apply.holdoff='3'
+uci commit luci
+EOF
+    sed -i "/uci commit system/r $temp_file_holdoff" "${file_default_settings}"
+    rm "$temp_file_holdoff"
+
+    if grep -q "uci set luci.apply.holdoff" $file_default_settings; then
+        echo "【LinInfo】修改luci提交等待时间成功！"
+    fi
+fi
 
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # # 修改argon主题颜色
@@ -174,8 +180,8 @@ if [[ -f "${file_default_settings}" && "$is_reset_password" == "true" ]]; then
     echo "【LinInfo】LEAN配置密码已清空：${file_default_settings}"
 fi
 
-WIFI_NAME=LEDE
-WIFI_PASSWORD=88888888
+# WIFI_NAME=LEDE
+# WIFI_PASSWORD=88888888
 
 # # 修改wifi国家
 # sed -i 's/set wireless.radio\${devidx}.type=mac80211/set wireless.radio\${devidx}.type=mac80211 \n\t\t\t set wireless.radio\${devidx}.country=\"CN\"/g' ./kernel/mac80211/files/lib/wifi/mac80211.sh
@@ -203,9 +209,9 @@ fi
 # 配置编译信息
 if [[ -f "${file_default_settings}" ]]; then
     # 获取版本号
-    version_workdir="."
-    config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-    include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+    openwrt_workdir="." #openwrt目录
+    config_version=$(grep CONFIG_VERSION_NUMBER "${openwrt_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+    include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${openwrt_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
     op_version="${config_version:-${include_version}}"
     DISTRIB_REVISION=$(cat "${file_default_settings}" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
     if [[ -n $DISTRIB_REVISION ]]; then
