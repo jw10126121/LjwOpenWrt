@@ -127,6 +127,16 @@ else
     echo "【LinInfo】使用源码默认主题"
 fi
 
+# 修改luci响应时间
+# temp_file_holdoff=$(mktemp)
+# cat <<EOF > "$temp_file"
+
+# uci set luci.apply.holdoff='3'
+# uci commit luci
+# EOF
+# sed -i "/uci commit system/r $temp_file_holdoff" "${file_default_settings}"
+# rm "$temp_file_holdoff"
+
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # # 修改argon主题颜色
 # if [ -n "$theme_argon_dir" ] && ! grep -q "uci commit argon" $file_default_settings; then
