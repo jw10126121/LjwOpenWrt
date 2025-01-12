@@ -127,6 +127,22 @@ else
     echo "【LinInfo】使用源码默认主题"
 fi
 
+# 修复frpc、frps执行问题
+if ! grep -q '/etc/init.d/frpc' $file_default_settings; then
+    temp_file_frp=$(mktemp)
+cat <<EOF > "$temp_file_frp"
+
+[ -f /usr/bin/frpc ] && chmod +x /usr/bin/frpc
+[ -f /usr/bin/frps ] && chmod +x /usr/bin/frps
+[ -f /etc/init.d/frpc ] && chmod +x /etc/init.d/frpc
+[ -f /etc/init.d/frps ] && chmod +x /etc/init.d/frps
+EOF
+    sed -i "/uci commit system/r $temp_file_frp" "${file_default_settings}"
+    if grep -q '/etc/init.d/frpc' $file_default_settings; then
+        echo "【LinInfo】修改frpc、frps执行权限成功！"
+    fi
+fi
+
 # 修改luci响应时间
 if ! grep -q "uci set luci.apply.holdoff" $file_default_settings; then
     temp_file_holdoff=$(mktemp)
@@ -143,6 +159,14 @@ EOF
     fi
 fi
 
+# 注释openwrt_sqm_scripts_nss
+remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
+sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
+if [ $? -eq 0 ]; then
+    echo "【LinInfo】注释feeds中openwrt_sqm_scripts_nss完成"
+else
+    echo "【LinInfo】注释feeds中openwrt_sqm_scripts_nss失败"
+fi
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # # 修改argon主题颜色
 # if [ -n "$theme_argon_dir" ] && ! grep -q "uci commit argon" $file_default_settings; then
