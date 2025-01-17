@@ -398,9 +398,13 @@ fi
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
 if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
     pushbot_action_file="${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
+    # 显示wifi温度
     sed -i 's/local cputemp=`soc_temp`/local cputemp=`tempinfo`/' "${pushbot_action_file}"
     sed -i 's/CPU：\${cputemp}℃/\${cputemp}/' "${pushbot_action_file}"
-    echo "【LinInfo】app-pushbot has been fixed：pushbot显示wifi温度！"
+    # 日志不停报网络断开
+    net_fix_test_del=' https://www.qidian.com https://www.douban.com'
+    sed -i "s|${net_fix_test_del}||g" "${pushbot_action_file}"
+    echo "【LinInfo】app-pushbot has been fixed"
 fi
 
 #预置OpenClash内核和数据
