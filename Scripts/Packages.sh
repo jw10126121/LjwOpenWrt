@@ -260,6 +260,10 @@ if [ -n "$op_version" ]; then
     [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
 
     git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+    if [ ! -d "$path_node_makefile" ]; then
+        echo "【LinInfo】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
+        git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+    fi
 
     if [ -d "$path_node_makefile" ]; then
         echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
@@ -407,37 +411,37 @@ if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
     echo "【LinInfo】app-pushbot has been fixed"
 fi
 
-#预置OpenClash内核和数据
-# if [ -d *"openclash"* ]; then
-#     CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
-#     # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
-#     CORE_TYPE="arm64"
-#     CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
+# 预置OpenClash内核和数据
+if [ -d *"openclash"* ]; then
+    CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
+    # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
+    CORE_TYPE="arm64"
+    CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
 
-#     CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
-#     CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
-#     CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
+    CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
+    CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
+    CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
 
-#     GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
-#     GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
-#     GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
+    GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
+    GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
+    GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
 
-#     cd ./luci-app-openclash/root/etc/openclash/
+    cd ./luci-app-openclash/root/etc/openclash/
 
-#     curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
-#     curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
-#     curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
+    curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
+    curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
+    curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
 
-#     mkdir ./core/ && cd ./core/
+    mkdir ./core/ && cd ./core/
 
-#     curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
-#     curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
-#     curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
+    curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
+    curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
+    curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
 
-#     chmod +x ./* && rm -rf ./*.gz
+    chmod +x ./* && rm -rf ./*.gz
 
-#     echo "【LinInfo】openclash date has been updated!"
-# fi
+    echo "【LinInfo】openclash date has been updated!"
+fi
 
 
 
