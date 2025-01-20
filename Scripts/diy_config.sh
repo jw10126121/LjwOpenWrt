@@ -4,11 +4,12 @@
 # Lisence: MIT
 # Author: Linjw
 # 通用的diy配置脚本
-# 需要在确认配置后再运行
+# 该脚本在config确认前于openwrt目录下执行
 #=================================================
 
-
-
+# 运行在openwrt目录下
+current_script_dir=$(cd $(dirname $0) && pwd)
+echo "【LinInfo】脚本目录：${current_script_dir}"
 
 # 显示帮助信息的函数
 show_help() {
@@ -70,6 +71,8 @@ WRT_IP=$default_ip
 WRT_NAME=$default_name
 WRT_THEME=$default_theme_name
 
+config_file="./.config"
+
 CFG_FILE="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
@@ -107,15 +110,14 @@ fi
 # 取消主题默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
 # 设置默认主题
-if [ -n "$default_theme_name" ]; then
-    the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "*${default_theme_name}" -prune)
+if [ -n "$WRT_THEME" ]; then
+    the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
     echo "【LinInfo】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         # 旧版修改主题方法，现在应该是找不到了
         # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
-        echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
         if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
             echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
         fi
@@ -167,6 +169,16 @@ if [ $? -eq 0 ]; then
 else
     echo "【LinInfo】注释feeds中openwrt_sqm_scripts_nss失败"
 fi
+
+# 注释openwrt_nss_packages
+remove_nss_packages="sed -i 's|src/gz openwrt_nss_packages|#src/gz openwrt_nss_packages|' /etc/opkg/distfeeds.conf"
+sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_nss_packages" "$file_default_settings"
+if [ $? -eq 0 ]; then
+    echo "【LinInfo】注释feeds中openwrt_nss_packages完成"
+else
+    echo "【LinInfo】注释feeds中openwrt_nss_packages失败"
+fi
+
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # # 修改argon主题颜色
 # if [ -n "$theme_argon_dir" ] && ! grep -q "uci commit argon" $file_default_settings; then
@@ -286,18 +298,18 @@ if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]
 fi
 
 
-sed -i "s/^CONFIG_FEED_helloworld=y/CONFIG_FEED_helloworld=n/g" ./.config
+sed -i "s/^CONFIG_FEED_helloworld=[ym]/CONFIG_FEED_helloworld=n/g" "${config_file}"
+sed -i "s/^CONFIG_FEED_sqm_scripts_nss=[ym]/CONFIG_FEED_sqm_scripts_nss=n/g" "${config_file}"
+sed -i "s/^CONFIG_FEED_nss_packages=[ym]/CONFIG_FEED_nss_packages=n/g" "${config_file}"
 
-sed -i "s/^CONFIG_FEED_sqm_scripts_nss=y/CONFIG_FEED_sqm_scripts_nss=n/g" ./.config
-
-sed -i "s/^CONFIG_FEED_nss_packages=y/CONFIG_FEED_nss_packages=n/g" ./.config
-
-
-if ! grep -q "^CONFIG_PACKAGE_luci=y" "./.config"; then
-    echo "CONFIG_PACKAGE_luci=y" >> ./.config
+if ! grep -q "^CONFIG_PACKAGE_luci=y" "${config_file}"; then
+    echo "CONFIG_PACKAGE_luci=y" >> "${config_file}"
 fi
 
-if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "./.config"; then
-    echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
+if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "${config_file}"; then
+    echo "CONFIG_LUCI_LANG_zh_Hans=y" >> "${config_file}"
 fi
+
+
+
 
