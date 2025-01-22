@@ -343,27 +343,26 @@ UPDATE_VERSION "alist"
 #修复Openvpnserver一键生成证书
 UPDATE_VERSION "openvpn-easy-rsa" 
 
+## 预置HomeProxy数据
+# if [ -d *"homeproxy"* ]; then
+#     HP_RULES="surge"
+#     HP_PATCH="./homeproxy/root/etc/homeproxy"
 
-# 预置HomeProxy数据
-if [ -d *"homeproxy"* ]; then
-    HP_RULES="surge"
-    HP_PATCH="./homeproxy/root/etc/homeproxy"
+#     chmod +x ./$HP_PATCH/scripts/*
+#     rm -rf ./$HP_PATCH/resources/*
 
-    chmod +x ./$HP_PATCH/scripts/*
-    rm -rf ./$HP_PATCH/resources/*
+#     git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULES/
+#     cd ./$HP_RULES/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
 
-    git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULES/
-    cd ./$HP_RULES/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
+#     echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+#     awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
+#     sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
+#     mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATCH/resources/
 
-    echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
-    awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
-    sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
-    mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATCH/resources/
+#     cd .. && rm -rf ./$HP_RULES/
 
-    cd .. && rm -rf ./$HP_RULES/
-
-    echo "【LinInfo】homeproxy date has been updated!"
-fi
+#     echo "【LinInfo】homeproxy date has been updated!"
+# fi
 
 # 移除Shadowsocks组件
 PW_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
@@ -386,17 +385,11 @@ fi
 
 # 修复TailScale配置文件冲突
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
-if [ -f "$TS_FILE" ]; then
-    sed -i '/\/files/d' $TS_FILE
-    echo "【LinInfo】tailscale has been fixed!"
-fi
+[ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【LinInfo】tailscale has been fixed!"
 
 ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # 修改argon主题进度条颜色与主题色一致
-if [ -n "${ARGON_DIR}" ]; then
-    find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \;
-    echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
-fi
+[ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 
 # 目前仅lean源码测试过，V佬源码也支持
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
@@ -411,6 +404,12 @@ if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
     echo "【LinInfo】app-pushbot has been fixed"
 fi
 
+# 修复luci-app-vlmcsd未自带vlmcsd.ini的问题
+app_vlmcsd_DIR=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
+if [ -n "${app_vlmcsd_DIR}" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
+    my_config_vlmcsd_file="${current_script_dir}/config/vlmcsd.ini"
+    [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【LinInfo】预置vlmcsd.ini成功！"
+fi
 
 
 

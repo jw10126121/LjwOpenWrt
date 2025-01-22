@@ -72,6 +72,34 @@ if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cpu
 fi
 
 
+choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
+# homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
+homeproxy_DIR=$(readlink -f $(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune))
+echo "homeproxy_DIR: ${homeproxy_DIR}"
+# 预置HomeProxy数据
+if [ -n "${choose_type_homeproxy}" ] && [ -d "${homeproxy_DIR}" ]; then
+    HP_RULES="${homeproxy_DIR}/root/etc/homeproxy/my_surge"
+    HP_PATCH="${homeproxy_DIR}/root/etc/homeproxy"
+
+    chmod +x $HP_PATCH/scripts/*
+    rm -rf $HP_PATCH/resources/*
+    [ -d "${HP_RULES}" ] && rm -fr "${HP_RULES}"
+    mkdir -p "${HP_RULES}"
+
+    git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" "${HP_RULES}"
+    cd "${HP_RULES}" && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
+    
+    echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+    awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
+    sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
+
+    mv -f ${HP_RULES}/{china_*,gfw_list}.{ver,txt} ${HP_PATCH}/resources/
+
+    cd .. && rm -rf "${HP_RULES}"
+
+    echo "【LinInfo】homeproxy date has been updated!"
+fi
+
 
 
 

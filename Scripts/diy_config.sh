@@ -84,6 +84,11 @@ else
   is_code_lean=false
 fi
 
+# 更新luci配置
+update_luci_config() {
+
+} 
+
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
@@ -130,7 +135,7 @@ else
 fi
 
 # 修复frpc、frps执行问题
-if ! grep -q '/etc/init.d/frpc' $file_default_settings; then
+[ -f "$file_default_settings" ] && if ! grep -qF '/etc/init.d/frpc' $file_default_settings; then
     temp_file_frp=$(mktemp)
 cat <<EOF > "$temp_file_frp"
 
@@ -140,13 +145,13 @@ cat <<EOF > "$temp_file_frp"
 [ -f /etc/init.d/frps ] && chmod +x /etc/init.d/frps
 EOF
     sed -i "/uci commit system/r $temp_file_frp" "${file_default_settings}"
-    if grep -q '/etc/init.d/frpc' $file_default_settings; then
+    if grep -qF '/etc/init.d/frpc' $file_default_settings; then
         echo "【LinInfo】修改frpc、frps执行权限成功！"
     fi
 fi
 
 # 修改luci响应时间
-if ! grep -q "uci set luci.apply.holdoff" $file_default_settings; then
+[ -f "$file_default_settings" ] && if ! grep -qF "uci set luci.apply.holdoff" $file_default_settings; then
     temp_file_holdoff=$(mktemp)
 cat <<EOF > "$temp_file_holdoff"
 
@@ -156,8 +161,29 @@ EOF
     sed -i "/uci commit system/r $temp_file_holdoff" "${file_default_settings}"
     rm "$temp_file_holdoff"
 
-    if grep -q "uci set luci.apply.holdoff" $file_default_settings; then
+    if grep -qF "uci set luci.apply.holdoff" $file_default_settings; then
         echo "【LinInfo】修改luci提交等待时间成功！"
+    fi
+fi
+
+# 修改dhcp顺序分配ip
+[ -f "$file_default_settings" ] && if ! grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' $file_default_settings; then
+    temp_file_dhcp=$(mktemp)
+    dhcp_ip_start=10
+    dhcp_ip_limit=245
+    dhcp_ip_end=$((dhcp_ip_start + dhcp_ip_limit - 1))
+cat <<EOF > "$temp_file_dhcp"
+
+uci set dhcp.@dnsmasq[0].sequential_ip=1
+uci set dhcp.lan.start='${dhcp_ip_start}'
+uci set dhcp.lan.limit='${dhcp_ip_limit}'
+uci commit dhcp
+EOF
+    sed -i "/uci commit system/r $temp_file_dhcp" "${file_default_settings}"
+    rm "$temp_file_dhcp"
+
+    if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' $file_default_settings; then
+        echo "【LinInfo】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
     fi
 fi
 
