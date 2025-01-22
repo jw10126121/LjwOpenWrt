@@ -75,7 +75,7 @@ fi
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
 homeproxy_DIR=$(readlink -f $(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune))
-echo "homeproxy_DIR: ${homeproxy_DIR}"
+
 # 预置HomeProxy数据
 if [ -n "${choose_type_homeproxy}" ] && [ -d "${homeproxy_DIR}" ]; then
     HP_RULES="${homeproxy_DIR}/root/etc/homeproxy/my_surge"

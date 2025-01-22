@@ -84,11 +84,6 @@ else
   is_code_lean=false
 fi
 
-# 更新luci配置
-update_luci_config() {
-
-} 
-
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
