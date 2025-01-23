@@ -9,7 +9,7 @@
 
 # 运行在openwrt目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
-echo "【LinInfo】脚本目录：${current_script_dir}"
+echo "【Lin】脚本目录：${current_script_dir}"
 current_dir=$(pwd)
 openwrt_workdir="${current_dir}"
 
@@ -32,13 +32,13 @@ if [ -z "${cputype_simple}" ]; then
     done   
 fi
 
-echo "【LinInfo】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
+echo "【Lin】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
 # 从配置文件中，获取值
 choose_type_openclash=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-openclash=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 openclash_DIR=$(find ./package/*/ -maxdepth 3 -type d -iname "luci-app-openclash" -prune)
 # 预置OpenClash内核和数据
 if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cputype_simple}" ]; then
-    echo "【LinInfo】准备下载openclash资源，架构：${cputype_simple}"
+    echo "【Lin】准备下载openclash资源，架构：${cputype_simple}"
     
     # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
     CORE_TYPE="${cputype_simple}"
@@ -70,7 +70,7 @@ if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cpu
 
     cd "${openwrt_workdir}"
 
-    echo "【LinInfo】openclash date has been updated!"
+    echo "【Lin】openclash date has been updated!"
 fi
 
 cd "${openwrt_workdir}"
@@ -102,7 +102,7 @@ if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
 
         cd .. && rm -rf "${HP_RULES}"
 
-        echo "【LinInfo】homeproxy date has been updated!"
+        echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
 

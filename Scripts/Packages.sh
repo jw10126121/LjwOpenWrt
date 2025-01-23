@@ -3,20 +3,20 @@
 
 # 运行在openwrt/package目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
-echo "【LinInfo】脚本目录：${current_script_dir}"
+echo "【Lin】脚本目录：${current_script_dir}"
 
 if [ $(basename "$(pwd)") != 'package' ]; then
     if [ -d "./package" ]; then
         cd ./package
     else
-        echo "【LinInfo】请在package目录下执行，当前工作目录：$(pwd)" 
+        echo "【Lin】请在package目录下执行，当前工作目录：$(pwd)" 
         exit 0;
     fi
 fi
 
 current_dir=$(pwd)
 current_script_dir=$(cd $(dirname $0) && pwd)
-echo "【LinInfo】工作目录：${current_dir}"
+echo "【Lin】工作目录：${current_dir}"
 current_dirname=$(basename "${current_dir}")
 
 openwrt_workdir="$(readlink -f ..)"
@@ -34,7 +34,7 @@ fi
 DELETE_PACKAGE() {
     local PKG_NAME=$1
     rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    echo "【LinInfo】删除插件：$PKG_NAME"
+    echo "【Lin】删除插件：$PKG_NAME"
 }
 
 # 删除并备份插件(包名是文件夹名)
@@ -43,7 +43,7 @@ DELETE_AND_BACKUP_PACKAGE() {
     path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
     path_default_bak="${path_default}_bak"
     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份${PKG_NAME}：${path_default} -> ${path_default_bak}"
+    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份${PKG_NAME}：${path_default} -> ${path_default_bak}"
 }
 
 # 删除备份的包(包名是文件夹名)
@@ -65,7 +65,7 @@ UPDATE_PACKAGE() {
     # 删除原本同名的软件包
     the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
     if [ -n "$the_exist_pkg" ]; then
-        echo "【LinInfo】删除同名插件：$the_exist_pkg"
+        echo "【Lin】删除同名插件：$the_exist_pkg"
         rm -rf $the_exist_pkg
     fi
 
@@ -79,7 +79,7 @@ UPDATE_PACKAGE() {
     REPO_NAME=${REPO_URL_git##*/}
 
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "${the_full_repo}" "${REPO_NAME}"
-    echo "【LinInfo】成功clone插件：$PKG_NAME"
+    echo "【Lin】成功clone插件：$PKG_NAME"
     if [[ $PKG_SPECIAL == "pkg" ]]; then
         search_result_pkg_dir=$(find ./${REPO_NAME}/*/ -maxdepth 1 -type d -iname "$searchType" -prune)
         if [ -n "${search_result_pkg_dir}" ]; then
@@ -89,7 +89,7 @@ UPDATE_PACKAGE() {
         fi
     elif [[ $PKG_SPECIAL == "name" ]]; then
         mv -f $REPO_NAME $PKG_NAME
-        echo "【LinInfo】重命名插件：$PKG_NAME <= $REPO_NAME"
+        echo "【Lin】重命名插件：$PKG_NAME <= $REPO_NAME"
     fi
 }
 
@@ -102,13 +102,13 @@ UPDATE_PACKAGE_FROM_REPO() {
     # 删除原本同名的软件包
     the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
     if [ -n "$the_exist_pkg" ]; then
-        echo "【LinInfo】删除同名插件包库：$the_exist_pkg"
+        echo "【Lin】删除同名插件包库：$the_exist_pkg"
         rm -rf $the_exist_pkg
     fi
 
     # Clone插件
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git" $PKG_NAME
-    echo "【LinInfo】成功clone插件包库：$PKG_NAME"
+    echo "【Lin】成功clone插件包库：$PKG_NAME"
     echo ""
 }
 
@@ -117,7 +117,7 @@ REMOVE_PACKAGE_FROM_REPO() {
         # 删除原本同名的软件包
     the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
     if [ -n "$the_exist_pkg" ]; then
-        echo "【LinInfo】删除同名插件包库：$the_exist_pkg"
+        echo "【Lin】删除同名插件包库：$the_exist_pkg"
         rm -rf $the_exist_pkg
     fi
 }
@@ -129,9 +129,9 @@ MOVE_PACKAGE_FROM_LIST() {
     found=$(find ./"$LIST_REPO"/*/ -maxdepth 1 -type d -iname "$PKG_NAME" -print)
     if [ $? -eq 0 ]; then
         cp -rf $found ./
-        echo "【LinInfo】复制插件包库${LIST_REPO}的${PKG_NAME}到package中"
+        echo "【Lin】复制插件包库${LIST_REPO}的${PKG_NAME}到package中"
     else
-        echo "【LinInfo】未找到插件包库${LIST_REPO}的${PKG_NAME}"
+        echo "【Lin】未找到插件包库${LIST_REPO}的${PKG_NAME}"
     fi
 }
 
@@ -170,19 +170,19 @@ update_package_list() {
 
     exist_pkg_list=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$REPO_NAME" -prune)
     if [ -n "$exist_pkg_list" ]; then
-        echo "【LinInfo】删除同名插件包库：${exist_pkg_list}"
+        echo "【Lin】删除同名插件包库：${exist_pkg_list}"
         rm -rf "${exist_pkg_list}"
     fi
-    echo "【LinInfo】下载插件库${REPO_NAME}：【${pkg_branch}】${the_full_repo}"
+    echo "【Lin】下载插件库${REPO_NAME}：【${pkg_branch}】${the_full_repo}"
     git clone --depth=1 --single-branch --branch $pkg_branch "${the_full_repo}" ${REPO_NAME}
-    echo "【LinInfo】成功clone插件包库：${REPO_NAME}"
+    echo "【Lin】成功clone插件包库：${REPO_NAME}"
 
     # 使用for循环遍历数组
     for pkg_name in "${pkg_name_list[@]}"; do
         MOVE_PACKAGE_FROM_LIST "${pkg_name}" "${REPO_NAME}"
     done
 
-    echo "【LinInfo】删除插件包库：${REPO_NAME}"
+    echo "【Lin】删除插件包库：${REPO_NAME}"
     rm -rf ${REPO_NAME}
 
 }
@@ -194,14 +194,14 @@ safe_update_package() {
     path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
     path_default_bak="${path_default}_bak"
     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【LinInfo】备份frp：${path_default} -> ${path_default_bak}"
+    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份frp：${path_default} -> ${path_default_bak}"
     git clone --depth=1 --single-branch -b "${pkg_branch}" "${pkg_repo}" ${path_default}
     if [ -d ${path_default} ]; then
-         echo "【LinInfo】替换${package_name}成功：${path_default}"
+         echo "【Lin】替换${package_name}成功：${path_default}"
          [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
     else
         mv -f "${path_default_bak}" "${path_default}"
-        echo "【LinInfo】替换${package_name}失败，还原${package_name}"
+        echo "【Lin】替换${package_name}失败，还原${package_name}"
     fi
 }
 
@@ -252,28 +252,28 @@ config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -
 include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
 package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
 op_version="${config_version:-${include_version:-${package_version}}}"
-echo "【LinInfo】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
+echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
 if [ -n "$op_version" ]; then  
     path_node_makefile="${version_workdir}/feeds/packages/lang/node"
     path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
     [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【LinInfo】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【Lin】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
 
     git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
     if [ ! -d "$path_node_makefile" ]; then
-        echo "【LinInfo】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
+        echo "【Lin】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
         git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
     fi
 
     if [ -d "$path_node_makefile" ]; then
-        echo "【LinInfo】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
+        echo "【Lin】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
         [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
     else
         mv -f "$path_node_dir_bak" "$path_node_makefile"
-        echo "【LinInfo】替换lang_node for openwrt_${op_version}失败，还原lang_node"
+        echo "【Lin】替换lang_node for openwrt_${op_version}失败，还原lang_node"
     fi
 else
-    echo "【LinInfo】openwrt版本号未知"
+    echo "【Lin】openwrt版本号未知"
 fi
 
 # UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
@@ -329,9 +329,9 @@ UPDATE_VERSION() {
         if [[ $NEW_VER =~ ^[0-9].* ]] && dpkg --compare-versions "$OLD_VER" lt "$NEW_VER"; then
             sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$NEW_VER/g" "$PKG_FILE"
             sed -i "s/PKG_HASH:=.*/PKG_HASH:=$NEW_HASH/g" "$PKG_FILE"
-            echo "【LinInfo】$PKG_FILE $NEW_VER version has been updated!"
+            echo "【Lin】$PKG_FILE $NEW_VER version has been updated!"
         else
-            echo "【LinInfo】$PKG_FILE $NEW_VER version is already the latest!"
+            echo "【Lin】$PKG_FILE $NEW_VER version is already the latest!"
         fi
     done
 }
@@ -361,7 +361,7 @@ UPDATE_VERSION "openvpn-easy-rsa"
 
 #     cd .. && rm -rf ./$HP_RULES/
 
-#     echo "【LinInfo】homeproxy date has been updated!"
+#     echo "【Lin】homeproxy date has been updated!"
 # fi
 
 # 移除Shadowsocks组件
@@ -371,7 +371,7 @@ if [ -f "$PW_FILE" ]; then
     sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' $PW_FILE
     sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $PW_FILE
 
-    echo "【LinInfo】passwall has been fixed!"
+    echo "【Lin】passwall has been fixed!"
 fi
 
 SP_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-ssr-plus/Makefile")
@@ -380,16 +380,16 @@ if [ -f "$SP_FILE" ]; then
     sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' $SP_FILE
     sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $SP_FILE
 
-    echo "【LinInfo】ssr-plus has been fixed!"
+    echo "【Lin】ssr-plus has been fixed!"
 fi
 
 # 修复TailScale配置文件冲突
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
-[ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【LinInfo】tailscale has been fixed!"
+[ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【Lin】tailscale has been fixed!"
 
 ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # 修改argon主题进度条颜色与主题色一致
-[ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【LinInfo】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+[ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 
 # 目前仅lean源码测试过，V佬源码也支持
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
@@ -401,14 +401,14 @@ if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
     # 日志不停报网络断开
     net_fix_test_del=' https://www.qidian.com https://www.douban.com'
     sed -i "s|${net_fix_test_del}||g" "${pushbot_action_file}"
-    echo "【LinInfo】app-pushbot has been fixed"
+    echo "【Lin】app-pushbot has been fixed"
 fi
 
 # 修复luci-app-vlmcsd未自带vlmcsd.ini的问题
 app_vlmcsd_DIR=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
 if [ -n "${app_vlmcsd_DIR}" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
     my_config_vlmcsd_file="${current_script_dir}/config/vlmcsd.ini"
-    [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【LinInfo】预置vlmcsd.ini成功！"
+    [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
 fi
 
 

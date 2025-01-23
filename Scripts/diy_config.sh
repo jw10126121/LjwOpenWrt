@@ -165,8 +165,8 @@ fi
 [ -f "$file_default_settings" ] && if ! grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' $file_default_settings; then
     temp_file_dhcp=$(mktemp)
     dhcp_ip_start=10
-    dhcp_ip_limit=245
-    dhcp_ip_end=$((dhcp_ip_start + dhcp_ip_limit - 1))
+    dhcp_ip_end=254
+    dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
 cat <<EOF > "$temp_file_dhcp"
 
 uci set dhcp.@dnsmasq[0].sequential_ip=1
