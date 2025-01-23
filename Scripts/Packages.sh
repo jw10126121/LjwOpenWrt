@@ -112,16 +112,6 @@ UPDATE_PACKAGE_FROM_REPO() {
     echo ""
 }
 
-REMOVE_PACKAGE_FROM_REPO() {
-    local PKG_NAME=$1
-        # 删除原本同名的软件包
-    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    if [ -n "$the_exist_pkg" ]; then
-        echo "【Lin】删除同名插件包库：$the_exist_pkg"
-        rm -rf $the_exist_pkg
-    fi
-}
-
 MOVE_PACKAGE_FROM_LIST() {
     local PKG_NAME=$1
     local LIST_REPO=$2
@@ -205,103 +195,6 @@ safe_update_package() {
     fi
 }
 
-
-#UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
-
-UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
-# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon-config" "master"
-# UPDATE_PACKAGE "luci-theme-argon" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
-# UPDATE_PACKAGE "luci-theme-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
-
-#UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
-#UPDATE_PACKAGE "luci-app-wolplus" "animegasan/luci-app-wolplus" "master"
-
-# 从插件库列表中下载插件
-update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
-
-# lean源码不可用：luci-theme-design
-# update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
-
-# UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master" # 测试不能用，不加
-# UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
-
-
-DELETE_PACKAGE "wrtbwmon"
-DELETE_PACKAGE "luci-app-wrtbwmon"
-DELETE_PACKAGE "luci-app-onliner"
-
-UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg"
-UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg"
-UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg"
-
-# luci-app-wechatpush依赖wrtbwmon
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
-UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-
-# 替换frp
-safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
-
-# 更新luci-app-frpc luci-app-frps
-update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
-
-version_workdir="${openwrt_workdir}"
-
-# 修复lang_node编译问题
-config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
-op_version="${config_version:-${include_version:-${package_version}}}"
-echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
-if [ -n "$op_version" ]; then  
-    path_node_makefile="${version_workdir}/feeds/packages/lang/node"
-    path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
-    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【Lin】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
-
-    git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
-    if [ ! -d "$path_node_makefile" ]; then
-        echo "【Lin】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
-        git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
-    fi
-
-    if [ -d "$path_node_makefile" ]; then
-        echo "【Lin】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
-        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    else
-        mv -f "$path_node_dir_bak" "$path_node_makefile"
-        echo "【Lin】替换lang_node for openwrt_${op_version}失败，还原lang_node"
-    fi
-else
-    echo "【Lin】openwrt版本号未知"
-fi
-
-# UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
-# # 注意，需要luci-app-nlbwmon支持
-# # UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
-#UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
-#UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
-#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
-#UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
-
-# if [[ $WRT_REPO == *"lede"* ]]; then
-#   UPDATE_PACKAGE "alist" "sbwml/luci-app-alist" "main" # 2024年12月3日测试依旧报错
-# fi
-
-#UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5"
-#UPDATE_PACKAGE "vnt" "lazyoop/networking-artifact" "main" "pkg"
-#UPDATE_PACKAGE "easytier" "lazyoop/networking-artifact" "main" "pkg"
-
-# UPDATE_PACKAGE "luci-app-advancedplus" "VIKINGYFY/packages" "main" "pkg"
-#UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
-#UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
-
-# if [[ $WRT_REPO != *"immortalwrt"* ]]; then
-#   UPDATE_PACKAGE "qmi-wwan" "immortalwrt/wwan-packages" "master" "pkg"
-# fi
-
-
-
 #更新软件包版本
 UPDATE_VERSION() {
     local PKG_NAME=$1
@@ -336,33 +229,68 @@ UPDATE_VERSION() {
     done
 }
 
+### ---------- 执行 ---------- ###
+
+#UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
+
+UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+
+UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+
+# update_package_list: 从插件库列表中下载插件
+update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
+update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
+update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
+update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
+
+# 替换frp
+safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
+# 更新luci-app-frpc luci-app-frps
+update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
+
+# luci-app-wechatpush依赖wrtbwmon
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+
+
+
+version_workdir="${openwrt_workdir}"
+
+# 修复lang_node编译问题
+config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+op_version="${config_version:-${include_version:-${package_version}}}"
+echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
+if [ -n "$op_version" ]; then  
+    path_node_makefile="${version_workdir}/feeds/packages/lang/node"
+    path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
+    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【Lin】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
+
+    git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+    if [ ! -d "$path_node_makefile" ]; then
+        echo "【Lin】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
+        git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
+    fi
+
+    if [ -d "$path_node_makefile" ]; then
+        echo "【Lin】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
+        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
+    else
+        mv -f "$path_node_dir_bak" "$path_node_makefile"
+        echo "【Lin】替换lang_node for openwrt_${op_version}失败，还原lang_node"
+    fi
+else
+    echo "【Lin】openwrt版本号未知"
+fi
+
 # UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
 # UPDATE_VERSION "sing-box"
 # UPDATE_VERSION "tailscale"
 UPDATE_VERSION "alist"
 #修复Openvpnserver一键生成证书
 UPDATE_VERSION "openvpn-easy-rsa" 
-
-## 预置HomeProxy数据
-# if [ -d *"homeproxy"* ]; then
-#     HP_RULES="surge"
-#     HP_PATCH="./homeproxy/root/etc/homeproxy"
-
-#     chmod +x ./$HP_PATCH/scripts/*
-#     rm -rf ./$HP_PATCH/resources/*
-
-#     git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULES/
-#     cd ./$HP_RULES/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
-
-#     echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
-#     awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
-#     sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
-#     mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATCH/resources/
-
-#     cd .. && rm -rf ./$HP_RULES/
-
-#     echo "【Lin】homeproxy date has been updated!"
-# fi
 
 # 移除Shadowsocks组件
 PW_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
@@ -412,5 +340,66 @@ if [ -n "${app_vlmcsd_DIR}" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" 
 fi
 
 
+###### ------- 以下为备用代码 ---------
 
+# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon-config" "master"
+# UPDATE_PACKAGE "luci-theme-argon" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
+# UPDATE_PACKAGE "luci-theme-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
+# lean源码不可用：luci-theme-design
+# update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
+# DELETE_PACKAGE "wrtbwmon"
+# DELETE_PACKAGE "luci-app-wrtbwmon"
+# DELETE_PACKAGE "luci-app-onliner"
+# UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg"
+# UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg"
+# UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg"
+# UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master"     # 测试不能用，不加
+# UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+
+#UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
+
+# UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
+# # 注意，需要luci-app-nlbwmon支持
+# # UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
+#UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
+#UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
+#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
+#UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
+
+# if [[ $WRT_REPO == *"lede"* ]]; then
+#   UPDATE_PACKAGE "alist" "sbwml/luci-app-alist" "main" # 2024年12月3日测试依旧报错
+# fi
+
+#UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5"
+#UPDATE_PACKAGE "vnt" "lazyoop/networking-artifact" "main" "pkg"
+#UPDATE_PACKAGE "easytier" "lazyoop/networking-artifact" "main" "pkg"
+
+# UPDATE_PACKAGE "luci-app-advancedplus" "VIKINGYFY/packages" "main" "pkg"
+#UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
+#UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
+
+# if [[ $WRT_REPO != *"immortalwrt"* ]]; then
+#   UPDATE_PACKAGE "qmi-wwan" "immortalwrt/wwan-packages" "master" "pkg"
+# fi
+
+## 预置HomeProxy数据
+# if [ -d *"homeproxy"* ]; then
+#     HP_RULES="surge"
+#     HP_PATCH="./homeproxy/root/etc/homeproxy"
+
+#     chmod +x ./$HP_PATCH/scripts/*
+#     rm -rf ./$HP_PATCH/resources/*
+
+#     git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULES/
+#     cd ./$HP_RULES/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
+
+#     echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+#     awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
+#     sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
+#     mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATCH/resources/
+
+#     cd .. && rm -rf ./$HP_RULES/
+
+#     echo "【Lin】homeproxy date has been updated!"
+# fi
 
