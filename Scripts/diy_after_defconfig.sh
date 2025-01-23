@@ -10,6 +10,8 @@
 # 运行在openwrt目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
 echo "【LinInfo】脚本目录：${current_script_dir}"
+current_dir=$(pwd)
+openwrt_workdir="${current_dir}"
 
 # 获取CPU架构
 cputype=$(grep -m 1 "^CONFIG_TARGET_ARCH_PACKAGES=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
@@ -66,12 +68,12 @@ if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cpu
 
     chmod +x ./* && rm -rf ./*.gz
 
-    cd "${current_script_dir}"
+    cd "${openwrt_workdir}"
 
     echo "【LinInfo】openclash date has been updated!"
 fi
 
-
+cd "${openwrt_workdir}"
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
 app_homeproxy_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)

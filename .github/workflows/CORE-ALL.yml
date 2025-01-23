@@ -137,12 +137,12 @@ jobs:
 
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
-            echo "【LinInfo】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
+            echo "【Lin】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
         fi
 
-        echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
-        echo "【LinInfo】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
-        echo "【LinInfo】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
+        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
+        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
+        echo "【Lin】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
         if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
             echo "${{ env.WRT_MINE_SAY }}"
         fi
@@ -217,7 +217,7 @@ jobs:
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
         echo "START_DATE=$START_DATE" >> $GITHUB_ENV
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】编译日期：$START_DATE；编译时间：$START_TIME；"
+        echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
@@ -229,7 +229,7 @@ jobs:
 
     - name: Check Scripts (搜索脚本并配置权限)
       run: |
-        echo "【LinInfo】配置脚本执行权限..."
+        echo "【Lin】配置脚本执行权限..."
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: config git (修改git下载缓冲大小)
@@ -240,12 +240,12 @@ jobs:
 
     - name: Clone Source Code (克隆源代码)
       run: |
-        echo "【LinInfo】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
+        echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
         cd openwrt
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         if [ -n "${{ env.WRT_REPO_Commit_Hash }}" ]; then
-          echo "【LinInfo】GIT检出到指定版本：${{ env.WRT_REPO_Commit_Hash }}"
+          echo "【Lin】GIT检出到指定版本：${{ env.WRT_REPO_Commit_Hash }}"
           git fetch --depth=1 origin ${{ env.WRT_REPO_Commit_Hash }}
           git checkout ${{ env.WRT_REPO_Commit_Hash }}
         fi
@@ -253,7 +253,7 @@ jobs:
         REPO_GIT_hash_simple=$(git log -1 --pretty=format:'%h')
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
         echo "REPO_GIT_hash_simple=$REPO_GIT_hash_simple" >> $GITHUB_ENV
-        echo "【LinInfo】GIT HASH：${REPO_GIT_HASH}，hash: ${REPO_GIT_hash_simple}"
+        echo "【Lin】GIT HASH：${REPO_GIT_HASH}，hash: ${REPO_GIT_hash_simple}"
         VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         # 临时导入config，为了获取设备信息
@@ -297,22 +297,22 @@ jobs:
         if [ -f "$MAKEFILE_PATH" ]; then
           KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
         else
-          echo "【LinInfo】文件不存在：$MAKEFILE_PATH"
+          echo "【Lin】文件不存在：$MAKEFILE_PATH"
         fi
         if [ -n "$KERNEL_PATCHVER" ]; then
-          echo "【LinInfo】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
+          echo "【Lin】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
         else
-          echo "【LinInfo】主版本KERNEL_PATCHVER为空，取6.1"
+          echo "【Lin】主版本KERNEL_PATCHVER为空，取6.1"
           KERNEL_PATCHVER=6.1
         fi
         if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
           VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
           echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
-          echo "【LinInfo】内核版本：$VERSION_KERNEL"
+          echo "【Lin】内核版本：$VERSION_KERNEL"
         else
-          echo "【LinInfo】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
+          echo "【Lin】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
         fi
-        echo "【LinInfo】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
+        echo "【Lin】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
 
     - name: Check Caches
       id: check-cache
@@ -334,27 +334,27 @@ jobs:
             find "$DIR" -type f -exec touch {} +
           done
           mkdir -p ${{ env.OPENWRT_PATH }}/tmp && echo "1" > ${{ env.OPENWRT_PATH }}/tmp/.build
-          echo "【LinInfo】toolchain skiped done!"
+          echo "【Lin】toolchain skiped done!"
         else
-          echo "【LinInfo】caches missed!"
+          echo "【Lin】caches missed!"
         fi
         if ${{steps.check-cache.outputs.cache-hit != 'true'}}; then
           the_cache_key="${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}"
           CACHE_LIST_ALL=$(gh cache list --key "$the_cache_key")
-          echo "【LinInfo】CACHE_LIST_ALL：${CACHE_LIST_ALL[@]}"   
+          echo "【Lin】CACHE_LIST_ALL：${CACHE_LIST_ALL[@]}"   
           CACHE_LIST=$(gh cache list --key "$the_cache_key" | cut -f 1)
           for CACHE_KEY in $CACHE_LIST; do
             gh cache delete $CACHE_KEY
-            echo "【LinInfo】caches cleanup done：$CACHE_KEY"
+            echo "【Lin】caches cleanup done：$CACHE_KEY"
           done
-          echo "【LinInfo】caches cleanup done：${CACHE_LIST[@]}"
+          echo "【Lin】caches cleanup done：${CACHE_LIST[@]}"
         fi
         
     - name: diy Feeds (自定义feeds)
       run: |
         cd $OPENWRT_PATH
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
-        echo "【LinInfo】feeds内容：$(cat ./feeds.conf.default)"
+        echo "【Lin】feeds内容：$(cat ./feeds.conf.default)"
 
     - name: Update Feeds (更新feeds)
       run: |
@@ -369,12 +369,12 @@ jobs:
     - name: diy Packages (自定义包)
       run: |
         cd $OPENWRT_PATH/package
-        echo "【LinInfo】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
+        echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
     - name: diy config (自定义配置)
       run: |
-        echo '【LinInfo】移除所有.config并添加新的.config'
+        echo '【Lin】移除所有.config并添加新的.config'
         cd $OPENWRT_PATH
         [ -f ./.config ] && rm -rf ./.config
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
@@ -384,10 +384,10 @@ jobs:
         cd $OPENWRT_PATH
         cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
-          echo "【LinInfo】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
+          echo "【Lin】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
           bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "argon"
         else
-          echo "【LinInfo】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
+          echo "【Lin】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
         fi
         cp -f .config my_config.txt
 
@@ -399,7 +399,7 @@ jobs:
         # 从配置文件中获取架构, 一般是defconfig后获取
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' $OPENWRT_PATH/.config)
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
-        echo "【LinInfo】make defconfig后配置文件为："
+        echo "【Lin】make defconfig后配置文件为："
         echo "$(cat seed.config)"
 
     - name: DIY after defconfig (确认config后执行脚本)
@@ -414,14 +414,14 @@ jobs:
         # 从配置文件中获取架构, 一般是defconfig后获取
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
-        echo "【LinInfo】编译DEVICE架构：${DEVICE_ARCH}"
+        echo "【Lin】编译DEVICE架构：${DEVICE_ARCH}"
 
     - name: Check Config (缓存配置文件)
       run: |
         cd $OPENWRT_PATH
         name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
-        echo "【LinInfo】配置文件名为：$name_config_file"
+        echo "【Lin】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
         cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
@@ -440,7 +440,7 @@ jobs:
         源码分支：${{ env.WRT_REPO_BRANCH }}\n\
         源码hash：${{ env.REPO_GIT_HASH }}"
         echo "system_content=$system_content" >> $GITHUB_ENV
-        echo -e "【LinInfo】\n$system_content"
+        echo -e "【Lin】\n$system_content"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
         [ -f "$readme_script" ] && chmod +x "$readme_script"
         TO_MY_SAY_DETAIL_tmp="${system_content}\n\
@@ -490,7 +490,7 @@ jobs:
     - name: Download tools (下载工具包) 
       working-directory: ./openwrt
       run: |
-        echo "【LinInfo】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
+        echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j$(($(nproc) * 2))
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -509,7 +509,7 @@ jobs:
         echo "END_DATE=$(date +"D%y%m%d")" >> $GITHUB_ENV
         END_TIME=$(date +"D%y%m%d_T%H%M%S")
         echo "END_TIME=$END_TIME" >> $GITHUB_ENV
-        echo "【LinInfo】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$END_TIME"
+        echo "【Lin】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$END_TIME"
 
     - name: Machine Information
       continue-on-error: true
@@ -566,7 +566,7 @@ jobs:
         release_desc_file="$OPENWRT_PATH/readme_release.txt"
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
-        echo "【LinInfo】编译完成获取内核版本：$KVER"
+        echo "【Lin】编译完成获取内核版本：$KVER"
         cp -f ./config_mine/* ./upload/
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
@@ -577,16 +577,16 @@ jobs:
         tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
         rm -rf "$TMP_DIR"
         rm -rf ./upload/packages
-        echo "【LinInfo】设备信息：${{ env.DEVICE_NAME_LIST }}"
+        echo "【Lin】设备信息：${{ env.DEVICE_NAME_LIST }}"
         for TYPE in ${{ env.DEVICE_NAME_LIST }} ; do
-          echo "【LinInfo】TYPE: $TYPE============================================"
+          echo "【Lin】TYPE: $TYPE============================================"
           for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
             EXT=$(basename $FILE | cut -d '.' -f 2-)
             NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
             NEW_FILE="${{ env.DEVICE_SUBTARGET }}"_"$NAME"_"${{ env.WRT_VER }}"_"${{ env.START_TIME }}"."$EXT"
-            echo "【LinInfo】文件：$FILE"
-            echo "【LinInfo】改名后：$NEW_FILE"
-            echo "【LinInfo】-----------------------------------------------------"
+            echo "【Lin】文件：$FILE"
+            echo "【Lin】改名后：$NEW_FILE"
+            echo "【Lin】-----------------------------------------------------"
             mv -f $FILE ./upload/$NEW_FILE
           done
         done
@@ -614,7 +614,7 @@ jobs:
       id: notification_content
       continue-on-error: true
       run: |
-        echo "【LinInfo】配置通知content"
+        echo "【Lin】配置通知content"
         notify_content="\
         限时下载地址：${{env.bin_download_url}}\n\n\
         ${{ env.system_content }}\n\
@@ -649,7 +649,7 @@ jobs:
 
     - name: Prepare Release Body (准备发布内容)
       run: |
-        echo "【LinInfo】发布内容: ${{ env.release_desc_file }}"
+        echo "【Lin】发布内容: ${{ env.release_desc_file }}"
         the_release_content=$(cat ${{ env.release_desc_file }})
         echo "${the_release_content}"
 

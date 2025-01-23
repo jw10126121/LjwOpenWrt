@@ -9,7 +9,7 @@
 
 # 运行在openwrt目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
-echo "【LinInfo】脚本目录：${current_script_dir}"
+echo "【Lin】脚本目录：${current_script_dir}"
 
 # 显示帮助信息的函数
 show_help() {
@@ -88,23 +88,23 @@ fi
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
     sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
-    echo "【LinInfo】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
+    echo "【Lin】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
 fi
 
 if [ -f "$CFG_FILE" ]; then
     # 修改默认IP地址
     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-    echo "【LinInfo】默认IP: $WRT_IP"
+    echo "【Lin】默认IP: $WRT_IP"
     # 修改默认主机名
     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-    echo "【LinInfo】默认主机名: 主机名：$WRT_NAME"
+    echo "【Lin】默认主机名: 主机名：$WRT_NAME"
 fi
 
 #LEDE平台调整
 if [ -f "$CFG_FILE_LEDE" ]; then
     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_LEDE
-    echo "【LinInfo】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
+    echo "【Lin】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
 fi
 
 # 取消主题默认设置
@@ -112,7 +112,7 @@ fi
 # 设置默认主题
 if [ -n "$WRT_THEME" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
-    echo "【LinInfo】搜索到主题：$the_exist_theme"
+    echo "【Lin】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
@@ -121,12 +121,12 @@ if [ -n "$WRT_THEME" ]; then
         if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
             echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
         fi
-        echo "【LinInfo】默认主题：$WRT_THEME"
+        echo "【Lin】默认主题：$WRT_THEME"
     else
-        echo "【LinInfo】不存在主题【$WRT_THEME】，使用默认主题"
+        echo "【Lin】不存在主题【$WRT_THEME】，使用默认主题"
     fi
 else
-    echo "【LinInfo】使用源码默认主题"
+    echo "【Lin】使用源码默认主题"
 fi
 
 # 修复frpc、frps执行问题
@@ -141,7 +141,7 @@ cat <<EOF > "$temp_file_frp"
 EOF
     sed -i "/uci commit system/r $temp_file_frp" "${file_default_settings}"
     if grep -qF '/etc/init.d/frpc' $file_default_settings; then
-        echo "【LinInfo】修改frpc、frps执行权限成功！"
+        echo "【Lin】修改frpc、frps执行权限成功！"
     fi
 fi
 
@@ -157,7 +157,7 @@ EOF
     rm "$temp_file_holdoff"
 
     if grep -qF "uci set luci.apply.holdoff" $file_default_settings; then
-        echo "【LinInfo】修改luci提交等待时间成功！"
+        echo "【Lin】修改luci提交等待时间成功！"
     fi
 fi
 
@@ -178,7 +178,7 @@ EOF
     rm "$temp_file_dhcp"
 
     if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' $file_default_settings; then
-        echo "【LinInfo】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
+        echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
     fi
 fi
 
@@ -186,18 +186,18 @@ fi
 remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
 sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
 if [ $? -eq 0 ]; then
-    echo "【LinInfo】注释feeds中openwrt_sqm_scripts_nss完成"
+    echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
 else
-    echo "【LinInfo】注释feeds中openwrt_sqm_scripts_nss失败"
+    echo "【Lin】注释feeds中openwrt_sqm_scripts_nss失败"
 fi
 
 # 注释openwrt_nss_packages
 remove_nss_packages="sed -i 's|src/gz openwrt_nss_packages|#src/gz openwrt_nss_packages|' /etc/opkg/distfeeds.conf"
 sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_nss_packages" "$file_default_settings"
 if [ $? -eq 0 ]; then
-    echo "【LinInfo】注释feeds中openwrt_nss_packages完成"
+    echo "【Lin】注释feeds中openwrt_nss_packages完成"
 else
-    echo "【LinInfo】注释feeds中openwrt_nss_packages失败"
+    echo "【Lin】注释feeds中openwrt_nss_packages失败"
 fi
 
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
@@ -219,7 +219,7 @@ fi
 # fi
 
 # if grep -q "uci commit argon" $file_default_settings; then
-#     echo "【LinInfo】修改argon主题色成功"
+#     echo "【Lin】修改argon主题色成功"
 # fi
 
 # 修复 armv8 设备 xfsprogs 报错
@@ -229,12 +229,12 @@ fi
 # 清空密码
 if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
     sed -i 's/^root:.*:/root:::0:99999:7:::/' "./package/base-files/files/etc/shadow"
-    echo "【LinInfo】密码已清空：./package/base-files/files/etc/shadow"
+    echo "【Lin】密码已清空：./package/base-files/files/etc/shadow"
 fi
 # 清空密码
 if [[ -f "${file_default_settings}" && "$is_reset_password" == "true" ]]; then
     sed -i '/\/etc\/shadow$/{/root::0:0:99999:7:::/d;/root:::0:99999:7:::/d}' "${file_default_settings}"
-    echo "【LinInfo】LEAN配置密码已清空：${file_default_settings}"
+    echo "【Lin】LEAN配置密码已清空：${file_default_settings}"
 fi
 
 # WIFI_NAME=LEDE
@@ -280,7 +280,7 @@ if [[ -f "${file_default_settings}" ]]; then
             TO_DISTRIB_REVISION="R${date_version} by Lin"
         fi
         sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/${TO_DISTRIB_REVISION}/" "${file_default_settings}"
-        echo "【LinInfo】编译信息修改为：${TO_DISTRIB_REVISION}"
+        echo "【Lin】编译信息修改为：${TO_DISTRIB_REVISION}"
     fi
     # DISTRIB_DESCRIPTION=$(cat "./package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}')
     # sed -i "/DISTRIB_DESCRIPTION=/s/${DISTRIB_DESCRIPTION}/Linjw /" ./package/lean/default-settings/files/zzz-default-settings
@@ -296,9 +296,9 @@ sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
         echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
     fi' "$USAGE_FILE"
 if [ $? -eq 0 ]; then
-    echo "【LinInfo】配置NSS显示执行完成"
+    echo "【Lin】配置NSS显示执行完成"
 else
-    echo "【LinInfo】配置NSS显示执行完成"
+    echo "【Lin】配置NSS显示执行完成"
 fi
 
 #获取IP地址前3段
@@ -306,16 +306,16 @@ WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
 #修复Openvpnserver无法连接局域网和外网问题
 if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
    echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
-   echo "【LinInfo】OpenVPN Server has been fixed and is now accessible on the network!"
+   echo "【Lin】OpenVPN Server has been fixed and is now accessible on the network!"
 fi
 
 #修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
 if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
     echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-    echo "【LinInfo】OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
+    echo "【Lin】OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
     sed -i "s/192.168.1.1/$WRT_IPPART.1/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
     sed -i "s/192.168.1.0/$WRT_IPPART.0/g" ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
-    echo "【LinInfo】OpenVPN Server has been fixed the default gateway address!"
+    echo "【Lin】OpenVPN Server has been fixed the default gateway address!"
 fi
 
 
