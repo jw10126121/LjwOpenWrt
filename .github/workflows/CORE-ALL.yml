@@ -109,9 +109,6 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@master
-
     - name: Check Server Performance (检查服务器性能)
       run: |
         echo "警告⚠"
@@ -125,28 +122,6 @@ jobs:
         echo -e "$(sudo lshw -short -C memory | grep GiB) \n"
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
-
-    - name: Check Values (设置变量)
-      run: |
-        WRT_HAS_WIFI=true
-        [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
-        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
-
-        WRT_HAS_LITE=false
-        [[ "${WRT_CONFIG,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
-        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
-
-        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
-            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
-            echo "【Lin】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
-        fi
-
-        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
-        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
-        echo "【Lin】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
-        if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
-            echo "${{ env.WRT_MINE_SAY }}"
-        fi
 
     - name: Free Disk Space (清理磁盘)
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
@@ -208,9 +183,42 @@ jobs:
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone 'Asia/Shanghai'
 
+    - name: Combine Disks (合并磁盘)
+      uses: easimon/maximize-build-space@master
+      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
+      with:
+        swap-size-mb: 1024
+        temp-reserve-mb: 100
+        root-reserve-mb: 1024
+
     - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
+
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
+      
+    - name: Check Values (设置变量)
+      run: |
+        WRT_HAS_WIFI=true
+        [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+
+        WRT_HAS_LITE=false
+        [[ "${WRT_CONFIG,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
+        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
+
+        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
+            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
+            echo "【Lin】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
+        fi
+
+        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
+        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
+        echo "【Lin】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
+        if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
+            echo "${{ env.WRT_MINE_SAY }}"
+        fi
 
     - name: Check Values (设置变量)
       run: |
@@ -219,14 +227,6 @@ jobs:
         echo "START_DATE=$START_DATE" >> $GITHUB_ENV
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
         echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
-
-    - name: Combine Disks (合并磁盘)
-      uses: easimon/maximize-build-space@master
-      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 100
-        root-reserve-mb: 1024
 
     - name: Check Scripts (搜索脚本并配置权限)
       run: |
