@@ -40,12 +40,12 @@ UPDATE_PACKAGE_LIST() {
 # 删除依赖包列表
 DELETE_PACKAGE_LIST() {
 
-	local ACTION_DIR=$1
+ 	local ACTION_DIR=$1
 	local PACKAGE_PRE_LIST=$2
 
 	for pkg in $PACKAGE_PRE_LIST; do
 	    for ext in ipk apk; do
-	    	find "$ACTION_DIR" -name "${pkg}*.$ext" 2>/dev/null -exec rm -rf {} \;
+	    	find "$ACTION_DIR" -maxdepth 1 -name "${pkg}*.$ext" 2>/dev/null -exec rm -rf {} \;
 	    done
 	done
 
