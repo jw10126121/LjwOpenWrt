@@ -272,11 +272,11 @@ if [[ -f "${file_default_settings}" ]]; then
     op_version="${config_version:-${include_version}}"
     DISTRIB_REVISION=$(cat "${file_default_settings}" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
     if [[ -n $DISTRIB_REVISION ]]; then
+        date_version=$(date +"%y%m%d")
         if [ -n "${op_version}" ]; then
-            show_version_text="v${op_version} by Lin"
+            show_version_text="v${op_version} by Lin on ${date_version}"
             TO_DISTRIB_REVISION="${show_version_text}"
         else
-            date_version=$(date +"%y.%m.%d")
             TO_DISTRIB_REVISION="R${date_version} by Lin"
         fi
         sed -i "/DISTRIB_REVISION=/s/${DISTRIB_REVISION}/${TO_DISTRIB_REVISION}/" "${file_default_settings}"
