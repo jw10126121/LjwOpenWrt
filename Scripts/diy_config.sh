@@ -71,12 +71,16 @@ WRT_IP=$default_ip
 WRT_NAME=$default_name
 WRT_THEME=$default_theme_name
 
-config_file="./.config"
-
-CFG_FILE="./package/base-files/files/bin/config_generate"
+# op配置文件
+op_config="./.config"
+# op.config_generate
+CFG_FILE_OP="./package/base-files/files/bin/config_generate"
+# lean.config_generate
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
+# lean.默认配置文件，固件首次刷入后运行
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
 
+# 是否lean代码
 is_code_lean=true
 if [ -f "$file_default_settings" ]; then
   is_code_lean=true
@@ -91,13 +95,12 @@ if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | gr
     echo "【Lin】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
 fi
 
-if [ -f "$CFG_FILE" ]; then
+if [ -f "$CFG_FILE_OP" ]; then
     # 修改默认IP地址
-    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE
-    echo "【Lin】默认IP: $WRT_IP"
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_OP
     # 修改默认主机名
-    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
-    echo "【Lin】默认主机名: 主机名：$WRT_NAME"
+    sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_OP
+    echo "【Lin】OP默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
 fi
 
 #LEDE平台调整
@@ -112,16 +115,15 @@ fi
 # 设置默认主题
 if [ -n "$WRT_THEME" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
-    echo "【Lin】搜索到主题：$the_exist_theme"
     if [ -n "$the_exist_theme" ]; then
         # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
         sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
         # 旧版修改主题方法，现在应该是找不到了
         # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
-        if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "./.config"; then
-            echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
+        if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "${op_config}"; then
+            echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> "${op_config}"
         fi
-        echo "【Lin】默认主题：$WRT_THEME"
+        echo "【Lin】默认主题：${WRT_THEME}，主题目录：${the_exist_theme}"
     else
         echo "【Lin】不存在主题【$WRT_THEME】，使用默认主题"
     fi
@@ -129,7 +131,7 @@ else
     echo "【Lin】使用源码默认主题"
 fi
 
-# 修复frpc、frps执行问题
+# <<<<<<<<<<<< 修复frpc、frps执行问题
 [ -f "$file_default_settings" ] && if ! grep -qF '/etc/init.d/frpc' $file_default_settings; then
     temp_file_frp=$(mktemp)
 cat <<EOF > "$temp_file_frp"
@@ -144,8 +146,9 @@ EOF
         echo "【Lin】修改frpc、frps执行权限成功！"
     fi
 fi
+# >>>>>>>>>>>> 修复frpc、frps执行问题
 
-# 修改luci响应时间
+# <<<<<<<<<<<< 修改luci响应时间
 [ -f "$file_default_settings" ] && if ! grep -qF "uci set luci.apply.holdoff" $file_default_settings; then
     temp_file_holdoff=$(mktemp)
 cat <<EOF > "$temp_file_holdoff"
@@ -160,8 +163,9 @@ EOF
         echo "【Lin】修改luci提交等待时间成功！"
     fi
 fi
+# >>>>>>>>>>>> 修改luci响应时间
 
-# 修改dhcp顺序分配ip
+# <<<<<<<<<<<< 修改dhcp顺序分配ip
 [ -f "$file_default_settings" ] && if ! grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' $file_default_settings; then
     temp_file_dhcp=$(mktemp)
     dhcp_ip_start=10
@@ -181,6 +185,7 @@ EOF
         echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
     fi
 fi
+# >>>>>>>>>>>> 修改dhcp顺序分配ip
 
 # 注释openwrt_sqm_scripts_nss
 remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
@@ -301,7 +306,7 @@ else
     echo "【Lin】配置NSS显示执行完成"
 fi
 
-#获取IP地址前3段
+# 获取IP地址前3段
 WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
 #修复Openvpnserver无法连接局域网和外网问题
 if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
@@ -309,7 +314,7 @@ if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
    echo "【Lin】OpenVPN Server has been fixed and is now accessible on the network!"
 fi
 
-#修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
+# 修复Openvpnserver默认配置的网关地址与无法多终端同时连接问题
 if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then
     echo "  option duplicate_cn '1'" >> ./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn
     echo "【Lin】OpenVPN Server has been fixed to resolve the issue of duplicate connecting!"
@@ -319,16 +324,16 @@ if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]
 fi
 
 
-sed -i "s/^CONFIG_FEED_helloworld=[ym]/CONFIG_FEED_helloworld=n/g" "${config_file}"
-sed -i "s/^CONFIG_FEED_sqm_scripts_nss=[ym]/CONFIG_FEED_sqm_scripts_nss=n/g" "${config_file}"
-sed -i "s/^CONFIG_FEED_nss_packages=[ym]/CONFIG_FEED_nss_packages=n/g" "${config_file}"
+sed -i "s/^CONFIG_FEED_helloworld=[ym]/CONFIG_FEED_helloworld=n/g" "${op_config}"
+sed -i "s/^CONFIG_FEED_sqm_scripts_nss=[ym]/CONFIG_FEED_sqm_scripts_nss=n/g" "${op_config}"
+sed -i "s/^CONFIG_FEED_nss_packages=[ym]/CONFIG_FEED_nss_packages=n/g" "${op_config}"
 
-if ! grep -q "^CONFIG_PACKAGE_luci=y" "${config_file}"; then
-    echo "CONFIG_PACKAGE_luci=y" >> "${config_file}"
+if ! grep -q "^CONFIG_PACKAGE_luci=y" "${op_config}"; then
+    echo "CONFIG_PACKAGE_luci=y" >> "${op_config}"
 fi
 
-if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "${config_file}"; then
-    echo "CONFIG_LUCI_LANG_zh_Hans=y" >> "${config_file}"
+if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "${op_config}"; then
+    echo "CONFIG_LUCI_LANG_zh_Hans=y" >> "${op_config}"
 fi
 
 
