@@ -11,7 +11,7 @@ on:
         type: choice
         options:
           - IPQ60XX-NOWIFI.txt
-          - IPQ60XX-NOWIFI_lite.txt
+          - IPQ60XX-NOWIFI_FRPS.txt
           - MT6000.txt
         default: 'IPQ60XX-NOWIFI.txt'
       WRT_DIY_SETTING:
