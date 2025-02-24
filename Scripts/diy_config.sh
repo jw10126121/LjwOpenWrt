@@ -28,7 +28,7 @@ show_help() {
 default_name="Linjw"
 default_ip="192.168.0.1"
 is_reset_password=true
-default_theme_name=''
+default_theme_name='argon'
 
 # 脚本主体
 while getopts "hi:n:p:t:" opt; do
