@@ -169,13 +169,20 @@ jobs:
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone 'Asia/Shanghai'
 
-    - name: Combine Disks (合并磁盘)
-      uses: easimon/maximize-build-space@master
+    # - name: Combine Disks (合并磁盘)
+    #   uses: easimon/maximize-build-space@master
+    #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
+    #   with:
+    #     swap-size-mb: 1024
+    #     temp-reserve-mb: 100
+    #     root-reserve-mb: 1024
+
+    - name: ln mnt (合并磁盘mnt)
       if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 100
-        root-reserve-mb: 1024
+      run: |
+        sudo mkdir -p /mnt/build_wrt
+        sudo chown $USER:$USER /mnt/build_wrt
+        sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/openwrt
 
     - name: Check Disk (磁盘信息)
       run: |
@@ -206,7 +213,7 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
-    - name: Check Values (设置变量)
+    - name: Check Values (设置编译变量)
       run: |
         START_DATE=$(date +"D%y%m%d")
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
