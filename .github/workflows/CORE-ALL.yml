@@ -76,7 +76,7 @@ env:
   WRT_DIR_SCRIPTS: Scripts                                    # 脚本文件夹
   WRT_diy_after_defconfig: 'diy_after_defconfig.sh'
   WRT_THEME_NAME: 'argon'
-  UPLOAD_FIRMWARE_DIR: true
+  UPLOAD_FIRMWARE_DIR: false
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
@@ -254,8 +254,8 @@ jobs:
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: Read Variables (读取变量)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
         the_repo=${WRT_REPO_URL%/}
         WRT_VER="${the_repo##*/}"-$WRT_REPO_BRANCH
         echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
@@ -344,33 +344,35 @@ jobs:
         fi
         
     - name: diy Feeds (自定义feeds)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
         echo "【Lin】feeds内容：$(cat ./feeds.conf.default)"
 
     - name: Update Feeds (更新并安装feeds)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
+        # cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: diy Packages (自定义包)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         cd $OPENWRT_PATH/package
         echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
     - name: diy config (自定义配置)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo '【Lin】移除所有.config并添加新的.config'
-        cd $OPENWRT_PATH
         [ -f ./.config ] && rm -rf ./.config
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
         
-    - name: diy settings (加载自定义设置)
+    - name: diy settings (加载自定义设置) 
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
         cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
           echo "【Lin】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
@@ -398,16 +400,16 @@ jobs:
         [ -f "${file_diy}" ] && chmod +x "${file_diy}" && bash "${file_diy}"
 
     - name: Read Variables (读取变量)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
         # 从配置文件中获取架构, 一般是defconfig后获取
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         echo "【Lin】编译DEVICE架构：${DEVICE_ARCH}"
 
     - name: Check Config (缓存配置文件)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
         name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【Lin】配置文件名为：$name_config_file"
@@ -477,7 +479,7 @@ jobs:
     #     prefix: ${{ env.OPENWRT_PATH }}
 
     - name: Download tools (下载工具包) 
-      working-directory: ./openwrt
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j$(nproc)
@@ -490,7 +492,7 @@ jobs:
 
     - name: 编译固件 Build firmware
       id: compile
-      working-directory: ./openwrt
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo -e "$(nproc) thread build."
         # make -j$(nproc) V=s || make -j1 V=s
@@ -503,8 +505,9 @@ jobs:
 
     - name: Machine Information
       continue-on-error: true
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH
+        # cd $OPENWRT_PATH
         echo "======================="
         lscpu | grep -E "name|Core|Thread"
         echo "======================="
@@ -536,11 +539,12 @@ jobs:
         echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_OUTPUT
         echo "bin_download_url_all=${bin_download_url_all}" >> $GITHUB_ENV
 
-    - name: Organize Files(整理文件)
+    - name: Organize Files(整理编译后的文件)
       id: organize
       if: steps.compile.outputs.status == 'success'
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH && mkdir -p ./upload ./upload/packages
+        mkdir -p ./upload ./upload/packages ./upload/configs
         # 重新配置readme.txt(加入编译完成时间)
         rm -fr "./config_mine/readme.txt"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
@@ -557,7 +561,8 @@ jobs:
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
         echo "【Lin】编译完成获取内核版本：$KVER"
-        cp -f ./config_mine/* ./upload/
+        cp -f ./config_mine/* ./upload/configs/
+        cp -f ./my_config.txt ./upload/config.txt
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
         find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
@@ -583,11 +588,11 @@ jobs:
         find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Check Disk (磁盘信息)
+    - name: Check Disk (查询磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
 
-    - name: Upload bin to wss
+    - name: Upload bin to wss (上传固件到WSS)
       id: upload_wss
       continue-on-error: true
       timeout-minutes: 25
@@ -600,7 +605,7 @@ jobs:
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
 
-    - name: Create Notification Content (创建推送内容)
+    - name: Create Notification Content (创建推送成功内容)
       id: notification_content
       continue-on-error: true
       run: |
@@ -613,7 +618,7 @@ jobs:
         echo "notify_content=${notify_content}" >> $GITHUB_ENV
         echo "notify_content=${notify_content}" >> $GITHUB_OUTPUT
 
-    - name: Send dingding notify
+    - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true
       uses: zcong1993/actions-ding@master
       if: env.DINGDING_TOKEN != '' && steps.upload_wss.outputs.bin_download_url != ''
@@ -637,13 +642,13 @@ jobs:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
-    - name: Prepare Release Body (准备发布内容)
+    - name: Prepare Release Body (读取发布内容)
       run: |
         echo "【Lin】发布内容: ${{ env.release_desc_file }}"
         the_release_content=$(cat ${{ env.release_desc_file }})
         echo "${the_release_content}"
 
-    - name: Upload Firmware To Release(发布固件)
+    - name: Upload Firmware To Release (发布固件)
       id: release
       if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
       uses: softprops/action-gh-release@v2
