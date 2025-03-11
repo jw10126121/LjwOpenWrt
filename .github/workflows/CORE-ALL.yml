@@ -79,8 +79,8 @@ env:
   UPLOAD_FIRMWARE_DIR: true
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
-  IS_RESIZE_SPACE: true                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
-  FREE_UP_DISK: false                                          # 是否清理磁盘
+  IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  FREE_UP_DISK: true                                          # 是否清理磁盘
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
   WRT_HAS_WIFI: true
@@ -143,16 +143,15 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-          # docker rmi $(docker images -q)
-          sudo -E apt -yqq update
-          sudo -E apt -yqq full-upgrade
-          sudo -E apt -yqq autoremove --purge
-          sudo -E apt -yqq autoclean
-          sudo -E apt -yqq clean
-          sudo -E apt -yqq install dos2unix libfuse-dev
-          sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-          sudo -E systemctl daemon-reload
-          sudo -E timedatectl set-timezone "Asia/Shanghai"
+        sudo -E apt -yqq update
+        sudo -E apt -yqq full-upgrade
+        sudo -E apt -yqq autoremove --purge
+        sudo -E apt -yqq autoclean
+        sudo -E apt -yqq clean
+        sudo -E apt -yqq install dos2unix libfuse-dev
+        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+        sudo -E systemctl daemon-reload
+        sudo -E timedatectl set-timezone "Asia/Shanghai"
 
     # - name: Initialization Environment (初始化环境)
     #   env:
@@ -221,11 +220,6 @@ jobs:
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
         echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
 
-    - name: Check Scripts (搜索脚本并配置权限)
-      run: |
-        echo "【Lin】配置脚本执行权限..."
-        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
-
     - name: config git (修改git下载缓冲大小)
       run: |
         git config --global http.postBuffer 524288000
@@ -253,6 +247,11 @@ jobs:
         # 临时导入config，为了获取设备信息
         [ -f ./.config ] && rm -rf ./.config
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        echo "【Lin】配置脚本执行权限..."
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: Read Variables (读取变量)
       run: |
@@ -350,14 +349,10 @@ jobs:
         bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_FEEDS
         echo "【Lin】feeds内容：$(cat ./feeds.conf.default)"
 
-    - name: Update Feeds (更新feeds)
+    - name: Update Feeds (更新并安装feeds)
       run: |
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
-
-    - name: Install Feeds (安装feeds)
-      run: |
-        cd $OPENWRT_PATH
         ./scripts/feeds install -a
 
     - name: diy Packages (自定义包)
@@ -485,9 +480,9 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
-        make download -j$(($(nproc) * 2))
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+        make download -j$(nproc)
+        # find dl -size -1024c -exec ls -l {} \;
+        # find dl -size -1024c -exec rm -f {} \;
     
     - name: Check Disk (磁盘信息)
       run: |
@@ -498,7 +493,8 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
-        make -j$(nproc) V=s || make -j1 V=s
+        # make -j$(nproc) V=s || make -j1 V=s
+        make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         echo "END_DATE=$(date +"D%y%m%d")" >> $GITHUB_ENV
         END_TIME=$(date +"D%y%m%d_T%H%M%S")
