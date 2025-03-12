@@ -247,8 +247,9 @@ jobs:
     #     sudo mkdir -p /mnt/build_wrt
     #     sudo chown $USER:$USER /mnt/build_wrt
     #     sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/openwrt
-    
+
     - name: Check Scripts (搜索脚本并配置权限)
+      working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo "【Lin】配置脚本执行权限..."
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
