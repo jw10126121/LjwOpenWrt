@@ -168,20 +168,13 @@ jobs:
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone 'Asia/Shanghai'
 
-    # - name: Combine Disks (合并磁盘)
-    #   uses: easimon/maximize-build-space@master
-    #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-    #   with:
-    #     swap-size-mb: 1024
-    #     temp-reserve-mb: 100
-    #     root-reserve-mb: 1024
-
-    - name: ln mnt (合并磁盘mnt)
+    - name: Combine Disks (合并磁盘)
+      uses: easimon/maximize-build-space@master
       if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-      run: |
-        sudo mkdir -p /mnt/build_wrt
-        sudo chown $USER:$USER /mnt/build_wrt
-        sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/openwrt
+      with:
+        swap-size-mb: 1024
+        temp-reserve-mb: 100
+        root-reserve-mb: 1024
 
     - name: Check Disk (磁盘信息)
       run: |
@@ -248,6 +241,13 @@ jobs:
         [ -f ./.config ] && rm -rf ./.config
         cat $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_GENERAL_CONFIG $GITHUB_WORKSPACE/$WRT_DIR_CONFIGS/$WRT_CONFIG >> .config
 
+    # - name: ln mnt (合并磁盘mnt)
+    #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
+    #   run: |
+    #     sudo mkdir -p /mnt/build_wrt
+    #     sudo chown $USER:$USER /mnt/build_wrt
+    #     sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/openwrt
+    
     - name: Check Scripts (搜索脚本并配置权限)
       run: |
         echo "【Lin】配置脚本执行权限..."
