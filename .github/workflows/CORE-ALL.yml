@@ -79,7 +79,7 @@ env:
   UPLOAD_FIRMWARE_DIR: false
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
-  IS_RESIZE_SPACE: true                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   FREE_UP_DISK: true                                          # 是否清理磁盘
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
@@ -168,22 +168,7 @@ jobs:
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone 'Asia/Shanghai'
 
-    - name: Combine Disks (合并磁盘)
-      uses: easimon/maximize-build-space@master
-      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 100
-        root-reserve-mb: 1024
-
-    - name: Check Disk (磁盘信息)
-      run: |
-        df -hT $GITHUB_WORKSPACE
-
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@master
-      
-    - name: Check Values (设置变量)
+    - name: Check Config Values (检查配置变量)
       run: |
         WRT_HAS_WIFI=true
         [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
@@ -204,6 +189,21 @@ jobs:
         if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
             echo "${{ env.WRT_MINE_SAY }}"
         fi
+
+    - name: Combine Disks (合并磁盘)
+      uses: easimon/maximize-build-space@master
+      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true' || env.WRT_HAS_WIFI == 'true'
+      with:
+        swap-size-mb: 1024
+        temp-reserve-mb: 100
+        root-reserve-mb: 1024
+
+    - name: Check Disk (磁盘信息)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@master
 
     - name: Check Values (设置编译变量)
       run: |
