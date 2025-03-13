@@ -353,14 +353,13 @@ jobs:
     - name: Update Feeds (更新并安装feeds)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        # cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: diy Packages (自定义包)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        cd $OPENWRT_PATH/package
+        cd ./package
         echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
@@ -469,7 +468,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
-        path: openwrt/config_mine
+        path: ${{ env.OPENWRT_PATH }}/config_mine
 
     # - name: Cache Toolchain (缓存工具链)
     #   if: env.CACHE_TOOLCHAIN == 'true'
@@ -508,7 +507,6 @@ jobs:
       continue-on-error: true
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        # cd $OPENWRT_PATH
         echo "======================="
         lscpu | grep -E "name|Core|Thread"
         echo "======================="
@@ -517,15 +515,15 @@ jobs:
         du -h --max-depth=1
         echo "======================="
         
-    - name: Upload bin directory
-      continue-on-error: true
-      id: all_upload
-      timeout-minutes: 25
-      uses: actions/upload-artifact@master
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR == true || env.UPLOAD_ALL_BIN_DIR == 'true')
-      with:
-        name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
-        path: openwrt/bin
+    # - name: Upload bin directory
+    #   continue-on-error: true
+    #   id: all_upload
+    #   timeout-minutes: 25
+    #   uses: actions/upload-artifact@master
+    #   if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR == true || env.UPLOAD_ALL_BIN_DIR == 'true')
+    #   with:
+    #     name: bin_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+    #     path: ${{ env.OPENWRT_PATH }}/bin
         
     - name: Upload all bin datas to wss
       id: all_upload_wss
@@ -562,8 +560,9 @@ jobs:
         echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
         KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
         echo "【Lin】编译完成获取内核版本：$KVER"
-        cp -f ./config_mine/* ./upload/configs/
+        # cp -f ./config_mine/* ./upload/configs/
         cp -f ./my_config.txt ./upload/config.txt
+        echo "【Lin】复制配置文件config.txt"
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
         find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
@@ -596,7 +595,7 @@ jobs:
     - name: Upload bin to wss (上传固件到WSS)
       id: upload_wss
       continue-on-error: true
-      timeout-minutes: 25
+      timeout-minutes: 30
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
@@ -605,6 +604,17 @@ jobs:
         echo "下载地址：$bin_download_url"
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: upload bin directory when wss fail
+      continue-on-error: true
+      id: upload_when_wss_fail
+      timeout-minutes: 30
+      uses: actions/upload-artifact@master
+      if: steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success'
+      with:
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+        path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Create Notification Content (创建推送成功内容)
       id: notification_content
