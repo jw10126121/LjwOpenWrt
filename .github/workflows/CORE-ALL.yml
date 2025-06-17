@@ -562,6 +562,7 @@ jobs:
         echo "【Lin】编译完成获取内核版本：$KVER"
         # cp -f ./config_mine/* ./upload/configs/
         cp -f ./my_config.txt ./upload/config.txt
+        cp -f ${readme_desc_file} ./upload/readme.txt
         echo "【Lin】复制配置文件config.txt"
         TMP_DIR=$(mktemp -d)
         find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
