@@ -153,7 +153,7 @@ fi
     temp_file_holdoff=$(mktemp)
 cat <<EOF > "$temp_file_holdoff"
 
-uci set luci.apply.holdoff='3'
+uci set luci.apply.holdoff=3
 uci commit luci
 EOF
     sed -i "/uci commit system/r $temp_file_holdoff" "${file_default_settings}"
@@ -174,8 +174,8 @@ fi
 cat <<EOF > "$temp_file_dhcp"
 
 uci set dhcp.@dnsmasq[0].sequential_ip=1
-uci set dhcp.lan.start='${dhcp_ip_start}'
-uci set dhcp.lan.limit='${dhcp_ip_limit}'
+uci set dhcp.lan.start=${dhcp_ip_start}
+uci set dhcp.lan.limit=${dhcp_ip_limit}
 uci commit dhcp
 EOF
     sed -i "/uci commit system/r $temp_file_dhcp" "${file_default_settings}"
