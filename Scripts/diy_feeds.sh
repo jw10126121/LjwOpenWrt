@@ -14,9 +14,9 @@ if [[ -z $version_firewall ]]; then
 fi
 
 sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
-if ! grep -q '^[^#]*sqm-scripts-nss\.git$' "$feed_config_name"; then
-	# sed -i '$a src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git' $feed_config_name
-fi
+# if ! grep -q '^[^#]*sqm-scripts-nss\.git$' "$feed_config_name"; then
+# 	sed -i '$a src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git' $feed_config_name
+# fi
 
 if [[ $version_firewall == "4" ]]; then
 	# rm -rf ./package/qca
