@@ -252,6 +252,9 @@ update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
 update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
 update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
 
+# 应用过滤
+update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
+
 # 替换frp
 safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
 # 更新luci-app-frpc luci-app-frps
@@ -260,6 +263,8 @@ update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" 
 # luci-app-wechatpush依赖wrtbwmon
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+
+
 
 
 
