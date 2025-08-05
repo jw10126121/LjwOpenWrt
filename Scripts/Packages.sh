@@ -264,8 +264,8 @@ update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" 
 UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
 UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
-
-
+# luci-app-easytier
+update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
 
 
 version_workdir="${openwrt_workdir}"
