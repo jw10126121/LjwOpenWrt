@@ -28,7 +28,7 @@ show_help() {
 default_name="Linjw"
 default_ip="192.168.0.1"
 is_reset_password=true
-default_theme_name='argon'
+default_theme_name=''
 
 # 脚本主体
 while getopts "hi:n:p:t:" opt; do
@@ -113,23 +113,23 @@ fi
 # 取消主题默认设置
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
 # 设置默认主题
-if [ -n "$WRT_THEME" ]; then
-    the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
-    if [ -n "$the_exist_theme" ]; then
-        # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
-        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
-        # 旧版修改主题方法，现在应该是找不到了
-        # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
-        if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "${op_config}"; then
-            echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> "${op_config}"
-        fi
-        echo "【Lin】默认主题：${WRT_THEME}，主题目录：${the_exist_theme}"
-    else
-        echo "【Lin】不存在主题【$WRT_THEME】，使用默认主题"
-    fi
-else
-    echo "【Lin】使用源码默认主题"
-fi
+#if [ -n "$WRT_THEME" ]; then
+#    the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
+#    if [ -n "$the_exist_theme" ]; then
+#        # 修改默认主题，（需要使用JS版本主题，否则会进不去后台，提示"Unhandled exception during request dispatching"）
+#        sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
+#        # 旧版修改主题方法，现在应该是找不到了
+#        # sed -i "s/luci-theme-bootstrap/luci-theme-design/g" ./feeds/luci/collections/luci/Makefile
+#        if ! grep -q "^CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" "${op_config}"; then
+#            echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> "${op_config}"
+#        fi
+#        echo "【Lin】默认主题：${WRT_THEME}，主题目录：${the_exist_theme}"
+#    else
+#        echo "【Lin】不存在主题【$WRT_THEME】，使用默认主题"
+#    fi
+#else
+#    echo "【Lin】使用源码默认主题"
+#fi
 
 # <<<<<<<<<<<< 修复frpc、frps执行问题
 [ -f "$file_default_settings" ] && if ! grep -qF '/etc/init.d/frpc' $file_default_settings; then
