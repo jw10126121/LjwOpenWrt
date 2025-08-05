@@ -647,7 +647,7 @@ jobs:
     - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true
       uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != '' && steps.upload_wss.outputs.bin_download_url != ''
+      if: env.DINGDING_TOKEN != '' && (steps.upload_wss_first.outputs.bin_download_url != '' || steps.upload_wss.outputs.bin_download_url != '')
       with:
         dingToken: ${{ env.DINGDING_TOKEN }}
         body: |
