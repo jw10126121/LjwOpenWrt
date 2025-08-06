@@ -95,7 +95,7 @@ CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
 
 # 主题
 CONFIG_PACKAGE_luci-theme-kucat=m
-CONFIG_PACKAGE_luci-theme-bootstrap=m
+CONFIG_PACKAGE_luci-theme-bootstrap=y
 CONFIG_PACKAGE_luci-theme-argon=y
 
 CONFIG_PACKAGE_luci=y
