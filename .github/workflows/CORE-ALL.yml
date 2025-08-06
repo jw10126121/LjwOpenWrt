@@ -596,28 +596,14 @@ jobs:
         df -hT $GITHUB_WORKSPACE
 
     - name: Upload bin to wss (上传固件到WSS)
-      id: upload_wss_first
+      id: upload_wss
       continue-on-error: true
       timeout-minutes: 30
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
-        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
-        echo "下载地址：$bin_download_url"
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
-        echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 上传固件到WSS(重试)
-      id: upload_wss
-      continue-on-error: true
-      timeout-minutes: 50
-      if: steps.upload_wss_first.outputs.status != 'success' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee wss.log
-        bin_download_url=$(cat wss.log | grep "Download Link: " | cut -f3 -d" ")
+        ./transfer wss --silent --no-progress "${{ env.OPENWRT_PATH }}/upload/" 2>&1 | tee upload_net.log
+        bin_download_url=$(cat upload_net.log | grep "Download Link: " | cut -f3 -d" ")
         echo "下载地址：$bin_download_url"
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_OUTPUT
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
@@ -628,7 +614,7 @@ jobs:
       id: upload_when_wss_fail
       timeout-minutes: 40
       uses: actions/upload-artifact@master
-      if: (steps.upload_wss_first.outputs.status != 'success' && steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success') || env.UPLOAD_BIN_DIR_FORCE == 'true'
+      if: (steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success') || env.UPLOAD_BIN_DIR_FORCE == 'true'
       with:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/upload
@@ -639,7 +625,8 @@ jobs:
       run: |
         echo "【Lin】配置通知content"
         notify_content="\
-        限时下载地址：${{env.bin_download_url}}\n\n\
+        限时下载地址：${{env.bin_download_url}}\n\
+        Artifact下载地址：https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\n\
         ${{ env.system_content }}\n\
         编译开始：${{ env.START_TIME }}\n\
         编译完成：${{ env.END_TIME }}"
@@ -649,7 +636,7 @@ jobs:
     - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true
       uses: zcong1993/actions-ding@master
-      if: env.DINGDING_TOKEN != '' && (steps.upload_wss_first.outputs.bin_download_url != '' || steps.upload_wss.outputs.bin_download_url != '')
+      if: env.DINGDING_TOKEN != '' && (steps.upload_wss.outputs.bin_download_url != '' || env.UPLOAD_BIN_DIR_FORCE == 'true')
       with:
         dingToken: ${{ env.DINGDING_TOKEN }}
         body: |
