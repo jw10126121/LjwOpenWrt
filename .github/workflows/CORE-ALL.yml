@@ -83,6 +83,7 @@ env:
   FREE_UP_DISK: true                                          # 是否清理磁盘
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
+  UPLOAD_BIN_DIR_FORCE: false                                 # 强制上传bin
   WRT_HAS_WIFI: true
   UPLOAD_ALL_BIN_DIR_WSS: false
   WRT_USE_APK: ${{inputs.WRT_USE_APK || false }}
@@ -626,7 +627,7 @@ jobs:
       id: upload_when_wss_fail
       timeout-minutes: 40
       uses: actions/upload-artifact@master
-      if: steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success'
+      if: (steps.upload_wss_first.outputs.status != 'success' && steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success') || env.UPLOAD_BIN_DIR_FORCE == 'true'
       with:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/upload
