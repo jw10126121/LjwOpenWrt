@@ -33,45 +33,48 @@ if [ -z "${cputype_simple}" ]; then
 fi
 
 echo "【Lin】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
-# 从配置文件中，获取值
-choose_type_openclash=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-openclash=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
-openclash_DIR=$(find ./package/*/ -maxdepth 3 -type d -iname "luci-app-openclash" -prune)
-# 预置OpenClash内核和数据
-if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cputype_simple}" ]; then
-    echo "【Lin】准备下载openclash资源，架构：${cputype_simple}"
+# # 从配置文件中，获取值
+# choose_type_openclash=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-openclash=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
+# # 预置OpenClash内核和数据
+# openclash_DIR=$(find ./package/*/ -maxdepth 3 -type d -iname "luci-app-openclash" -prune)
+# if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cputype_simple}" ]; then
+#     echo "【Lin】准备下载openclash资源，架构：${cputype_simple}"
     
-    # CORE_TYPE=$(echo $WRT_TARGET | grep -Eiq "64|86" && echo "amd64" || echo "arm64")
-    CORE_TYPE="${cputype_simple}"
+#     CORE_TYPE="${cputype_simple}"
 
-    CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
-    CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
+#     CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
+#     CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
 
-    CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
-    CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
-    CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
+#     # CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
+#     # CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
+#     # CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
 
-    GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
-    GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
-    GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
+#     CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
+#     CORE_MATE="https://github.com/vernesong/OpenClash/tree/core/master/meta/clash-linux-$CORE_TYPE.tar.gz"
+#     CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
 
-    cd "${openclash_DIR}/root/etc/openclash/"
+#     GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
+#     GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
+#     GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
 
-    curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
-    curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
-    curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
+#     cd "${openclash_DIR}/root/etc/openclash/"
 
-    mkdir ./core/ && cd ./core/
+#     curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
+#     curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
+#     curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
 
-    curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
-    curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
-    curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
+#     mkdir ./core/ && cd ./core/
 
-    chmod +x ./* && rm -rf ./*.gz
+#     curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
+#     curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
+#     curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
 
-    cd "${openwrt_workdir}"
+#     chmod +x ./* && rm -rf ./*.gz
 
-    echo "【Lin】openclash date has been updated!"
-fi
+#     cd "${openwrt_workdir}"
+
+#     echo "【Lin】openclash date has been updated!"
+# fi
 
 cd "${openwrt_workdir}"
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
