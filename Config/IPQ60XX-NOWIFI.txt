@@ -94,10 +94,9 @@ CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
 ### --- 系统 --- ###
 
 # 主题
-CONFIG_PACKAGE_luci-theme-neobird=m
-CONFIG_PACKAGE_luci-theme-design=m
+CONFIG_PACKAGE_luci-theme-kucat=m
+CONFIG_PACKAGE_luci-theme-bootstrap=m
 CONFIG_PACKAGE_luci-theme-argon=y
-
 
 CONFIG_PACKAGE_luci=y
 CONFIG_LUCI_LANG_zh_Hans=y
