@@ -83,7 +83,7 @@ env:
   FREE_UP_DISK: true                                          # 是否清理磁盘
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
-  UPLOAD_BIN_DIR_FORCE: false                                 # 强制上传bin
+  UPLOAD_BIN_DIR_FORCE: true                                 # 强制上传bin
   WRT_HAS_WIFI: true
   UPLOAD_ALL_BIN_DIR_WSS: false
   WRT_USE_APK: ${{inputs.WRT_USE_APK || false }}
