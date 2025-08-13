@@ -598,7 +598,7 @@ jobs:
     - name: Upload bin to wss (上传固件到WSS)
       id: upload_wss
       continue-on-error: true
-      timeout-minutes: 30
+      timeout-minutes: 10
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
@@ -609,14 +609,14 @@ jobs:
         echo "bin_download_url=${bin_download_url}" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: upload bin directory when wss fail
+    - name: Upload Firmware To Artifact(将固件上传到Artifact)
+      id: upload_artifact
+      timeout-minutes: 30
       continue-on-error: true
-      id: upload_when_wss_fail
-      timeout-minutes: 40
-      uses: actions/upload-artifact@master
-      if: (steps.upload_wss.outputs.status != 'success' && steps.organize.outputs.status == 'success') || env.UPLOAD_BIN_DIR_FORCE == 'true'
+      if: steps.compile.outputs.status == 'success' && ((env.WRT_RELEASE_FIRMWARE != 'true' && env.UPLOAD_FIRMWARE_DIR == 'true') || env.UPLOAD_BIN_DIR_FORCE != 'true' || steps.upload_wss.outputs.status != 'success')
+      uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Create Notification Content (创建推送成功内容)
@@ -647,16 +647,6 @@ jobs:
              }
           }
 
-    - name: Upload Firmware To Artifact(将固件上传到Artifact)
-      id: upload_artifact
-      timeout-minutes: 30
-      continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE != 'true' && env.UPLOAD_FIRMWARE_DIR == 'true'
-      uses: actions/upload-artifact@main
-      with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
-        path: ${{ env.OPENWRT_PATH }}/upload
-
     - name: Prepare Release Body (读取发布内容)
       run: |
         echo "【Lin】发布内容: ${{ env.release_desc_file }}"
@@ -665,7 +655,7 @@ jobs:
 
     - name: Upload Firmware To Release (发布固件)
       id: release
-      if: steps.compile.outputs.status == 'success' && (env.WRT_RELEASE_FIRMWARE == true || env.WRT_RELEASE_FIRMWARE == 'true')
+      if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
       uses: softprops/action-gh-release@v2
       with:
         name: ${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}
