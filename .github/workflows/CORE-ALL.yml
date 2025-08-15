@@ -531,7 +531,7 @@ jobs:
       id: all_upload_wss
       timeout-minutes: 25
       continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && (env.UPLOAD_ALL_BIN_DIR_WSS == true || env.UPLOAD_ALL_BIN_DIR_WSS == 'true')
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_ALL_BIN_DIR_WSS == 'true'
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wss -s -p 16 --no-progress "${{ env.OPENWRT_PATH }}/bin/" 2>&1 | tee wss_all.log
