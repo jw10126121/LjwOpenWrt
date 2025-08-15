@@ -74,7 +74,7 @@ declare -A PACKAGES=(
 	["wifischedule"]="luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_"
 	["usbprinter"]="luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_"
 	["pushbot"]="luci-app-pushbot_ iputils-arping_ jq_"
-	["oaf"]="luci-app-oaf_ appfilter_ kmod-oaf_"
+	["oaf"]="luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_"
 	#["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
 )
 
