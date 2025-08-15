@@ -7,9 +7,19 @@
 # 该脚本在config确认前于openwrt目录下执行
 #=================================================
 
+work_dir=$(pwd)
 # 运行在openwrt目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
+
+if [ $(basename "$(pwd)") != 'openwrt' ]; then
+    if [ -d "./openwrt" ]; then
+        cd ./openwrt
+    else
+        echo "【Lin】请在openwrt目录下执行，当前工作目录：$(pwd)" 
+        exit 0;
+    fi
+fi
 
 # 显示帮助信息的函数
 show_help() {

@@ -270,6 +270,8 @@ UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 # luci-app-easytier
 update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
 
+UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
+UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
 version_workdir="${openwrt_workdir}"
 
