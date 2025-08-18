@@ -33,6 +33,19 @@ if [ -z "${cputype_simple}" ]; then
 fi
 
 echo "【Lin】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
+
+# EASYTIER_CORE_BIN="/usr/bin/easytier-core"
+# choose_type_easytier=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-easytier=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
+# if [ -n "${choose_type_easytier}" ] && [ -n "${cputype_simple}" ]; then
+#     VERSION_easytier=$(curl -s https://api.github.com/repos/EasyTier/easytier/releases/latest | grep -Po '"tag_name": "\K.*\d')
+#     if [ ${cputype_simple} == "arm64" ]; then
+#         ARCH_easytier="aarch64"
+#     fi
+#     the_net_filename="easytier-linux-${ARCH_easytier}-${VERSION_easytier}"
+#     the_url_easytier="https://github.com/EasyTier/EasyTier/releases/download/${VERSION_easytier}/${the_net_filename}.zip"
+# fi
+
+
 # # 从配置文件中，获取值
 # choose_type_openclash=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-openclash=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # # 预置OpenClash内核和数据
