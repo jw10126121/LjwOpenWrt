@@ -95,7 +95,7 @@ CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
 
 # 主题
 CONFIG_PACKAGE_luci-theme-kucat=m
-CONFIG_PACKAGE_luci-theme-bootstrap=m
+CONFIG_PACKAGE_luci-theme-bootstrap=y
 CONFIG_PACKAGE_luci-theme-argon=y
 
 CONFIG_PACKAGE_luci=y
@@ -134,8 +134,8 @@ CONFIG_PACKAGE_luci-app-hd-idle=m
 CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
 CONFIG_PACKAGE_hd-idle=m
 
-#CONFIG_PACKAGE_luci-app-alist=m
-#CONFIG_PACKAGE_luci-i18n-alist-zh-cn=m
+# CONFIG_PACKAGE_luci-app-alist=m
+# CONFIG_PACKAGE_luci-i18n-alist-zh-cn=m
 #会自动加入以下依赖 
 #CONFIG_PACKAGE_alist=m
 #CONFIG_PACKAGE_libfuse=m
@@ -183,6 +183,8 @@ CONFIG_PACKAGE_luci-app-socat=y
 CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y
 CONFIG_PACKAGE_socat=y
 
+CONFIG_PACKAGE_luci-app-bandix=m
+CONFIG_PACKAGE_bandix=m
 
 CONFIG_PACKAGE_luci-app-turboacc=y
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
