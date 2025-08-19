@@ -598,7 +598,7 @@ jobs:
     - name: Upload bin to wss (上传固件到WSS)
       id: upload_wss
       continue-on-error: true
-      timeout-minutes: 10
+      timeout-minutes: 5
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
