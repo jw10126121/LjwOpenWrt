@@ -222,9 +222,22 @@ jobs:
         git config --global advice.detachedHead false
 
     - name: Clone Source Code (克隆源代码)
+      id: clone_source
       run: |
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
+        if [ ! -d ./openwrt ]; then
+          change_branceh=''
+          if [ "$WRT_REPO_URL" == 'master' ]; then
+            change_branceh='main'
+          elif [ "$WRT_REPO_URL" == 'main' ]; then
+            change_branceh='master'
+          fi
+          echo "【Lin】修改克隆源代码：【$change_branceh】$WRT_REPO_URL"
+          if [ -n "${change_branceh}" ]; then
+            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL openwrt
+          fi
+        fi
         cd openwrt
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         if [ -n "${{ env.WRT_REPO_Commit_Hash }}" ]; then
