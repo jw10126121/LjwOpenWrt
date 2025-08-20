@@ -71,11 +71,7 @@ jobs:
       # 源码
       WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
       # 编译分支
-      WRT_REPO_BRANCH: WRT_REPO_BRANCH: ${{ 
-        if: inputs.WRT_REPO_URL =~ 'immortalwrt$',
-        then: 'main',
-        else: matrix.BRANCH || 'master'
-      }}
+      WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件
