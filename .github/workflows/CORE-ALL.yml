@@ -420,7 +420,15 @@ jobs:
         # 从配置文件中获取架构, 一般是defconfig后获取
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
+        LUCI_VERSION=$(grep -P '^[^#]*luci' "${OPENWRT_PATH}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+        echo "LUCI_VERSION=$LUCI_VERSION" >> $GITHUB_ENV
+        config_version=$(grep CONFIG_VERSION_NUMBER "${OPENWRT_PATH}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
+        include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${OPENWRT_PATH}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+        op_version="${config_version:-${include_version}}"
+        echo "OP_VERSION=$op_version" >> $GITHUB_ENV
         echo "【Lin】编译DEVICE架构：${DEVICE_ARCH}"
+        echo "【Lin】编译LUCI版本信息：${LUCI_VERSION}"
+        echo "【Lin】编译openwrt版本信息：${OP_VERSION}"
 
     - name: Check Config (缓存配置文件)
       working-directory: ${{ env.OPENWRT_PATH }}
@@ -438,6 +446,8 @@ jobs:
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
         内核版本：${{ env.VERSION_KERNEL }}\n\
+        LUCI版本：${{ env.LUCI_VERSION }}\n\
+        OP版本：${{ env.OP_VERSION }}\n\
         包管理器：${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipkg' }}\n\
         默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\
         默认密码：无 | password\n\
