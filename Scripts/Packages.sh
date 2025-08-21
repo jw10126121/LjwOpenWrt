@@ -280,8 +280,12 @@ version_workdir="${openwrt_workdir}"
 # 修复lang_node编译问题
 config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
 include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-package_version=$(grep 'openwrt-' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+package_version=$(grep -P '^[^#]*coolsnowwolf/luci' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
 op_version="${config_version:-${include_version:-${package_version}}}"
+# if [ -n "$package_version" ]; then
+#     op_version="${package_version}"
+# fi
+
 echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
 if [ -n "$op_version" ]; then  
     path_node_makefile="${version_workdir}/feeds/packages/lang/node"

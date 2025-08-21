@@ -28,13 +28,13 @@ if [[ $version_firewall == "4" ]]; then
 fi
 
 
-# luci_version='' # openwrt-23.05
-# if [ -n "${luci_version}" ]; then
-# 	# 注释掉所有luci配置
-# 	sed -i "/coolsnowwolf\/luci/ { /^#/! s/^/#/ }" $feed_config_name
-# 	# 去掉
-# 	sed -i "/$luci_version/ { s/^#// }" "$feed_config_name"
-# fi
+luci_version='' # openwrt-23.05
+if [ -n "${luci_version}" ]; then
+	# 注释掉所有luci配置
+	sed -i "/coolsnowwolf\/luci/ { /^#/! s/^/#/ }" $feed_config_name
+	# 去掉
+	sed -i "/$luci_version/ { s/^#// }" "$feed_config_name"
+fi
 
 configGit() {
 
