@@ -39,11 +39,14 @@ on:
         required: false
         type: string
         default: ''
-      WRT_REPO_URL:
+      WRT_REPO_INFO:
         description: '源码'
         required: true
-        type: string
-        default: 'https://github.com/coolsnowwolf/lede'
+        type: choice
+        options:
+          - 'https://github.com/coolsnowwolf/lede|master'
+          - 'https://github.com/VIKINGYFY/immortalwrt|main'
+        default: 'https://github.com/coolsnowwolf/lede|master'
       WRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
@@ -69,9 +72,10 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
+      WRT_REPO_INFO: ${{ inputs.WRT_REPO_INFO || 'https://github.com/coolsnowwolf/lede|master' }}
       WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
       # 编译分支
-      WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
+      WRT_REPO_BRANCH: ${{ 'master' }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件

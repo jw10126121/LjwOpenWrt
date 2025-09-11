@@ -8,6 +8,9 @@ name:  CORE-ALL
 on:
   workflow_call:
     inputs:
+      WRT_REPO_INFO:
+        required: true
+        type: string
       WRT_REPO_URL:
         required: true
         type: string
@@ -191,6 +194,10 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
+        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "$WRT_REPO_INFO"
+        echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
+        echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
+
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
       if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true' || env.WRT_HAS_WIFI == 'true'
@@ -224,6 +231,15 @@ jobs:
     - name: Clone Source Code (克隆源代码)
       id: clone_source
       run: |
+        if [[ "${WRT_REPO_URL}" == *"immortalwrt"* ]]; then
+          WRT_REPO_BRANCH=main
+          echo "WRT_REPO_BRANCH=main" >> $GITHUB_OUTPUT
+          echo "WRT_REPO_BRANCH=main" >> $GITHUB_ENV
+        else
+          WRT_REPO_BRANCH=master
+          echo "WRT_REPO_BRANCH=master" >> $GITHUB_OUTPUT
+          echo "WRT_REPO_BRANCH=master" >> $GITHUB_ENV
+        fi
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
         if [ ! -d ./openwrt ]; then
