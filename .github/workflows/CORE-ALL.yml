@@ -194,7 +194,7 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
-        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "$WRT_REPO_INFO"
+        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${{inputs.WRT_REPO_INFO}}"
         echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
 
