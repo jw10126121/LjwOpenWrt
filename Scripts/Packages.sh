@@ -243,7 +243,7 @@ UPDATE_VERSION() {
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
-if [ "$is_code_lean" == true ];
+if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
     update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
