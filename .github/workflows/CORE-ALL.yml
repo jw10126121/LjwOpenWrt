@@ -103,6 +103,7 @@ env:
   system_content: ''
   readme_desc_file: ''
   release_desc_file: ''
+  WRT_IS_LEAN: true
   
 #CI权限
 permissions: write-all
@@ -233,12 +234,16 @@ jobs:
       run: |
         if [[ "${WRT_REPO_URL}" == *"immortalwrt"* ]]; then
           WRT_REPO_BRANCH=main
+          WRT_IS_LEAN=false
           echo "WRT_REPO_BRANCH=main" >> $GITHUB_OUTPUT
           echo "WRT_REPO_BRANCH=main" >> $GITHUB_ENV
+          echo "WRT_IS_LEAN=true" >> $GITHUB_ENV
         else
+          WRT_IS_LEAN=true
           WRT_REPO_BRANCH=master
           echo "WRT_REPO_BRANCH=master" >> $GITHUB_OUTPUT
-          echo "WRT_REPO_BRANCH=master" >> $GITHUB_ENV
+          echo "WRT_REPO_BRANCH=master" >> $GITHUB_ENV          
+          echo "WRT_IS_LEAN=true" >> $GITHUB_ENV
         fi
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
@@ -326,16 +331,22 @@ jobs:
         fi
         if [ -n "$KERNEL_PATCHVER" ]; then
           echo "【Lin】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
+          echo "VERSION_KERNEL=$KERNEL_PATCHVER" >> $GITHUB_ENV
         else
           echo "【Lin】主版本KERNEL_PATCHVER为空，取6.1"
           KERNEL_PATCHVER=6.1
         fi
-        if [ -f "$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER" ]; then
-          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' ./include/kernel-$KERNEL_PATCHVER)
+        if [ "${{ env.WRT_IS_LEAN }}" == 'true' ];
+          kernel_file_detail="$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
+        else
+          kernel_file_detail="$OPENWRT_PATH/target/linux/generic/kernel-$KERNEL_PATCHVER"
+        fi
+        if [ -f "$kernel_file_detail" ]; then
+          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' "$kernel_file_detail")
           echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
           echo "【Lin】内核版本：$VERSION_KERNEL"
         else
-          echo "【Lin】文件不存在：$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
+          echo "【Lin】文件不存在：$kernel_file_detail"
         fi
         echo "【Lin】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
 
@@ -462,7 +473,7 @@ jobs:
         支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
         设备架构：${{ env.DEVICE_ARCH }}\n\
         内核版本：${{ env.VERSION_KERNEL }}\n\
-        LUCI版本：${{ env.LUCI_VERSION }}\n\
+        LUCI版本：${{ env.LUCI_VERSION || '未知' }}\n\
         OP版本：${{ env.OP_VERSION }}\n\
         包管理器：${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipkg' }}\n\
         默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\

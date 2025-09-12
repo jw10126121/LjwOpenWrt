@@ -243,37 +243,53 @@ UPDATE_VERSION() {
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
-UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
-update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
-#UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
-#UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
+if [ "$is_code_lean" == true ];
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+    update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
+    #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
+    #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
 
-UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
-# update_package_list: 从插件库列表中下载插件
-update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
-update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
-update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
-update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
+    # update_package_list: 从插件库列表中下载插件
+    update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
+    update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
+    update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
+    update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
 
-# 应用过滤
-update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
+    # 应用过滤
+    update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
 
-# 替换frp
-safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
-# 更新luci-app-frpc luci-app-frps
-update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
+    # 替换frp
+    safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
+    # 更新luci-app-frpc luci-app-frps
+    update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
-# luci-app-wechatpush依赖wrtbwmon
-UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
-UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+    # luci-app-wechatpush依赖wrtbwmon
+    UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+    UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
-# luci-app-easytier
-update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+    # luci-app-easytier
+    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
 
-UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
-UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+    UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
+    UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+else
+    # luci-app-easytier
+    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+    update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
+
+    # 替换frp
+    safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
+    # 更新luci-app-frpc luci-app-frps
+    update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
+    
+    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+
+fi
+
+
 
 version_workdir="${openwrt_workdir}"
 
@@ -282,9 +298,9 @@ config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -
 include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
 package_version=$(grep -P '^[^#]*coolsnowwolf/luci' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
 op_version="${config_version:-${include_version:-${package_version}}}"
-# if [ -n "$package_version" ]; then
-#     op_version="${package_version}"
-# fi
+if [ -z "$op_version" ]; then
+    op_version="24.10"
+fi
 
 echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
 if [ -n "$op_version" ]; then  
