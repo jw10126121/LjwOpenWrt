@@ -311,7 +311,7 @@ else
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "main"
-    update_package_list "luci-app-socat" Lienol/openwrt-package" "main"
+    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
 
 
 fi
