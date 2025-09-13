@@ -375,7 +375,8 @@ fi
 
 # 修复luci-app-vlmcsd未自带vlmcsd.ini的问题
 app_vlmcsd_DIR=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
-if [ -n "${app_vlmcsd_DIR}" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
+echo "【Lin】检索到luci-app-vlmcsd目录：${app_vlmcsd_DIR}"
+if [ -n "${app_vlmcsd_DIR}" ] && [ -d "${app_vlmcsd_DIR}/root/etc/" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
     my_config_vlmcsd_file="${current_script_dir}/config/vlmcsd.ini"
     [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
 fi
