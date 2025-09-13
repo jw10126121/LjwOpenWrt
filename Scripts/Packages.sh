@@ -276,16 +276,40 @@ if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 else
-    # luci-app-easytier
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+
+    UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
+    
+    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+    update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
+    #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
+    #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
+
+    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+
+    # update_package_list: 从插件库列表中下载插件
+    update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
+    update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
+    update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
+
+    # 应用过滤
+    update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
 
     # 替换frp
     safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
     # 更新luci-app-frpc luci-app-frps
     update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
-    
-    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+
+    # luci-app-wechatpush依赖wrtbwmon
+    UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+    UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+
+    # luci-app-easytier
+    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+
+    UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
+    UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
 fi
 
