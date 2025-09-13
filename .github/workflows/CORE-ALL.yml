@@ -82,7 +82,7 @@ env:
   UPLOAD_FIRMWARE_DIR: false
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
-  IS_RESIZE_SPACE: true                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
+  IS_RESIZE_SPACE: false                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
   FREE_UP_DISK: true                                          # 是否清理磁盘
   CACHE_TOOLCHAIN: true
   CLASH_KERNEL: amd64
@@ -237,7 +237,7 @@ jobs:
           WRT_IS_LEAN=false
           echo "WRT_REPO_BRANCH=main" >> $GITHUB_OUTPUT
           echo "WRT_REPO_BRANCH=main" >> $GITHUB_ENV
-          echo "WRT_IS_LEAN=true" >> $GITHUB_ENV
+          echo "WRT_IS_LEAN=false" >> $GITHUB_ENV
         else
           WRT_IS_LEAN=true
           WRT_REPO_BRANCH=master
@@ -446,8 +446,10 @@ jobs:
         # 从配置文件中获取架构, 一般是defconfig后获取
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
+        echo "【Lin】DEVICE_ARCH：${DEVICE_ARCH}"
         LUCI_VERSION=$(grep -P '^[^#]*luci' "${OPENWRT_PATH}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
         echo "LUCI_VERSION=$LUCI_VERSION" >> $GITHUB_ENV
+        echo "【Lin】LUCI_VERSION：${LUCI_VERSION}"
         config_version=$(grep CONFIG_VERSION_NUMBER "${OPENWRT_PATH}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
         include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${OPENWRT_PATH}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
         op_version="${config_version:-${include_version}}"
