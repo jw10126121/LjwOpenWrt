@@ -447,11 +447,13 @@ jobs:
         DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
         echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
         echo "【Lin】编译DEVICE架构：${DEVICE_ARCH}"
-        LUCI_VERSION=$(grep -oP '^[^#]*luci' "${OPENWRT_PATH}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+        # LUCI_VERSION=$(grep -oP '^[^#]*luci' "${OPENWRT_PATH}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
+        LUCI_VERSION=$(sed -n 's/^[^#]*luci.*openwrt-\([^;[:space:]]*\).*/\1/p' "${OPENWRT_PATH}/feeds.conf.default")
         echo "LUCI_VERSION=$LUCI_VERSION" >> $GITHUB_ENV
         echo "【Lin】编译LUCI版本信息：${LUCI_VERSION}"
         config_version=$(grep CONFIG_VERSION_NUMBER "${OPENWRT_PATH}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-        include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${OPENWRT_PATH}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+        # include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${OPENWRT_PATH}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+        include_version=$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${OPENWRT_PATH}/include/version.mk" | tail -n 1)
         OP_VERSION="${config_version:-${include_version}}"
         echo "OP_VERSION=$OP_VERSION" >> $GITHUB_ENV
         echo "【Lin】编译openwrt版本信息：${OP_VERSION}"
