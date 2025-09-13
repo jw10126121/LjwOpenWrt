@@ -196,24 +196,26 @@ EOF
         echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
     fi
 fi
-# >>>>>>>>>>>> 修改dhcp顺序分配ip
 
-# 注释openwrt_sqm_scripts_nss
-remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
-sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
-if [ $? -eq 0 ]; then
-    echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
-else
-    echo "【Lin】注释feeds中openwrt_sqm_scripts_nss失败"
-fi
 
-# 注释openwrt_nss_packages
-remove_nss_packages="sed -i 's|src/gz openwrt_nss_packages|#src/gz openwrt_nss_packages|' /etc/opkg/distfeeds.conf"
-sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_nss_packages" "$file_default_settings"
-if [ $? -eq 0 ]; then
-    echo "【Lin】注释feeds中openwrt_nss_packages完成"
-else
-    echo "【Lin】注释feeds中openwrt_nss_packages失败"
+if [ -f "$file_default_settings" ]; then
+    # 注释openwrt_sqm_scripts_nss
+    remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
+    sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
+    if [ $? -eq 0 ]; then
+        echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
+    else
+        echo "【Lin】注释feeds中openwrt_sqm_scripts_nss失败"
+    fi
+
+    # 注释openwrt_nss_packages
+    remove_nss_packages="sed -i 's|src/gz openwrt_nss_packages|#src/gz openwrt_nss_packages|' /etc/opkg/distfeeds.conf"
+    sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_nss_packages" "$file_default_settings"
+    if [ $? -eq 0 ]; then
+        echo "【Lin】注释feeds中openwrt_nss_packages完成"
+    else
+        echo "【Lin】注释feeds中openwrt_nss_packages失败"
+    fi
 fi
 
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
@@ -304,18 +306,21 @@ fi
 
 # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
-sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
-    if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
-        connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
-        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"\
-    else\
-        echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
-    fi' "$USAGE_FILE"
-if [ $? -eq 0 ]; then
-    echo "【Lin】配置NSS显示执行完成"
-else
-    echo "【Lin】配置NSS显示执行完成"
+if [[ -f "${USAGE_FILE}" ]]; then
+    sed -i '/echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"/c\
+        if [ -r "/sys/kernel/debug/ecm/ecm_db/connection_count_simple" ]; then\
+            connection_count=$(cat /sys/kernel/debug/ecm/ecm_db/connection_count_simple)\
+            echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}, ECM: ${connection_count}"\
+        else\
+            echo -n "CPU: ${cpu_usage}, NPU: ${npu_usage}"\
+        fi' "$USAGE_FILE"
+    if [ $? -eq 0 ]; then
+        echo "【Lin】配置NSS显示执行完成"
+    else
+        echo "【Lin】配置NSS显示执行完成"
+    fi
 fi
+
 
 # 获取IP地址前3段
 WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
