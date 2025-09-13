@@ -30,6 +30,7 @@ show_help() {
     echo "  -n default_name       设置主机名，默认Linjw"
     echo "  -p is_reset_password  是否重置密码，默认true"
     echo "  -t default_theme_name 默认主题，默认不修改"
+    echo "  -m package_manager    包管理器类型，默认ipk，可选apk"
 }
 
 # 检查是否需要显示帮助信息
@@ -39,9 +40,10 @@ default_name="Linjw"
 default_ip="192.168.0.1"
 is_reset_password=true
 default_theme_name=''
+package_manager='ipk'
 
 # 脚本主体
-while getopts "hi:n:p:t:" opt; do
+while getopts "hi:n:p:t:m:" opt; do
     case $opt in
         h)
             show_help
@@ -54,6 +56,9 @@ while getopts "hi:n:p:t:" opt; do
         i)
             default_ip=$OPTARG
             # echo "input.default_ip: $default_ip"
+            ;;
+        m)
+            package_manager=$OPTARG
             ;;
         p)
             is_reset_password=$OPTARG
@@ -112,6 +117,23 @@ if [ -f "$CFG_FILE_OP" ]; then
     sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE_OP
     echo "【Lin】OP默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
 fi
+
+if [ -d "./feeds/luci/modules/luci-mod-system/" ]; then
+    #修改immortalwrt.lan关联IP
+    sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")
+fi
+
+if [ -d "./feeds/luci/modules/luci-mod-status/" ]; then
+    #添加编译日期标识
+    sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Linjw-$(date "+%a %Y-%m-%d")')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+fi
+
+if [ "${is_code_lean}" != true ]; then
+    #临时修复luci无法保存的问题
+    sed -i "s/\[sid\]\.hasOwnProperty/\[sid\]\?\.hasOwnProperty/g" $(find ./feeds/luci/modules/luci-base/ -type f -name "uci.js")  
+fi
+
+
 
 #LEDE平台调整
 if [ -f "$CFG_FILE_LEDE" ]; then
@@ -275,7 +297,7 @@ sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/roo
 sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-upnp/root/usr/share/luci/menu.d/ -type f -name "luci-app-upnp.json")
 sed -i 's/services/network/g' $(find ./feeds/luci/applications/luci-app-nlbwmon/root/usr/share/luci/menu.d/ -type f -name "luci-app-nlbwmon.json")
 sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-hd-idle/root/usr/share/luci/menu.d/ -type f -name "luci-app-hd-idle.json")
-if [ -d "./feeds/luci/applications/luci-app-hd-idle/root/usr/share/luci/menu.d/" ]; then
+if [ -d "./feeds/luci/applications/luci-app-alist/root/usr/share/luci/menu.d" ]; then
     sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-alist/root/usr/share/luci/menu.d/ -type f -name "luci-app-alist.json")
 fi
 
@@ -353,6 +375,40 @@ fi
 if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "${op_config}"; then
     echo "CONFIG_LUCI_LANG_zh_Hans=y" >> "${op_config}"
 fi
+
+
+if ! grep -q "^CONFIG_USE_APK=n" "${op_config}"; then
+    echo "CONFIG_USE_APK=n" >> "${op_config}"
+fi
+
+if [ "${package_manager}" == 'apk' ]; then
+    sed -i "s/^CONFIG_USE_APK=[ym]/CONFIG_USE_APK=y/g" "${op_config}"
+else
+    sed -i "s/^CONFIG_USE_APK=[ym]/CONFIG_USE_APK=n/g" "${op_config}"
+    echo "CONFIG_PACKAGE_default-settings-chn=y" >> "${op_config}"
+fi
+
+
+WRT_TARGET='IPQ'
+
+if [ "${is_code_lean}" != true ]; then
+    if [[ $WRT_TARGET == *"IPQ"* ]]; then
+
+        #编译器优化
+        echo "CONFIG_TARGET_OPTIONS=y" >> "${op_config}"
+        echo "CONFIG_TARGET_OPTIMIZATION=\"-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\"" >> "${op_config}"
+
+        #取消nss相关feed
+        echo "CONFIG_FEED_nss_packages=n" >> "${op_config}"
+        echo "CONFIG_FEED_sqm_scripts_nss=n" >> "${op_config}"
+        #设置NSS版本
+        echo "CONFIG_NSS_FIRMWARE_VERSION_11_4=n" >> "${op_config}"
+        echo "CONFIG_NSS_FIRMWARE_VERSION_12_5=y" >> "${op_config}"
+
+    fi
+fi
+
+
 
 
 

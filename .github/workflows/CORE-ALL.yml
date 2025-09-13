@@ -417,7 +417,7 @@ jobs:
         cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
           echo "【Lin】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "${{env.WRT_THEME_NAME}}"
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "${{env.WRT_THEME_NAME}}" -m "${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipk' }}"
         else
           echo "【Lin】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
         fi
