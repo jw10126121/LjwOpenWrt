@@ -319,7 +319,8 @@ else
 
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
-    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
     update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
 
