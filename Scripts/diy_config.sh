@@ -128,7 +128,7 @@ if [ -d "./feeds/luci/modules/luci-mod-status/" ]; then
     sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Linjw-$(date "+%a %Y-%m-%d")')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 fi
 
-if [ "${is_code_lean}" != true ]; then
+if [ ! -f "$file_default_settings" ]; then
     #临时修复luci无法保存的问题
     sed -i "s/\[sid\]\.hasOwnProperty/\[sid\]\?\.hasOwnProperty/g" $(find ./feeds/luci/modules/luci-base/ -type f -name "uci.js")  
 fi
@@ -391,7 +391,7 @@ fi
 
 WRT_TARGET='IPQ'
 
-if [ "${is_code_lean}" != true ]; then
+if [ ! -f "$file_default_settings" ]; then
     if [[ $WRT_TARGET == *"IPQ"* ]]; then
 
         #编译器优化
@@ -408,7 +408,7 @@ if [ "${is_code_lean}" != true ]; then
     fi
 fi
 
-if [ "${is_code_lean}" != true ]; then
+if [ ! -f "$file_default_settings" ]; then
     default_bash_dir='./package/base-files/files/etc/uci-defaults'
     default_bash_script='./package/base-files/files/etc/uci-defaults/99-lin-defaults'
     mkdir -p "$default_bash_dir"
