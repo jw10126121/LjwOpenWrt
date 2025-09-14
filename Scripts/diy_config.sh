@@ -129,8 +129,8 @@ fi
 
 if [ -d "./feeds/luci/modules/luci-mod-status/" ]; then
     #添加编译日期标识
-    sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Linjw-$(date "+%a %Y-%m-%d")')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
-    echo "【Lin】添加编译日期标识成功：Linjw-$(date "+%a %Y-%m-%d")"
+    sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ ${default_name}-$(date "%Y-%m-%d")')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+    echo "【Lin】添加编译日期标识成功：${default_name}-$(date "%Y-%m-%d")"
 fi
 
 if [ ! -f "$file_default_settings" ]; then
