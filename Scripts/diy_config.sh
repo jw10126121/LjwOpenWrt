@@ -103,6 +103,10 @@ else
   is_code_lean=false
 fi
 
+if [ "$is_code_lean" == true ]; then
+    echo "【Lin】当前源码是否LEAN：${$is_code_lean}"
+fi
+
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
@@ -126,11 +130,13 @@ fi
 if [ -d "./feeds/luci/modules/luci-mod-status/" ]; then
     #添加编译日期标识
     sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ Linjw-$(date "+%a %Y-%m-%d")')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+    echo "【Lin】添加编译日期标识成功：Linjw-$(date "+%a %Y-%m-%d")"
 fi
 
 if [ ! -f "$file_default_settings" ]; then
     #临时修复luci无法保存的问题
     sed -i "s/\[sid\]\.hasOwnProperty/\[sid\]\?\.hasOwnProperty/g" $(find ./feeds/luci/modules/luci-base/ -type f -name "uci.js")  
+    echo "【Lin】临时修复luci无法保存的问题"
 fi
 
 
@@ -434,6 +440,10 @@ exit 0
 EOF
 
     chmod +x ${default_bash_script}
+    echo "【Lin】配置首次运行脚本成功："
+    echo "【Lin】1、修改frpc、frps权限"
+    echo "【Lin】2、配置dhcp，起：${dhcp_ip_start}，数：${dhcp_ip_limit}"
+    echo "【Lin】3、修改luci响应时间3s"
 fi
 
 
