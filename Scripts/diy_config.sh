@@ -408,6 +408,34 @@ if [ "${is_code_lean}" != true ]; then
     fi
 fi
 
+if [ "${is_code_lean}" != true ]; then
+    default_bash_dir='./package/base-files/files/etc/uci-defaults'
+    default_bash_script='./package/base-files/files/etc/uci-defaults/99-lin-defaults'
+    mkdir -p "$default_bash_dir"
+    touch $default_bash_script
+    dhcp_ip_start=10
+    dhcp_ip_end=254
+    dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
+cat <<EOF > $default_bash_script
+[ -f /usr/bin/frpc ] && chmod +x /usr/bin/frpc
+[ -f /usr/bin/frps ] && chmod +x /usr/bin/frps
+[ -f /etc/init.d/frpc ] && chmod +x /etc/init.d/frpc
+[ -f /etc/init.d/frps ] && chmod +x /etc/init.d/frps
+
+uci set dhcp.@dnsmasq[0].sequential_ip=1
+uci set dhcp.lan.start=${dhcp_ip_start}
+uci set dhcp.lan.limit=${dhcp_ip_limit}
+uci commit dhcp
+
+uci set luci.apply.holdoff=3
+uci commit luci
+
+exit 0
+EOF
+
+    chmod +x ${default_bash_script}
+fi
+
 
 
 
