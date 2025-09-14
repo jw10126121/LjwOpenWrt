@@ -146,6 +146,9 @@ CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y
 CONFIG_PACKAGE_luci-lib-fs=y
 
 
+CONFIG_PACKAGE_luci-app-quickfile=y
+
+
 CONFIG_PACKAGE_luci-app-cpufreq=m
 CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
 ##CONFIG_PACKAGE_cpufreq=m
@@ -224,6 +227,7 @@ CONFIG_PACKAGE_socat=y
 CONFIG_PACKAGE_luci-app-bandix=m
 CONFIG_PACKAGE_bandix=m
 
+# IMM下，不需要turboacc，也没用tueboacc，这是FW3用的，=y没用，但写着也不报错
 CONFIG_PACKAGE_luci-app-turboacc=y
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 
@@ -241,6 +245,9 @@ CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 #ONFIG_PACKAGE_luci-i18n-mwan3helper-zh-cn=m
 #CONFIG_PACKAGE_pdnsd-alt=y
 #CONFIG_PACKAGE_mwan3=y
+
+CONFIG_PACKAGE_luci-app-netspeedtest=m
+CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
 
 # 多拨，暂时没用
 # CONFIG_PACKAGE_luci-app-syncdial=m
@@ -299,6 +306,8 @@ CONFIG_PACKAGE_luci-app-wol=y
 CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y
 
 CONFIG_PACKAGE_luci-app-wolplus=y
+
+CONFIG_PACKAGE_luci-app-timewol=y
 
 #CONFIG_PACKAGE_luci-app-ssr-plus=y
 #CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y

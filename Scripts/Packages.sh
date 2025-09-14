@@ -278,9 +278,12 @@ if [ "$is_code_lean" == true ]; then
 else
 
     UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-    
+
+    update_package_list "luci-app-momo momo" "nikkinikki-org/OpenWrt-momo" "main"
+    update_package_list "luci-app-nikki nikki" "nikkinikki-org/OpenWrt-nikki" "main"
+
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.4.3"
     update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
     #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
     #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
@@ -310,6 +313,11 @@ else
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+
+    update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
+    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+
+    update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
 
 fi
 
@@ -380,9 +388,53 @@ fi
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
 [ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【Lin】tailscale has been fixed!"
 
+#修复Rust编译失败
+RUST_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
+if [ -f "$RUST_FILE" ]; then
+    echo " "
+
+    sed -i 's/ci-llvm=true/ci-llvm=false/g' $RUST_FILE
+
+    cd $package_workdir && echo "【Lin】rust has been fixed!"
+fi
+
+#修复DiskMan编译失败
+DM_FILE="./luci-app-diskman/applications/luci-app-diskman/Makefile"
+if [ -f "$DM_FILE" ]; then
+    echo " "
+
+    sed -i 's/fs-ntfs/fs-ntfs3/g' $DM_FILE
+    sed -i '/ntfs-3g-utils /d' $DM_FILE
+
+    cd $package_workdir && echo "【Lin】diskman has been fixed!"
+fi
+
+
 ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # 修改argon主题进度条颜色与主题色一致
 [ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+
+
+if [ "$is_code_lean" != true ]; then
+    #修改qca-nss-drv启动顺序
+    NSS_DRV="../feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
+    if [ -f "$NSS_DRV" ]; then
+        echo " "
+        sed -i 's/START=.*/START=85/g' $NSS_DRV
+        cd $package_workdir && echo "【Lin】qca-nss-drv has been fixed!"
+    fi
+
+    #修改qca-nss-pbuf启动顺序
+    NSS_PBUF="./kernel/mac80211/files/qca-nss-pbuf.init"
+    if [ -f "$NSS_PBUF" ]; then
+        echo " "
+
+        sed -i 's/START=.*/START=86/g' $NSS_PBUF
+
+        cd $package_workdir && echo "【Lin】qca-nss-pbuf has been fixed!"
+    fi
+
+fi
 
 # 目前仅lean源码测试过，V佬源码也支持
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
@@ -448,24 +500,24 @@ fi
 #   UPDATE_PACKAGE "qmi-wwan" "immortalwrt/wwan-packages" "master" "pkg"
 # fi
 
-## 预置HomeProxy数据
-# if [ -d *"homeproxy"* ]; then
-#     HP_RULES="surge"
-#     HP_PATCH="./homeproxy/root/etc/homeproxy"
+# 预置HomeProxy数据
+if [ -d *"homeproxy"* ]; then
+    HP_RULE="surge"
+    HP_PATH="./homeproxy/root/etc/homeproxy"
 
-#     chmod +x ./$HP_PATCH/scripts/*
-#     rm -rf ./$HP_PATCH/resources/*
+    # chmod +x ./$HP_PATH/scripts/*
+    rm -rf ./$HP_PATH/resources/*
+    git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULE/
+    cd ./$HP_RULE/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
 
-#     git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULES/
-#     cd ./$HP_RULES/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
+    echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+    awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
 
-#     echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
-#     awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
-#     sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
-#     mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATCH/resources/
+    sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
+    mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATH/resources/
 
-#     cd .. && rm -rf ./$HP_RULES/
+    cd .. && rm -rf ./$HP_RULE/
 
-#     echo "【Lin】homeproxy date has been updated!"
-# fi
+    echo "【Lin】homeproxy date has been updated!"
+fi
 
