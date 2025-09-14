@@ -314,13 +314,13 @@ else
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
     # 直接用luci-app-quickfile，弃用luci-app-filetransfer
-    UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "main"
+    # UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "main"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
 
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
-    # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
-    UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
+    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    # UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
     update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
 
