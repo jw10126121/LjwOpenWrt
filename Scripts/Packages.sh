@@ -32,9 +32,21 @@ fi
 
 #删除软件包
 DELETE_PACKAGE() {
+
     local PKG_NAME=$1
-    rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    echo "【Lin】删除插件：$PKG_NAME"
+    
+    local FOUND_DIRS=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" 2>/dev/null)
+    # 删除找到的目录
+    if [ -n "$FOUND_DIRS" ]; then
+        while read -r DIR; do
+            rm -rf "$DIR"
+            echo "【Lin】删除文件夹：$DIR"
+        done <<< "$FOUND_DIRS"
+    else
+        echo "【Lin】未找到文件夹：$PKG_NAME"
+    fi
+    # rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
+    # echo "【Lin】删除插件：$PKG_NAME"
 }
 
 # 删除并备份插件(包名是文件夹名)
@@ -63,13 +75,15 @@ UPDATE_PACKAGE() {
     searchType="$PKG_NAME"
 
     # 删除原本同名的软件包
-    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
-    if [ -n "$the_exist_pkg" ]; then
-        echo "【Lin】删除同名插件：$the_exist_pkg"
-        rm -rf $the_exist_pkg
-    fi
+    # local the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
+    # if [ -n "$the_exist_pkg" ]; then
+    #     echo "【Lin】删除同名插件：$the_exist_pkg"
+    #     rm -rf $the_exist_pkg
+    # fi
 
-    if [[ $PKG_REPO == https://github.com* ]]; then
+    DELETE_PACKAGE "${PKG_NAME}"
+
+    if [[ $PKG_REPO == *github.com* ]]; then
         the_full_repo=$PKG_REPO
     else
         the_full_repo="https://github.com/${PKG_REPO}.git"
@@ -79,7 +93,7 @@ UPDATE_PACKAGE() {
     REPO_NAME=${REPO_URL_git##*/}
 
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "${the_full_repo}" "${REPO_NAME}"
-    echo "【Lin】成功clone插件：$PKG_NAME"
+    echo "【Lin】成功clone插件：$PKG_NAME [库：${REPO_NAME}]"
     if [[ $PKG_SPECIAL == "pkg" ]]; then
         search_result_pkg_dir=$(find ./${REPO_NAME}/*/ -maxdepth 1 -type d -iname "$searchType" -prune)
         if [ -n "${search_result_pkg_dir}" ]; then
@@ -125,6 +139,7 @@ MOVE_PACKAGE_FROM_LIST() {
     fi
 }
 
+# 从库集中添加多个库
 update_package_list() {
 
     pkg_name_list=($1)
@@ -147,16 +162,14 @@ update_package_list() {
     REPO_NAME_LAST=${REPO_URL_git##*/}
 
     # 获取用户名_仓库名
-    REPO_NAME=${the_full_repo#*//}      # 删除前面的协议部分
+    REPO_NAME=${the_full_repo#*//}  # 删除前面的协议部分
     REPO_NAME=${REPO_NAME#*/}       # 删除第一个/后面的内容，保留用户名和仓库名
     REPO_NAME=${REPO_NAME%.git}     # 删除后面的.git
-    REPO_NAME=${REPO_NAME//\//_}    # 将所有的/替换为_
-    if [ -n "$REPO_NAME" ]; then
-        REPO_NAME="PkgList_${REPO_NAME}"
-    else
+    REPO_NAME=${REPO_NAME//\//_}    # 将所有的/替换为_，最终的结果是：作者名_仓库名
+    REPO_NAME="pkglist_${REPO_NAME:-$REPO_NAME_LAST}"
 
-        REPO_NAME="PkgList_${REPO_NAME_LAST}"
-    fi
+    # REPO_NAME="pkglist_$(sed 's#.*/\([^/]*\)/\([^/.]*\)\.git#\1_\2#' <<<"$the_full_repo")" # 以上代码可以精简成这句
+
 
     exist_pkg_list=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$REPO_NAME" -prune)
     if [ -n "$exist_pkg_list" ]; then
@@ -268,6 +281,7 @@ if [ "$is_code_lean" == true ]; then
 
     # luci-app-wechatpush依赖wrtbwmon
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+    # https://github.com/gaoyaxuan/luci-app-pushbot，该项目有在更新，可替换
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
     # luci-app-easytier
@@ -294,7 +308,6 @@ else
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
     # update_package_list: 从插件库列表中下载插件
-    update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
     update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
     update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
@@ -309,6 +322,7 @@ else
 
     # luci-app-wechatpush依赖wrtbwmon
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+    # https://github.com/gaoyaxuan/luci-app-pushbot，该项目有在更新，可替换
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
     # luci-app-easytier
@@ -325,6 +339,7 @@ else
     update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
     # UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
+    # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
 
 fi
