@@ -54,7 +54,7 @@ CONFIG_PACKAGE_kmod-nft-offload=y
 CONFIG_PACKAGE_kmod-nft-fullcone=y
 
 
-#CONFIG_PACKAGE_luci-app-homeproxy=y
+CONFIG_PACKAGE_luci-app-homeproxy=y
 # FW4下，不能用ssr-plus
 CONFIG_PACKAGE_luci-app-ssr-plus=n
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n
@@ -116,8 +116,8 @@ CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=n
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geoview=n
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=n
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=n
-#CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=m
-#CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-ng=m
+CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=m
+CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-ng=m
 
 ### === 插件项 === ###
 
@@ -127,9 +127,9 @@ CONFIG_LUCI_LANG_zh_Hans=y
 ### --- 状态 --- ###
 
 
-#CONFIG_PACKAGE_luci-app-onliner=y
-#CONFIG_PACKAGE_luci-app-ramfree=y
-#CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
+CONFIG_PACKAGE_luci-app-onliner=y
+CONFIG_PACKAGE_luci-app-ramfree=y
+CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y
 
 ### --- 系统 --- ###
 
@@ -139,41 +139,41 @@ CONFIG_PACKAGE_luci-theme-bootstrap=y
 CONFIG_PACKAGE_luci-theme-argon=y
 
 
-#CONFIG_PACKAGE_luci-app-autoreboot=y
-#CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
+CONFIG_PACKAGE_luci-app-autoreboot=y
+CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-filetransfer=m
-#CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=m
+CONFIG_PACKAGE_luci-app-filetransfer=m
+CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=m
 #CONFIG_PACKAGE_luci-lib-fs=y
 
 
 CONFIG_PACKAGE_luci-app-quickfile=y
 
 
-#CONFIG_PACKAGE_luci-app-cpufreq=m
-#CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
+CONFIG_PACKAGE_luci-app-cpufreq=m
+CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
 ##CONFIG_PACKAGE_cpufreq=m
 
-#CONFIG_PACKAGE_luci-app-ttyd=y
-#CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
+CONFIG_PACKAGE_luci-app-ttyd=y
+CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-advancedsetting=m
-#CONFIG_PACKAGE_luci-i18n-advancedsetting-zh-cn=m
+CONFIG_PACKAGE_luci-app-advancedsetting=m
+CONFIG_PACKAGE_luci-i18n-advancedsetting-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-advancedplus=m
-#CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m
+CONFIG_PACKAGE_luci-app-advancedplus=m
+CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m
 
 ### --- 网络存储 --- ###
 
-#CONFIG_PACKAGE_luci-app-vsftpd=m
-#CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
+CONFIG_PACKAGE_luci-app-vsftpd=m
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-samba4=m
-#CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m
+CONFIG_PACKAGE_luci-app-samba4=m
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-hd-idle=m
-#CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
-#CONFIG_PACKAGE_hd-idle=m
+CONFIG_PACKAGE_luci-app-hd-idle=m
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
+CONFIG_PACKAGE_hd-idle=m
 
 # CONFIG_PACKAGE_luci-app-alist=m
 # CONFIG_PACKAGE_luci-i18n-alist-zh-cn=m
@@ -182,30 +182,30 @@ CONFIG_PACKAGE_luci-app-quickfile=y
 #CONFIG_PACKAGE_libfuse=m
 #CONFIG_PACKAGE_fuse-utils=m
 
-#CONFIG_PACKAGE_luci-app-verysync=m
-#CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
-#CONFIG_PACKAGE_verysync=m
+CONFIG_PACKAGE_luci-app-verysync=m
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
+CONFIG_PACKAGE_verysync=m
 
-#CONFIG_PACKAGE_luci-app-usb-printer=m
-#CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m
+CONFIG_PACKAGE_luci-app-usb-printer=m
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m
 
 ### --- VPN --- ###
 
-#CONFIG_PACKAGE_luci-app-openvpn=m
-#CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
+CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-openvpn-server=m
-#CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
+CONFIG_PACKAGE_luci-app-openvpn-server=m
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
 #CONFIG_PACKAGE_liblzo=y
 #CONFIG_PACKAGE_openvpn-easy-rsa=y
 #CONFIG_PACKAGE_openvpn-openssl=y
 
-#CONFIG_PACKAGE_luci-app-easytier=y
-#CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y
-#CONFIG_PACKAGE_easytier=y
+CONFIG_PACKAGE_luci-app-easytier=y
+CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y
+CONFIG_PACKAGE_easytier=y
 
-#CONFIG_PACKAGE_luci-app-zerotier=y
-#CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y
+CONFIG_PACKAGE_luci-app-zerotier=y
+CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y
 
 #这个插件不能用，会造成冲突而编译失败
 #CONFIG_PACKAGE_luci-app-ipsec-vpnd=n
@@ -213,27 +213,27 @@ CONFIG_PACKAGE_luci-app-quickfile=y
 
 ### --- 网络 --- ###
 
-#CONFIG_PACKAGE_luci-app-sqm=y
-#CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y
-#CONFIG_PACKAGE_sqm-scripts-nss=m    # 这项在ipq60xx上不可用，会导致拨号失败
+CONFIG_PACKAGE_luci-app-sqm=y
+CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y
+CONFIG_PACKAGE_sqm-scripts-nss=m    # 这项在ipq60xx上不可用，会导致拨号失败
 #CONFIG_NSS_DRV_IGS_ENABLE=y
 #CONFIG_NSS_DRV_SHAPER_ENABLE=y
 #CONFIG_PACKAGE_kmod-qca-nss-drv-igs=y
 #CONFIG_PACKAGE_kmod-qca-nss-drv-qdisc=y
 
-#CONFIG_PACKAGE_luci-app-socat=y
-#CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y
-#CONFIG_PACKAGE_socat=y
+CONFIG_PACKAGE_luci-app-socat=y
+CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y
+CONFIG_PACKAGE_socat=y
 
-#CONFIG_PACKAGE_luci-app-bandix=m
-#CONFIG_PACKAGE_bandix=m
+CONFIG_PACKAGE_luci-app-bandix=m
+CONFIG_PACKAGE_bandix=m
 
 # IMM下，不需要turboacc，也没用tueboacc，这是FW3用的，=y没用，但写着也不报错
-#CONFIG_PACKAGE_luci-app-turboacc=y
-#CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
+CONFIG_PACKAGE_luci-app-turboacc=y
+CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-arpbind=m
-#CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
+CONFIG_PACKAGE_luci-app-arpbind=m
+CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 
 #CONFIG_PACKAGE_firewall=y
 #CONFIG_PACKAGE_kmod-ipt-fullconenat=y
@@ -247,37 +247,37 @@ CONFIG_PACKAGE_luci-app-quickfile=y
 #CONFIG_PACKAGE_pdnsd-alt=y
 #CONFIG_PACKAGE_mwan3=y
 
-#CONFIG_PACKAGE_luci-app-netspeedtest=m
-#CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
+CONFIG_PACKAGE_luci-app-netspeedtest=m
+CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
 
 # 多拨，暂时没用
 # CONFIG_PACKAGE_luci-app-syncdial=m
 
 ### --- 服务 --- ###
 
-#CONFIG_PACKAGE_luci-app-oaf=y
+CONFIG_PACKAGE_luci-app-oaf=y
 
-#CONFIG_PACKAGE_luci-app-adguardhome=y
-#CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n
 
-#CONFIG_PACKAGE_luci-app-upnp=y
-#CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
+CONFIG_PACKAGE_luci-app-upnp=y
+CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-ddns=y
-#CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
+CONFIG_PACKAGE_luci-app-ddns=y
+CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-pushbot=y
+CONFIG_PACKAGE_luci-app-pushbot=y
 ##会自动加入以下依赖
 ##CONFIG_PACKAGE_iputils-arping=y
 ##CONFIG_PACKAGE_jq=y
 
-#CONFIG_PACKAGE_luci-app-wechatpush=y
+CONFIG_PACKAGE_luci-app-wechatpush=y
 ##CONFIG_PACKAGE_luci-app-serverchan=y
 ##会自动加入以下依赖
 ##CONFIG_PACKAGE_iputils-arping=y
 ##CONFIG_PACKAGE_jq=y
 
-#CONFIG_PACKAGE_luci-app-openclash=m
+CONFIG_PACKAGE_luci-app-openclash=m
 #会自动加入以下依赖 
 ##CONFIG_PACKAGE_kmod-inet-diag=y
 ##CONFIG_PACKAGE_ruby=y
@@ -299,45 +299,45 @@ CONFIG_PACKAGE_luci-app-quickfile=y
 ##CONFIG_PACKAGE_unzip=y
 ##CONFIG_PACKAGE_coreutils-nohup=y
 
-#CONFIG_PACKAGE_luci-app-vlmcsd=y
-#CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y
-#CONFIG_PACKAGE_vlmcsd=y
+CONFIG_PACKAGE_luci-app-vlmcsd=y
+CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y
+CONFIG_PACKAGE_vlmcsd=y
 
-#CONFIG_PACKAGE_luci-app-wol=y
-#CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y
+CONFIG_PACKAGE_luci-app-wol=y
+CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-wolplus=y
+CONFIG_PACKAGE_luci-app-wolplus=y
 
-#CONFIG_PACKAGE_luci-app-timewol=y
+CONFIG_PACKAGE_luci-app-timewol=y
 
 #CONFIG_PACKAGE_luci-app-ssr-plus=y
 #CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-watchcat=y
-#CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y
-#CONFIG_PACKAGE_watchcat=y
+CONFIG_PACKAGE_luci-app-watchcat=y
+CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y
+CONFIG_PACKAGE_watchcat=y
 
-#CONFIG_PACKAGE_luci-app-netdata=m
-#CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m
+CONFIG_PACKAGE_luci-app-netdata=m
+CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-nlbwmon=m
-#CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m
+CONFIG_PACKAGE_luci-app-nlbwmon=m
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-wrtbwmon=m
-#CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
-#CONFIG_PACKAGE_wrtbwmon=m
+CONFIG_PACKAGE_luci-app-wrtbwmon=m
+CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
+CONFIG_PACKAGE_wrtbwmon=m
 
-#CONFIG_PACKAGE_luci-app-ddns-go=m
-#CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m
-#CONFIG_PACKAGE_ddns-go=m
+CONFIG_PACKAGE_luci-app-ddns-go=m
+CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m
+CONFIG_PACKAGE_ddns-go=m
 
-#CONFIG_PACKAGE_frpc=y
-#CONFIG_PACKAGE_luci-app-frpc=y
-#CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
+CONFIG_PACKAGE_frpc=y
+CONFIG_PACKAGE_luci-app-frpc=y
+CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
 
-#CONFIG_PACKAGE_luci-app-frps=m
-#CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
-#CONFIG_PACKAGE_frps=m
+CONFIG_PACKAGE_luci-app-frps=m
+CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
+CONFIG_PACKAGE_frps=m
 
 # CONFIG_PACKAGE_luci-app-rclone=m
 # CONFIG_PACKAGE_luci-i18n-rclone-zh-cn=m
@@ -346,12 +346,12 @@ CONFIG_PACKAGE_luci-app-quickfile=y
 # CONFIG_PACKAGE_rclone-ng=m
 # CONFIG_PACKAGE_rclone-webui-react=m
 
-#CONFIG_PACKAGE_luci-app-smartdns=m
-#CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m
-#CONFIG_PACKAGE_smartdns=m
+CONFIG_PACKAGE_luci-app-smartdns=m
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m
+CONFIG_PACKAGE_smartdns=m
 
-#CONFIG_PACKAGE_luci-proto-wireguard=m
-#CONFIG_PACKAGE_wireguard-tools=m
+CONFIG_PACKAGE_luci-proto-wireguard=m
+CONFIG_PACKAGE_wireguard-tools=m
 
 # 不好用，暂时不加
 #CONFIG_PACKAGE_luci-app-netwizard=m

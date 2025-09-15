@@ -275,6 +275,9 @@ if [ "$is_code_lean" == true ]; then
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+
+    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+
 else
 
     UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
