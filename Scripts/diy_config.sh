@@ -31,6 +31,8 @@ show_help() {
     echo "  -p is_reset_password  是否重置密码，默认true"
     echo "  -t default_theme_name 默认主题，默认不修改"
     echo "  -m package_manager    包管理器类型，默认ipk，可选apk"
+    echo "  -c config_name        配置名，如IPQ60XX-NOWIFI-LEAN"
+    echo "  -s source_code_info   源码信息，格式为：hash|url|branch"
 }
 
 # 检查是否需要显示帮助信息
@@ -41,9 +43,11 @@ default_ip="192.168.0.1"
 is_reset_password=true
 default_theme_name=''
 package_manager='ipk'
+config_name=''
+source_code_info=''
 
 # 脚本主体
-while getopts "hi:n:p:t:m:" opt; do
+while getopts "hi:n:p:t:m:c:s:" opt; do
     case $opt in
         h)
             show_help
@@ -51,18 +55,15 @@ while getopts "hi:n:p:t:m:" opt; do
             ;;
         n)
             default_name=$OPTARG
-            # echo "input.default_name: $default_name"
             ;;
         i)
             default_ip=$OPTARG
-            # echo "input.default_ip: $default_ip"
             ;;
         m)
             package_manager=$OPTARG
             ;;
         p)
             is_reset_password=$OPTARG
-            # echo "input.is_reset_password: $is_reset_password"
             if [[ "$OPTARG" =~ ^[1-9][0-9]*$ ]] || [ "$OPTARG" = "true" ]; then
                 is_reset_password=true
             else
@@ -71,7 +72,12 @@ while getopts "hi:n:p:t:m:" opt; do
             ;;
         t)
             default_theme_name=$OPTARG
-            # echo "input.default_theme_name: $default_theme_name"
+            ;;
+        c)
+            config_name=$OPTARG
+            ;;
+        s)
+            source_code_info=$OPTARG
             ;;
         \?)
             echo "无效选项: -$OPTARG" >&2

@@ -6,16 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       WRT_CONFIG:
-        description: '配置文件'
+        description: '配置：平台-NOWIFI-源码作者'
         required: true
         type: choice
         options:
           - IPQ60XX-NOWIFI.txt
-          - IPQ60XX-NOWIFI_FRPS.txt
-          - MT6000.txt
+          - MT6000-WIFI.txt
           - IPQ60XX-NOWIFI-V.txt
-          - IPQ60XX-NOWIFI_FRPS-V.txt
-          - MT6000-V.txt
+          - MT6000-WIFI-V.txt
         default: 'IPQ60XX-NOWIFI.txt'
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
@@ -42,16 +40,16 @@ on:
         required: false
         type: string
         default: ''
-      WRT_REPO_INFO:
-        description: '源码'
-        required: true
-        type: choice
-        options:
-          - 'https://github.com/coolsnowwolf/lede|master'
-          - 'https://github.com/VIKINGYFY/immortalwrt|main'
-        default: 'https://github.com/coolsnowwolf/lede|master'
-      WRT_REPO_Commit_Hash:
-        description: '历史版本HASH'
+      # WRT_REPO_INFO:
+      #   description: '源码'
+      #   required: true
+      #   type: choice
+      #   options:
+      #     - 'https://github.com/coolsnowwolf/lede|master'
+      #     - 'https://github.com/VIKINGYFY/immortalwrt|main'
+      #   default: 'https://github.com/coolsnowwolf/lede|master'
+      WRT_SOURCE_HASH_INFO:
+        description: '版本HASH|URL|BRANCH'
         required: false
         type: string
         default: ''
@@ -75,12 +73,13 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      WRT_REPO_INFO: ${{ inputs.WRT_REPO_INFO || 'https://github.com/coolsnowwolf/lede|master' }}
-      WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      # WRT_REPO_INFO: ${{ inputs.WRT_REPO_INFO || 'https://github.com/coolsnowwolf/lede|master' }}
+      # WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
       # 编译分支
-      WRT_REPO_BRANCH: ${{ 'master' }}
+      # WRT_REPO_BRANCH: ${{ 'master' }}
       # 编译指定版本
-      WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
+      # WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件
       WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
       # 通用配置

@@ -8,16 +8,16 @@ name:  CORE-ALL
 on:
   workflow_call:
     inputs:
-      WRT_REPO_INFO:
-        required: true
-        type: string
-      WRT_REPO_URL:
-        required: true
-        type: string
-      WRT_REPO_BRANCH:
-        required: true
-        type: string
-      WRT_REPO_Commit_Hash:
+      # WRT_REPO_INFO:
+      #   required: true
+      #   type: string
+      # WRT_REPO_URL:
+      #   required: true
+      #   type: string
+      # WRT_REPO_BRANCH:
+      #   required: true
+      #   type: string
+      WRT_SOURCE_HASH_INFO:
         required: true
         type: string
       WRT_CONFIG:
@@ -64,8 +64,10 @@ on:
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
+  WRT_REPO_INFO: ''
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+  WRT_SOURCE_HASH_INFO: ${{inputs.WRT_SOURCE_HASH_INFO}}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_CONFIG: ${{inputs.WRT_CONFIG}}                          # 配置文件
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
@@ -195,9 +197,32 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
-        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${{inputs.WRT_REPO_INFO}}"
+        IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${{env.WRT_CONFIG}}"
+        echo "INPUT_PLATFORM=$WRT_INPUT_PLATFORM" >> $GITHUB_ENV
+        WRT_HAS_WIFI=true
+        [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
+        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        if [ "${INPUT_SOURCE_TYPE}" == 'V' ]; then
+          WRT_REPO_INFO='https://github.com/VIKINGYFY/immortalwrt|main'
+        else
+          WRT_REPO_INFO='https://github.com/coolsnowwolf/lede|master'
+        fi
+
+        # 判断是否有Hash
+        if [ -n "${{ env.WRT_SOURCE_HASH_INFO }}" ]; then
+          IFS='|' read -r WRT_SOURCE_HASH WRT_SOURCE_URL WRT_SOURCE_BRANCH <<< "${{ env.WRT_SOURCE_HASH_INFO }}"
+          WRT_REPO_Commit_Hash="${WRT_SOURCE_HASH}"
+          echo "WRT_REPO_Commit_Hash=$WRT_SOURCE_HASH" >> $GITHUB_ENV
+          if [ -n "${WRT_SOURCE_URL}" ]; then
+            WRT_REPO_INFO="${WRT_SOURCE_URL}|${WRT_SOURCE_BRANCH}"
+          fi
+        fi
+        echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
+
+        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${{env.WRT_REPO_INFO}}"
         echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
+
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
