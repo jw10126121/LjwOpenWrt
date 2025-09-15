@@ -197,31 +197,39 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
+        echo "【Lin】读取配置名：${{env.WRT_CONFIG}}"
         IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${{env.WRT_CONFIG}}"
         echo "INPUT_PLATFORM=$WRT_INPUT_PLATFORM" >> $GITHUB_ENV
+        echo "【Lin】配置名读取平台：${{env.INPUT_PLATFORM}}"
         WRT_HAS_WIFI=true
         [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
+        echo "【Lin】配置名读取WIFI：${{env.WRT_HAS_WIFI}}"
         if [ "${INPUT_SOURCE_TYPE}" == 'V' ]; then
           WRT_REPO_INFO='https://github.com/VIKINGYFY/immortalwrt|main'
         else
           WRT_REPO_INFO='https://github.com/coolsnowwolf/lede|master'
         fi
+        echo "【Lin】配置名读取源码信息：${WRT_REPO_INFO}"
 
         # 判断是否有Hash
         if [ -n "${{ env.WRT_SOURCE_HASH_INFO }}" ]; then
           IFS='|' read -r WRT_SOURCE_HASH WRT_SOURCE_URL WRT_SOURCE_BRANCH <<< "${{ env.WRT_SOURCE_HASH_INFO }}"
           WRT_REPO_Commit_Hash="${WRT_SOURCE_HASH}"
           echo "WRT_REPO_Commit_Hash=$WRT_SOURCE_HASH" >> $GITHUB_ENV
+          echo "【Lin】源码HASH值：${WRT_SOURCE_HASH}"
           if [ -n "${WRT_SOURCE_URL}" ]; then
             WRT_REPO_INFO="${WRT_SOURCE_URL}|${WRT_SOURCE_BRANCH}"
+            echo "【Lin】源码HASH值读取源码信息：${WRT_REPO_INFO}"
           fi
+          
         fi
         echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
 
         IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${{env.WRT_REPO_INFO}}"
         echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
+        echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
 
 
     - name: Combine Disks (合并磁盘)
