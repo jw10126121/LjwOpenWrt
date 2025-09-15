@@ -200,7 +200,7 @@ jobs:
         echo "【Lin】读取配置名：${{env.WRT_CONFIG}}"
         IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${{env.WRT_CONFIG}}"
         echo "INPUT_PLATFORM=$INPUT_PLATFORM" >> $GITHUB_ENV
-        echo "【Lin】配置名读取平台：${{env.INPUT_PLATFORM}}"
+        echo "【Lin】配置名读取平台：${INPUT_PLATFORM}"
         WRT_HAS_WIFI=true
         [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
@@ -226,8 +226,10 @@ jobs:
         echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
 
         IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${WRT_REPO_INFO}"
-        echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
-        echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
+        WRT_REPO_URL="${WRT_REPO_URL}"
+        WRT_REPO_BRANCH="${WRT_REPO_BRANCH}"
+        echo "WRT_REPO_URL=${WRT_REPO_URL}" >> $GITHUB_ENV
+        echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}" >> $GITHUB_ENV
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
 
     - name: Combine Disks (合并磁盘)
@@ -264,16 +266,10 @@ jobs:
       id: clone_source
       run: |
         if [[ "${WRT_REPO_URL}" == *"immortalwrt"* ]]; then
-          WRT_REPO_BRANCH=main
           WRT_IS_LEAN=false
-          echo "WRT_REPO_BRANCH=main" >> $GITHUB_OUTPUT
-          echo "WRT_REPO_BRANCH=main" >> $GITHUB_ENV
           echo "WRT_IS_LEAN=false" >> $GITHUB_ENV
         else
           WRT_IS_LEAN=true
-          WRT_REPO_BRANCH=master
-          echo "WRT_REPO_BRANCH=master" >> $GITHUB_OUTPUT
-          echo "WRT_REPO_BRANCH=master" >> $GITHUB_ENV          
           echo "WRT_IS_LEAN=true" >> $GITHUB_ENV
         fi
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
