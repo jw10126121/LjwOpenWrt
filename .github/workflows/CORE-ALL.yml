@@ -199,7 +199,7 @@ jobs:
 
         echo "【Lin】读取配置名：${{env.WRT_CONFIG}}"
         IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${{env.WRT_CONFIG}}"
-        echo "INPUT_PLATFORM=$WRT_INPUT_PLATFORM" >> $GITHUB_ENV
+        echo "INPUT_PLATFORM=$INPUT_PLATFORM" >> $GITHUB_ENV
         echo "【Lin】配置名读取平台：${{env.INPUT_PLATFORM}}"
         WRT_HAS_WIFI=true
         [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
@@ -222,15 +222,13 @@ jobs:
             WRT_REPO_INFO="${WRT_SOURCE_URL}|${WRT_SOURCE_BRANCH}"
             echo "【Lin】源码HASH值读取源码信息：${WRT_REPO_INFO}"
           fi
-          
         fi
         echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
 
-        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${{env.WRT_REPO_INFO}}"
+        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${WRT_REPO_INFO}"
         echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
-
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
