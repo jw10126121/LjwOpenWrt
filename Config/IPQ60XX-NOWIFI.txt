@@ -104,11 +104,11 @@ CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_luci-app-autoreboot=y
 CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
 
-CONFIG_PACKAGE_luci-app-filetransfer=y
-CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y
-CONFIG_PACKAGE_luci-lib-fs=y
+CONFIG_PACKAGE_luci-app-filetransfer=m
+CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=m
 
-#CONFIG_PACKAGE_luci-app-quickfile=m
+CONFIG_PACKAGE_luci-app-quickfile=y
+CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=y
 
 
 CONFIG_PACKAGE_luci-app-cpufreq=m
