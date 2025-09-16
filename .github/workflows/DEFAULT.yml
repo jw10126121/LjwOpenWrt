@@ -25,6 +25,11 @@ on:
         required: false
         type: string
         default: 'Packages.sh'
+      WRT_GENERAL_CONFIG:
+        description: '通用配置'
+        required: false
+        type: string
+        default: 'GENERAL.txt'
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
@@ -83,7 +88,7 @@ jobs:
       # DIY配置文件
       WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
       # 通用配置
-      WRT_GENERAL_CONFIG: GENERAL.txt
+      WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }} # GENERAL.txt
       # DIY脚本
       WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置
