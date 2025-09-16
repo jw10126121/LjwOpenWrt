@@ -3,23 +3,22 @@
 #  FW4 相关内核模块，按“留 / 删 / 可选”给建议
 # -----------------------------------------------------------------------------
 
-CONFIG_PACKAGE_kmod-inet-mptcp-diag=y   # MPTCP 诊断，内核默认未开 MPTCP → **删**
-CONFIG_PACKAGE_kmod-netlink-diag=y      # ss -x 看 Unix 套接字，路由器用不到 → **删**
-CONFIG_PACKAGE_kmod-nft-arp=y           # ARP 过滤，基本用不到 → **删**
-CONFIG_PACKAGE_kmod-nft-bridge=y        # 桥过滤，家用无需求 → **删**
-CONFIG_PACKAGE_kmod-nft-connlimit=y     # 限并发连接数，可选 → **可选**
-CONFIG_PACKAGE_kmod-nft-core=y          # fw4 核心，已自动依赖 → **留（无需手写）**
-CONFIG_PACKAGE_kmod-nft-dup-inet=y      # 报文镜像，审计场景才用 → **删**
-CONFIG_PACKAGE_kmod-nft-fib=y           # FIB 查找，fw4 默认规则需要 → **留**
-CONFIG_PACKAGE_kmod-nft-fullcone=y      # FullCone-NAT，游戏/PT 党 → **建议留**
-CONFIG_PACKAGE_kmod-nft-nat=y           # NAT 核心，fw4 必须 → **留**
-CONFIG_PACKAGE_kmod-nft-netdev=y        # 早期丢包，需 Suricata 等 → **删**
-CONFIG_PACKAGE_kmod-nft-offload=y       # FLOWOFFLOAD 加速 → **留**
-CONFIG_PACKAGE_kmod-nft-queue=y         # NFQUEUE，用户态防火墙才用 → **删**
-CONFIG_PACKAGE_kmod-nft-socket=y        # socket 匹配，透明代理需要 → **可选（代理党留）**
-CONFIG_PACKAGE_kmod-nft-tproxy=y        # 透明代理必备 → **可选（代理党留）**
-CONFIG_PACKAGE_kmod-nft-xfrm=y          # IPsec 策略匹配 → **可选（用 IPsec 留）**
-#CONFIG_PACKAGE_kmod-sound-core=y        # USB 声卡，路由器无用 → **删**
+# CONFIG_PACKAGE_kmod-inet-mptcp-diag=y   # MPTCP 诊断，内核默认未开 MPTCP → **删**
+# CONFIG_PACKAGE_kmod-netlink-diag=y      # ss -x 看 Unix 套接字，路由器用不到 → **删**
+# CONFIG_PACKAGE_kmod-nft-arp=y           # ARP 过滤，基本用不到 → **删**
+# CONFIG_PACKAGE_kmod-nft-bridge=y        # 桥过滤，家用无需求 → **删**
+# CONFIG_PACKAGE_kmod-nft-connlimit=y     # 限并发连接数，可选 → **可选**
+# CONFIG_PACKAGE_kmod-nft-core=y          # fw4 核心，已自动依赖 → **留（无需手写）**
+# CONFIG_PACKAGE_kmod-nft-dup-inet=y      # 报文镜像，审计场景才用 → **删**
+# CONFIG_PACKAGE_kmod-nft-fib=y           # FIB 查找，fw4 默认规则需要 → **留**
+# CONFIG_PACKAGE_kmod-nft-fullcone=y      # FullCone-NAT，游戏/PT 党 → **建议留**
+# CONFIG_PACKAGE_kmod-nft-nat=y           # NAT 核心，fw4 必须 → **留**
+# CONFIG_PACKAGE_kmod-nft-netdev=y        # 早期丢包，需 Suricata 等 → **删**
+# CONFIG_PACKAGE_kmod-nft-offload=y       # FLOWOFFLOAD 加速 → **留**
+# CONFIG_PACKAGE_kmod-nft-queue=y         # NFQUEUE，用户态防火墙才用 → **删**
+# CONFIG_PACKAGE_kmod-nft-socket=y        # socket 匹配，透明代理需要 → **可选（代理党留）**
+# CONFIG_PACKAGE_kmod-nft-tproxy=y        # 透明代理必备 → **可选（代理党留）**
+# CONFIG_PACKAGE_kmod-nft-xfrm=y          # IPsec 策略匹配 → **可选（用 IPsec 留）**
 
 # -----------------------------------------------------------------------------
 #  目标平台 / 机型
@@ -179,8 +178,8 @@ CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
 CONFIG_PACKAGE_luci-app-filetransfer=m			# 文件传输
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=m
 
-# CONFIG_PACKAGE_luci-app-quickfile=y			# 文件传输
-# CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=y	
+CONFIG_PACKAGE_luci-app-quickfile=y			# 文件传输
+CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=y	
 
 CONFIG_PACKAGE_luci-app-cpufreq=m				# cpu
 CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m

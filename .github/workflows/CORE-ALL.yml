@@ -198,14 +198,15 @@ jobs:
         fi
 
         echo "【Lin】读取配置名：${{env.WRT_CONFIG}}"
-        IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${{env.WRT_CONFIG}}"
+        WRT_CONFIG_TMP="${{env.WRT_CONFIG}}"
+        IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${WRT_CONFIG_TMP%.txt}"
         echo "INPUT_PLATFORM=$INPUT_PLATFORM" >> $GITHUB_ENV
         echo "【Lin】配置名读取平台：${INPUT_PLATFORM}"
         WRT_HAS_WIFI=true
         [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
         echo "【Lin】配置名读取WIFI：${{env.WRT_HAS_WIFI}}"
-        if [ "${INPUT_SOURCE_TYPE}" == 'V' ]; then
+        if [[ "${INPUT_SOURCE_TYPE}" == "V" ]]; then
           WRT_REPO_INFO='https://github.com/VIKINGYFY/immortalwrt|main'
         else
           WRT_REPO_INFO='https://github.com/coolsnowwolf/lede|master'
