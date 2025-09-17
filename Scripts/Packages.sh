@@ -290,7 +290,8 @@ if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
-    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    update_package_list "luci-app-quickfile quickfile" "Jaykwok2999/luci-app-quickfile" "main"
+    update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
 else
 
@@ -336,7 +337,7 @@ else
 
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
-    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    update_package_list "luci-app-quickfile quickfile" "Jaykwok2999/luci-app-quickfile" "main"
     # UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
     # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
