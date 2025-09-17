@@ -290,7 +290,7 @@ if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
-    update_package_list "luci-app-quickfile quickfile" "Jaykwok2999/luci-app-quickfile" "main"
+    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
     update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
 else
@@ -337,7 +337,7 @@ else
 
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
-    update_package_list "luci-app-quickfile quickfile" "Jaykwok2999/luci-app-quickfile" "main"
+    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
     # UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 
     # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
@@ -345,6 +345,19 @@ else
 
 fi
 
+
+Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -path "*/quickfile/Makefile")
+if [ -f "${Quickfile_Makefile}" ]; then
+    # 下面这句同时兼容 Linux 与 macOS
+    sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
+define Build/Compile\
+\t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
+\t      $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES)\
+endef' "${Quickfile_Makefile}"
+    echo "【Lin】修复问题： ${Quickfile_Makefile}"
+else
+    echo "【Lin】未找到 quickfile/Makefile"
+fi
 
 
 version_workdir="${openwrt_workdir}"
