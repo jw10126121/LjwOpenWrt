@@ -349,13 +349,19 @@ fi
 Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -path "*/quickfile/Makefile")
 if [ -f "${Quickfile_Makefile}" ]; then
     # 下面这句同时兼容 Linux 与 macOS
-    sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
-define Build/Compile\
-\t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
-\t      $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES)\
-endef' "${Quickfile_Makefile}"
+#     sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
+# define Build/Compile\
+# \t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
+# \t      $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES)\
+# endef' "${Quickfile_Makefile}"
+            sed -i '/\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-\$(ARCH_PACKAGES)/c\
+\tif [ "\$(ARCH_PACKAGES)" = "x86_64" ]; then \\\
+\t\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-x86_64 \$(1)\/usr\/bin\/quickfile; \\\
+\telse \\\
+\t\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-aarch64_generic \$(1)\/usr\/bin\/quickfile; \\\
+\tfi' "$Quickfile_Makefile"
     # sed -i 's|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES) $(1)/usr/bin/quickfile|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-aarch64_generic $(1)/usr/bin/quickfile|' "${Quickfile_Makefile}"
-    echo "【Lin】修复问题： ${Quickfile_Makefile}"
+    echo "【Lin】修复quickfile问题： ${Quickfile_Makefile}"
 else
     echo "【Lin】未找到 quickfile/Makefile"
 fi
