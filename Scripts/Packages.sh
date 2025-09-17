@@ -346,7 +346,8 @@ else
 fi
 
 
-Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -path "*/quickfile/Makefile")
+Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
+
 if [ -f "${Quickfile_Makefile}" ]; then
     # 下面这句同时兼容 Linux 与 macOS
 #     sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
@@ -501,9 +502,6 @@ if [ -n "${app_vlmcsd_DIR}" ] && [ -d "${app_vlmcsd_DIR}/root/etc/" ] && [ ! -f 
     [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
 fi
 
-CFG_FILE_OP="./package/base-files/files/bin/config_generate"
-# lean.config_generate
-CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 
 # echo "【Lin】修改ttyd为免密"
 # if [ -f "${current_script_dir}/patch/99_ttyd-nopass.sh" ]; then
