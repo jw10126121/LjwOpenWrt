@@ -354,6 +354,7 @@ define Build/Compile\
 \t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
 \t      $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES)\
 endef' "${Quickfile_Makefile}"
+    # sed -i 's|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES) $(1)/usr/bin/quickfile|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-aarch64_generic $(1)/usr/bin/quickfile|' "${Quickfile_Makefile}"
     echo "【Lin】修复问题： ${Quickfile_Makefile}"
 else
     echo "【Lin】未找到 quickfile/Makefile"
@@ -493,6 +494,20 @@ if [ -n "${app_vlmcsd_DIR}" ] && [ -d "${app_vlmcsd_DIR}/root/etc/" ] && [ ! -f 
     my_config_vlmcsd_file="${current_script_dir}/config/vlmcsd.ini"
     [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
 fi
+
+CFG_FILE_OP="./package/base-files/files/bin/config_generate"
+# lean.config_generate
+CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
+
+# echo "【Lin】修改ttyd为免密"
+# if [ -f "${current_script_dir}/patch/99_ttyd-nopass.sh" ]; then
+#     if [ -d "${package_workdir}/base-files/files/etc/uci-defaults/" ]; then
+#        install -Dm755 "${current_script_dir}/patch/99_ttyd-nopass.sh" "${package_workdir}/base-files/files/etc/uci-defaults/99_ttyd-nopass" 
+#     fi
+#     if [ -d "${package_workdir}/lean/default-settings/files/" ]; then
+#         install -Dm755 "${current_script_dir}/patch/99_ttyd-nopass.sh" "${package_workdir}/lean/default-settings/files/99_ttyd-nopass"
+#     fi
+# fi
 
 
 ###### ------- 以下为备用代码 ---------
