@@ -70,6 +70,8 @@ CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_ip6tables=y
 CONFIG_PACKAGE_ip6tables-extra=y
 CONFIG_PACKAGE_ip6tables-mod-nat=y
+CONFIG_PACKAGE_kmod-ipt-fullconenat=y
+CONFIG_PACKAGE_iptables-mod-fullconenat=y
 
 ###### FW4 ##########
 # CONFIG_PACKAGE_kmod-ipt-ipset=n
@@ -109,6 +111,8 @@ CONFIG_PACKAGE_luci-app-homeproxy=n      # FW4 推荐，基于 sing-box
 
 CONFIG_PACKAGE_luci=y
 CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_USE_APK=n
+CONFIG_PACKAGE_default-settings-chn=y
 
 ### --- 主题 --- ###
 
@@ -209,10 +213,6 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 CONFIG_PACKAGE_luci-app-arpbind=m			# ARP绑定
 CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 
-#CONFIG_PACKAGE_firewall=y						# 防火墙
-#CONFIG_PACKAGE_kmod-ipt-fullconenat=y
-#CONFIG_PACKAGE_iptables-mod-fullconenat=y
-
 
 CONFIG_PACKAGE_luci-app-netspeedtest=m			# 网速测试
 CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
@@ -301,6 +301,4 @@ CONFIG_PACKAGE_wireguard-tools=m
 #CONFIG_PACKAGE_luci-app-netwizard=m
 #CONFIG_PACKAGE_luci-i18n-netwizard-zh-cn=m
 
-CONFIG_USE_APK=n
-CONFIG_PACKAGE_default-settings-chn=y
 
