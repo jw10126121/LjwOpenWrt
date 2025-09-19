@@ -21,6 +21,8 @@ if [ $(basename "$(pwd)") != 'openwrt' ]; then
     fi
 fi
 
+package_workdir="$(pwd)/package"
+
 # 显示帮助信息的函数
 show_help() {
     echo "Usage: $0 [options]"
@@ -402,7 +404,7 @@ else
 fi
 
 
-WRT_TARGET='IPQ'
+WRT_TARGET="${config_name}"
 
 if [ ! -f "$file_default_settings" ]; then
     if [[ $WRT_TARGET == *"IPQ"* ]]; then
@@ -420,6 +422,29 @@ if [ ! -f "$file_default_settings" ]; then
 
     fi
 fi
+
+if [ ! -f "$file_default_settings" ]; then
+    if [[ $WRT_TARGET == *"IPQ"* ]]; then
+        #修改qca-nss-drv启动顺序
+        NSS_DRV="./feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
+        if [ -f "$NSS_DRV" ]; then
+            echo " "
+            sed -i 's/START=.*/START=85/g' $NSS_DRV
+            cd $package_workdir && echo "【Lin】qca-nss-drv has been fixed!"
+        fi
+
+        #修改qca-nss-pbuf启动顺序
+        NSS_PBUF="${package_workdir}/kernel/mac80211/files/qca-nss-pbuf.init"
+        if [ -f "$NSS_PBUF" ]; then
+            echo " "
+
+            sed -i 's/START=.*/START=86/g' $NSS_PBUF
+
+            cd $package_workdir && echo "【Lin】qca-nss-pbuf has been fixed!"
+        fi
+    fi
+fi
+
 
 if [ ! -f "$file_default_settings" ]; then
     default_bash_dir='./package/base-files/files/etc/uci-defaults'

@@ -460,27 +460,6 @@ ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 [ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 
 
-if [ "$is_code_lean" != true ]; then
-    #修改qca-nss-drv启动顺序
-    NSS_DRV="../feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
-    if [ -f "$NSS_DRV" ]; then
-        echo " "
-        sed -i 's/START=.*/START=85/g' $NSS_DRV
-        cd $package_workdir && echo "【Lin】qca-nss-drv has been fixed!"
-    fi
-
-    #修改qca-nss-pbuf启动顺序
-    NSS_PBUF="./kernel/mac80211/files/qca-nss-pbuf.init"
-    if [ -f "$NSS_PBUF" ]; then
-        echo " "
-
-        sed -i 's/START=.*/START=86/g' $NSS_PBUF
-
-        cd $package_workdir && echo "【Lin】qca-nss-pbuf has been fixed!"
-    fi
-
-fi
-
 # 目前仅lean源码测试过，V佬源码也支持
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
 if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
