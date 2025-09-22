@@ -153,8 +153,8 @@ CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
 CONFIG_PACKAGE_luci-app-filetransfer=y			# 文件传输
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y
 
-CONFIG_PACKAGE_luci-app-quickfile=m			# 文件传输
-CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=m	
+# CONFIG_PACKAGE_luci-app-quickfile=m			# 文件传输
+# CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=m	
 
 CONFIG_PACKAGE_luci-app-cpufreq=m
 CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
@@ -190,9 +190,9 @@ CONFIG_PACKAGE_luci-i18n-alist-zh-cn=n
 #CONFIG_PACKAGE_libfuse=m
 #CONFIG_PACKAGE_fuse-utils=m
 
-CONFIG_PACKAGE_luci-app-verysync=m
-CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
-CONFIG_PACKAGE_verysync=m
+CONFIG_PACKAGE_luci-app-verysync=y
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=y
+CONFIG_PACKAGE_verysync=y
 
 CONFIG_PACKAGE_luci-app-usb-printer=y
 CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=y
