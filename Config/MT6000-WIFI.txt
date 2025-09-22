@@ -99,13 +99,9 @@ CONFIG_PACKAGE_default-settings-chn=y
 
 ### --- 主题 --- ###
 
-# CONFIG_PACKAGE_luci-theme-kucat=m
 CONFIG_PACKAGE_luci-theme-bootstrap=y
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-theme-kucat=m
-CONFIG_PACKAGE_luci-theme-bootstrap=y
-CONFIG_PACKAGE_luci-theme-argon=y
-
 
 ### --- 状态 --- ###
 
@@ -121,12 +117,11 @@ CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y
 CONFIG_PACKAGE_luci-app-filetransfer=y			# 文件传输
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y
 
-CONFIG_PACKAGE_luci-app-quickfile=m			# 文件传输
-CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=m	
+# CONFIG_PACKAGE_luci-app-quickfile=m			# 文件传输
+# CONFIG_PACKAGE_luci-i18n-quickfile-zh-cn=m	
 
 CONFIG_PACKAGE_luci-app-cpufreq=m
 CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m
-#CONFIG_PACKAGE_cpufreq=m
 
 CONFIG_PACKAGE_luci-app-ttyd=y
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y
@@ -141,45 +136,35 @@ CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m
 #  网络存储
 # -----------------------------------------------------------------------------
 
-CONFIG_PACKAGE_luci-app-vsftpd=y
-CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=y
+CONFIG_PACKAGE_luci-app-vsftpd=m
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
 
 CONFIG_PACKAGE_luci-app-samba4=y
 CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
 
-CONFIG_PACKAGE_luci-app-hd-idle=y
-CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=y
-CONFIG_PACKAGE_hd-idle=y
+CONFIG_PACKAGE_luci-app-hd-idle=m
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
+CONFIG_PACKAGE_hd-idle=m
 
-CONFIG_PACKAGE_luci-app-alist=n
-CONFIG_PACKAGE_luci-i18n-alist-zh-cn=n
-#会自动加入以下依赖 
-#CONFIG_PACKAGE_alist=m
-#CONFIG_PACKAGE_libfuse=m
-#CONFIG_PACKAGE_fuse-utils=m
+CONFIG_PACKAGE_luci-app-verysync=m
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
+#CONFIG_PACKAGE_verysync=m
 
-CONFIG_PACKAGE_luci-app-verysync=y
-CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=y
-#CONFIG_PACKAGE_verysync=y
+CONFIG_PACKAGE_luci-app-usb-printer=m
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-usb-printer=y
-CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=y
-
-CONFIG_PACKAGE_luci-app-openlist=y
-CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=y
+CONFIG_PACKAGE_luci-app-openlist=m
+CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m
 
 # -----------------------------------------------------------------------------
 #  VPN
 # -----------------------------------------------------------------------------
 
-CONFIG_PACKAGE_luci-app-openvpn=y
-CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=y
+CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-openvpn-server=y
-CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=y
-#CONFIG_PACKAGE_liblzo=y
-#CONFIG_PACKAGE_openvpn-easy-rsa=y
-#CONFIG_PACKAGE_openvpn-openssl=y
+CONFIG_PACKAGE_luci-app-openvpn-server=m
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
 
 CONFIG_PACKAGE_luci-app-easytier=y
 CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y
@@ -204,8 +189,8 @@ CONFIG_PACKAGE_luci-app-socat=y
 CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y
 CONFIG_PACKAGE_socat=y
 
-CONFIG_PACKAGE_luci-app-bandix=y
-CONFIG_PACKAGE_bandix=y
+CONFIG_PACKAGE_luci-app-bandix=m
+CONFIG_PACKAGE_bandix=m
 
 CONFIG_PACKAGE_luci-app-turboacc=y
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
@@ -213,13 +198,10 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
 #CONFIG_PACKAGE_luci-app-arpbind=m
 #CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 
-
-CONFIG_PACKAGE_luci-app-mwan3=m
-CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=m
-CONFIG_PACKAGE_luci-app-mwan3helper=m
-#ONFIG_PACKAGE_luci-i18n-mwan3helper-zh-cn=m
-#CONFIG_PACKAGE_pdnsd-alt=y
-#CONFIG_PACKAGE_mwan3=y
+#CONFIG_PACKAGE_luci-app-mwan3=m
+#CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=m
+#CONFIG_PACKAGE_luci-app-mwan3helper=m
+#CONFIG_PACKAGE_luci-i18n-mwan3helper-zh-cn=m
 
 CONFIG_PACKAGE_luci-app-netspeedtest=m			# 网速测试
 CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
@@ -243,16 +225,8 @@ CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
 
 CONFIG_PACKAGE_luci-app-pushbot=y
-#会自动加入以下依赖
-#CONFIG_PACKAGE_iputils-arping=y
-#CONFIG_PACKAGE_jq=y
 
 CONFIG_PACKAGE_luci-app-wechatpush=y
-#CONFIG_PACKAGE_luci-app-serverchan=y
-#会自动加入以下依赖
-#CONFIG_PACKAGE_iputils-arping=y
-#CONFIG_PACKAGE_jq=y
-
 
 CONFIG_PACKAGE_luci-app-vlmcsd=y
 CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y
@@ -272,8 +246,8 @@ CONFIG_PACKAGE_watchcat=y
 CONFIG_PACKAGE_luci-app-netdata=m
 CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m
 
-CONFIG_PACKAGE_luci-app-nlbwmon=y
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=y
+CONFIG_PACKAGE_luci-app-nlbwmon=m
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m
 
 CONFIG_PACKAGE_luci-app-wrtbwmon=m
 CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
@@ -281,7 +255,6 @@ CONFIG_PACKAGE_wrtbwmon=m
 
 CONFIG_PACKAGE_luci-app-ddns-go=m
 CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m
-CONFIG_PACKAGE_ddns-go=m
 
 CONFIG_PACKAGE_frpc=y
 CONFIG_PACKAGE_luci-app-frpc=y
@@ -291,13 +264,15 @@ CONFIG_PACKAGE_luci-app-frps=m
 CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
 CONFIG_PACKAGE_frps=m
 
-CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_luci-app-dockerman=m
 CONFIG_PACKAGE_luci-app-ksmbd=m
-CONFIG_PACKAGE_luci-app-mosdns=y
+CONFIG_PACKAGE_luci-app-mosdns=m
 CONFIG_PACKAGE_luci-app-smartdns=m
+
 # CONFIG_PACKAGE_luci-app-tailscale=m
 CONFIG_PACKAGE_luci-app-uhttpd=m
 # CONFIG_PACKAGE_luci-app-unblockneteasemusic=m
+
 CONFIG_PACKAGE_luci-app-wifischedule=m
 
 

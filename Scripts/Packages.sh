@@ -290,7 +290,7 @@ if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
-    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+    # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
     update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
 else
@@ -331,14 +331,13 @@ else
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
-    # 直接用luci-app-quickfile，弃用luci-app-filetransfer
+
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
 
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
-    update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
-    # UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
+    # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
 
     # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
@@ -363,8 +362,8 @@ if [ -f "${Quickfile_Makefile}" ]; then
 \tfi' "$Quickfile_Makefile"
     # sed -i 's|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES) $(1)/usr/bin/quickfile|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-aarch64_generic $(1)/usr/bin/quickfile|' "${Quickfile_Makefile}"
     echo "【Lin】修复quickfile问题： ${Quickfile_Makefile}"
-else
-    echo "【Lin】未找到 quickfile/Makefile"
+# else
+#     echo "【Lin】未找到 quickfile/Makefile"
 fi
 
 
