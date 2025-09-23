@@ -27,6 +27,9 @@ if [[ $version_firewall == "4" ]]; then
 	# echo "src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git" >> ./feeds.conf.default
 fi
 
+# 添加luci-app-netspeedtest
+echo "src-git muink_netspeedtest https://github.com/muink/luci-app-netspeedtest.git" >> $feed_config_name
+
 
 luci_version='' # openwrt-23.05
 if [ -n "${luci_version}" ]; then

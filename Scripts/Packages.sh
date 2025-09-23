@@ -293,6 +293,8 @@ if [ "$is_code_lean" == true ]; then
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
     update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
+    # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+
 else
 
     UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
