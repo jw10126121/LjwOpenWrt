@@ -474,11 +474,22 @@ if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
     echo "【Lin】app-pushbot has been fixed"
 fi
 
+wechatpush_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-wechatpush" -prune)
+wechatpush_bin="${wechatpush_DIR}/root/usr/share/wechatpush/wechatpush"
+if [ -n "${wechatpush_DIR}" ] && [ -f "${wechatpush_bin}" ]; then
+    sed -i '/^#/!{/^[[:blank:]]*\[ -z "\$1" \] && get_disk/s/^[[:blank:]]*/#&/;}' "${wechatpush_bin}" && echo "【Lin】微信推送去掉硬盘检查"
+    sed -i '\|>"\$output_dir/cputemp"|s/soc_temp/tempinfo/g' "${wechatpush_bin}"
+    sed -i 's/$(translate "CPU:") ${cputemp}℃/${cputemp}/g' "${wechatpush_bin}"
+    echo "【Lin】微信推送添加CPU和WIFI显示"
+    my_config_wechatpush_file="${current_script_dir}/patch/wechatpush_diy.json"
+    [ -f "${my_config_wechatpush_file}" ] && cp -p "${my_config_wechatpush_file}" "${wechatpush_DIR}/root/usr/share/wechatpush/api/diy.json" && echo "【Lin】wechatpush的diy.json成功！"
+fi
+
 # 修复luci-app-vlmcsd未自带vlmcsd.ini的问题
 app_vlmcsd_DIR=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
 echo "【Lin】检索到luci-app-vlmcsd目录：${app_vlmcsd_DIR}"
 if [ -n "${app_vlmcsd_DIR}" ] && [ -d "${app_vlmcsd_DIR}/root/etc/" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
-    my_config_vlmcsd_file="${current_script_dir}/config/vlmcsd.ini"
+    my_config_vlmcsd_file="${current_script_dir}/patch/vlmcsd.ini"
     [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
 fi
 
