@@ -43,8 +43,8 @@
       {
 	      "msgtype": "\"markdown\"",
 	      "markdown": {
-		      	"title": "\"${1}\"",
-			"text": "\"${str_title_start}${font_purple}${1}${font_end}${str_title_end}${str_linefeed}${str_linefeed}${str_tab} - 时间：${nowtime}${str_linefeed}${font_purple}${2}${font_end}${str_splitline}\""
+		    "title": "\"${1}\"",
+			"text": "\"**<font color=#6A65FF>${font_purple}${1}${font_end}**</font>${str_linefeed}${str_linefeed}${str_tab} - 时间：<font color=#92D050>${nowtime}</font>${str_linefeed}${font_purple}${2}${font_end}${str_splitline}\""
 	      }
       }
 }

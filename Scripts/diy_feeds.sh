@@ -28,7 +28,7 @@ if [[ $version_firewall == "4" ]]; then
 fi
 
 # 添加luci-app-netspeedtest
-echo "src-git muink_netspeedtest https://github.com/muink/luci-app-netspeedtest.git" >> $feed_config_name
+# echo "src-git muink_netspeedtest https://github.com/muink/luci-app-netspeedtest.git" >> $feed_config_name
 
 
 luci_version='' # openwrt-23.05

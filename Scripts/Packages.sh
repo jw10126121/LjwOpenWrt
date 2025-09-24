@@ -256,44 +256,48 @@ UPDATE_VERSION() {
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
+
+
+update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
+UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+
+update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
+update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
+update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
+
+# 应用过滤
+update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
+
+# 替换frp
+safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
+# 更新luci-app-frpc luci-app-frps
+update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
+
+# luci-app-wechatpush依赖wrtbwmon
+UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+# https://github.com/gaoyaxuan/luci-app-pushbot，该项目有在更新，可替换
+UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+
+    # luci-app-easytier
+update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+
+UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
+UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+
+update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
+
 if [ "$is_code_lean" == true ]; then
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
-    update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
     #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
     #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
 
-    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
-
-    # update_package_list: 从插件库列表中下载插件
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
-    update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
-    update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
-    update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
-
-    # 应用过滤
-    update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
-
-    # 替换frp
-    safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
-    # 更新luci-app-frpc luci-app-frps
-    update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
-
-    # luci-app-wechatpush依赖wrtbwmon
-    UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
-    # https://github.com/gaoyaxuan/luci-app-pushbot，该项目有在更新，可替换
-    UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-
-    # luci-app-easytier
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
-
-    UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
-    UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
-    update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
-
     # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+
+    UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
 
 else
 
@@ -304,45 +308,17 @@ else
 
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.4.3"
-    update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
     #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
     #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
 
-    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
-
-    # update_package_list: 从插件库列表中下载插件
-    update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
-    update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
-    update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
-
-    # 应用过滤
-    update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
-
-    # 替换frp
-    safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
-    # 更新luci-app-frpc luci-app-frps
-    update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
-
-    # luci-app-wechatpush依赖wrtbwmon
-    UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
-    # https://github.com/gaoyaxuan/luci-app-pushbot，该项目有在更新，可替换
-    UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
-
-    # luci-app-easytier
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
-
-    UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
-    UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
-
 
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
 
     # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
-    update_package_list "luci-app-wolplus luci-app-timewol" "VIKINGYFY/packages" "main"
 
 fi
 
