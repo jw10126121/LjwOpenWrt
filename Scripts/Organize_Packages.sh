@@ -73,10 +73,16 @@ declare -A PACKAGES=(
 	["nlbwmon"]="luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_"
 	["wifischedule"]="luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_"
 	["usbprinter"]="luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_"
-	["pushbot"]="luci-app-pushbot_ iputils-arping_ jq_"
+	["pushbot"]="luci-app-pushbot_ iputils-arping_ jq_ curl_"
+	["wechatpush"]="luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ curl_ bash_"
 	["oaf"]="luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_"
-	["easytier"]="luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_"
-	["bandix"]="luci-app-bandix_ bandix_"
+	["easytier"]="luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ kmod-tun_"
+	["bandix"]="luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_"
+	["argon"]="luci-theme-argon_ curl_ jsonfilter_"
+	["wolplus"]="luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_"
+	["versync"]="luci-app-verysync_ verysync_"
+	["vlmcsd"]="luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_"
+
 	#["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
 )
 
