@@ -53,6 +53,9 @@ DELETE_PACKAGE_LIST() {
 
 ### --- 执行 --- ###
 
+# netspeedtest需要下载librespeed-go，但编译后，未发现librespeed-go，所以需要下载
+# https://mirrors.tencent.com/lede/releases/24.10.2/packages/aarch64_cortex-a53/packages/librespeed-go_1.1.5-r5_aarch64_cortex-a53.ipk
+
 ### --- 包列表定义 --- ###
 declare -A PACKAGES=(
     ["openclash"]="luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgmp10_ libruby3.1_ libyaml_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
@@ -62,13 +65,14 @@ declare -A PACKAGES=(
     ["samba4"]="luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_"
     ["mwan3"]="luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_"
     ["alist"]="luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_"
+    ["openlist"]="luci-app-openlist_ luci-i18n-openlist-zh-cn_ openlist_ libfuse_ fuse-utils_"
     ["wrtbwmon"]="luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_"
     ["netdata"]="luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_"
     ["rclone"]="luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_"
-    ["frps"]="luci-app-frps_ frps_"
-    ["frpc"]="luci-app-frpc_ frpc_"
+    ["frps"]="luci-app-frps_ frps_ libc_"
+    ["frpc"]="luci-app-frpc_ frpc_ libc_"
 	["filetransfer"]="luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_"
-	["socat"]="luci-app-socat_ socat_ luci-i18n-socat-zh-cn_"
+	["socat"]="luci-app-socat_ luci-i18n-socat-zh-cn_ socat_"
 	["diskman"]="luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_"
 	["nlbwmon"]="luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_"
 	["wifischedule"]="luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_"
@@ -82,8 +86,8 @@ declare -A PACKAGES=(
 	["wolplus"]="luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_"
 	["versync"]="luci-app-verysync_ verysync_"
 	["vlmcsd"]="luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_"
-
-	#["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
+	["netspeedtest"]="luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ librespeed-go_ python3-speedtest-cli_ ca-certificates_ iperf3_"
+	["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
 )
 
 ### --- 执行 --- ###
