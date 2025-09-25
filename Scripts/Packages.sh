@@ -295,9 +295,10 @@ if [ "$is_code_lean" == true ]; then
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
 
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
-    # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
 
-    UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+    # UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
+    update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
+    # update_package_list "luci-app-netspeedtest speedtest-cli luci-app-ota fw_download_tool" "sbwml/openwrt_pkgs" "main"
 
 else
 
