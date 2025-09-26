@@ -323,13 +323,18 @@ else
 
 fi
 
-easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
-if [ -n "${easytier_latest_version}" ]; then
-    if [ -f "${package_workdir}/easytier/Makefile" ]; then
-        echo "【Lin】easytier原版本：$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")"
-        sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
+# 对比easytier版本，并替换
+if [ -f "${package_workdir}/easytier/Makefile" ]; then
+    easytier_origin_version=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")
+    echo "【Lin】easytier原版本：${easytier_origin_version}"
+    easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
+    if [ -n "${easytier_latest_version}" ]; then
+        echo "【Lin】easytier最新版本： ${easytier_latest_version}"
+        if [ "${easytier_latest_version}" != "${easytier_origin_version}" ]; then
+            sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
+            echo "【Lin】easytier版本更新： ${easytier_origin_version} -> ${easytier_latest_version}"
+        fi
     fi
-    echo "【Lin】替换easytier最新版本： ${easytier_latest_version}"
 fi
 
 
