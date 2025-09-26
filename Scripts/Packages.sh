@@ -287,7 +287,7 @@ UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
 if [ "$is_code_lean" == true ]; then
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.4.3"
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
     #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
     #UPDATE_PACKAGE "luci-theme-design" "0x676e67/luci-theme-design" "main"
