@@ -96,6 +96,8 @@ for pkg_name in "${!PACKAGES[@]}"; do
     UPDATE_PACKAGE_LIST "$ACTION_DIR" "${PACKAGES[$pkg_name]}"
 done
 
+#UPDATE_PACKAGE_LIST "$ACTION_DIR" "luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ librespeed-go_ iperf3_ python3-speedtest-cli_ ca-certificates_" "luci-app-netspeedtest_muink"
+
 # 再删除所有包
 for pkg_name in "${!PACKAGES[@]}"; do
     DELETE_PACKAGE_LIST "$ACTION_DIR" "${PACKAGES[$pkg_name]}"
