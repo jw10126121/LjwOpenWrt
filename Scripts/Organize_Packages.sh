@@ -86,7 +86,7 @@ declare -A PACKAGES=(
 	["wolplus"]="luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_"
 	["versync"]="luci-app-verysync_ verysync_"
 	["vlmcsd"]="luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_"
-	["netspeedtest"]="luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ librespeed-go_ python3-speedtest-cli_ ca-certificates_ iperf3_"
+	["netspeedtest"]="luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ speedtest-cli_ iperf3_ curl_ jsonfilter_ taskset_"
 	["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
 )
 
