@@ -323,6 +323,15 @@ else
 
 fi
 
+easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
+if [ -n "${easytier_latest_version}" ]; then
+    if [ -f "${package_workdir}/easytier/Makefile" ]; then
+        echo "【Lin】easytier原版本：$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")"
+        sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
+    fi
+    echo "【Lin】替换easytier最新版本： ${easytier_latest_version}"
+fi
+
 
 Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
 
