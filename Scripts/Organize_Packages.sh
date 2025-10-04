@@ -69,11 +69,12 @@ declare -A PACKAGES=(
     ["wrtbwmon"]="luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_"
     ["netdata"]="luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_"
     ["rclone"]="luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_"
-    ["frps"]="luci-app-frps_ frps_ libc_"
-    ["frpc"]="luci-app-frpc_ frpc_ libc_"
+    ["frps"]="luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_"
+    ["frpc"]="luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_"
 	["filetransfer"]="luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_"
+	["filebrowser"]="luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_"
 	["socat"]="luci-app-socat_ luci-i18n-socat-zh-cn_ socat_"
-	["diskman"]="luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_"
+	["diskman"]="luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_ blkid_ e2fsprogs_"
 	["nlbwmon"]="luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_"
 	["wifischedule"]="luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_"
 	["usbprinter"]="luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_"
@@ -88,6 +89,10 @@ declare -A PACKAGES=(
 	["vlmcsd"]="luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_"
 	["netspeedtest"]="luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ speedtest-cli_ iperf3_ curl_ jsonfilter_ taskset_"
 	["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
+	["vlmcsd"]="luci-app-tailscale_ luci-i18n-tailscale-zh-cn_ tailscale_"
+	["nftqos"]="luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_"
+	["hdidle"]="luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_"
+	["airplay2"]="luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_"
 )
 
 ### --- 执行 --- ###
