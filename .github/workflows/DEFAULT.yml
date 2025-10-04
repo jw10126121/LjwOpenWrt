@@ -14,6 +14,7 @@ on:
           - IPQ60XX-NOWIFI-V.txt
           - MT6000-WIFI.txt
           - MT6000-WIFI-V.txt
+          - MT6000-NOWIFI_FRPS.txt
         default: 'IPQ60XX-NOWIFI.txt'
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
