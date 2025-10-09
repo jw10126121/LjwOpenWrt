@@ -269,7 +269,8 @@ update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
 update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
 
 # 替换frp
-safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
+safe_update_package "frp" "https://github.com/jw10126121/openwrt_frp" "main"
+# safe_update_package "frp" "https://github.com/user1121114685/frp.git" "main"
 # 更新luci-app-frpc luci-app-frps
 update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
