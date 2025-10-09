@@ -197,7 +197,7 @@ safe_update_package() {
     path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
     path_default_bak="${path_default}_bak"
     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份frp：${path_default} -> ${path_default_bak}"
+    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份${package_name}：${path_default} -> ${path_default_bak}"
     git clone --depth=1 --single-branch -b "${pkg_branch}" "${pkg_repo}" ${path_default}
     if [ -d ${path_default} ]; then
          echo "【Lin】替换${package_name}成功：${path_default}"
@@ -337,6 +337,20 @@ if [ -f "${package_workdir}/easytier/Makefile" ]; then
         fi
     fi
 fi
+
+# # 对比frp版本，并替换
+# if [ -f "${package_workdir}/frp/Makefile" ]; then
+#     frp_origin_version=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/frp/Makefile")
+#     echo "【Lin】frp原版本：${frp_origin_version}"
+#     frp_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/fatedier/frp/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
+#     if [ -n "${frp_latest_version}" ]; then
+#         echo "【Lin】frp最新版本： ${frp_latest_version}"
+#         if [ "${frp_latest_version}" != "${frp_origin_version}" ]; then
+#             sed -i "s/^\(PKG_VERSION:=\).*/\1${frp_latest_version}/" "${package_workdir}/frp/Makefile"
+#             echo "【Lin】frp版本更新： ${frp_origin_version} -> ${frp_latest_version}"
+#         fi
+#     fi
+# fi
 
 
 Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
