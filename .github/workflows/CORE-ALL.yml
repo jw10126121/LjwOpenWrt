@@ -530,17 +530,17 @@ jobs:
 
     - name: Send dingding notify
       continue-on-error: true
-      uses: zcong1993/actions-ding@master
       if: env.DINGDING_TOKEN != ''
-      with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "编译开始：${{ env.START_TIME }}\n${{ env.system_content_note }}"
-             }
-          }
+      env:
+        DINGDING_MESSAGE: |
+          编译开始：${{ env.START_TIME }}
+          ${{ env.system_content_note }}
+      run: |
+        payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
+        curl --fail --silent --show-error \
+          -H 'Content-Type: application/json' \
+          -d "$payload" \
+          "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
           
     - name: Upload Config (上传配置文件)
       id: config_upload
@@ -706,17 +706,16 @@ jobs:
 
     - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true
-      uses: zcong1993/actions-ding@master
       if: env.DINGDING_TOKEN != '' && (steps.upload_wss.outputs.bin_download_url != '' || env.UPLOAD_BIN_DIR_FORCE == 'true')
-      with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: |
-          {
-            "msgtype": "text",
-            "text": {
-                "content": "${{ env.notify_content }}"
-             }
-          }
+      env:
+        DINGDING_MESSAGE: |
+          ${{ env.notify_content }}
+      run: |
+        payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
+        curl --fail --silent --show-error \
+          -H 'Content-Type: application/json' \
+          -d "$payload" \
+          "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
 
     - name: Prepare Release Body (读取发布内容)
       run: |
@@ -748,5 +747,3 @@ jobs:
         #   - 固件内核：${{ env.VERSION_KERNEL }}
         #   - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
         #   - ${{ env.VERSION_INFO }}
-
-
