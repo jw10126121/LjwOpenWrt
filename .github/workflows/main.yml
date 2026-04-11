@@ -166,9 +166,9 @@ jobs:
         echo 'readme_file_note<<EOF' >> $GITHUB_ENV
         cat "${readme_desc_file}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
-        # echo 'readme_file_note: ${{ env.readme_file_note }}' > /dev/null 2>&1
-        # sleep 1
-        echo "::set-output name=readme_content::${readme_file_note}"
+        echo 'readme_content<<EOF' >> $GITHUB_OUTPUT
+        cat "${readme_desc_file}" >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Prepare JSON
       id: prepare_json
@@ -184,27 +184,18 @@ jobs:
         }
         EOF
         )
-        echo "::set-output name=json_content::${json_content}"
+        echo 'json_content<<EOF' >> $GITHUB_OUTPUT
+        echo "${json_content}" >> $GITHUB_OUTPUT
+        echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Send dingding notify
       continue-on-error: true
-      uses: zcong1993/actions-ding@master
       if: env.DINGDING_TOKEN != ''
-      with:
-        dingToken: ${{ env.DINGDING_TOKEN }}
-        body: ${{ steps.prepare_json.outputs.json_content }}
-        
-    # - name: Send dingding notify
-    #   continue-on-error: true
-    #   uses: zcong1993/actions-ding@master
-    #   if: env.DINGDING_TOKEN != ''
-    #   with:
-    #     dingToken: ${{ env.DINGDING_TOKEN }}
-    #     body: |
-    #       {
-    #         "msgtype": "text",
-    #         "text": {
-    #             "content": "编译开始：\n${{ env.readme_file_note }}"
-    #          }
-    #       }
+      env:
+        DINGDING_BODY: ${{ steps.prepare_json.outputs.json_content }}
+      run: |
+        curl --fail --silent --show-error \
+          -H 'Content-Type: application/json' \
+          -d "$DINGDING_BODY" \
+          "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
   
