@@ -258,7 +258,7 @@ UPDATE_VERSION() {
 
 
 
-update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "js"
+update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
 update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
@@ -317,7 +317,7 @@ else
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
 
-    update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "js"
+    update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
 
     # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
@@ -573,4 +573,3 @@ if [ -d *"homeproxy"* ]; then
 
     echo "【Lin】homeproxy date has been updated!"
 fi
-

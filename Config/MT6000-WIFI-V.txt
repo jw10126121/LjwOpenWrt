@@ -318,7 +318,10 @@ CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
 CONFIG_PACKAGE_frps=m
 
 CONFIG_PACKAGE_luci-app-dockerman=y
-CONFIG_PACKAGE_luci-app-ksmbd=m
+# ksmbd 与当前 lede master 的 6.12 内核接口不兼容，先关闭，保留 samba4
+# CONFIG_PACKAGE_luci-app-ksmbd is not set
+# CONFIG_PACKAGE_ksmbd-server is not set
+# CONFIG_PACKAGE_kmod-fs-ksmbd is not set
 CONFIG_PACKAGE_luci-app-mosdns=y
 CONFIG_PACKAGE_luci-app-smartdns=m
 # CONFIG_PACKAGE_luci-app-tailscale=m
@@ -330,7 +333,6 @@ CONFIG_PACKAGE_luci-app-wifischedule=m
 # 不好用，暂时不加
 #CONFIG_PACKAGE_luci-app-netwizard=m
 #CONFIG_PACKAGE_luci-i18n-netwizard-zh-cn=m
-
 
 
 
