@@ -63,6 +63,7 @@ on:
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
   WRT_REPO_INFO: ''
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
@@ -726,7 +727,7 @@ jobs:
     - name: Upload Firmware To Release (发布固件)
       id: release
       if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v2.6.1
       with:
         name: ${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}
         tag_name: ${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}
