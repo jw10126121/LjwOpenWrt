@@ -34,65 +34,81 @@ fi
 
 echo "【Lin】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
 
-# EASYTIER_CORE_BIN="/usr/bin/easytier-core"
-# choose_type_easytier=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-easytier=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
-# if [ -n "${choose_type_easytier}" ] && [ -n "${cputype_simple}" ]; then
-#     VERSION_easytier=$(curl -s https://api.github.com/repos/EasyTier/easytier/releases/latest | grep -Po '"tag_name": "\K.*\d')
-#     if [ ${cputype_simple} == "arm64" ]; then
-#         ARCH_easytier="aarch64"
-#     fi
-#     the_net_filename="easytier-linux-${ARCH_easytier}-${VERSION_easytier}"
-#     the_url_easytier="https://github.com/EasyTier/EasyTier/releases/download/${VERSION_easytier}/${the_net_filename}.zip"
-# fi
+get_config_value() {
+    local key="$1"
+    grep -m 1 "^${key}=" ./.config | awk -F'=' '{print $2}' | tr -d '"'
+}
 
+prepare_openclash_meta_core() {
+    local choose_type_openclash openclash_dir openclash_core_arch openclash_core_url
+    local openclash_root_dir openclash_core_dir temp_dir temp_tar
 
-# # 从配置文件中，获取值
-# choose_type_openclash=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-openclash=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
-# # 预置OpenClash内核和数据
-# openclash_DIR=$(find ./package/*/ -maxdepth 3 -type d -iname "luci-app-openclash" -prune)
-# if [ -n "${choose_type_openclash}" ] && [ -d "${openclash_DIR}" ] && [ -n "${cputype_simple}" ]; then
-#     echo "【Lin】准备下载openclash资源，架构：${cputype_simple}"
-    
-#     CORE_TYPE="${cputype_simple}"
+    choose_type_openclash=$(get_config_value "CONFIG_PACKAGE_luci-app-openclash")
+    if [ -z "${choose_type_openclash}" ] || [ "${choose_type_openclash}" = "n" ]; then
+        echo "【Lin】未启用 luci-app-openclash，跳过 Meta 内核预置"
+        return 0
+    fi
 
-#     CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
-#     CORE_TUN_VER=$(curl -sL $CORE_VER | sed -n "2{s/\r$//;p;q}")
+    openclash_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-openclash" -print -quit)
+    if [ -z "${openclash_dir}" ] || [ ! -d "${openclash_dir}" ]; then
+        echo "【Lin】警告：已启用 luci-app-openclash，但未找到插件目录，跳过 Meta 内核预置"
+        return 0
+    fi
 
-#     # CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
-#     # CORE_MATE="https://github.com/vernesong/OpenClash/raw/core/dev/meta/clash-linux-$CORE_TYPE.tar.gz"
-#     # CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
+    case "${cputype_simple}" in
+        amd64|arm64)
+            openclash_core_arch="${cputype_simple}"
+            ;;
+        *)
+            echo "【Lin】警告：OpenClash Meta 内核暂不支持当前架构 ${cputype:-unknown}，跳过预置"
+            return 0
+            ;;
+    esac
 
-#     CORE_DEV="https://github.com/vernesong/OpenClash/raw/core/dev/dev/clash-linux-$CORE_TYPE.tar.gz"
-#     CORE_MATE="https://github.com/vernesong/OpenClash/tree/core/master/meta/clash-linux-$CORE_TYPE.tar.gz"
-#     CORE_TUN="https://github.com/vernesong/OpenClash/raw/core/dev/premium/clash-linux-$CORE_TYPE-$CORE_TUN_VER.gz"
+    openclash_root_dir="$(readlink -f "${openclash_dir}")/root/etc/openclash"
+    openclash_core_dir="${openclash_root_dir}/core"
+    openclash_core_url="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-${openclash_core_arch}.tar.gz"
 
-#     GEO_MMDB="https://github.com/alecthw/mmdb_china_ip_list/raw/release/lite/Country.mmdb"
-#     GEO_SITE="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geosite.dat"
-#     GEO_IP="https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/geoip.dat"
+    mkdir -p "${openclash_core_dir}"
+    temp_dir=$(mktemp -d "${openwrt_workdir}/tmp/openclash-meta.XXXXXX") || {
+        echo "【Lin】警告：无法创建 OpenClash 临时目录，跳过 Meta 内核预置"
+        return 0
+    }
+    temp_tar="${temp_dir}/clash-meta.tar.gz"
 
-#     cd "${openclash_DIR}/root/etc/openclash/"
+    echo "【Lin】开始预置 OpenClash Meta 内核：${openclash_core_arch}"
+    if ! curl -fL --connect-timeout 30 --retry 3 --retry-delay 2 -o "${temp_tar}" "${openclash_core_url}"; then
+        echo "【Lin】警告：下载 OpenClash Meta 内核失败：${openclash_core_url}"
+        rm -rf "${temp_dir}"
+        return 0
+    fi
 
-#     curl -sL -o Country.mmdb $GEO_MMDB && echo "Country.mmdb done!"
-#     curl -sL -o GeoSite.dat $GEO_SITE && echo "GeoSite.dat done!"
-#     curl -sL -o GeoIP.dat $GEO_IP && echo "GeoIP.dat done!"
+    if ! tar -xzf "${temp_tar}" -C "${temp_dir}"; then
+        echo "【Lin】警告：解压 OpenClash Meta 内核失败"
+        rm -rf "${temp_dir}"
+        return 0
+    fi
 
-#     mkdir ./core/ && cd ./core/
+    if [ ! -f "${temp_dir}/clash" ]; then
+        echo "【Lin】警告：OpenClash Meta 内核压缩包内未找到 clash 主程序"
+        rm -rf "${temp_dir}"
+        return 0
+    fi
 
-#     curl -sL -o meta.tar.gz $CORE_MATE && tar -zxf meta.tar.gz && mv -f clash clash_meta && echo "meta done!"
-#     curl -sL -o tun.gz $CORE_TUN && gzip -d tun.gz && mv -f tun clash_tun && echo "tun done!"
-#     curl -sL -o dev.tar.gz $CORE_DEV && tar -zxf dev.tar.gz && echo "dev done!"
+    mv -f "${temp_dir}/clash" "${openclash_core_dir}/clash_meta"
+    chmod 0755 "${openclash_core_dir}/clash_meta"
+    rm -rf "${temp_dir}"
 
-#     chmod +x ./* && rm -rf ./*.gz
+    echo "【Lin】OpenClash Meta 内核预置完成：${openclash_core_dir}/clash_meta"
+    return 0
+}
 
-#     cd "${openwrt_workdir}"
-
-#     echo "【Lin】openclash date has been updated!"
-# fi
+prepare_openclash_meta_core
 
 cd "${openwrt_workdir}"
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
-app_homeproxy_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
+app_homeproxy_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-homeproxy" -print -quit 2>/dev/null)
 if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
 
     homeproxy_DIR=$(readlink -f "${app_homeproxy_dir}")
@@ -121,8 +137,6 @@ if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
         echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
-
-
 
 
 
