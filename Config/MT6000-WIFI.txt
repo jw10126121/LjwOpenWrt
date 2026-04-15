@@ -76,10 +76,10 @@ CONFIG_PACKAGE_iptables-mod-fullconenat=y
 #  代理插件
 # -----------------------------------------------------------------------------
 
-CONFIG_PACKAGE_luci-app-ssr-plus=y
+CONFIG_PACKAGE_luci-app-ssr-plus=m
 CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n
-CONFIG_PACKAGE_luci-app-openclash=m
+CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-homeproxy=n      # FW4 推荐，基于 sing-box
 
 # -----------------------------------------------------------------------------
@@ -284,8 +284,6 @@ CONFIG_PACKAGE_luci-app-wifischedule=m
 # 不好用，暂时不加
 #CONFIG_PACKAGE_luci-app-netwizard=m
 #CONFIG_PACKAGE_luci-i18n-netwizard-zh-cn=m
-
-
 
 
 
