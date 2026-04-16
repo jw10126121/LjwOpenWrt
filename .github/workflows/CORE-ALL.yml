@@ -727,12 +727,27 @@ jobs:
     - name: Upload Firmware To Release (发布固件)
       id: release
       if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
-      uses: softprops/action-gh-release@v2.6.1
-      with:
-        name: ${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}
-        tag_name: ${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}
-        files: ${{ env.OPENWRT_PATH }}/upload/*.*
-        body_path: ${{ env.release_desc_file }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        release_name="${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}"
+        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}"
+        shopt -s nullglob
+        release_files=( "${{ env.OPENWRT_PATH }}"/upload/*.* )
+
+        if [ ${#release_files[@]} -eq 0 ]; then
+          echo "【Lin】错误：未找到可上传的固件文件"
+          exit 1
+        fi
+
+        if gh release view "${release_tag}" >/dev/null 2>&1; then
+          echo "【Lin】更新已有 Release：${release_tag}"
+          gh release edit "${release_tag}" --title "${release_name}" --notes-file "${{ env.release_desc_file }}"
+          gh release upload "${release_tag}" "${release_files[@]}" --clobber
+        else
+          echo "【Lin】创建新的 Release：${release_tag}"
+          gh release create "${release_tag}" "${release_files[@]}" --title "${release_name}" --notes-file "${{ env.release_desc_file }}"
+        fi
         # body: |
         #   **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
         #   ### 📒 固件信息(${{ env.WRT_HAS_WIFI_TEXT }})
