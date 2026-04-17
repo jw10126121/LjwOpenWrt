@@ -1,0 +1,86 @@
+#CI项目
+name: TEST-ORGANIZE
+
+on:
+  workflow_dispatch:
+    inputs:
+      DEVICE_SUBTARGET:
+        description: '测试平台'
+        required: false
+        type: string
+        default: 'filogic'
+      DEVICE_NAME_LIST:
+        description: '设备列表，空格分隔'
+        required: false
+        type: string
+        default: 'glinet_gl-mt6000'
+      WRT_VER:
+        description: '版本标识'
+        required: false
+        type: string
+        default: 'lede-master'
+      START_TIME:
+        description: '时间标识'
+        required: false
+        type: string
+        default: 'D260417_T120000'
+
+permissions: read-all
+
+jobs:
+  organize:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Build Test Fixture
+      run: |
+        tmp_root="$(mktemp -d)"
+        openwrt_path="${tmp_root}/openwrt"
+        mkdir -p "${openwrt_path}/bin/packages/aarch64_cortex-a53/base" \
+                 "${openwrt_path}/bin/targets/mediatek/filogic" \
+                 "${openwrt_path}/config_mine"
+
+        printf 'dummy config\n' > "${openwrt_path}/my_config.txt"
+        printf 'full config\n' > "${openwrt_path}/.config"
+        printf 'readme body\n' > "${openwrt_path}/config_mine/readme.txt"
+        printf 'manifest: kernel - 6.12.80\n' > "${openwrt_path}/bin/targets/mediatek/filogic/test.manifest"
+        printf 'package content\n' > "${openwrt_path}/bin/packages/aarch64_cortex-a53/base/test-package.ipk"
+        printf 'firmware content\n' > "${openwrt_path}/bin/targets/mediatek/filogic/openwrt-mediatek-filogic-glinet_gl-mt6000-squashfs-sysupgrade.bin"
+        printf 'sha256 content\n' > "${openwrt_path}/bin/targets/mediatek/filogic/sha256sums"
+        printf 'buildinfo content\n' > "${openwrt_path}/bin/targets/mediatek/filogic/profiles.json"
+        printf 'seed content\n' > "${openwrt_path}/seed.config"
+
+        echo "TEST_OPENWRT_PATH=${openwrt_path}" >> "$GITHUB_ENV"
+
+    - name: Run Organize Script
+      env:
+        OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}
+        WRT_DIR_SCRIPTS: Scripts
+        WRT_MINE_SAY: 'test organize'
+        system_content: |
+          支持设备：${{ inputs.DEVICE_NAME_LIST }}
+          测试说明：仅用于验证 organize 脚本
+        START_TIME: ${{ inputs.START_TIME }}
+        END_TIME: TEST_END
+        DEVICE_NAME_LIST: ${{ inputs.DEVICE_NAME_LIST }}
+        DEVICE_SUBTARGET: ${{ inputs.DEVICE_SUBTARGET }}
+        WRT_VER: ${{ inputs.WRT_VER }}
+        GITHUB_ENV: /tmp/test_organize_env
+        GITHUB_OUTPUT: /tmp/test_organize_output
+      run: |
+        : > "$GITHUB_ENV"
+        : > "$GITHUB_OUTPUT"
+        bash "$GITHUB_WORKSPACE/Scripts/ci_organize_outputs.sh"
+        test -d "${OPENWRT_PATH}/upload"
+        test -f "${OPENWRT_PATH}/upload/config.txt"
+        test -f "${OPENWRT_PATH}/upload/readme.txt"
+        test -f "${OPENWRT_PATH}/upload/Packages.tar.gz"
+        find "${OPENWRT_PATH}/upload" -maxdepth 1 -type f | sort | tee /tmp/organize_files.txt
+
+    - name: Print Summary
+      run: |
+        echo "Organized files:"
+        cat /tmp/organize_files.txt

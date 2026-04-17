@@ -321,61 +321,7 @@ jobs:
     - name: Read Variables (读取变量)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        the_repo=${WRT_REPO_URL%/}
-        WRT_VER="${the_repo##*/}"-$WRT_REPO_BRANCH
-        echo "WRT_VER=$WRT_VER" >> $GITHUB_ENV
-        SOURCE_REPO="$(echo $WRT_REPO_URL | awk -F '/' '{print $(NF)}')"
-        echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
-        path_config_file="$OPENWRT_PATH/.config"
-        device_name_list=()
-        while IFS= read -r line
-        do
-          if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
-            prefix=${BASH_REMATCH[1]} 
-            platform=${BASH_REMATCH[2]}
-            subplatform=${BASH_REMATCH[3]}
-            deviceName=${BASH_REMATCH[4]}
-            device_name_list+=("$deviceName")
-            DEVICE_TARGET=$platform
-            DEVICE_SUBTARGET=$subplatform
-          fi
-        done < "$path_config_file"
-        DEVICE_PROFILE=$(IFS=$'、'; echo "${device_name_list[*]}")
-        DEVICE_NAME_LIST=$(IFS=$' '; echo "${device_name_list[*]}")
-        DEVICE_NAME_LIST_LIAN=$(IFS=$'_and_'; echo "${device_name_list[*]}")
-        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
-        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
-        echo "DEVICE_PROFILE=$DEVICE_PROFILE" >> $GITHUB_ENV
-        echo "DEVICE_NAME_LIST=$DEVICE_NAME_LIST" >> $GITHUB_ENV
-        echo "DEVICE_NAME_LIST_LIAN=$DEVICE_NAME_LIST_LIAN" >> $GITHUB_ENV
-        dir_linux_version="$OPENWRT_PATH/target/linux/"
-        dir_linux_device_target=$(find "$dir_linux_version" -type d -name "$DEVICE_TARGET" -print -prune)
-        KERNEL_PATCHVER=''
-        MAKEFILE_PATH="$dir_linux_device_target/Makefile"
-        if [ -f "$MAKEFILE_PATH" ]; then
-          KERNEL_PATCHVER=$(grep -E "KERNEL_PATCHVER[:=]+" $MAKEFILE_PATH | awk -F ':=' '{print $2}' | tr -d ' ')
-        else
-          echo "【Lin】文件不存在：$MAKEFILE_PATH"
-        fi
-        if [ -n "$KERNEL_PATCHVER" ]; then
-          echo "【Lin】主版本KERNEL_PATCHVER：$KERNEL_PATCHVER"
-          echo "VERSION_KERNEL=$KERNEL_PATCHVER" >> $GITHUB_ENV
-        else
-          echo "【Lin】主版本KERNEL_PATCHVER为空，取6.1"
-          KERNEL_PATCHVER=6.1
-        fi
-        kernel_file_detail="$OPENWRT_PATH/target/linux/generic/kernel-$KERNEL_PATCHVER"
-        if [ "${{ env.WRT_IS_LEAN }}" == 'true' ]; then
-          kernel_file_detail="$OPENWRT_PATH/include/kernel-$KERNEL_PATCHVER"
-        fi
-        if [ -f "$kernel_file_detail" ]; then
-          VERSION_KERNEL=$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' "$kernel_file_detail")
-          echo "VERSION_KERNEL=$VERSION_KERNEL" >> $GITHUB_ENV
-          echo "【Lin】内核版本：$VERSION_KERNEL"
-        else
-          echo "【Lin】文件不存在：$kernel_file_detail"
-        fi
-        echo "【Lin】编译DEVICE：${DEVICE_TARGET}-${DEVICE_SUBTARGET}-${DEVICE_PROFILE}"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_collect_source_metadata.sh" >> "$GITHUB_ENV"
 
     - name: Check Caches
       id: check-cache
@@ -471,20 +417,8 @@ jobs:
     - name: Read Variables (读取变量)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        # 从配置文件中获取架构, 一般是defconfig后获取
-        DEVICE_ARCH=$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "$OPENWRT_PATH/.config")
-        echo "DEVICE_ARCH=$DEVICE_ARCH" >> $GITHUB_ENV
-        echo "【Lin】编译DEVICE架构：${DEVICE_ARCH}"
-        # LUCI_VERSION=$(grep -oP '^[^#]*luci' "${OPENWRT_PATH}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
-        LUCI_VERSION=$(sed -n 's/^[^#]*luci.*openwrt-\([^;[:space:]]*\).*/\1/p' "${OPENWRT_PATH}/feeds.conf.default")
-        echo "LUCI_VERSION=$LUCI_VERSION" >> $GITHUB_ENV
-        echo "【Lin】编译LUCI版本信息：${LUCI_VERSION}"
-        config_version=$(grep CONFIG_VERSION_NUMBER "${OPENWRT_PATH}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-        # include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${OPENWRT_PATH}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-        include_version=$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${OPENWRT_PATH}/include/version.mk" | tail -n 1)
-        OP_VERSION="${config_version:-${include_version}}"
-        echo "OP_VERSION=$OP_VERSION" >> $GITHUB_ENV
-        echo "【Lin】编译openwrt版本信息：${OP_VERSION}"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_collect_final_metadata.sh" >> "$GITHUB_ENV"
+        echo "【Lin】已刷新 defconfig 后元数据"
 
     - name: Check Config (缓存配置文件)
       working-directory: ${{ env.OPENWRT_PATH }}
@@ -497,22 +431,7 @@ jobs:
         cp -f ./.config ./config_mine/"$name_config_file"_full.txt
         awk '!/^#/ && !/^$/' ./.config > ./config_mine/"$name_config_file".txt
         cp -f ./seed.config ./config_mine/"$name_config_file".seed.txt
-        system_content="支持设备：${{ env.DEVICE_PROFILE }}\n\
-        固件类型：${{ env.WRT_HAS_LITE == 'true' && '[精简版]' || '[常规版]' }}\n\
-        支持平台：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}\n\
-        设备架构：${{ env.DEVICE_ARCH }}\n\
-        内核版本：${{ env.VERSION_KERNEL }}\n\
-        LUCI版本：${{ env.LUCI_VERSION || '未知' }}\n\
-        OP版本：${{ env.OP_VERSION }}\n\
-        包管理器：${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipkg' }}\n\
-        默认地址：${{ env.WRT_DEFAULT_LANIP }}\n\
-        默认密码：无 | password\n\
-        是否wifi：${{ env.WRT_HAS_WIFI == 'true' && '有WIFI' || '无WIFI' }}\n\
-        源码地址：${{ env.WRT_REPO_URL }}\n\
-        源码分支：${{ env.WRT_REPO_BRANCH }}\n\
-        源码hash：${{ env.REPO_GIT_HASH }}"
-        echo "system_content=$system_content" >> $GITHUB_ENV
-        echo -e "【Lin】\n$system_content"
+        echo -e "【Lin】\n${system_content}"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
         [ -f "$readme_script" ] && chmod +x "$readme_script"
         TO_MY_SAY_DETAIL_tmp="${system_content}\n\
@@ -602,52 +521,7 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        mkdir -p ./upload ./upload/packages ./upload/configs
-        # 重新配置readme.txt(加入编译完成时间)
-        rm -fr "./config_mine/readme.txt"
-        readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
-        [ -f "$readme_script" ] && chmod +x "$readme_script"
-        TO_MY_SAY_DETAIL_tmp="${{ env.system_content }}\n\
-        编译开始：${{ env.START_TIME }}\n\
-        编译完成：${{ env.END_TIME }}"
-        TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
-        [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
-        [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./readme_release.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'true'
-        readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
-        echo "readme_desc_file=${readme_desc_file}" >> $GITHUB_ENV
-        release_desc_file="$OPENWRT_PATH/readme_release.txt"
-        echo "release_desc_file=${release_desc_file}" >> $GITHUB_ENV
-        KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)
-        echo "【Lin】编译完成获取内核版本：$KVER"
-        # cp -f ./config_mine/* ./upload/configs/
-        cp -f ./my_config.txt ./upload/config.txt
-        cp -f ${readme_desc_file} ./upload/readme.txt
-        echo "【Lin】复制配置文件config.txt"
-        TMP_DIR=$(mktemp -d)
-        find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "$TMP_DIR" \;
-        find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
-        find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
-        find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
-        bash $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/Organize_Packages.sh "$TMP_DIR"
-        tar -zcf ./upload/Packages.tar.gz -C "$TMP_DIR" --transform 's,^./,,' .
-        rm -rf "$TMP_DIR"
-        rm -rf ./upload/packages
-        echo "【Lin】设备信息：${{ env.DEVICE_NAME_LIST }}"
-        for TYPE in ${{ env.DEVICE_NAME_LIST }} ; do
-          echo "【Lin】TYPE: $TYPE============================================"
-          for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
-            EXT=$(basename $FILE | cut -d '.' -f 2-)
-            NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-            NEW_FILE="${{ env.DEVICE_SUBTARGET }}"_"$NAME"_"${{ env.WRT_VER }}"_"${{ env.START_TIME }}"."$EXT"
-            echo "【Lin】文件：$FILE"
-            echo "【Lin】改名后：$NEW_FILE"
-            echo "【Lin】-----------------------------------------------------"
-            mv -f $FILE ./upload/$NEW_FILE
-          done
-        done
-        find ./bin/targets/ -type f -not -name '*openwrt-imagebuilder*' -exec mv -f {} ./upload/ \;
-        echo "status=success" >> $GITHUB_OUTPUT
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_organize_outputs.sh"
 
     - name: Check Disk (查询磁盘信息)
       run: |
@@ -667,35 +541,7 @@ jobs:
       id: notification_content
       continue-on-error: true
       run: |
-        echo "【Lin】配置通知content"
-        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}"
-        artifact_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-        {
-          echo "notify_content<<EOF"
-          if [ "${{ env.WRT_RELEASE_FIRMWARE }}" = "true" ]; then
-            echo "Release下载地址：https://github.com/${{ github.repository }}/releases/tag/${release_tag}"
-          fi
-          echo "Artifact下载地址：${artifact_url}"
-          echo ""
-          printf '%b\n' "${{ env.system_content }}"
-          echo "编译开始：${{ env.START_TIME }}"
-          echo "编译完成：${{ env.END_TIME }}"
-          echo "EOF"
-        } >> "$GITHUB_ENV"
-
-        {
-          echo "notify_content<<EOF"
-          if [ "${{ env.WRT_RELEASE_FIRMWARE }}" = "true" ]; then
-            echo "Release下载地址：https://github.com/${{ github.repository }}/releases/tag/${release_tag}"
-          fi
-          echo "Artifact下载地址：${artifact_url}"
-          echo ""
-          printf '%b\n' "${{ env.system_content }}"
-          echo "编译开始：${{ env.START_TIME }}"
-          echo "编译完成：${{ env.END_TIME }}"
-          echo "EOF"
-        } >> "$GITHUB_OUTPUT"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_create_notifications.sh"
 
     - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true

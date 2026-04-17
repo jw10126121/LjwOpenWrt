@@ -1,0 +1,111 @@
+#CI项目
+name: TEST-METADATA
+
+on:
+  workflow_dispatch:
+    inputs:
+      WRT_CONFIG:
+        description: '显示用配置名'
+        required: false
+        type: string
+        default: 'MT6000-WIFI.txt'
+      WRT_REPO_URL:
+        description: '源码地址'
+        required: false
+        type: string
+        default: 'https://github.com/coolsnowwolf/lede'
+      WRT_REPO_BRANCH:
+        description: '源码分支'
+        required: false
+        type: string
+        default: 'master'
+      WRT_DEFAULT_LANIP:
+        description: '默认LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
+
+permissions: read-all
+
+jobs:
+  metadata:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Build Test Fixture
+      run: |
+        tmp_root="$(mktemp -d)"
+        openwrt_path="${tmp_root}/openwrt"
+        mkdir -p "${openwrt_path}/target/linux/mediatek" \
+                 "${openwrt_path}/include" \
+                 "${openwrt_path}/config_mine"
+
+        cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/.config"
+        CONFIG_TARGET_mediatek=y
+        CONFIG_TARGET_mediatek_filogic=y
+        CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y
+        CONFIG_TARGET_ARCH_PACKAGES="aarch64_cortex-a53"
+        CONFIG_VERSION_NUMBER="OpenWrt 24.10.5"
+        EOF
+
+        cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/feeds.conf.default"
+        src-git packages https://github.com/openwrt/packages.git
+        src-git luci https://github.com/openwrt/luci.git;openwrt-23.05
+        EOF
+
+        cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/target/linux/mediatek/Makefile"
+        KERNEL_PATCHVER:=6.12
+        EOF
+
+        cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/include/kernel-6.12"
+        LINUX_KERNEL_HASH-6.12.80 = test
+        EOF
+
+        cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/include/version.mk"
+        VERSION_NUMBER:= OpenWrt, 24.10.5
+        EOF
+
+        echo "TEST_OPENWRT_PATH=${openwrt_path}" >> "$GITHUB_ENV"
+
+    - name: Run Source Metadata Script
+      env:
+        OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
+        WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
+        WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+        WRT_IS_LEAN: true
+      run: |
+        bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
+        grep -q '^WRT_VER=' /tmp/source_metadata.txt
+        grep -q '^DEVICE_TARGET=mediatek$' /tmp/source_metadata.txt
+        grep -q '^DEVICE_SUBTARGET=filogic$' /tmp/source_metadata.txt
+
+    - name: Run Final Metadata Script
+      env:
+        OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
+        WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
+        WRT_HAS_LITE: false
+        WRT_HAS_WIFI: true
+        WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
+        WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+        WRT_USE_APK: false
+        DEVICE_PROFILE: glinet_gl-mt6000
+        DEVICE_TARGET: mediatek
+        DEVICE_SUBTARGET: filogic
+        VERSION_KERNEL: 6.12.80
+        REPO_GIT_HASH: test-metadata
+      run: |
+        bash "$GITHUB_WORKSPACE/Scripts/ci_collect_final_metadata.sh" | tee /tmp/final_metadata.txt
+        grep -q '^DEVICE_ARCH=aarch64_cortex-a53$' /tmp/final_metadata.txt
+        grep -q '^LUCI_VERSION=23.05$' /tmp/final_metadata.txt
+        grep -q '^OP_VERSION=24.10.5$' /tmp/final_metadata.txt
+        grep -q '^system_content<<EOF_SYSTEM$' /tmp/final_metadata.txt
+
+    - name: Print Summary
+      run: |
+        echo "Source metadata:"
+        cat /tmp/source_metadata.txt
+        echo ""
+        echo "Final metadata:"
+        cat /tmp/final_metadata.txt
