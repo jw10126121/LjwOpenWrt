@@ -64,12 +64,15 @@ jobs:
         } >> "$GITHUB_ENV"
 
     - name: Send dingding notify
-      if: secrets.DINGDING_TOKEN != ''
       env:
         DINGDING_MESSAGE: |
           ${{ env.notify_content }}
         DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
       run: |
+        if [ -z "${DINGDING_TOKEN}" ]; then
+          echo "【Lin】未配置 DINGDING_TOKEN，跳过钉钉发送"
+          exit 0
+        fi
         payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
         curl --fail --silent --show-error \
           -H 'Content-Type: application/json' \
