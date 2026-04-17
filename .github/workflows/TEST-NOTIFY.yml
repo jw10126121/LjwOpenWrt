@@ -1,0 +1,81 @@
+#CI项目
+name: TEST-NOTIFY
+
+on:
+  workflow_dispatch:
+    inputs:
+      WRT_CONFIG:
+        description: '显示用配置名'
+        required: false
+        type: string
+        default: 'MT6000-WIFI.txt'
+      WRT_RELEASE_FIRMWARE:
+        description: '模拟显示 Release 链接'
+        required: false
+        type: boolean
+        default: true
+      WHAT_MY_SAY:
+        description: '附加说明'
+        required: false
+        type: string
+        default: '这是一条钉钉通知测试消息'
+
+permissions: read-all
+
+jobs:
+  notify:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Create Test Notification Content
+      id: notification_content
+      env:
+        TEST_START_TIME: ${{ github.run_id }}
+        TEST_END_TIME: ${{ github.run_attempt }}
+      run: |
+        echo "【Lin】生成测试钉钉消息"
+        release_tag="TEST_${{ github.run_id }}"
+        artifact_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+        {
+          echo "notify_content<<EOF"
+          if [ "${{ inputs.WRT_RELEASE_FIRMWARE }}" = "true" ]; then
+            echo "Release下载地址：https://github.com/${{ github.repository }}/releases/tag/${release_tag}"
+          fi
+          echo "Artifact下载地址：${artifact_url}"
+          echo ""
+          echo "支持设备：${{ inputs.WRT_CONFIG }}"
+          echo "固件类型：[测试通知]"
+          echo "支持平台：mediatek-filogic"
+          echo "设备架构：aarch64_cortex-a53"
+          echo "内核版本：6.12.80"
+          echo "LUCI版本：23.05"
+          echo "OP版本：24.10.5"
+          echo "包管理器：ipkg"
+          echo "默认地址：192.168.0.1"
+          echo "默认密码：无 | password"
+          echo "是否wifi：有WIFI"
+          echo "源码地址：https://github.com/coolsnowwolf/lede"
+          echo "源码分支：master"
+          echo "源码hash：test-notify"
+          echo "附加说明：${{ inputs.WHAT_MY_SAY }}"
+          echo "编译开始：TEST_${TEST_START_TIME}"
+          echo "编译完成：TEST_${TEST_END_TIME}"
+          echo "EOF"
+        } >> "$GITHUB_ENV"
+
+    - name: Send dingding notify
+      if: secrets.DINGDING_TOKEN != ''
+      env:
+        DINGDING_MESSAGE: |
+          ${{ env.notify_content }}
+        DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
+      run: |
+        payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
+        curl --fail --silent --show-error \
+          -H 'Content-Type: application/json' \
+          -d "$payload" \
+          "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
+
+    - name: Print Test Message
+      run: |
+        echo "${{ env.notify_content }}"
