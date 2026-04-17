@@ -156,7 +156,7 @@ jobs:
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
      
     - name: Checkout (下载当前源码)
-      uses: actions/checkout@master    
+      uses: actions/checkout@v6.0.1
 
     - name: 检查变量
       id: read_readme
