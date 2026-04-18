@@ -57,55 +57,61 @@ DELETE_PACKAGE_LIST() {
 # https://mirrors.tencent.com/lede/releases/24.10.2/packages/aarch64_cortex-a53/packages/librespeed-go_1.1.5-r5_aarch64_cortex-a53.ipk
 
 ### --- 包列表定义 --- ###
-declare -A PACKAGES=(
-    ["openclash"]="luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgmp10_ libruby libyaml_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_"
-    ["ssrplus"]="luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ libpcap1_ libudns_ libuci-lua_ nping_ resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_"
-    ["sqm"]="luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ sqm-scripts-nss_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_"
-    ["openvpnserver"]="luci-app-openvpn-server_ luci-i18n-openvpn-server-zh-cn_ liblzo_ openvpn-easy-rsa_ openvpn-openssl_"
-    ["samba4"]="luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_"
-    ["mwan3"]="luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_"
-    ["alist"]="luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_"
-    ["openlist"]="luci-app-openlist_ luci-i18n-openlist-zh-cn_ openlist_ libfuse_ fuse-utils_"
-    ["wrtbwmon"]="luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_"
-    ["netdata"]="luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_"
-    ["rclone"]="luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_"
-    ["frps"]="luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_"
-    ["frpc"]="luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_"
-	["filetransfer"]="luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_"
-	["filebrowser"]="luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_"
-	["socat"]="luci-app-socat_ luci-i18n-socat-zh-cn_ socat_"
-	["diskman"]="luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_ blkid_ e2fsprogs_"
-	["nlbwmon"]="luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_"
-	["wifischedule"]="luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_"
-	["usbprinter"]="luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_"
-	["pushbot"]="luci-app-pushbot_ iputils-arping_ jq_ curl_"
-	["wechatpush"]="luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ curl_ bash_"
-	["oaf"]="luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_"
-	["easytier"]="luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ kmod-tun_"
-	["bandix"]="luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_"
-	["argon"]="luci-theme-argon_ curl_ jsonfilter_"
-	["wolplus"]="luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_"
-	["versync"]="luci-app-verysync_ verysync_"
-	["vlmcsd"]="luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_"
-	["netspeedtest"]="luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ speedtest-cli_ iperf3_ curl_ jsonfilter_ taskset_"
-	["homeproxy"]="luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_"
-	["vlmcsd"]="luci-app-tailscale_ luci-i18n-tailscale-zh-cn_ tailscale_"
-	["nftqos"]="luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_"
-	["hdidle"]="luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_"
-	["airplay2"]="luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_"
+PACKAGES=$(cat <<'EOF'
+openclash|luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgmp10_ libruby libyaml_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_
+ssrplus|luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ libustream-openssl libpcap1_ libudns_ libuci-lua_ nping_ resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_ ca-bundle_ libopenssl3_ libubox20240329_
+sqm|luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ sqm-scripts-nss_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_
+openvpnserver|luci-app-openvpn-server_ luci-i18n-openvpn-server-zh-cn_ liblzo_ openvpn-easy-rsa_ openvpn-openssl_
+samba4|luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_
+mwan3|luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_
+alist|luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_
+openlist|luci-app-openlist_ luci-i18n-openlist-zh-cn_ openlist_ libfuse_ fuse-utils_
+wrtbwmon|luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_
+netdata|luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_
+rclone|luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_
+frps|luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_
+frpc|luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_
+filetransfer|luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_
+filebrowser|luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_
+socat|luci-app-socat_ luci-i18n-socat-zh-cn_ socat_
+diskman|luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_ blkid_ e2fsprogs_
+nlbwmon|luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_
+wifischedule|luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_
+usbprinter|luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_
+pushbot|luci-app-pushbot_ iputils-arping_ jq_ curl_
+wechatpush|luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ curl_ bash_
+oaf|luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_
+easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ kmod-tun_
+bandix|luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_
+argon|luci-theme-argon_ curl_ jsonfilter_
+wolplus|luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_
+versync|luci-app-verysync_ verysync_
+vlmcsd|luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_
+netspeedtest|luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ speedtest-cli_ iperf3_ curl_ jsonfilter_ taskset_
+homeproxy|luci-app-homeproxy_ luci-i18n-homeproxy-zh-cn_ firewall4_ kmod-lib-crc32c_ kmod-nf-flow_ kmod-nft-core_ kmod-nft-fib_ kmod-nft-nat_ kmod-nft-offload_ kmod-nft-tproxy_ kmod-netlink-diag_ jansson_ libnftnl_ nftables-json_ chinadns-ng_ sing-box_
+tailscale|luci-app-tailscale_ luci-i18n-tailscale-zh-cn_ tailscale_
+nftqos|luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_
+hdidle|luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_
+airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_
+EOF
 )
 
 ### --- 执行 --- ###
 # 先更新所有包
-for pkg_name in "${!PACKAGES[@]}"; do
-    UPDATE_PACKAGE_LIST "$ACTION_DIR" "${PACKAGES[$pkg_name]}"
-done
+while IFS='|' read -r pkg_name package_list; do
+	[ -z "$pkg_name" ] && continue
+	UPDATE_PACKAGE_LIST "$ACTION_DIR" "$package_list"
+done <<EOF
+$PACKAGES
+EOF
 
 #UPDATE_PACKAGE_LIST "$ACTION_DIR" "luci-app-netspeedtest_ luci-i18n-netspeedtest-zh-cn_ librespeed-go_ iperf3_ python3-speedtest-cli_ ca-certificates_" "luci-app-netspeedtest_muink"
 
 # 再删除所有包
-for pkg_name in "${!PACKAGES[@]}"; do
-    DELETE_PACKAGE_LIST "$ACTION_DIR" "${PACKAGES[$pkg_name]}"
-done
-
+while IFS='|' read -r pkg_name package_list; do
+	[ -z "$pkg_name" ] && continue
+	DELETE_PACKAGE_LIST "$ACTION_DIR" "$package_list"
+done <<EOF
+$PACKAGES
+EOF
 
