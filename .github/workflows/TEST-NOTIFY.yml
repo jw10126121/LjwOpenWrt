@@ -46,32 +46,30 @@ jobs:
           has_wifi="无WIFI"
         fi
 
-        cat > "$config_file" <<'EOF'
-        CONFIG_PACKAGE_luci-app-accesscontrol=y
-        CONFIG_PACKAGE_luci-app-adguardhome=y
-        CONFIG_PACKAGE_luci-app-ddns=m
-EOF
+        printf '%s\n' \
+          'CONFIG_PACKAGE_luci-app-accesscontrol=y' \
+          'CONFIG_PACKAGE_luci-app-adguardhome=y' \
+          'CONFIG_PACKAGE_luci-app-ddns=m' \
+          > "$config_file"
 
-        system_desc=$(cat <<EOF
-编译开始：TEST_${TEST_START_TIME}
-
-### --- 编译说明 --- ###
-支持设备：${{ inputs.WRT_CONFIG }}
-固件类型：[测试通知]
-支持平台：mediatek-filogic
-设备架构：aarch64_cortex-a53
-内核版本：6.12.80
-LUCI版本：23.05
-OP版本：24.10.5
-包管理器：ipkg
-默认地址：192.168.0.1
-默认密码：无 | password
-是否wifi：${has_wifi}
-源码地址：https://github.com/coolsnowwolf/lede
-源码分支：master
-源码hash：test-notify
-EOF
-)
+        system_desc=$(printf '%s\n' \
+          "编译开始：TEST_${TEST_START_TIME}" \
+          "" \
+          "### --- 编译说明 --- ###" \
+          "支持设备：${{ inputs.WRT_CONFIG }}" \
+          "固件类型：[测试通知]" \
+          "支持平台：mediatek-filogic" \
+          "设备架构：aarch64_cortex-a53" \
+          "内核版本：6.12.80" \
+          "LUCI版本：23.05" \
+          "OP版本：24.10.5" \
+          "包管理器：ipkg" \
+          "默认地址：192.168.0.1" \
+          "默认密码：无 | password" \
+          "是否wifi：${has_wifi}" \
+          "源码地址：https://github.com/coolsnowwolf/lede" \
+          "源码分支：master" \
+          "源码hash：test-notify")
 
         bash "$readme_script" -c "$config_file" -o "$readme_file" -s "$system_desc" -a "${{ inputs.WHAT_MY_SAY }}" -r false
 
