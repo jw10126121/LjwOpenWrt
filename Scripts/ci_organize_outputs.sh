@@ -27,13 +27,16 @@ cp -f ./my_config.txt ./upload/config.txt
 cp -f "${readme_desc_file}" ./upload/readme.txt
 
 tmp_dir="$(mktemp -d)"
+generated_overrides="$(mktemp)"
 find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
-bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config"
+bash "${scripts_dir}/generate_package_overrides.sh" "${tmp_dir}" "./.config" "${generated_overrides}"
+bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config" "${generated_overrides}"
 tar -zcf ./upload/Packages.tar.gz -C "${tmp_dir}" --transform 's,^./,,' .
+rm -f "${generated_overrides}"
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
 

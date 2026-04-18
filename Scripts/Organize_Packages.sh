@@ -4,6 +4,7 @@
 
 ACTION_DIR=${1:-}
 CONFIG_PATH=${2:-}
+GENERATED_OVERRIDES_PATH=${3:-}
 
 [ -z "$ACTION_DIR" ] && echo "【Lin】错误：未指定操作目录" && exit 1;
 [ -z "$CONFIG_PATH" ] && [ -f "./.config" ] && CONFIG_PATH="./.config"
@@ -94,6 +95,14 @@ BUILD_AUTO_PACKAGE_RULES() {
 	done
 }
 
+GET_OVERRIDE_PACKAGE_NAMES() {
+
+	printf '%s\n' "$1" | while IFS='|' read -r override_name package_list; do
+		[ -z "$package_list" ] && continue
+		echo "$package_list" | tr ' ' '\n' | grep -E '^luci-(app|theme)-' | sed 's/_$//' | head -n1
+	done | sed '/^$/d' | sort -u
+}
+
 ### --- 执行 --- ###
 
 # netspeedtest需要下载librespeed-go，但编译后，未发现librespeed-go，所以需要下载
@@ -126,7 +135,7 @@ wechatpush|luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ 
 oaf|luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_
 easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ kmod-tun_
 bandix|luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_
-argon|luci-theme-argon_ curl_ jsonfilter_
+argon|luci-theme-argon_ luci-i18n-argon-zh-cn_ curl_ jsonfilter_
 wolplus|luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_
 versync|luci-app-verysync_ verysync_
 vlmcsd|luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_
@@ -139,11 +148,15 @@ airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync
 EOF
 )
 
-OVERRIDE_PACKAGE_NAMES=$(printf '%s\n' "$PACKAGE_OVERRIDES" | cut -d'|' -f1)
+GENERATED_OVERRIDES=""
+[ -n "$GENERATED_OVERRIDES_PATH" ] && [ -f "$GENERATED_OVERRIDES_PATH" ] && GENERATED_OVERRIDES=$(cat "$GENERATED_OVERRIDES_PATH")
+
+ALL_OVERRIDES=$(printf '%s\n%s\n' "$PACKAGE_OVERRIDES" "$GENERATED_OVERRIDES")
+OVERRIDE_PACKAGE_NAMES=$(GET_OVERRIDE_PACKAGE_NAMES "$ALL_OVERRIDES")
 
 AUTO_PACKAGES=$(BUILD_AUTO_PACKAGE_RULES "$ACTION_DIR" "$CONFIG_PATH" "$OVERRIDE_PACKAGE_NAMES")
 
-PACKAGES=$(printf '%s\n%s\n' "$PACKAGE_OVERRIDES" "$AUTO_PACKAGES")
+PACKAGES=$(printf '%s\n%s\n%s\n' "$PACKAGE_OVERRIDES" "$GENERATED_OVERRIDES" "$AUTO_PACKAGES")
 
 ### --- 执行 --- ###
 # 先更新所有包
