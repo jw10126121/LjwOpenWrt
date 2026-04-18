@@ -87,5 +87,27 @@ bash "$NOTIFY_SCRIPT"
 grep -q '编译状态：failure' "$ENV_FILE"
 grep -q '编译开始：D260418_T105727' "$ENV_FILE"
 grep -q '编译结束：D260418_T120000' "$ENV_FILE"
+if grep -q '下载地址：' "$ENV_FILE"; then
+	echo "Unexpected download URL in failure notification" >&2
+	exit 1
+fi
+
+: > "$ENV_FILE"
+: > "$OUTPUT_FILE"
+GITHUB_ENV="$ENV_FILE" \
+GITHUB_OUTPUT="$OUTPUT_FILE" \
+START_TIME="D260418_T105727" \
+END_TIME="D260418_T120000" \
+DEVICE_SUBTARGET="mt6000" \
+GITHUB_REPOSITORY="user/repo" \
+GITHUB_RUN_ID="123456" \
+WRT_RELEASE_FIRMWARE="true" \
+COMPILE_STATUS="success" \
+system_content="$system_desc" \
+bash "$NOTIFY_SCRIPT"
+
+grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/D260418_T105727_mt6000' "$ENV_FILE"
+grep -q 'Artifact下载地址：https://github.com/user/repo/actions/runs/123456' "$ENV_FILE"
+grep -q '编译状态：success' "$ENV_FILE"
 
 echo "test_notification_format: ok"

@@ -13,11 +13,13 @@ write_notify_content() {
     local target_file="$1"
     {
         echo "notify_content<<EOF"
-        if [ "${WRT_RELEASE_FIRMWARE:-false}" = "true" ]; then
+        if [ "${COMPILE_STATUS:-unknown}" = "success" ] && [ "${WRT_RELEASE_FIRMWARE:-false}" = "true" ]; then
             echo "Release下载地址：https://github.com/${GITHUB_REPOSITORY}/releases/tag/${release_tag}"
         fi
-        echo "Artifact下载地址：${artifact_url}"
-        echo ""
+        if [ "${COMPILE_STATUS:-unknown}" = "success" ]; then
+            echo "Artifact下载地址：${artifact_url}"
+            echo ""
+        fi
         printf '%s\n' "${system_content:-}"
         echo ""
         echo "编译状态：${COMPILE_STATUS:-unknown}"

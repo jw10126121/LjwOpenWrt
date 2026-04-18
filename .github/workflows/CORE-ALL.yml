@@ -553,16 +553,16 @@ jobs:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
         path: ${{ env.OPENWRT_PATH }}/upload
 
-    - name: Create Notification Content (创建推送成功内容)
+    - name: Create Notification Content (创建推送结果内容)
       id: notification_content
-      if: always()
+      if: always() && steps.finalize_compile.outputs.status != 'cancelled'
       continue-on-error: true
       run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_create_notifications.sh"
 
-    - name: Send dingding notify (推送编译成功消息)
+    - name: Send dingding notify (推送编译结果消息)
       continue-on-error: true
-      if: always() && env.DINGDING_TOKEN != ''
+      if: always() && env.DINGDING_TOKEN != '' && steps.finalize_compile.outputs.status != 'cancelled'
       env:
         DINGDING_MESSAGE: |
           ${{ env.notify_content }}
