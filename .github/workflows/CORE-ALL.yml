@@ -503,16 +503,24 @@ jobs:
 
     - name: 编译固件 Build firmware
       id: compile
+      continue-on-error: true
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo -e "$(nproc) thread build."
         # make -j$(nproc) V=s || make -j1 V=s
         make -j$(nproc) || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-        echo "END_DATE=$(date +"D%y%m%d")" >> $GITHUB_ENV
+
+    - name: Finalize Compile Status
+      id: finalize_compile
+      if: always()
+      run: |
+        END_DATE=$(date +"D%y%m%d")
         END_TIME=$(date +"D%y%m%d_T%H%M%S")
+        echo "END_DATE=$END_DATE" >> $GITHUB_ENV
         echo "END_TIME=$END_TIME" >> $GITHUB_ENV
-        echo "【Lin】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译完成，完成时间：$END_TIME"
+        echo "status=${{ steps.compile.outcome }}" >> $GITHUB_OUTPUT
+        echo "COMPILE_STATUS=${{ steps.compile.outcome }}" >> $GITHUB_ENV
+        echo "【Lin】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译状态：${{ steps.compile.outcome }}，结束时间：$END_TIME"
 
     - name: Machine Information
       continue-on-error: true
@@ -529,7 +537,7 @@ jobs:
 
     - name: Organize Files(整理编译后的文件)
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: steps.finalize_compile.outputs.status == 'success'
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_organize_outputs.sh"
@@ -542,7 +550,7 @@ jobs:
       id: upload_artifact
       timeout-minutes: 30
       continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true'
+      if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
@@ -550,13 +558,14 @@ jobs:
 
     - name: Create Notification Content (创建推送成功内容)
       id: notification_content
+      if: always()
       continue-on-error: true
       run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_create_notifications.sh"
 
     - name: Send dingding notify (推送编译成功消息)
       continue-on-error: true
-      if: steps.compile.outputs.status == 'success' && env.DINGDING_TOKEN != ''
+      if: always() && env.DINGDING_TOKEN != ''
       env:
         DINGDING_MESSAGE: |
           ${{ env.notify_content }}
@@ -575,7 +584,7 @@ jobs:
 
     - name: Upload Firmware To Release (发布固件)
       id: release
-      if: steps.compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
+      if: steps.finalize_compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -623,3 +632,9 @@ jobs:
           find staging_dir -maxdepth 1 -mindepth 1 -type d \( -name 'target-*' -o -name 'packages' -o -name 'pkginfo' \) -exec rm -rf {} +
         fi
         df -hT "$GITHUB_WORKSPACE"
+
+    - name: Fail Workflow If Compile Failed
+      if: always() && steps.finalize_compile.outputs.status != 'success'
+      run: |
+        echo "【Lin】编译失败，通知已发送"
+        exit 1

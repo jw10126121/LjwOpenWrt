@@ -19,8 +19,10 @@ write_notify_content() {
         echo "Artifact下载地址：${artifact_url}"
         echo ""
         printf '%s\n' "${system_content:-}"
+        echo ""
+        echo "编译状态：${COMPILE_STATUS:-unknown}"
         echo "编译开始：${START_TIME}"
-        echo "编译完成：${END_TIME:-}"
+        echo "编译结束：${END_TIME:-}"
         echo "EOF"
     } >> "${target_file}"
 }

@@ -13,7 +13,7 @@ rm -f ./config_mine/readme.txt
 readme_script="${scripts_dir}/readme.sh"
 [ -f "${readme_script}" ] && chmod +x "${readme_script}"
 
-to_my_say_detail=$(printf '%s\n编译开始：%s\n编译完成：%s\n' "${system_content:-}" "${START_TIME:?START_TIME is required}" "${END_TIME:?END_TIME is required}")
+to_my_say_detail="${system_content:-}"
 
 [ -f "${readme_script}" ] && bash "${readme_script}" -c "./.config" -o "./config_mine/readme.txt" -s "${to_my_say_detail}" -a "${WRT_MINE_SAY:-}" -r 'false'
 [ -f "${readme_script}" ] && bash "${readme_script}" -c "./.config" -o "./readme_release.txt" -s "${to_my_say_detail}" -a "${WRT_MINE_SAY:-}" -r 'true'
