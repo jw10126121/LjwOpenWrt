@@ -325,18 +325,26 @@ else
 fi
 
 # 对比easytier版本，并替换
-if [ -f "${package_workdir}/easytier/Makefile" ]; then
-    easytier_origin_version=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")
-    echo "【Lin】easytier原版本：${easytier_origin_version}"
-    easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
-    if [ -n "${easytier_latest_version}" ]; then
-        echo "【Lin】easytier最新版本： ${easytier_latest_version}"
-        if [ "${easytier_latest_version}" != "${easytier_origin_version}" ]; then
-            sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
-            echo "【Lin】easytier版本更新： ${easytier_origin_version} -> ${easytier_latest_version}"
-        fi
-    fi
-fi
+# if [ -f "${package_workdir}/easytier/Makefile" ]; then
+#     easytier_origin_version_raw=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")
+#     easytier_origin_version=$(printf '%s\n' "${easytier_origin_version_raw}" | sed -E 's/^\$\(or \$\(EASYTIER_VERSION\),([^)]*)\)$/\1/')
+#     echo "【Lin】easytier原版本：${easytier_origin_version_raw}"
+#     echo "【Lin】easytier当前有效默认版本：${easytier_origin_version}"
+#     easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
+#     if [ -n "${easytier_latest_version}" ]; then
+#         echo "【Lin】easytier最新版本： ${easytier_latest_version}"
+#         if dpkg --compare-versions "${easytier_origin_version}" lt "${easytier_latest_version}"; then
+#             if [ "${easytier_origin_version_raw}" != "${easytier_origin_version}" ]; then
+#                 sed -i "s|^\(PKG_VERSION:=\).*$|\1\$(or \$(EASYTIER_VERSION),${easytier_latest_version})|" "${package_workdir}/easytier/Makefile"
+#             else
+#                 sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
+#             fi
+#             echo "【Lin】easytier版本更新： ${easytier_origin_version} -> ${easytier_latest_version}"
+#         else
+#             echo "【Lin】easytier无需更新，保留版本：${easytier_origin_version}"
+#         fi
+#     fi
+# fi
 
 # # 对比frp版本，并替换
 # if [ -f "${package_workdir}/frp/Makefile" ]; then
