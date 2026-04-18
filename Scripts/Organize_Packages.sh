@@ -2,9 +2,11 @@
 
 ### --- 取参 --- ###
 
-ACTION_DIR=$1
+ACTION_DIR=${1:-}
+CONFIG_PATH=${2:-}
 
 [ -z "$ACTION_DIR" ] && echo "【Lin】错误：未指定操作目录" && exit 1;
+[ -z "$CONFIG_PATH" ] && [ -f "./.config" ] && CONFIG_PATH="./.config"
 
 ### --- 方法 --- ###
 
@@ -51,13 +53,54 @@ DELETE_PACKAGE_LIST() {
 
 }
 
+PACKAGE_EXISTS() {
+
+	local ACTION_DIR=$1
+	local PACKAGE_PREFIX=$2
+
+	for ext in ipk apk; do
+		if find "$ACTION_DIR" -maxdepth 1 -name "${PACKAGE_PREFIX}*.${ext}" 2>/dev/null | grep -q .; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+BUILD_AUTO_PACKAGE_RULES() {
+
+	local ACTION_DIR=$1
+	local CONFIG_PATH=$2
+	local OVERRIDE_NAMES=$3
+
+	[ -z "$CONFIG_PATH" ] && return 0
+	[ ! -f "$CONFIG_PATH" ] && return 0
+
+	grep -E '^CONFIG_PACKAGE_luci-(app|theme)-.*=[my]$' "$CONFIG_PATH" | \
+	sed 's/^CONFIG_PACKAGE_//' | \
+	sed 's/=[my]$//' | \
+	sort -u | while read -r PACKAGE_NAME; do
+		[ -z "$PACKAGE_NAME" ] && continue
+		echo "$OVERRIDE_NAMES" | grep -qx "$PACKAGE_NAME" && continue
+		PACKAGE_EXISTS "$ACTION_DIR" "${PACKAGE_NAME}_" || continue
+
+		if echo "$PACKAGE_NAME" | grep -q '^luci-app-'; then
+			PACKAGE_SUFFIX=${PACKAGE_NAME#luci-app-}
+		else
+			PACKAGE_SUFFIX=${PACKAGE_NAME#luci-theme-}
+		fi
+
+		echo "${PACKAGE_NAME}|${PACKAGE_NAME}_ luci-i18n-${PACKAGE_SUFFIX}-zh-cn_"
+	done
+}
+
 ### --- 执行 --- ###
 
 # netspeedtest需要下载librespeed-go，但编译后，未发现librespeed-go，所以需要下载
 # https://mirrors.tencent.com/lede/releases/24.10.2/packages/aarch64_cortex-a53/packages/librespeed-go_1.1.5-r5_aarch64_cortex-a53.ipk
 
 ### --- 包列表定义 --- ###
-PACKAGES=$(cat <<'EOF'
+PACKAGE_OVERRIDES=$(cat <<'EOF'
 openclash|luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgmp10_ libruby libyaml_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_
 ssrplus|luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ libustream-openssl libpcap1_ libudns_ libuci-lua_ nping_ resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_ ca-bundle_ libopenssl3_ libubox20240329_
 sqm|luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ sqm-scripts-nss_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_
@@ -96,6 +139,12 @@ airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync
 EOF
 )
 
+OVERRIDE_PACKAGE_NAMES=$(printf '%s\n' "$PACKAGE_OVERRIDES" | cut -d'|' -f1)
+
+AUTO_PACKAGES=$(BUILD_AUTO_PACKAGE_RULES "$ACTION_DIR" "$CONFIG_PATH" "$OVERRIDE_PACKAGE_NAMES")
+
+PACKAGES=$(printf '%s\n%s\n' "$PACKAGE_OVERRIDES" "$AUTO_PACKAGES")
+
 ### --- 执行 --- ###
 # 先更新所有包
 while IFS='|' read -r pkg_name package_list; do
@@ -114,4 +163,3 @@ while IFS='|' read -r pkg_name package_list; do
 done <<EOF
 $PACKAGES
 EOF
-

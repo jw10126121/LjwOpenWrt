@@ -32,7 +32,7 @@ find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} 
 find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
-bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}"
+bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config"
 tar -zcf ./upload/Packages.tar.gz -C "${tmp_dir}" --transform 's,^./,,' .
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
