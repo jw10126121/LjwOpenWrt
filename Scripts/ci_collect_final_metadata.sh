@@ -1,5 +1,7 @@
 #!/bin/bash
-# Collect metadata available after make defconfig.
+# 说明：
+# 1. 在 make defconfig 之后收集可确定的固件元信息。
+# 2. 输出为 shell 变量片段，供 GitHub Actions `source` 或重定向导入。
 
 set -euo pipefail
 
@@ -33,6 +35,7 @@ if [ "${WRT_USE_APK:-false}" = "true" ]; then
     package_manager='apk'
 fi
 
+# 统一拼接给 README / 通知消息使用的固件说明正文。
 system_content="支持设备：${DEVICE_PROFILE}
 固件类型：${wrt_has_lite_text}
 支持平台：${device_target}-${device_subtarget}

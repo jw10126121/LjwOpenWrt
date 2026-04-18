@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 说明：
+# 1. 根据 .config 生成编译说明文件。
+# 2. 同时支持普通文本输出和 Release 场景下的 HTML details 折叠输出。
 
 show_help() {
     echo "Usage: $0 [options]"
@@ -25,7 +28,7 @@ author_note=""
 # 是否发布
 is_release=false
 
-# 脚本主体
+# 解析传入参数，决定输出位置、附加说明以及是否按 Release 格式渲染。
 while getopts "hc:o:s:a:r:" opt; do
     case $opt in
         h)
@@ -62,6 +65,7 @@ done
 
 [ -f "$desc_file" ] && rm -fr "$desc_file"
 
+# 先写固定的编译说明与作者说明，再枚举已编译/可安装的插件与主题。
 # 编译说明
 if [ -n "$system_desc" ]; then
 	echo "" >> $desc_file

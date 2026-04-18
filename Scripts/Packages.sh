@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 说明：
+# 1. 该脚本在 OpenWrt 的 package 目录下执行，用于删除、替换和修补第三方插件包。
+# 2. 前半部分提供通用的包管理函数，后半部分是当前项目的插件更新清单与兼容性修补。
+# 3. 脚本会直接修改 package/ 与 feeds/ 下的目录，适合在 feeds 更新后、编译前执行。
 
 # 运行在openwrt/package目录下
 current_script_dir=$(cd $(dirname $0) && pwd)
@@ -35,6 +39,7 @@ DELETE_PACKAGE() {
 
     local PKG_NAME=$1
     
+    # 在本地 package 与常见 feeds 中查找同名目录并删除，避免旧包残留。
     local FOUND_DIRS=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" 2>/dev/null)
     # 删除找到的目录
     if [ -n "$FOUND_DIRS" ]; then
@@ -83,6 +88,7 @@ UPDATE_PACKAGE() {
 
     DELETE_PACKAGE "${PKG_NAME}"
 
+    # 兼容 owner/repo 与完整 GitHub URL 两种写法。
     if [[ $PKG_REPO == *github.com* ]]; then
         the_full_repo=$PKG_REPO
     else
@@ -92,8 +98,10 @@ UPDATE_PACKAGE() {
     REPO_URL_git=${the_full_repo%.git}; 
     REPO_NAME=${REPO_URL_git##*/}
 
+    # 统一浅克隆，减少 CI 下载量。
     git clone --depth=1 --single-branch --branch $PKG_BRANCH "${the_full_repo}" "${REPO_NAME}"
     echo "【Lin】成功clone插件：$PKG_NAME [库：${REPO_NAME}]"
+    # pkg: 从大仓库里只提取指定目录；name: 克隆后按包名重命名目录。
     if [[ $PKG_SPECIAL == "pkg" ]]; then
         search_result_pkg_dir=$(find ./${REPO_NAME}/*/ -maxdepth 1 -type d -iname "$searchType" -prune)
         if [ -n "${search_result_pkg_dir}" ]; then
@@ -130,6 +138,7 @@ MOVE_PACKAGE_FROM_LIST() {
     local PKG_NAME=$1
     local LIST_REPO=$2
 
+    # 从已克隆的“包合集仓库”里抽取单个子目录到 package 根目录。
     found=$(find ./"$LIST_REPO"/*/ -maxdepth 1 -type d -iname "$PKG_NAME" -print)
     if [ $? -eq 0 ]; then
         cp -rf $found ./
@@ -161,7 +170,7 @@ update_package_list() {
     REPO_URL_git=${the_full_repo%.git}; 
     REPO_NAME_LAST=${REPO_URL_git##*/}
 
-    # 获取用户名_仓库名
+    # 获取用户名_仓库名，并生成不会与普通包目录冲突的临时仓库名。
     REPO_NAME=${the_full_repo#*//}  # 删除前面的协议部分
     REPO_NAME=${REPO_NAME#*/}       # 删除第一个/后面的内容，保留用户名和仓库名
     REPO_NAME=${REPO_NAME%.git}     # 删除后面的.git
@@ -197,6 +206,7 @@ safe_update_package() {
     path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
     path_default_bak="${path_default}_bak"
     [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+    # 先备份旧目录，替换失败时自动回滚，降低直接覆盖的风险。
     [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份${package_name}：${path_default} -> ${path_default_bak}"
     git clone --depth=1 --single-branch -b "${pkg_branch}" "${pkg_repo}" ${path_default}
     if [ -d ${path_default} ]; then
@@ -225,6 +235,7 @@ UPDATE_VERSION() {
 
     for PKG_FILE in $PKG_FILES; do
         local PKG_REPO=$(grep -Po "PKG_SOURCE_URL:=https://.*github.com/\K[^/]+/[^/]+(?=.*)" $PKG_FILE)
+        # 直接取 GitHub Releases 的最新标签，并同步更新 Makefile 中的版本与哈希。
         local PKG_TAG=$(curl -sL "https://api.github.com/repos/$PKG_REPO/releases" | jq -r "map(select(.prerelease == $PKG_MARK)) | first | .tag_name")
 
         local OLD_VER=$(grep -Po "PKG_VERSION:=\K.*" "$PKG_FILE")
@@ -256,8 +267,7 @@ UPDATE_VERSION() {
 
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
 
-
-
+# 下面开始执行当前仓库实际启用的插件替换策略。
 update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
 UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
@@ -288,6 +298,7 @@ UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
 
 if [ "$is_code_lean" == true ]; then
+    # Lean 系源码与非 Lean 源码的包布局不同，这里分开处理。
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2" # 2.4.3点击的时候，会有图标闪的问题
     # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "master"
     #UPDATE_PACKAGE "luci-theme-neobird" "BootLoopLover/luci-theme-neobird" "master" # 不可用
@@ -364,7 +375,8 @@ fi
 Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
 
 if [ -f "${Quickfile_Makefile}" ]; then
-    # 下面这句同时兼容 Linux 与 macOS
+    # quickfile 官方脚本对架构名兼容性一般，这里按常用架构手动兜底安装路径。
+# 下面这句同时兼容 Linux 与 macOS
 #     sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
 # define Build/Compile\
 # \t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
@@ -385,7 +397,7 @@ fi
 
 version_workdir="${openwrt_workdir}"
 
-# 修复lang_node编译问题
+# 修复 lang_node 编译问题：按当前 OpenWrt 版本切换到预编译 node 包仓库。
 config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
 include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
 package_version=$(grep -P '^[^#]*coolsnowwolf/luci' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
@@ -425,7 +437,7 @@ fi
 #修复Openvpnserver一键生成证书
 UPDATE_VERSION "openvpn-easy-rsa" 
 
-# 移除Shadowsocks组件
+# 精简 PassWall / SSR Plus 的 Shadowsocks 选项，避免引入当前不需要的变体组件。
 PW_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
 if [ -f "$PW_FILE" ]; then
     sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' $PW_FILE
@@ -444,11 +456,11 @@ if [ -f "$SP_FILE" ]; then
     echo "【Lin】ssr-plus has been fixed!"
 fi
 
-# 修复TailScale配置文件冲突
+# 修复 TailScale 配置文件冲突。
 TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
 [ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【Lin】tailscale has been fixed!"
 
-#修复Rust编译失败
+# 修复 Rust 编译失败。
 RUST_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
 if [ -f "$RUST_FILE" ]; then
     echo " "
@@ -458,7 +470,7 @@ if [ -f "$RUST_FILE" ]; then
     cd $package_workdir && echo "【Lin】rust has been fixed!"
 fi
 
-#修复DiskMan编译失败
+# 修复 DiskMan 编译失败。
 DM_FILE="./luci-app-diskman/applications/luci-app-diskman/Makefile"
 if [ -f "$DM_FILE" ]; then
     echo " "
@@ -475,7 +487,7 @@ ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 [ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 
 
-# 目前仅lean源码测试过，V佬源码也支持
+# 目前仅 Lean 源码测试过，V 佬源码也支持。
 pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
 if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
     pushbot_action_file="${pushbot_DIR}/root/usr/bin/pushbot/pushbot"

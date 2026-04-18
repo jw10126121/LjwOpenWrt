@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 说明：
+# 1. 根据实际编译出的 ipk/apk 依赖关系，自动生成 Organize_Packages.sh 可消费的覆盖规则。
+# 2. 只为“主包 + 中文包”之外还存在额外依赖闭包的 luci 应用/主题生成规则，避免产出无意义目录。
+
 set -eu
 
 PACKAGE_DIR=${1:-}
@@ -24,6 +28,7 @@ OUTPUT_FILE=${OUTPUT_PATH:-$TMPDIR/generated_overrides.txt}
 : > "$OUTPUT_FILE"
 
 extract_control() {
+	# 从 ipk/apk 中抽取 control 文件，统一复用给包名 / depends / provides 解析。
 	local package_path=$1
 	tar -xOf "$package_path" ./control.tar.gz 2>/dev/null | tar -xzO ./control 2>/dev/null
 }
@@ -65,6 +70,7 @@ get_prefix_from_basename() {
 }
 
 is_base_dependency() {
+	# 这些依赖通常由系统基础镜像提供，不需要因为它们额外建一个包目录。
 	case "$1" in
 		libc|libgcc1|libpthread|zlib|libstdcpp6|librt|libatomic1|busybox|base-files|kernel)
 			return 0
@@ -84,6 +90,7 @@ resolve_dep_basename() {
 	local dep_expr=$1
 	local dep_option
 
+	# 依次尝试用真实包名或 Provides 名称解析依赖，取第一个能命中的包文件名。
 	while IFS= read -r dep_option; do
 		dep_option=$(normalize_dep_expr "$dep_option")
 		[ -z "$dep_option" ] && continue
@@ -131,6 +138,7 @@ done <<EOF
 $(find "$PACKAGE_DIR" -maxdepth 1 -type f \( -name '*.ipk' -o -name '*.apk' \) | sort)
 EOF
 
+# 对每个已启用的 luci-app / luci-theme 做一次广度优先依赖展开。
 grep -E '^CONFIG_PACKAGE_luci-(app|theme)-.*=[my]$' "$CONFIG_PATH" | \
 sed 's/^CONFIG_PACKAGE_//' | \
 sed 's/=[my]$//' | \
@@ -162,6 +170,7 @@ sort -u | while IFS= read -r package_name; do
 		append_unique "$prefixes_file" "$(get_prefix_from_basename "$i18n_basename")"
 	fi
 
+	# seen_file 负责去重，queue_file 负责展开依赖闭包，prefixes_file 负责回写给整理脚本的文件前缀列表。
 	queue_index=1
 	queue_count=$(wc -l < "$queue_file" | tr -d ' ')
 	while [ "$queue_index" -le "$queue_count" ]; do

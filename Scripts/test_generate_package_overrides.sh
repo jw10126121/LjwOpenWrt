@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 说明：为 generate_package_overrides.sh 构造最小可复现样例，验证动态依赖分组是否正确生成。
+
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -13,6 +15,7 @@ cleanup() {
 trap cleanup EXIT
 
 make_ipk() {
+	# 生成一个最小 ipk，便于在纯 shell 测试里模拟依赖图。
 	local output_path=$1
 	local package_name=$2
 	local depends=${3-}
@@ -54,6 +57,7 @@ CONFIG_PACKAGE_luci-app-demo=m
 CONFIG_PACKAGE_luci-app-basic=m
 EOF
 
+# 先校验动态规则生成，再校验生成结果能被正式整理脚本消费。
 bash "$GENERATE_SCRIPT" "$PACKAGE_DIR" "$CONFIG_FILE" "$OVERRIDES_FILE"
 
 grep -q '^luci-app-demo|luci-app-demo_ luci-i18n-demo-zh-cn_ demo-core_ demo-helper_$' "$OVERRIDES_FILE"

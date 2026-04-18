@@ -5,6 +5,7 @@
 # Author: Linjw
 # 通用的diy配置脚本
 # 该脚本在config确认后于openwrt目录下执行
+# 主要职责：根据最终 .config 补充架构相关资源，例如 OpenClash Meta 内核、HomeProxy 规则集。
 #=================================================
 
 # 运行在openwrt目录下
@@ -40,6 +41,7 @@ get_config_value() {
 }
 
 prepare_openclash_meta_core() {
+    # 仅在启用了 luci-app-openclash 且架构受支持时，预置 clash_meta 二进制到插件目录。
     local choose_type_openclash openclash_dir openclash_core_arch openclash_core_url
     local openclash_root_dir openclash_core_dir temp_dir temp_tar
 
@@ -106,6 +108,7 @@ prepare_openclash_meta_core() {
 prepare_openclash_meta_core
 
 cd "${openwrt_workdir}"
+# HomeProxy 规则依赖外部 surge-rules 仓库，这里在编译前直接预置到插件资源目录。
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
 app_homeproxy_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-homeproxy" -print -quit 2>/dev/null)
@@ -137,7 +140,6 @@ if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
         echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
-
 
 
 

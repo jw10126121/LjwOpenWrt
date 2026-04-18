@@ -4,6 +4,7 @@
 # Lisence: MIT
 #=================================================
 #
+# 用途：修改 feeds.conf.default，并保留一组手工更新源码/feeds 的辅助函数。
 
 openwrt_root="openwrt"
 feed_config_name='feeds.conf.default'
@@ -13,6 +14,7 @@ if [[ -z $version_firewall ]]; then
 	version_firewall="3"
 fi
 
+# 默认启用 helloworld feed，其余可选 feed 按防火墙版本或注释开关控制。
 sed -i "s/#src-git helloworld/src-git helloworld/g" $feed_config_name
 
 # echo "src-git easytier https://github.com/EasyTier/luci-app-easytier.git" >> $feed_config_name
@@ -40,6 +42,7 @@ if [ -n "${luci_version}" ]; then
 fi
 
 configGit() {
+    # 兼容网络较差环境，放宽 git 低速阈值与缓存限制。
 
 	echo ''
 	echo '--------------------------------'
@@ -53,6 +56,7 @@ configGit() {
 }
 
 downloadCode() {
+	# 旧的源码下载 / 更新入口，目前主要保留为手工维护时使用。
 			
 	echo ''
 	echo '--------------------------------'
@@ -125,6 +129,7 @@ downloadCode() {
 
 
 configFeeds() {
+	# 手工调试时可再次确认 helloworld 是否启用。
 
 	if [[ $add_ssr_plus -eq 1 ]]; then
 	
@@ -144,6 +149,7 @@ configFeeds() {
 }
 
 updateFeeds() {
+	# 拉取并安装 feeds；是否先 clean 由外部变量控制。
 	echo '--------------------------------'
 	echo '--更新Feeds----------------------'
 	echo '--------------------------------'
@@ -173,7 +179,6 @@ updateFeeds() {
 	# echo '++++++++++++++++++++++++++++++++'
 	# echo '--结束更新源码和Feeds-------------'
 	# echo '++++++++++++++++++++++++++++++++'
-
 
 
 

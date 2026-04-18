@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 说明：验证 readme.sh 与 ci_create_notifications.sh 的输出格式，重点覆盖失败/成功通知差异。
+
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -44,6 +46,7 @@ OP版本：24.10.5
 EOF
 )
 
+# 先验证 README 生成逻辑，再验证 GitHub Actions 通知内容。
 bash "$README_SCRIPT" -c "$CONFIG_FILE" -o "$README_FILE" -s "$system_desc" -r false
 
 grep -q '^### --- 编译说明 --- ###$' "$README_FILE"

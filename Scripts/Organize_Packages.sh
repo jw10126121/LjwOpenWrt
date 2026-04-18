@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 说明：
+# 1. 按 luci-app / luci-theme 维度整理编译产出的 ipk/apk。
+# 2. 既支持手工维护的包分组，也支持根据 .config 自动补齐主题和插件的语言包分组。
+# 3. 输入目录会被直接复制与清理，适合在打包阶段使用。
+
 ### --- 取参 --- ###
 
 ACTION_DIR=${1:-}
@@ -18,7 +23,7 @@ UPDATE_PACKAGE_LIST() {
 	local PACKAGE_PRE_LIST=$2
 	PACKAGE_NAME=$3
 
-	# 如果没有输入包名，就取luci-app-或者luci-theme开头的内容作为包名
+	# 若未显式指定目录名，则优先从依赖列表里猜一个 luci-app / luci-theme 作为目标目录名。
 	if [ -z "${PACKAGE_NAME}" ]; then
 		PACKAGE_NAME=$(echo "$PACKAGE_PRE_LIST" | grep -o 'luci-(app|theme)-[[:alnum:]-]*_\?' | sed 's/_$//' | head -n1)	
 		# PACKAGE_NAME=$(echo "$PACKAGE_PRE_LIST" | tr ' ' '\n' | grep -E '^luci-(app|theme)-' | sed 's/_$//' | head -n1)
@@ -32,6 +37,7 @@ UPDATE_PACKAGE_LIST() {
 
 	PACKAGE_DIRNAME="$ACTION_DIR/$PACKAGE_NAME"
 	mkdir -p "$PACKAGE_DIRNAME"
+	# 将同一功能需要的 ipk/apk 聚合到一个目录，便于上传与安装。
 	for pkg in $PACKAGE_PRE_LIST; do
 	    for ext in ipk apk; do
 	    	find "$ACTION_DIR" -name "${pkg}*.${ext}" 2>/dev/null -exec cp -r {} "$PACKAGE_DIRNAME" \;
@@ -77,6 +83,7 @@ BUILD_AUTO_PACKAGE_RULES() {
 	[ -z "$CONFIG_PATH" ] && return 0
 	[ ! -f "$CONFIG_PATH" ] && return 0
 
+	# 从配置里自动识别已启用的 luci 应用/主题，并补出“主包 + 中文包”的基础整理规则。
 	grep -E '^CONFIG_PACKAGE_luci-(app|theme)-.*=[my]$' "$CONFIG_PATH" | \
 	sed 's/^CONFIG_PACKAGE_//' | \
 	sed 's/=[my]$//' | \
@@ -151,6 +158,7 @@ EOF
 GENERATED_OVERRIDES=""
 [ -n "$GENERATED_OVERRIDES_PATH" ] && [ -f "$GENERATED_OVERRIDES_PATH" ] && GENERATED_OVERRIDES=$(cat "$GENERATED_OVERRIDES_PATH")
 
+# 合并手工规则、动态生成规则与自动识别规则，后续统一整理。
 ALL_OVERRIDES=$(printf '%s\n%s\n' "$PACKAGE_OVERRIDES" "$GENERATED_OVERRIDES")
 OVERRIDE_PACKAGE_NAMES=$(GET_OVERRIDE_PACKAGE_NAMES "$ALL_OVERRIDES")
 

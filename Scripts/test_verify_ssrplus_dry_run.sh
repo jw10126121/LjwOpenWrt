@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 说明：为 verify_ssrplus_dry_run.sh 生成一组带依赖关系的测试包，验证其输出摘要。
+
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -12,6 +14,7 @@ cleanup() {
 trap cleanup EXIT
 
 make_ipk() {
+	# 生成只带 control 元数据的空包，足够支撑依赖解析逻辑测试。
 	local output_path=$1
 	local package_name=$2
 	local depends=${3-}

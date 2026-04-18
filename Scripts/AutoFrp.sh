@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # 该脚本，用于通过IPQ60XX-NOWIFI.txt生成IPQ60XX-NOWIFI_FRPS.txt
+# 核心逻辑：把 frpc / frps 相关配置项在 y 与 m 之间互换，快速生成另一套构建配置。
 
 # 输入文件和输出文件
 input_file="../Config/IPQ60XX-NOWIFI.txt"
@@ -15,7 +16,7 @@ fi
 # 清空或创建输出文件
 > "$output_file"
 
-# 逐行处理输入文件
+# 逐行处理输入文件，仅翻转 FRP 相关选项，其他配置原样保留。
 while IFS= read -r line; do
     # 检查是否是需要反转值的配置项
     if [[ "$line" =~ ^(CONFIG_PACKAGE_frpc|CONFIG_PACKAGE_luci-app-frpc|CONFIG_PACKAGE_luci-i18n-frpc-zh-cn|CONFIG_PACKAGE_luci-app-frps|CONFIG_PACKAGE_luci-i18n-frps-zh-cn|CONFIG_PACKAGE_frps)= ]]; then

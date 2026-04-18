@@ -1,5 +1,7 @@
 #!/bin/bash
-# Create multiline notification content for GitHub env/output files.
+# 说明：
+# 1. 在 GitHub Actions 中生成多行通知内容。
+# 2. 同时写入 GITHUB_ENV 与 GITHUB_OUTPUT，供后续步骤或 Action 输出复用。
 
 set -euo pipefail
 
@@ -11,6 +13,7 @@ artifact_url="https://github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is requi
 
 write_notify_content() {
     local target_file="$1"
+    # GitHub Actions 多行变量需要 <<EOF 语法，这里统一封装，避免两处逻辑漂移。
     {
         echo "notify_content<<EOF"
         if [ "${COMPILE_STATUS:-unknown}" = "success" ] && [ "${WRT_RELEASE_FIRMWARE:-false}" = "true" ]; then

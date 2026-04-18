@@ -3,6 +3,7 @@
 # Description: DIY script
 # Lisence: MIT
 # Author: Linjw
+# 用途：解析命令行参数后转调 diy_config.sh，作为 IPQ60XX 机型的简单入口脚本。
 #=================================================
 
 
@@ -25,7 +26,7 @@ default_ip="192.168.0.1"
 is_reset_password=true
 default_theme_name=''
 
-# 脚本主体
+# 解析用户输入的定制参数，再原样传给真正执行修改的 diy_config.sh。
 while getopts "hi:n:p:t:" opt; do
     case $opt in
         h)
@@ -134,7 +135,6 @@ bash "$(cd $(dirname $0) && pwd)/diy_config.sh" -n "$default_name" -i "$default_
 # else
 #     echo "【Lin】openwrt版本号未知"
 # fi
-
 
 
 

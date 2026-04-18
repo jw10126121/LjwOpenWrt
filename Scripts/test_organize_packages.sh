@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# 说明：验证 Organize_Packages.sh 是否能按手工规则和自动规则把包整理到目标目录。
+
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -53,6 +55,7 @@ CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
 EOF
 
+# 同时覆盖：手工内置规则、自动主题分组，以及“包含功能开关不应误生成目录”的场景。
 bash "$TARGET_SCRIPT" "$TMPDIR" "$CONFIG_FILE" >/dev/null
 
 SSRPLUS_DIR="$TMPDIR/luci-app-ssr-plus"

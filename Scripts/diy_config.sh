@@ -5,6 +5,7 @@
 # Author: Linjw
 # 通用的diy配置脚本
 # 该脚本在config确认前于openwrt目录下执行
+# 主要职责：改默认网络参数、修补 LuCI/插件行为、补充编译选项与首次启动脚本。
 #=================================================
 
 work_dir=$(pwd)
@@ -48,7 +49,7 @@ package_manager='ipk'
 config_name=''
 source_code_info=''
 
-# 脚本主体
+# 解析外部传入的定制参数，后续所有修改都围绕这些参数展开。
 while getopts "hi:n:p:t:m:c:s:" opt; do
     case $opt in
         h)
@@ -103,6 +104,7 @@ CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # lean.默认配置文件，固件首次刷入后运行
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
 
+# 根据默认设置文件是否存在，粗略判断当前源码是否为 Lean 分支布局。
 # 是否lean代码
 is_code_lean=true
 if [ -f "$file_default_settings" ]; then
@@ -115,6 +117,7 @@ if [ "$is_code_lean" == true ]; then
     echo "【Lin】当前源码是否LEAN：${is_code_lean}"
 fi
 
+# 修改首页显示的本地时间格式，便于直接看到完整时间戳。
 # 替换时间格式
 if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
     # 修改本地时间格式
@@ -123,6 +126,7 @@ if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | gr
 fi
 
 if [ -f "$CFG_FILE_OP" ]; then
+    # OpenWrt 官方布局：修改默认 LAN IP 与主机名。
     # 修改默认IP地址
     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_OP
     # 修改默认主机名
@@ -136,6 +140,7 @@ if [ -d "./feeds/luci/modules/luci-mod-system/" ]; then
 fi
 
 if [ -d "./feeds/luci/modules/luci-mod-status/" ]; then
+    # 在系统状态页追加“自定义名称 + 编译日期”标识，便于区分固件来源。
     #添加编译日期标识
     sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ ${default_name}-$(date +%Y%m%d)')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
     echo "【Lin】添加编译日期标识成功：${default_name}-$(date +%Y%m%d)"
@@ -149,6 +154,7 @@ fi
 
 
 
+# LEDE/旧版布局下的同类默认项调整。
 #LEDE平台调整
 if [ -f "$CFG_FILE_LEDE" ]; then
     sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $CFG_FILE_LEDE
@@ -160,6 +166,7 @@ fi
 # find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
 
 
+# 设置默认主题：不仅切换 collections，还确保对应主题已写入 .config。
 # 设置默认主题
 if [ -n "$WRT_THEME" ]; then
     the_exist_theme=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-${WRT_THEME}" -prune)
@@ -178,6 +185,7 @@ else
     echo "【Lin】使用源码默认主题"
 fi
 
+# 下面几段通过追加到首次启动脚本的方式，修补运行时问题，而不是直接改固件镜像中的最终配置。
 # <<<<<<<<<<<< 修复frpc、frps执行问题
 [ -f "$file_default_settings" ] && if ! grep -qF '/etc/init.d/frpc' $file_default_settings; then
     temp_file_frp=$(mktemp)
@@ -235,6 +243,7 @@ fi
 
 
 if [ -f "$file_default_settings" ]; then
+    # 某些第三方 feeds 会往 distfeeds.conf 中写入冲突源，这里在首次启动时直接注释掉。
     # 注释openwrt_sqm_scripts_nss
     remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
     sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
@@ -280,6 +289,7 @@ fi
 # sed -i 's/TARGET_CFLAGS.*/TARGET_CFLAGS += -DHAVE_MAP_SYNC -D_LARGEFILE64_SOURCE/g' feeds/packages/utils/xfsprogs/Makefile
 
 
+# 编译期直接清空 shadow / 默认设置中的 root 密码项，得到“空密码首次登录”效果。
 # 清空密码
 if [[ -f "./package/base-files/files/etc/shadow" && "$is_reset_password" == "true" ]]; then
     sed -i 's/^root:.*:/root:::0:99999:7:::/' "./package/base-files/files/etc/shadow"
@@ -306,6 +316,7 @@ fi
 # sed -i 's/channel=\"36\"/channel=\"153\"/g' $package_root/kernel/mac80211/files/lib/wifi/mac80211.sh
 
 
+# 调整菜单位置，把常用应用归类到更直观的一级菜单。
 # 调整位置
 sed -i 's/services/system/g' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
 sed -i '3 a\\t\t"order": 10,' $(find ./feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/ -type f -name "luci-app-ttyd.json")
@@ -320,6 +331,7 @@ if [ -f "$CFG_FILE_LEDE" ]; then
     sed -i 's/services/nas/g' $(find ./feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/ -type f -name "luci-app-samba4.json")
 fi
 
+# 写入发布信息，让系统页显示版本号、作者与编译日期。
 # 配置编译信息
 if [[ -f "${file_default_settings}" ]]; then
     # 获取版本号
@@ -343,6 +355,7 @@ if [[ -f "${file_default_settings}" ]]; then
     # sed -i "/DISTRIB_DESCRIPTION=/s/${DISTRIB_DESCRIPTION}/Linjw /" ./package/lean/default-settings/files/zzz-default-settings
 fi
 
+# 配置 NSS 统计显示，在首页额外展示 ECM 连接数。
 # 配置NSS
 USAGE_FILE="./package/lean/autocore/files/arm/sbin/usage"
 if [[ -f "${USAGE_FILE}" ]]; then
@@ -361,6 +374,7 @@ if [[ -f "${USAGE_FILE}" ]]; then
 fi
 
 
+# 获取 IP 地址前 3 段，用于复用到 OpenVPN 默认网段。
 # 获取IP地址前3段
 WRT_IPPART=$(echo $WRT_IP | cut -d'.' -f1-3)
 #修复Openvpnserver无法连接局域网和外网问题
@@ -379,6 +393,7 @@ if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]
 fi
 
 
+# 关闭部分冲突 feed，并确保 LuCI / 中文语言包 / 包管理器选项被显式写入配置。
 sed -i "s/^CONFIG_FEED_helloworld=[ym]/CONFIG_FEED_helloworld=n/g" "${op_config}"
 sed -i "s/^CONFIG_FEED_sqm_scripts_nss=[ym]/CONFIG_FEED_sqm_scripts_nss=n/g" "${op_config}"
 sed -i "s/^CONFIG_FEED_nss_packages=[ym]/CONFIG_FEED_nss_packages=n/g" "${op_config}"
@@ -408,6 +423,7 @@ WRT_TARGET="${config_name}"
 
 if [ ! -f "$file_default_settings" ]; then
     if [[ $WRT_TARGET == *"IPQ"* ]]; then
+        # IPQ 平台额外打开优化选项，并切换到当前项目默认的 NSS 固件版本。
 
         #编译器优化
         echo "CONFIG_TARGET_OPTIONS=y" >> "${op_config}"
@@ -425,6 +441,7 @@ fi
 
 if [ ! -f "$file_default_settings" ]; then
     if [[ $WRT_TARGET == *"IPQ"* ]]; then
+        # 调整 NSS 相关 init 脚本启动顺序，避免依赖初始化过早。
         #修改qca-nss-drv启动顺序
         NSS_DRV="./feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
         if [ -f "$NSS_DRV" ]; then
@@ -447,6 +464,7 @@ fi
 
 
 if [ ! -f "$file_default_settings" ]; then
+    # 非 Lean 布局没有现成 default-settings 时，补一个统一的首次启动脚本。
     default_bash_dir='./package/base-files/files/etc/uci-defaults'
     default_bash_script='./package/base-files/files/etc/uci-defaults/99-lin-defaults'
     mkdir -p "$default_bash_dir"
@@ -477,7 +495,6 @@ EOF
     echo "【Lin】2、配置dhcp，起：${dhcp_ip_start}，数：${dhcp_ip_limit}"
     echo "【Lin】3、修改luci响应时间3s"
 fi
-
 
 
 

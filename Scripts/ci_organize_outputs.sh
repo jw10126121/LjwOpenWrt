@@ -1,5 +1,7 @@
 #!/bin/bash
-# Organize compiled files into the upload directory.
+# 说明：
+# 1. 在 CI 末尾整理编译产物、README、配置文件和安装包归档。
+# 2. 会调用 readme.sh、generate_package_overrides.sh 与 Organize_Packages.sh 生成最终上传目录。
 
 set -euo pipefail
 
@@ -28,6 +30,7 @@ cp -f "${readme_desc_file}" ./upload/readme.txt
 
 tmp_dir="$(mktemp -d)"
 generated_overrides="$(mktemp)"
+# 先把分散在 bin/ 下的所有 ipk/apk 收拢到临时目录，再统一重组和压缩。
 find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
@@ -40,6 +43,7 @@ rm -f "${generated_overrides}"
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
 
+# 固件镜像文件按“子平台_设备名_版本_开始时间”重命名，方便发布页辨认。
 for type in ${DEVICE_NAME_LIST:-}; do
     while IFS= read -r file; do
         [ -z "${file}" ] && continue

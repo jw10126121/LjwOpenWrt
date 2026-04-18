@@ -1,5 +1,7 @@
 #!/bin/bash
-# Collect metadata available before make defconfig.
+# 说明：
+# 1. 在 make defconfig 之前，从 .config 与源码树推导目标平台、设备列表和内核版本。
+# 2. 输出 shell 变量片段，供 GitHub Actions 后续步骤直接导入。
 
 set -euo pipefail
 
@@ -18,6 +20,7 @@ device_target=""
 device_subtarget=""
 
 while IFS= read -r line; do
+    # 同时兼容 CONFIG_TARGET_DEVICE_* 与较旧的 CONFIG_TARGET_*_DEVICE_* 两种写法。
     if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
         device_target="${BASH_REMATCH[2]}"
         device_subtarget="${BASH_REMATCH[3]}"
