@@ -53,11 +53,22 @@ grep -q '^luci-app-accesscontrol$' "$README_FILE"
 grep -q '^luci-app-adguardhome$' "$README_FILE"
 grep -q '^#### --- 安装包插件 --- ####$' "$README_FILE"
 grep -q '^luci-app-ddns$' "$README_FILE"
+grep -q '^编译开始：D260418_T105727$' "$README_FILE"
+
+start_count=$(grep -c '^编译开始：D260418_T105727$' "$README_FILE")
+[ "$start_count" -eq 1 ] || {
+	echo "Expected exactly one compile start line in readme output" >&2
+	exit 1
+}
 
 if grep -q '^编译完成：' "$README_FILE"; then
 	echo "Unexpected compile end line in readme output" >&2
 	exit 1
 fi
+
+DINGDING_MESSAGE="$(cat "$README_FILE")"
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^### --- 编译说明 --- ###$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^支持设备：glinet_gl-mt6000$'
 
 : > "$ENV_FILE"
 : > "$OUTPUT_FILE"

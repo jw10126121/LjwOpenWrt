@@ -26,6 +26,9 @@ jobs:
   notify:
     runs-on: ubuntu-22.04
     steps:
+    - name: Checkout
+      uses: actions/checkout@v6.0.1
+
     - name: Create Test Notification Content
       id: notification_content
       env:
@@ -33,35 +36,48 @@ jobs:
         TEST_END_TIME: ${{ github.run_attempt }}
       run: |
         echo "【Lin】生成测试钉钉消息"
-        release_tag="TEST_${{ github.run_id }}"
-        artifact_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        workdir="$(mktemp -d)"
+        config_file="$workdir/.config"
+        readme_file="$workdir/readme.txt"
+        readme_script="$GITHUB_WORKSPACE/Scripts/readme.sh"
+        has_wifi="有WIFI"
 
-        {
-          echo "notify_content<<EOF"
-          if [ "${{ inputs.WRT_RELEASE_FIRMWARE }}" = "true" ]; then
-            echo "Release下载地址：https://github.com/${{ github.repository }}/releases/tag/${release_tag}"
-          fi
-          echo "Artifact下载地址：${artifact_url}"
-          echo ""
-          echo "支持设备：${{ inputs.WRT_CONFIG }}"
-          echo "固件类型：[测试通知]"
-          echo "支持平台：mediatek-filogic"
-          echo "设备架构：aarch64_cortex-a53"
-          echo "内核版本：6.12.80"
-          echo "LUCI版本：23.05"
-          echo "OP版本：24.10.5"
-          echo "包管理器：ipkg"
-          echo "默认地址：192.168.0.1"
-          echo "默认密码：无 | password"
-          echo "是否wifi：有WIFI"
-          echo "源码地址：https://github.com/coolsnowwolf/lede"
-          echo "源码分支：master"
-          echo "源码hash：test-notify"
-          echo "附加说明：${{ inputs.WHAT_MY_SAY }}"
-          echo "编译开始：TEST_${TEST_START_TIME}"
-          echo "编译完成：TEST_${TEST_END_TIME}"
-          echo "EOF"
-        } >> "$GITHUB_ENV"
+        if printf '%s' "${{ inputs.WRT_CONFIG }}" | grep -Eq 'NOWIFI|WIFINO|NO-WIFI|WIFI-NO'; then
+          has_wifi="无WIFI"
+        fi
+
+        cat > "$config_file" <<'EOF'
+        CONFIG_PACKAGE_luci-app-accesscontrol=y
+        CONFIG_PACKAGE_luci-app-adguardhome=y
+        CONFIG_PACKAGE_luci-app-ddns=m
+EOF
+
+        system_desc=$(cat <<EOF
+编译开始：TEST_${TEST_START_TIME}
+
+### --- 编译说明 --- ###
+支持设备：${{ inputs.WRT_CONFIG }}
+固件类型：[测试通知]
+支持平台：mediatek-filogic
+设备架构：aarch64_cortex-a53
+内核版本：6.12.80
+LUCI版本：23.05
+OP版本：24.10.5
+包管理器：ipkg
+默认地址：192.168.0.1
+默认密码：无 | password
+是否wifi：${has_wifi}
+源码地址：https://github.com/coolsnowwolf/lede
+源码分支：master
+源码hash：test-notify
+EOF
+)
+
+        bash "$readme_script" -c "$config_file" -o "$readme_file" -s "$system_desc" -a "${{ inputs.WHAT_MY_SAY }}" -r false
+
+        echo 'notify_content<<EOF' >> "$GITHUB_ENV"
+        cat "$readme_file" >> "$GITHUB_ENV"
+        echo 'EOF' >> "$GITHUB_ENV"
 
     - name: Send dingding notify
       env:

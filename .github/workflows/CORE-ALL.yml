@@ -445,9 +445,7 @@ jobs:
         echo -e "【Lin】\n${system_content}"
         readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
         [ -f "$readme_script" ] && chmod +x "$readme_script"
-        TO_MY_SAY_DETAIL_tmp="${system_content}\n\
-        编译开始：${{ env.START_TIME }}"
-        TO_MY_SAY_DETAIL=$(echo -e $TO_MY_SAY_DETAIL_tmp)
+        TO_MY_SAY_DETAIL=$(printf '%s\n\n编译开始：%s\n' "${system_content}" "${{ env.START_TIME }}")
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
         readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
         echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
@@ -463,7 +461,6 @@ jobs:
       if: env.DINGDING_TOKEN != ''
       env:
         DINGDING_MESSAGE: |
-          编译开始：${{ env.START_TIME }}
           ${{ env.system_content_note }}
       run: |
         payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
