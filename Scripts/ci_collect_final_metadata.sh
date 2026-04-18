@@ -21,7 +21,7 @@ include_version="$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[
 op_version="${config_version:-${include_version}}"
 wrt_has_lite_text='[常规版]'
 wrt_has_wifi_text='有WIFI'
-package_manager='ipkg'
+package_manager='ipk'
 
 if [ "${wrt_has_lite}" = "true" ]; then
     wrt_has_lite_text='[精简版]'

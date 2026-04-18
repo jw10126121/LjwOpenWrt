@@ -41,6 +41,11 @@ on:
         required: false
         type: boolean
         default: true
+      WRT_USE_APK:
+        description: '是否使用 APK 包管理器（false=ipk，true=apk）'
+        required: false
+        type: boolean
+        default: false
       WHAT_MY_SAY:
         description: '编译说明'
         required: false
@@ -105,7 +110,7 @@ jobs:
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
       # 是否使用APK包管理器
-      WRT_USE_APK: false
+      WRT_USE_APK: ${{ inputs.WRT_USE_APK || false }}
     secrets:
       # 钉钉TOKEN
       DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}

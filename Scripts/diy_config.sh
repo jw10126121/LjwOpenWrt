@@ -104,6 +104,49 @@ CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # lean.默认配置文件，固件首次刷入后运行
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
 
+set_kconfig_value() {
+    # 统一维护 .config 里的开关，避免多次追加出互相冲突的同名配置。
+    local key=$1
+    local value=$2
+
+    if grep -q "^${key}=" "${op_config}" 2>/dev/null; then
+        sed -i "s#^${key}=.*#${key}=${value}#g" "${op_config}"
+    else
+        echo "${key}=${value}" >> "${op_config}"
+    fi
+}
+
+build_disable_feed_cmd() {
+    local feed_name=$1
+
+    if [ "${package_manager}" = 'apk' ]; then
+        printf "[ -f /etc/apk/repositories.d/distfeeds.list ] && sed -i '\\|%s| s|^#*|#|' /etc/apk/repositories.d/distfeeds.list" "${feed_name}"
+    else
+        printf "[ -f /etc/opkg/distfeeds.conf ] && sed -i 's|^#*src/gz %s|#src/gz %s|' /etc/opkg/distfeeds.conf" "${feed_name}" "${feed_name}"
+    fi
+}
+
+configure_package_manager_mode() {
+    if [ "${package_manager}" = 'apk' ]; then
+        set_kconfig_value "CONFIG_USE_APK" "y"
+        set_kconfig_value "CONFIG_PACKAGE_luci-app-package-manager" "y"
+        set_kconfig_value "CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn" "y"
+        set_kconfig_value "CONFIG_PACKAGE_luci-app-opkg" "n"
+        set_kconfig_value "CONFIG_PACKAGE_luci-lib-ipkg" "n"
+        set_kconfig_value "CONFIG_PACKAGE_luci-i18n-opkg-zh-cn" "n"
+        echo "【Lin】包管理器模式：apk（启用新版 LuCI 包管理器）"
+    else
+        set_kconfig_value "CONFIG_USE_APK" "n"
+        set_kconfig_value "CONFIG_PACKAGE_luci-app-package-manager" "n"
+        set_kconfig_value "CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn" "n"
+        set_kconfig_value "CONFIG_PACKAGE_luci-app-opkg" "y"
+        set_kconfig_value "CONFIG_PACKAGE_luci-lib-ipkg" "y"
+        set_kconfig_value "CONFIG_PACKAGE_luci-i18n-opkg-zh-cn" "y"
+        set_kconfig_value "CONFIG_PACKAGE_default-settings-chn" "y"
+        echo "【Lin】包管理器模式：ipk（保留旧版 LuCI 包管理器）"
+    fi
+}
+
 # 根据默认设置文件是否存在，粗略判断当前源码是否为 Lean 分支布局。
 # 是否lean代码
 is_code_lean=true
@@ -245,7 +288,7 @@ fi
 if [ -f "$file_default_settings" ]; then
     # 某些第三方 feeds 会往 distfeeds.conf 中写入冲突源，这里在首次启动时直接注释掉。
     # 注释openwrt_sqm_scripts_nss
-    remove_sqm_scripts_nss="sed -i 's|src/gz openwrt_sqm_scripts_nss|#src/gz openwrt_sqm_scripts_nss|' /etc/opkg/distfeeds.conf"
+    remove_sqm_scripts_nss=$(build_disable_feed_cmd "openwrt_sqm_scripts_nss")
     sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_sqm_scripts_nss" "$file_default_settings"
     if [ $? -eq 0 ]; then
         echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
@@ -254,7 +297,7 @@ if [ -f "$file_default_settings" ]; then
     fi
 
     # 注释openwrt_nss_packages
-    remove_nss_packages="sed -i 's|src/gz openwrt_nss_packages|#src/gz openwrt_nss_packages|' /etc/opkg/distfeeds.conf"
+    remove_nss_packages=$(build_disable_feed_cmd "openwrt_nss_packages")
     sed -i '/openwrt_luci\|helloworld/!b;N;a\\n'"$remove_nss_packages" "$file_default_settings"
     if [ $? -eq 0 ]; then
         echo "【Lin】注释feeds中openwrt_nss_packages完成"
@@ -406,17 +449,7 @@ if ! grep -q "^CONFIG_LUCI_LANG_zh_Hans=y" "${op_config}"; then
     echo "CONFIG_LUCI_LANG_zh_Hans=y" >> "${op_config}"
 fi
 
-
-if ! grep -q "^CONFIG_USE_APK=n" "${op_config}"; then
-    echo "CONFIG_USE_APK=n" >> "${op_config}"
-fi
-
-if [ "${package_manager}" == 'apk' ]; then
-    sed -i "s/^CONFIG_USE_APK=[ym]/CONFIG_USE_APK=y/g" "${op_config}"
-else
-    sed -i "s/^CONFIG_USE_APK=[ym]/CONFIG_USE_APK=n/g" "${op_config}"
-    echo "CONFIG_PACKAGE_default-settings-chn=y" >> "${op_config}"
-fi
+configure_package_manager_mode
 
 
 WRT_TARGET="${config_name}"
@@ -495,8 +528,6 @@ EOF
     echo "【Lin】2、配置dhcp，起：${dhcp_ip_start}，数：${dhcp_ip_limit}"
     echo "【Lin】3、修改luci响应时间3s"
 fi
-
-
 
 
 

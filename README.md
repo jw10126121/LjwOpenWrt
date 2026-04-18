@@ -28,6 +28,14 @@
 [![CUSTOM](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml)
 [![DEFAULT](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml)
 
+### GitHub Actions 包管理器模式
+在 GitHub Actions 页面手动点击 `Run workflow` 时，可通过 `WRT_USE_APK` 选择固件的插件包格式：
+
+- `false`：使用传统 `ipk` 插件模式
+- `true`：使用新版 `apk` 插件模式
+
+目前 `DEFAULT`、`CUSTOM` 与 `main` 三个手动入口都已支持该选项，无需再手动改源码切换。
+
 ## 编译时间
 手动编译
 
@@ -76,4 +84,3 @@ ftkey | VIKINGYFY | LiBwrt-op | ZqinKing | laipeng668 | ImmortalWRT | LEDE | MOR
 ## 特别提示
 本人不对任何人因使用本固件所遭受的任何理论或实际的损失承担责任！
 本固件禁止用于任何商业用途，请务必严格遵守国家互联网使用相关法律规定！
-
