@@ -398,37 +398,7 @@ fi
 version_workdir="${openwrt_workdir}"
 
 # 修复 lang_node 编译问题：按当前 OpenWrt 版本切换到预编译 node 包仓库。
-config_version=$(grep CONFIG_VERSION_NUMBER "${version_workdir}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}')
-include_version=$(grep -oP '^VERSION_NUMBER:=.*,\s*\K[0-9]+\.[0-9]+\.[0-9]+(-*)?' "${version_workdir}/include/version.mk" | tail -n 1 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-package_version=$(grep -P '^[^#]*coolsnowwolf/luci' "${version_workdir}/feeds.conf.default" | grep -oP 'openwrt-\K[^;]*')
-op_version="${config_version:-${include_version:-${package_version}}}"
-if [ -z "$op_version" ]; then
-    op_version="24.10"
-fi
-
-echo "【Lin】openwrt版本号：${op_version}；config_version：${config_version:-无}；include_version：${include_version:-无}；package_version：${package_version:-无}"
-if [ -n "$op_version" ]; then  
-    path_node_makefile="${version_workdir}/feeds/packages/lang/node"
-    path_node_dir_bak="${version_workdir}/feeds/packages/lang/bak_node"
-    [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    [ -d "$path_node_makefile" ] && mv -f "$path_node_makefile" "$path_node_dir_bak" && echo "【Lin】备份lang_node：${path_node_makefile} -> ${path_node_dir_bak}"
-
-    git clone -b "packages-$op_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
-    if [ ! -d "$path_node_makefile" ]; then
-        echo "【Lin】下载失败：packages-${op_version}，下载备用版：packages-${package_version}"
-        git clone -b "packages-$package_version" https://github.com/sbwml/feeds_packages_lang_node-prebuilt "$path_node_makefile"
-    fi
-
-    if [ -d "$path_node_makefile" ]; then
-        echo "【Lin】替换lang_node for openwrt_${op_version}成功：${path_node_makefile}"
-        [ -d "$path_node_dir_bak" ] && rm -fr "$path_node_dir_bak"
-    else
-        mv -f "$path_node_dir_bak" "$path_node_makefile"
-        echo "【Lin】替换lang_node for openwrt_${op_version}失败，还原lang_node"
-    fi
-else
-    echo "【Lin】openwrt版本号未知"
-fi
+bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${version_workdir}"
 
 # UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
 # UPDATE_VERSION "sing-box"
