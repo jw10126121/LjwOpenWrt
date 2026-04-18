@@ -277,6 +277,57 @@ EOF
     fi
 }
 
+patch_apk_empty_feed_indexing() {
+    local package_makefile="${1:-./package/Makefile}"
+    local temp_file
+
+    [ "${package_manager}" = 'apk' ] || return 0
+    [ -f "$package_makefile" ] || return 0
+    grep -qF 'set -- *.apk; \' "$package_makefile" && return 0
+
+    temp_file=$(mktemp)
+    if ! awk '
+        BEGIN { in_block=0; patched=0 }
+        {
+            if (!in_block && $0 ~ /\$\(STAGING_DIR_HOST\)\/bin\/apk mkndx \\$/) {
+                match($0, /^[[:space:]]*/)
+                indent = substr($0, RSTART, RLENGTH)
+                print indent "set -- *.apk; \\"
+                print indent "if [ \"$$1\" = '\''*.apk'\'' ]; then \\"
+                print indent ":; \\"
+                print indent "else \\"
+                print
+                in_block = 1
+                patched = 1
+                next
+            }
+            if (in_block && $0 ~ /^[[:space:]]*\*\.apk; \\$/) {
+                sub(/\*\.apk; \\$/, "$$@; \\")
+                print
+                print indent "fi; \\"
+                in_block = 0
+                next
+            }
+            print
+        }
+        END {
+            if (in_block) {
+                exit 2
+            }
+            if (!patched) {
+                exit 3
+            }
+        }
+    ' "$package_makefile" > "$temp_file"; then
+        rm -f "$temp_file"
+        echo "【Lin】未找到可修补的 APK 索引块：${package_makefile}"
+        return 0
+    fi
+
+    mv "$temp_file" "$package_makefile"
+    echo "【Lin】已修补空 APK feed 索引：${package_makefile}"
+}
+
 # theme_argon_dir=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
 # # 修改argon主题颜色
 # if [ -n "$theme_argon_dir" ] && ! grep -q "uci commit argon" $file_default_settings; then
@@ -494,11 +545,11 @@ main() {
     configure_nss_usage_display
     configure_openvpn_defaults
     configure_base_package_options
+    patch_apk_empty_feed_indexing
     apply_ipq_optimizations
     apply_ipq_init_tuning
     apply_nonlean_runtime_defaults
 }
 
 main
-
 

@@ -12,6 +12,7 @@ append_default_settings_snippet
 configure_default_system
 configure_theme
 apply_lean_runtime_customizations
+patch_apk_empty_feed_indexing
 apply_nonlean_runtime_defaults
 apply_ipq_optimizations
 apply_ipq_init_tuning
