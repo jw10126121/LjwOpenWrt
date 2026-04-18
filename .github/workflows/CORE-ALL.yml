@@ -160,18 +160,6 @@ jobs:
         sudo -E systemctl daemon-reload
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Install CMake 3.31.5 (安装兼容源码要求的 CMake)
-      run: |
-        CMAKE_VERSION=3.31.5
-        CMAKE_ARCHIVE="cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz"
-        CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${CMAKE_ARCHIVE}"
-        CMAKE_DIR="$RUNNER_TEMP/cmake-${CMAKE_VERSION}-linux-x86_64"
-
-        curl -fsSL "$CMAKE_URL" -o "$RUNNER_TEMP/$CMAKE_ARCHIVE"
-        tar -xzf "$RUNNER_TEMP/$CMAKE_ARCHIVE" -C "$RUNNER_TEMP"
-        echo "$CMAKE_DIR/bin" >> "$GITHUB_PATH"
-        "$CMAKE_DIR/bin/cmake" --version
-
     # - name: Initialization Environment (初始化环境)
     #   env:
     #     DEBIAN_FRONTEND: noninteractive
@@ -340,9 +328,9 @@ jobs:
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: actions/cache@v5
       with:
-        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.WRT_REPO_BRANCH }}
+        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.WRT_REPO_BRANCH }}-${{ env.REPO_GIT_hash_simple }}
         restore-keys: |
-          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-
+          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.WRT_REPO_BRANCH }}-
         path: |
           ${{ env.OPENWRT_PATH }}/staging_dir/host*
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
