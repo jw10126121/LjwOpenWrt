@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# 说明：为 generate_package_overrides.sh 构造最小可复现样例，验证动态依赖分组是否正确生成。
+# 说明：为 generate_package_overrides.sh 构造最小可复现样例，验证动态依赖分组文本是否正确生成。
 
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 GENERATE_SCRIPT="$SCRIPT_DIR/generate_package_overrides.sh"
-ORGANIZE_SCRIPT="$SCRIPT_DIR/Organize_Packages.sh"
 
 TMPDIR=$(mktemp -d)
 cleanup() {
@@ -57,7 +56,7 @@ CONFIG_PACKAGE_luci-app-demo=m
 CONFIG_PACKAGE_luci-app-basic=m
 EOF
 
-# 先校验动态规则生成，再校验生成结果能被正式整理脚本消费。
+# 只校验动态规则文本生成结果；Organize_Packages.sh 是否消费这些规则由其自身测试负责。
 bash "$GENERATE_SCRIPT" "$PACKAGE_DIR" "$CONFIG_FILE" "$OVERRIDES_FILE"
 
 grep -q '^luci-app-demo|luci-app-demo_ luci-i18n-demo-zh-cn_ demo-core_ demo-helper_$' "$OVERRIDES_FILE"
@@ -65,20 +64,5 @@ if grep -q '^luci-app-basic|' "$OVERRIDES_FILE"; then
 	echo "Unexpected override generated for luci-app-basic" >&2
 	exit 1
 fi
-
-bash "$ORGANIZE_SCRIPT" "$PACKAGE_DIR" "$CONFIG_FILE" "$OVERRIDES_FILE" >/dev/null
-
-[ -f "$PACKAGE_DIR/luci-app-demo/demo-core_1_all.ipk" ] || {
-	echo "Missing organized dependency: demo-core_1_all.ipk" >&2
-	exit 1
-}
-[ -f "$PACKAGE_DIR/luci-app-demo/demo-helper_1_all.ipk" ] || {
-	echo "Missing organized dependency: demo-helper_1_all.ipk" >&2
-	exit 1
-}
-[ ! -f "$PACKAGE_DIR/luci-app-basic/demo-core_1_all.ipk" ] || {
-	echo "Unexpected dependency copied into luci-app-basic" >&2
-	exit 1
-}
 
 echo "test_generate_package_overrides: ok"

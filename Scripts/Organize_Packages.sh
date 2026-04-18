@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 说明：
-# 1. 按 luci-app / luci-theme 维度整理编译产出的 ipk/apk。
-# 2. 既支持手工维护的包分组，也支持根据 .config 自动补齐主题和插件的语言包分组。
+# 1. 按手工维护的 PACKAGE_OVERRIDES 维度整理编译产出的 ipk/apk。
+# 2. 不再根据 .config 或外部生成规则自动补齐插件/主题分组。
 # 3. 输入目录会被直接复制与清理，适合在打包阶段使用。
 
 ### --- 取参 --- ###
@@ -60,56 +60,6 @@ DELETE_PACKAGE_LIST() {
 
 }
 
-PACKAGE_EXISTS() {
-
-	local ACTION_DIR=$1
-	local PACKAGE_PREFIX=$2
-
-	for ext in ipk apk; do
-		if find "$ACTION_DIR" -maxdepth 1 -name "${PACKAGE_PREFIX}*.${ext}" 2>/dev/null | grep -q .; then
-			return 0
-		fi
-	done
-
-	return 1
-}
-
-BUILD_AUTO_PACKAGE_RULES() {
-
-	local ACTION_DIR=$1
-	local CONFIG_PATH=$2
-	local OVERRIDE_NAMES=$3
-
-	[ -z "$CONFIG_PATH" ] && return 0
-	[ ! -f "$CONFIG_PATH" ] && return 0
-
-	# 从配置里自动识别已启用的 luci 应用/主题，并补出“主包 + 中文包”的基础整理规则。
-	grep -E '^CONFIG_PACKAGE_luci-(app|theme)-.*=[my]$' "$CONFIG_PATH" | \
-	sed 's/^CONFIG_PACKAGE_//' | \
-	sed 's/=[my]$//' | \
-	sort -u | while read -r PACKAGE_NAME; do
-		[ -z "$PACKAGE_NAME" ] && continue
-		echo "$OVERRIDE_NAMES" | grep -qx "$PACKAGE_NAME" && continue
-		PACKAGE_EXISTS "$ACTION_DIR" "${PACKAGE_NAME}_" || continue
-
-		if echo "$PACKAGE_NAME" | grep -q '^luci-app-'; then
-			PACKAGE_SUFFIX=${PACKAGE_NAME#luci-app-}
-		else
-			PACKAGE_SUFFIX=${PACKAGE_NAME#luci-theme-}
-		fi
-
-		echo "${PACKAGE_NAME}|${PACKAGE_NAME}_ luci-i18n-${PACKAGE_SUFFIX}-zh-cn_"
-	done
-}
-
-GET_OVERRIDE_PACKAGE_NAMES() {
-
-	printf '%s\n' "$1" | while IFS='|' read -r override_name package_list; do
-		[ -z "$package_list" ] && continue
-		echo "$package_list" | tr ' ' '\n' | grep -E '^luci-(app|theme)-' | sed 's/_$//' | head -n1
-	done | sed '/^$/d' | sort -u
-}
-
 ### --- 执行 --- ###
 
 # netspeedtest需要下载librespeed-go，但编译后，未发现librespeed-go，所以需要下载
@@ -155,16 +105,8 @@ airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync
 EOF
 )
 
-GENERATED_OVERRIDES=""
-[ -n "$GENERATED_OVERRIDES_PATH" ] && [ -f "$GENERATED_OVERRIDES_PATH" ] && GENERATED_OVERRIDES=$(cat "$GENERATED_OVERRIDES_PATH")
-
-# 合并手工规则、动态生成规则与自动识别规则，后续统一整理。
-ALL_OVERRIDES=$(printf '%s\n%s\n' "$PACKAGE_OVERRIDES" "$GENERATED_OVERRIDES")
-OVERRIDE_PACKAGE_NAMES=$(GET_OVERRIDE_PACKAGE_NAMES "$ALL_OVERRIDES")
-
-AUTO_PACKAGES=$(BUILD_AUTO_PACKAGE_RULES "$ACTION_DIR" "$CONFIG_PATH" "$OVERRIDE_PACKAGE_NAMES")
-
-PACKAGES=$(printf '%s\n%s\n%s\n' "$PACKAGE_OVERRIDES" "$GENERATED_OVERRIDES" "$AUTO_PACKAGES")
+# 兼容保留旧入参，当前版本只消费手工 PACKAGE_OVERRIDES。
+PACKAGES="$PACKAGE_OVERRIDES"
 
 ### --- 执行 --- ###
 # 先更新所有包

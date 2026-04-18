@@ -1,7 +1,7 @@
 #!/bin/bash
 # 说明：
 # 1. 在 CI 末尾整理编译产物、README、配置文件和安装包归档。
-# 2. 会调用 readme.sh、generate_package_overrides.sh 与 Organize_Packages.sh 生成最终上传目录。
+# 2. 会调用 readme.sh 与 Organize_Packages.sh 生成最终上传目录。
 
 set -euo pipefail
 
@@ -29,17 +29,14 @@ cp -f ./my_config.txt ./upload/config.txt
 cp -f "${readme_desc_file}" ./upload/readme.txt
 
 tmp_dir="$(mktemp -d)"
-generated_overrides="$(mktemp)"
 # 先把分散在 bin/ 下的所有 ipk/apk 收拢到临时目录，再统一重组和压缩。
 find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
-bash "${scripts_dir}/generate_package_overrides.sh" "${tmp_dir}" "./.config" "${generated_overrides}"
-bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config" "${generated_overrides}"
+bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config"
 tar -zcf ./upload/Packages.tar.gz -C "${tmp_dir}" --transform 's,^./,,' .
-rm -f "${generated_overrides}"
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
 

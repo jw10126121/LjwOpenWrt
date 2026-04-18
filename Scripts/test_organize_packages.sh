@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 说明：验证 Organize_Packages.sh 是否能按手工规则和自动规则把包整理到目标目录。
+# 说明：验证 Organize_Packages.sh 只会按手工 PACKAGE_OVERRIDES 整理目标目录。
 
 set -eu
 
@@ -9,6 +9,7 @@ TARGET_SCRIPT="$SCRIPT_DIR/Organize_Packages.sh"
 
 TMPDIR=$(mktemp -d)
 CONFIG_FILE="$TMPDIR/.config"
+GENERATED_OVERRIDES="$TMPDIR/generated_overrides.txt"
 cleanup() {
 	rm -rf "$TMPDIR"
 }
@@ -45,18 +46,23 @@ touch "$TMPDIR/libopenssl3_1_aarch64.ipk"
 touch "$TMPDIR/libubox20240329_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-openvpn_1_all.ipk"
 touch "$TMPDIR/luci-i18n-openvpn-zh-cn_1_all.ipk"
-touch "$TMPDIR/luci-theme-argon_1_all.ipk"
-touch "$TMPDIR/luci-i18n-argon-zh-cn_1_all.ipk"
+touch "$TMPDIR/luci-app-basic_1_all.ipk"
+touch "$TMPDIR/luci-i18n-basic-zh-cn_1_all.ipk"
 
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-ssr-plus=m
 CONFIG_PACKAGE_luci-app-openvpn=m
-CONFIG_PACKAGE_luci-theme-argon=y
+CONFIG_PACKAGE_luci-app-basic=m
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
 EOF
 
-# 同时覆盖：手工内置规则、自动主题分组，以及“包含功能开关不应误生成目录”的场景。
-bash "$TARGET_SCRIPT" "$TMPDIR" "$CONFIG_FILE" >/dev/null
+cat > "$GENERATED_OVERRIDES" <<'EOF'
+luci-app-openvpn|luci-app-openvpn_ luci-i18n-openvpn-zh-cn_
+luci-app-basic|luci-app-basic_ luci-i18n-basic-zh-cn_
+EOF
+
+# 只允许手工内置规则生效；自动分组与外部生成规则都不应再创建目录。
+bash "$TARGET_SCRIPT" "$TMPDIR" "$CONFIG_FILE" "$GENERATED_OVERRIDES" >/dev/null
 
 SSRPLUS_DIR="$TMPDIR/luci-app-ssr-plus"
 required_files="
@@ -77,23 +83,12 @@ for filename in $required_files; do
 	fi
 done
 
-OPENVPN_DIR="$TMPDIR/luci-app-openvpn"
-ARGON_DIR="$TMPDIR/luci-theme-argon"
-
-[ -f "$OPENVPN_DIR/luci-app-openvpn_1_all.ipk" ] || {
-	echo "Missing auto-grouped file: luci-app-openvpn_1_all.ipk" >&2
+[ ! -d "$TMPDIR/luci-app-openvpn" ] || {
+	echo "Unexpected auto-grouped directory created: luci-app-openvpn" >&2
 	exit 1
 }
-[ -f "$OPENVPN_DIR/luci-i18n-openvpn-zh-cn_1_all.ipk" ] || {
-	echo "Missing auto-grouped file: luci-i18n-openvpn-zh-cn_1_all.ipk" >&2
-	exit 1
-}
-[ -f "$ARGON_DIR/luci-theme-argon_1_all.ipk" ] || {
-	echo "Missing auto-grouped file: luci-theme-argon_1_all.ipk" >&2
-	exit 1
-}
-[ -f "$ARGON_DIR/luci-i18n-argon-zh-cn_1_all.ipk" ] || {
-	echo "Missing auto-grouped file: luci-i18n-argon-zh-cn_1_all.ipk" >&2
+[ ! -d "$TMPDIR/luci-app-basic" ] || {
+	echo "Unexpected auto-grouped directory created: luci-app-basic" >&2
 	exit 1
 }
 
