@@ -2,6 +2,49 @@
 name: DEFAULT
 
 on:
+  workflow_call:
+    inputs:
+      WRT_DEVICE:
+        required: true
+        type: string
+      WRT_FIREWALL:
+        required: true
+        type: string
+      WRT_OVERLAYS:
+        required: false
+        type: string
+        default: ''
+      WRT_DIY_SETTING:
+        required: false
+        type: string
+        default: 'diy_config.sh'
+      WRT_DIYPackages:
+        required: false
+        type: string
+        default: 'Packages.sh'
+      WRT_DEFAULT_LANIP:
+        required: false
+        type: string
+        default: '192.168.0.1'
+      WRT_RELEASE_FIRMWARE:
+        required: false
+        type: boolean
+        default: true
+      WHAT_MY_SAY:
+        required: false
+        type: string
+        default: ''
+      WRT_SOURCE_FLAVOR:
+        required: false
+        type: string
+        default: 'lean'
+      WRT_SOURCE_HASH_INFO:
+        required: false
+        type: string
+        default: ''
+    secrets:
+      DINGDING_TOKEN:
+        required: false
   #手动编译
   workflow_dispatch:
     inputs:

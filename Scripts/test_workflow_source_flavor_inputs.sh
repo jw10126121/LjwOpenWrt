@@ -4,15 +4,14 @@
 
 set -eu
 
-WORKFLOWS=(
+WORKFLOWS_WITH_SOURCE_FLAVOR_INPUT=(
 	".github/workflows/main.yml"
 	".github/workflows/DEFAULT.yml"
-	".github/workflows/CUSTOM.yml"
 	".github/workflows/CORE-ALL.yml"
 	".github/workflows/TEST-METADATA.yml"
 )
 
-for workflow in "${WORKFLOWS[@]}"; do
+for workflow in "${WORKFLOWS_WITH_SOURCE_FLAVOR_INPUT[@]}"; do
 	grep -q 'WRT_SOURCE_FLAVOR:' "$workflow"
 	if head -n 120 "$workflow" | grep -q '^[[:space:]]*WRT_REPO_URL:'; then
 		echo "$workflow still exposes WRT_REPO_URL input" >&2
@@ -31,5 +30,10 @@ for workflow in "${WORKFLOWS[@]}"; do
 		exit 1
 	fi
 done
+
+if awk '/^jobs:/{exit} {print}' .github/workflows/CUSTOM.yml | grep -q '^[[:space:]]*WRT_SOURCE_FLAVOR:'; then
+	echo ".github/workflows/CUSTOM.yml should not expose WRT_SOURCE_FLAVOR input" >&2
+	exit 1
+fi
 
 echo "test_workflow_source_flavor_inputs: ok"

@@ -3,64 +3,10 @@ name: CUSTOM
 
 #CI计划
 on:
-  #手动编译
   workflow_dispatch:
     inputs:
-      WRT_DEVICE:
-        description: '设备型号'
-        required: true
-        type: string
-        default: 'IPQ60XX-NOWIFI'
-      WRT_FIREWALL:
-        description: '防火墙栈，fw3 或 fw4'
-        required: true
-        type: string
-        default: 'fw3'
-      WRT_OVERLAYS:
-        description: '可选 overlays，逗号分隔，例如 frps,apk'
-        required: false
-        type: string
-        default: ''
-      WRT_DIY_SETTING:
-        description: 'diy_setting脚本'
-        required: false
-        type: string
-        default: 'diy_config.sh'
-      WRT_DIYPackages:
-        description: 'DIY包配置'
-        required: false
-        type: string
-        default: 'Packages.sh'
-      WRT_DEFAULT_LANIP:
-        description: '默认LAN-IP'
-        required: false
-        type: string
-        default: '192.168.0.1'
-      WRT_RELEASE_FIRMWARE:
-        description: '发布firmware'
-        required: false
-        type: boolean
-        default: true
       WHAT_MY_SAY:
         description: '编译说明'
-        required: false
-        type: string
-        default: ''
-      WRT_SOURCE_FLAVOR:
-        description: '源码风味'
-        required: true
-        type: choice
-        options:
-          - lean
-          - VIKINGYFY
-        default: 'lean'
-      WRT_SOURCE_HASH_INFO:
-        description: '源码HASH，推荐只填 commit hash；兼容旧格式 hash|url|branch'
-        required: false
-        type: string
-        default: ''
-      WRT_REPO_Commit_Hash:
-        description: '历史版本HASH'
         required: false
         type: string
         default: ''
@@ -70,43 +16,62 @@ permissions: write-all
 
 #CI任务
 jobs:
-  config:
-    name: ${{ inputs.WRT_SOURCE_FLAVOR }}-${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
-    strategy:
-      fail-fast: false
-      #max-parallel: 2
-      matrix:
-        TARGET: [IPQ60XX-NOWIFI]
-        SOURCE: ['https://github.com/coolsnowwolf/lede']
-        BRANCH: [master]
-
-    #调用公用编译核心ALL-CORE.yml
-    uses: ./.github/workflows/CORE-ALL.yml
+  ipq60xx_nowifi_fw3:
+    name: lean-IPQ60XX-NOWIFI-fw3-base
+    uses: ./.github/workflows/DEFAULT.yml
     with:
-      # 源码
-      WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR }}
-      WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
-      # 编译指定版本
-      WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
-      # 参数化配置
-      WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
-      WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
-      WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
-      # DIY脚本
-      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
-      # DIY包配置
-      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
-      # FEED配置
-      WRT_DIY_FEEDS: diy_feeds.sh
-      # 是否发布
-      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }} # 发布固件
-      # 默认LAN-IP
-      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
-      # 钉钉TOKEN，用于推送下载文件
-      WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
-      # 编译说明
-      WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
-    secrets:
-      # 钉钉TOKEN
-      DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
-      
+      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+    secrets: inherit
+
+  ipq60xx_nowifi_fw3_frps:
+    name: lean-IPQ60XX-NOWIFI-fw3-frps
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: frps
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+    secrets: inherit
+
+  mt6000_wifi_fw3:
+    name: lean-MT6000-WIFI-fw3-base
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+    secrets: inherit
+
+  mt6000_wifi_fw4_vikingyfy:
+    name: VIKINGYFY-MT6000-WIFI-fw4-base
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: MT6000-WIFI
+      WRT_FIREWALL: fw4
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: VIKINGYFY
+    secrets: inherit
