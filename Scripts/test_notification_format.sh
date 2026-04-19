@@ -32,6 +32,8 @@ system_desc=$(cat <<'EOF'
 支持设备：glinet_gl-mt6000
 固件类型：[常规版]
 支持平台：mediatek-filogic
+FW环境：FW3
+FRP角色：FRPC
 设备架构：aarch64_cortex-a53
 内核版本：6.12.80
 LUCI版本：23.05
@@ -51,6 +53,8 @@ bash "$README_SCRIPT" -c "$CONFIG_FILE" -o "$README_FILE" -s "$system_desc" -r f
 
 grep -q '^### --- 编译说明 --- ###$' "$README_FILE"
 grep -q '^支持设备：glinet_gl-mt6000$' "$README_FILE"
+grep -q '^FW环境：FW3$' "$README_FILE"
+grep -q '^FRP角色：FRPC$' "$README_FILE"
 grep -q '^#### --- 集成的插件 --- ####$' "$README_FILE"
 grep -q '^luci-app-accesscontrol$' "$README_FILE"
 grep -q '^luci-app-adguardhome$' "$README_FILE"
@@ -72,6 +76,8 @@ fi
 DINGDING_MESSAGE="$(cat "$README_FILE")"
 printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^### --- 编译说明 --- ###$'
 printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^支持设备：glinet_gl-mt6000$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^FW环境：FW3$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^FRP角色：FRPC$'
 
 : > "$ENV_FILE"
 : > "$OUTPUT_FILE"

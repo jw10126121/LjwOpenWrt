@@ -48,6 +48,10 @@ jobs:
         CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y
         CONFIG_TARGET_ARCH_PACKAGES="aarch64_cortex-a53"
         CONFIG_VERSION_NUMBER="OpenWrt 24.10.5"
+        CONFIG_PACKAGE_firewall4=n
+        CONFIG_PACKAGE_firewall=y
+        CONFIG_PACKAGE_frpc=y
+        CONFIG_PACKAGE_frps=m
         EOF
 
         cat <<'EOF' | sed 's/^        //' > "${openwrt_path}/feeds.conf.default"
@@ -101,6 +105,8 @@ jobs:
         grep -q '^LUCI_VERSION=23.05$' /tmp/final_metadata.txt
         grep -q '^OP_VERSION=24.10.5$' /tmp/final_metadata.txt
         grep -q '^system_content<<EOF_SYSTEM$' /tmp/final_metadata.txt
+        grep -q 'FW环境：FW3' /tmp/final_metadata.txt
+        grep -q 'FRP角色：FRPC' /tmp/final_metadata.txt
 
     - name: Print Summary
       run: |

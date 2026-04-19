@@ -22,6 +22,8 @@ op_version="${config_version:-${include_version}}"
 wrt_has_lite_text='[常规版]'
 wrt_has_wifi_text='有WIFI'
 package_manager='ipk'
+fw_stack='未知'
+frp_role='未集成'
 
 if [ "${wrt_has_lite}" = "true" ]; then
     wrt_has_lite_text='[精简版]'
@@ -35,10 +37,32 @@ if [ "${WRT_USE_APK:-false}" = "true" ]; then
     package_manager='apk'
 fi
 
+if grep -q '^CONFIG_PACKAGE_firewall4=y$' "${openwrt_path}/.config" 2>/dev/null; then
+    fw_stack='FW4'
+elif grep -q '^CONFIG_PACKAGE_firewall=y$' "${openwrt_path}/.config" 2>/dev/null; then
+    fw_stack='FW3'
+fi
+
+if grep -q '^CONFIG_PACKAGE_frpc=y$' "${openwrt_path}/.config" 2>/dev/null && \
+   grep -q '^CONFIG_PACKAGE_frps=m$' "${openwrt_path}/.config" 2>/dev/null; then
+    frp_role='FRPC'
+elif grep -q '^CONFIG_PACKAGE_frpc=m$' "${openwrt_path}/.config" 2>/dev/null && \
+     grep -q '^CONFIG_PACKAGE_frps=y$' "${openwrt_path}/.config" 2>/dev/null; then
+    frp_role='FRPS'
+elif grep -q '^CONFIG_PACKAGE_frpc=y$' "${openwrt_path}/.config" 2>/dev/null && \
+     grep -q '^CONFIG_PACKAGE_frps=y$' "${openwrt_path}/.config" 2>/dev/null; then
+    frp_role='FRPC+FRPS'
+elif grep -q '^CONFIG_PACKAGE_frpc=m$' "${openwrt_path}/.config" 2>/dev/null && \
+     grep -q '^CONFIG_PACKAGE_frps=m$' "${openwrt_path}/.config" 2>/dev/null; then
+    frp_role='安装包'
+fi
+
 # 统一拼接给 README / 通知消息使用的固件说明正文。
 system_content="支持设备：${DEVICE_PROFILE}
 固件类型：${wrt_has_lite_text}
 支持平台：${device_target}-${device_subtarget}
+FW环境：${fw_stack}
+FRP角色：${frp_role}
 设备架构：${device_arch}
 内核版本：${VERSION_KERNEL:-}
 LUCI版本：${luci_version:-未知}

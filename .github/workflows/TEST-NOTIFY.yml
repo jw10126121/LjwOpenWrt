@@ -59,6 +59,8 @@ jobs:
           "支持设备：${{ inputs.WRT_CONFIG }}" \
           "固件类型：[测试通知]" \
           "支持平台：mediatek-filogic" \
+          "FW环境：FW3" \
+          "FRP角色：FRPC" \
           "设备架构：aarch64_cortex-a53" \
           "内核版本：6.12.80" \
           "LUCI版本：23.05" \
