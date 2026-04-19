@@ -40,7 +40,6 @@
 - `WRT_SOURCE_FLAVOR`：选择源码风味；当前仅支持 `lean` 与 `VIKINGYFY`
 - `WRT_SOURCE_HASH_INFO`：可选指定 commit hash；推荐只填 hash 本身
 - `WRT_FIREWALL`：只表示功能配置层，不再隐含绑定特定源码
-- `WRT_GENERAL_CONFIG`：可选手工基础配置组合；一般不需要填写
 - `WRT_OVERLAYS`：叠加可选差异层；会按传入顺序依次覆盖，只有 `apk` 与 `ipk` 互斥
 
 脚本内部会根据 `WRT_SOURCE_FLAVOR` 映射固定源码信息：`lean -> https://github.com/coolsnowwolf/lede @ master`，`VIKINGYFY -> https://github.com/VIKINGYFY/immortalwrt @ main`。

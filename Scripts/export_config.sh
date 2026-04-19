@@ -2,7 +2,7 @@
 
 # 说明：
 # 1. 导出一份可直接分享的参数化合并配置文件。
-# 2. 固定加载 GENERAL.txt + GENERAL-SERVICE.txt，再按 fw / device / overlays 叠加。
+# 2. 固定加载 GENERAL.txt + GENERAL-SERVICE.txt + GENERAL-FW3|FW4，再按 device / overlays 叠加。
 # 3. overlay 支持多个同时叠加，按传入顺序覆盖。
 
 set -eu
@@ -16,7 +16,6 @@ device=''
 fw=''
 overlay_list=''
 output_config=''
-manual_general_configs=''
 
 show_help() {
 	cat <<'EOF'
@@ -36,7 +35,6 @@ show_help() {
   --overlay     可选 overlay 列表，逗号分隔，例如 frps,apk
   --output      输出文件路径
   --config-dir  配置目录，默认 Config
-  --general     可选手工基础配置组合；不传时自动解析
   -h, --help    显示帮助
 EOF
 }
@@ -61,10 +59,6 @@ while [ $# -gt 0 ]; do
 			;;
 		--config-dir)
 			config_dir=${2:?missing value for --config-dir}
-			shift 2
-			;;
-		--general)
-			manual_general_configs=${2:?missing value for --general}
 			shift 2
 			;;
 		-h|--help)
@@ -124,7 +118,7 @@ if [ "$has_apk" = true ] && [ "$has_ipk" = true ]; then
 	exit 1
 fi
 
-resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$manual_general_configs" "$fw")
+resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
 
 device_config="devices/${device}.txt"
 if [ ! -f "$config_dir/$device_config" ]; then

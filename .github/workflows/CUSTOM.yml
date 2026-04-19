@@ -31,11 +31,6 @@ on:
         required: false
         type: string
         default: 'Packages.sh'
-      WRT_GENERAL_CONFIG:
-        description: '基础配置层，可留空自动选择；也可手工填写多个文件名'
-        required: false
-        type: string
-        default: ''
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
@@ -97,8 +92,6 @@ jobs:
       WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
       WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
       WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
-      # 通用配置
-      WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}
       # DIY脚本
       WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置

@@ -34,11 +34,6 @@ on:
         required: false
         type: string
         default: 'Packages.sh'
-      WRT_GENERAL_CONFIG:
-        description: '基础配置层，可留空自动选择；也可手工填写多个文件名'
-        required: false
-        type: string
-        default: ''
       WRT_DEFAULT_LANIP:
         description: '配置LAN-IP'
         required: false
@@ -72,12 +67,6 @@ on:
       #   required: false
       #   type: string
       #   default: ''
-      # WRT_GENERAL_CONFIG:
-      #   description: '通用配置文件'
-      #   required: true
-      #   type: string
-      #   default: 'GENERAL.txt'
-
   # workflow_call:
   #   inputs:
   #     WRT_REPO_URL:
@@ -99,12 +88,9 @@ on:
   #       required: true
   #       type: string
   #       default: diy_feeds.sh
-  #     WRT_GENERAL_CONFIG:
-  #       required: true
-  #       type: string
-  #     WRT_DIYPackages:
-  #       required: true
-  #       type: string
+      #     WRT_DIYPackages:
+      #       required: true
+      #       type: string
   #     WRT_RELEASE_FIRMWARE:
   #       required: true
   #       type: boolean
@@ -129,7 +115,6 @@ env:
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }} # overlays
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}           # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }}                         # 主要用于更新Feeds
-  WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}     # 通用配置
   WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}          # 自定义包配置
   WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}} # 发布固件
   WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}       # 默认lanIP

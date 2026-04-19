@@ -43,10 +43,6 @@ on:
         required: true
         type: string
         default: diy_feeds.sh
-      WRT_GENERAL_CONFIG:
-        description: 基础配置层，可留空自动选择；也可手工填写多个文件名
-        required: false
-        type: string
       WRT_DIYPackages:
         required: true
         type: string
@@ -88,7 +84,6 @@ env:
   WRT_CONFIG_LABEL: ''                                        # 组合标签
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
-  WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}        # 通用配置
   RESOLVED_GENERAL_CONFIG: ''
   WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}                # 自定义包配置
   WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}}      # 发布固件
@@ -230,7 +225,7 @@ jobs:
         echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
         echo "【Lin】读取防火墙参数：${{env.WRT_FIREWALL}}"
         echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
-        RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_GENERAL_CONFIG}" "${WRT_FIREWALL}")
+        RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_FIREWALL}")
         echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
         echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
@@ -342,9 +337,6 @@ jobs:
         if [ -n "$WRT_OVERLAYS" ]; then
           EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
         fi
-        if [ -n "$WRT_GENERAL_CONFIG" ]; then
-          EXPORT_ARGS+=(--general "$WRT_GENERAL_CONFIG")
-        fi
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
 
     # - name: ln mnt (合并磁盘mnt)
@@ -444,9 +436,6 @@ jobs:
         )
         if [ -n "$WRT_OVERLAYS" ]; then
           EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
-        fi
-        if [ -n "$WRT_GENERAL_CONFIG" ]; then
-          EXPORT_ARGS+=(--general "$WRT_GENERAL_CONFIG")
         fi
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
         
