@@ -371,6 +371,26 @@ fix_quickfile_makefile() {
 
 # 统一调用外部 helper 处理 node 预编译包兼容问题，避免主脚本继续膨胀。
 apply_lang_node_prebuilt_fix() {
+    local use_nxhack_node_feed=false
+
+    if [ "${source_flavor}" = "VIKINGYFY" ] || { [ "${source_flavor}" = "lean" ] && [ "${WRT_DEVICE:-}" = "IPQ60XX-NOWIFI" ] && [ "${WRT_FIREWALL:-}" = "fw3" ]; }; then
+        use_nxhack_node_feed=true
+    fi
+
+    if [ "${use_nxhack_node_feed}" = "true" ]; then
+        UPDATE_PACKAGE "node" "nxhack/openwrt-node-packages" "openwrt-25.12" "pkg"
+
+        if [ "${source_flavor}" = "VIKINGYFY" ]; then
+            echo "【Lin】VIKINGYFY 源码风味直接使用 nxhack/openwrt-node-packages 的 node 包，跳过 lang_node 预编译替换"
+        else
+            echo "【Lin】LEAN + IPQ60XX-NOWIFI + fw3 测试组合使用 nxhack/openwrt-node-packages 的 node 包，跳过 lang_node 预编译替换"
+        fi
+
+        return 0
+    fi
+
+    echo "【Lin】当前组合继续使用 jw10126121/feeds_packages_lang_node-prebuilt 的 lang_node 预编译替换"
+    LANG_NODE_PREBUILT_REPO="https://github.com/jw10126121/feeds_packages_lang_node-prebuilt" \
     bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${openwrt_workdir}"
 }
 
