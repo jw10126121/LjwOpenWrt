@@ -48,13 +48,38 @@ EOF
 	)
 }
 
+run_case_with_existing_nss_feed() {
+	local case_dir="$TMPDIR/ipq_vikingyfy_existing_sqm"
+	mkdir -p "$case_dir"
+
+	cat > "$case_dir/feeds.conf.default" <<'EOF'
+#src-git helloworld https://example.com/helloworld.git
+src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git;main
+EOF
+
+	(
+		cd "$case_dir"
+		PATH="$TEST_BIN:$PATH" \
+		WRT_DEVICE="IPQ60XX-NOWIFI" \
+		WRT_SOURCE_FLAVOR="VIKINGYFY" \
+		bash "$TARGET_SCRIPT"
+	)
+}
+
 run_case ipq_lean IPQ60XX-NOWIFI lean
 run_case ipq_vikingyfy IPQ60XX-NOWIFI VIKINGYFY
 run_case mt6000_lean MT6000-WIFI lean
+run_case_with_existing_nss_feed
 
 grep -q '^src-git helloworld ' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
 grep -q 'src-git nss_packages https://github.com/qosmio/nss-packages.git' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
 grep -q 'src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
+
+sqm_count=$(grep -Ec '^[[:space:]]*src-[^[:space:]]+[[:space:]]+sqm_scripts_nss([[:space:]]|$)' "$TMPDIR/ipq_vikingyfy_existing_sqm/feeds.conf.default")
+if [ "$sqm_count" -ne 1 ]; then
+	echo "existing sqm_scripts_nss feed should not be duplicated" >&2
+	exit 1
+fi
 
 grep -q '^src-git helloworld ' "$TMPDIR/ipq_lean/feeds.conf.default"
 if grep -q 'qosmio/nss-packages.git' "$TMPDIR/ipq_lean/feeds.conf.default"; then
