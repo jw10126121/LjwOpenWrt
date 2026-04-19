@@ -71,12 +71,20 @@ resolve_openwrt_versions() {
 
     config_raw=$(sed -n 's/^CONFIG_VERSION_NUMBER="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "${version_workdir}/.config" 2>/dev/null | head -n1)
     include_raw=$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${version_workdir}/include/version.mk" 2>/dev/null | tail -n1)
-    package_raw=$(sed -nE 's|^[^#]*coolsnowwolf/luci.*openwrt-([^;[:space:]]+).*|\1|p' "${version_workdir}/feeds.conf.default" 2>/dev/null | head -n1)
+    if [ -z "${include_raw}" ]; then
+        include_raw=$(sed -nE 's/^VERSION_NUMBER:=.*\b(SNAPSHOT)\b.*/\1/p' "${version_workdir}/include/version.mk" 2>/dev/null | tail -n1)
+    fi
+    package_raw=$(sed -nE 's|^[^#]*luci.*openwrt-([^;[:space:]]+).*|\1|p' "${version_workdir}/feeds.conf.default" 2>/dev/null | head -n1)
 
     CONFIG_VERSION_MINOR=$(extract_openwrt_minor_version "${config_raw}")
     INCLUDE_VERSION_MINOR=$(extract_openwrt_minor_version "${include_raw}")
     PACKAGE_VERSION_MINOR=$(extract_openwrt_minor_version "${package_raw}")
     OPENWRT_VERSION_MINOR="${CONFIG_VERSION_MINOR:-${INCLUDE_VERSION_MINOR:-${PACKAGE_VERSION_MINOR:-}}}"
+
+    if [ -z "${OPENWRT_VERSION_MINOR}" ] && \
+       grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${version_workdir}/feeds.conf.default" 2>/dev/null; then
+        OPENWRT_VERSION_MINOR="${LANG_NODE_DEFAULT_FALLBACK_VERSION:-24.10}"
+    fi
 }
 
 ### ---------- 远端分支匹配 ---------- ###

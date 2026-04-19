@@ -30,6 +30,22 @@ src-git luci https://github.com/coolsnowwolf/luci;openwrt-24.10
 EOF
 }
 
+make_vikingyfy_openwrt_tree() {
+    local root_dir=$1
+
+    mkdir -p "$root_dir/include" "$root_dir/feeds/packages/lang/node"
+    printf 'original-node\n' > "$root_dir/feeds/packages/lang/node/SOURCE.txt"
+    cat > "$root_dir/.config" <<'EOF'
+CONFIG_VERSION_NUMBER="SNAPSHOT"
+EOF
+    cat > "$root_dir/include/version.mk" <<'EOF'
+VERSION_NUMBER:=$(if $(VERSION_NUMBER),$(VERSION_NUMBER),SNAPSHOT)
+EOF
+    cat > "$root_dir/feeds.conf.default" <<'EOF'
+src-git luci https://github.com/immortalwrt/luci.git
+EOF
+}
+
 make_prebuilt_repo() {
     local repo_dir=$1
 
@@ -98,6 +114,19 @@ fi
 grep -Fxq 'original-node' "$WORKDIR_ROLLBACK/feeds/packages/lang/node/SOURCE.txt"
 [ ! -d "$WORKDIR_ROLLBACK/feeds/packages/lang/node.bak" ] || {
     echo "Backup directory should be removed after rollback" >&2
+    exit 1
+}
+
+WORKDIR_VIKINGYFY="$TMPDIR/openwrt-vikingyfy"
+make_vikingyfy_openwrt_tree "$WORKDIR_VIKINGYFY"
+
+LANG_NODE_PREBUILT_REPO="$REPO_DIR" \
+bash "$TARGET_SCRIPT" "$WORKDIR_VIKINGYFY"
+
+grep -Fxq 'packages-24.10' "$WORKDIR_VIKINGYFY/feeds/packages/lang/node/SOURCE.txt"
+grep -Fxq 'PKG_BASE:=packages-24.10' "$WORKDIR_VIKINGYFY/feeds/packages/lang/node/Makefile"
+[ ! -d "$WORKDIR_VIKINGYFY/feeds/packages/lang/node.bak" ] || {
+    echo "Backup directory should be removed after VIKINGYFY replacement" >&2
     exit 1
 }
 
