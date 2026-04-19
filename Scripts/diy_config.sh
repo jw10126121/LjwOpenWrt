@@ -512,12 +512,35 @@ configure_openvpn_defaults() {
 }
 
 configure_base_package_options() {
+    # 编译后，软件源里，去掉helloworld在线源
     set_kconfig_value "CONFIG_FEED_helloworld" "n"
-    set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
-    set_kconfig_value "CONFIG_FEED_nss_packages" "n"
+    configure_nss_feed_options
     set_kconfig_value "CONFIG_PACKAGE_luci" "y"
     set_kconfig_value "CONFIG_LUCI_LANG_zh_Hans" "y"
     configure_package_manager_mode
+}
+
+configure_nss_feed_options() {
+    # lean源码不支持nss，nss只支持ipq平台，VIKINGYFY支持nss
+    # lean：禁止 sqm-scripts-nss
+    # VIKINGYFY + IPQ：允许 sqm-scripts-nss
+    # MT6000：不允许 sqm-scripts-nss
+
+    local target_ref="${WRT_TARGET:-${WRT_DEVICE:-}}"
+    local source_ref="${source_flavor:-${WRT_SOURCE_FLAVOR:-lean}}"
+    local source_ref_lc
+
+    source_ref_lc=$(printf '%s' "${source_ref}" | tr '[:upper:]' '[:lower:]')
+
+    if [[ "${target_ref}" == *"IPQ"* ]] && [[ "${source_ref_lc}" == "vikingyfy" || "${source_ref_lc}" == nss* ]]; then
+        set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "y"
+        set_kconfig_value "CONFIG_FEED_nss_packages" "y"
+        set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "m"
+    else
+        set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
+        set_kconfig_value "CONFIG_FEED_nss_packages" "n"
+        set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "n"
+    fi
 }
 
 apply_ipq_optimizations() {
@@ -526,8 +549,7 @@ apply_ipq_optimizations() {
 
     set_kconfig_value "CONFIG_TARGET_OPTIONS" "y"
     set_kconfig_value "CONFIG_TARGET_OPTIMIZATION" "\"-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\""
-    set_kconfig_value "CONFIG_FEED_nss_packages" "n"
-    set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
+    configure_nss_feed_options
     set_kconfig_value "CONFIG_NSS_FIRMWARE_VERSION_11_4" "n"
     set_kconfig_value "CONFIG_NSS_FIRMWARE_VERSION_12_5" "y"
 }
