@@ -10,12 +10,12 @@ on:
         required: true
         type: choice
         options:
-          - IPQ60XX-NOWIFI.txt
-          - IPQ60XX-NOWIFI-V.txt
-          - MT6000-WIFI.txt
-          - MT6000-WIFI-V.txt
-          - IPQ60XX-NOWIFI_FRPS.txt
-        default: 'IPQ60XX-NOWIFI.txt'
+          - IPQ60XX-NOWIFI-FW3.txt
+          - IPQ60XX-NOWIFI-FW4.txt
+          - MT6000-WIFI-FW3.txt
+          - MT6000-WIFI-FW4.txt
+          - IPQ60XX-NOWIFI-FW3-FRPS.txt
+        default: 'IPQ60XX-NOWIFI-FW3.txt'
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
         required: false
@@ -27,10 +27,10 @@ on:
         type: string
         default: 'Packages.sh'
       WRT_GENERAL_CONFIG:
-        description: '通用配置'
+        description: '基础配置文件，支持空格分隔多个文件；留空时按配置类型自动选择'
         required: false
         type: string
-        default: 'GENERAL.txt'
+        default: ''
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false

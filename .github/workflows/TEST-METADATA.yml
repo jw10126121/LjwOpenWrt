@@ -8,7 +8,7 @@ on:
         description: '显示用配置名'
         required: false
         type: string
-        default: 'MT6000-WIFI.txt'
+        default: 'MT6000-WIFI-FW3.txt'
       WRT_REPO_URL:
         description: '源码地址'
         required: false

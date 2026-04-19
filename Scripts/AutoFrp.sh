@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 该脚本，用于通过IPQ60XX-NOWIFI.txt生成IPQ60XX-NOWIFI_FRPS.txt
+# 该脚本，用于通过 IPQ60XX-NOWIFI-FW3.txt 生成 IPQ60XX-NOWIFI-FW3-FRPS.txt
 # 核心逻辑：把 frpc / frps 相关配置项在 y 与 m 之间互换，快速生成另一套构建配置。
 
 # 输入文件和输出文件
-input_file="../Config/IPQ60XX-NOWIFI.txt"
-output_file="../Config/IPQ60XX-NOWIFI_FRPS.txt"
+input_file="../Config/IPQ60XX-NOWIFI-FW3.txt"
+output_file="../Config/IPQ60XX-NOWIFI-FW3-FRPS.txt"
 
 # 检查输入文件是否存在
 if [ ! -f "$input_file" ]; then

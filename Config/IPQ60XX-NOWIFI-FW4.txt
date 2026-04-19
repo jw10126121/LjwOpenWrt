@@ -1,36 +1,62 @@
 # -----------------------------------------------------------------------------
 #  配置定位
 # -----------------------------------------------------------------------------
-# V 分支源码 + FW4（nftables）方案：
-# 默认启用 HomeProxy，SSR Plus 关闭；frpc 内置，frps 按安装包输出。
+# FW4（nftables）方案：
+# 默认启用 HomeProxy，SSR Plus 显式关闭；保留 frpc，frps 仅按安装包输出。
 
 # -----------------------------------------------------------------------------
 #  目标平台 / 机型
 # -----------------------------------------------------------------------------
-CONFIG_TARGET_mediatek=y
-CONFIG_TARGET_mediatek_filogic=y
-CONFIG_TARGET_MULTI_PROFILE=y                # 多机型并行输出
-CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y
+CONFIG_TARGET_qualcommax=y
+CONFIG_TARGET_qualcommax_ipq60xx=y
+CONFIG_TARGET_MULTI_PROFILE=y                # 一次编译多个机型
+
+# 设备列表
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-axt1800=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_linksys_mr7350=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_qihoo_360v6=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_redmi_ax5-jdcloud=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=n
+
+# -----------------------------------------------------------------------------
+#  无线驱动关闭
+# -----------------------------------------------------------------------------
+CONFIG_PACKAGE_kmod-ath11k=n
+CONFIG_PACKAGE_kmod-ath11k-ahb=n
+CONFIG_PACKAGE_kmod-ath11k-pci=n
+CONFIG_PACKAGE_ath11k-firmware-ipq6018=n
+CONFIG_PACKAGE_ath11k-firmware-qcn9074=n
+CONFIG_PACKAGE_wpad-openssl=n
+CONFIG_PACKAGE_hostapd-common=n
 
 # -----------------------------------------------------------------------------
 #  防火墙 / 网络栈：FW4
 # -----------------------------------------------------------------------------
-CONFIG_PACKAGE_firewall4=y                   # 启用 FW4
-CONFIG_PACKAGE_firewall=n                    # 关闭 FW3
-CONFIG_PACKAGE_iptables=n                    # 关闭 iptables 用户态
-CONFIG_PACKAGE_ip6tables=n                   # 关闭 IPv6 iptables
-CONFIG_PACKAGE_ip6tables-extra=n             # 关闭 IPv6 iptables 扩展
-CONFIG_PACKAGE_ip6tables-mod-nat=n           # 关闭 IPv6 NAT 模块
-CONFIG_PACKAGE_iptables-mod-fullconenat=n    # 关闭 iptables FullCone
-CONFIG_PACKAGE_kmod-ipt-fullconenat=n        # 关闭 iptables FullCone 内核模块
-CONFIG_PACKAGE_kmod-nf-conntrack=y           # 连接跟踪核心
-CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y   # 连接跟踪 Netlink 接口
-CONFIG_PACKAGE_kmod-nf-conntrack6=y          # IPv6 连接跟踪
-CONFIG_PACKAGE_nftables=y                    # nftables 用户态
-CONFIG_PACKAGE_kmod-nft-core=y               # nftables 核心
-CONFIG_PACKAGE_kmod-nft-nat=y                # nft NAT 核心
-CONFIG_PACKAGE_kmod-nft-offload=y            # nft flow offload
-CONFIG_PACKAGE_kmod-nft-fullcone=y           # nft FullCone NAT
+# 以下 FW4 栈默认由 GENERAL-FW4.txt 提供。
+# 如需对当前机型单独覆盖，可取消注释并修改对应项。
+# CONFIG_PACKAGE_firewall4=y                 # 启用 FW4
+# CONFIG_PACKAGE_firewall=n                  # 关闭 FW3
+# CONFIG_PACKAGE_iptables=n                  # 关闭 iptables 用户态
+# CONFIG_PACKAGE_ip6tables=n                 # 关闭 IPv6 iptables
+# CONFIG_PACKAGE_ip6tables-extra=n           # 关闭 IPv6 iptables 扩展
+# CONFIG_PACKAGE_ip6tables-mod-nat=n         # 关闭 IPv6 NAT 模块
+# CONFIG_PACKAGE_iptables-mod-fullconenat=n  # 关闭 iptables FullCone
+# CONFIG_PACKAGE_kmod-ipt-fullconenat=n      # 关闭 iptables FullCone 内核模块
+#
+# FW4 连接跟踪 / nftables 核心
+# CONFIG_PACKAGE_kmod-nf-conntrack=y         # 连接跟踪核心
+# CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y # 连接跟踪 Netlink 接口
+# CONFIG_PACKAGE_kmod-nf-conntrack6=y        # IPv6 连接跟踪
+# CONFIG_PACKAGE_nftables=y                  # nftables 用户态
+# CONFIG_PACKAGE_kmod-nft-core=y             # nftables 核心
+# CONFIG_PACKAGE_kmod-nft-nat=y              # nft NAT 核心
+# CONFIG_PACKAGE_kmod-nft-offload=y          # nft flow offload
+# CONFIG_PACKAGE_kmod-nft-fullcone=y         # nft FullCone NAT
 
 # -----------------------------------------------------------------------------
 #  代理插件
@@ -51,7 +77,6 @@ CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n
 # -----------------------------------------------------------------------------
 CONFIG_PACKAGE_luci-theme-bootstrap=y        # LuCI 默认主题
 CONFIG_PACKAGE_luci-theme-argon=y            # Argon 主题
-CONFIG_PACKAGE_luci-theme-kucat=m            # Kucat 主题
 
 # -----------------------------------------------------------------------------
 #  状态 / 监控
@@ -61,8 +86,8 @@ CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
 CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
 CONFIG_PACKAGE_luci-app-netdata=m            # Netdata 监控面板
 CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m     # Netdata 中文语言包
-CONFIG_PACKAGE_luci-app-nlbwmon=y            # nlbwmon 流量统计
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=y     # nlbwmon 中文语言包
+CONFIG_PACKAGE_luci-app-nlbwmon=m            # nlbwmon 流量统计
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m     # nlbwmon 中文语言包
 CONFIG_PACKAGE_luci-app-wrtbwmon=m           # wrtbwmon 流量统计
 CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m    # wrtbwmon 中文语言包
 CONFIG_PACKAGE_wrtbwmon=m                    # wrtbwmon 后端
@@ -86,26 +111,24 @@ CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m
 # -----------------------------------------------------------------------------
 #  网络存储
 # -----------------------------------------------------------------------------
-CONFIG_PACKAGE_luci-app-vsftpd=y
-CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=y
-CONFIG_PACKAGE_luci-app-samba4=y
-CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=y
-CONFIG_PACKAGE_luci-app-hd-idle=y
-CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=y
-CONFIG_PACKAGE_hd-idle=y
-CONFIG_PACKAGE_luci-app-verysync=y
-CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=y
-CONFIG_PACKAGE_verysync=y
-CONFIG_PACKAGE_luci-app-usb-printer=y
-CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=y
+CONFIG_PACKAGE_luci-app-vsftpd=m
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
+CONFIG_PACKAGE_luci-app-samba4=m
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m
+CONFIG_PACKAGE_luci-app-hd-idle=m
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
+CONFIG_PACKAGE_luci-app-verysync=m
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
+CONFIG_PACKAGE_luci-app-usb-printer=m
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m
 
 # -----------------------------------------------------------------------------
 #  VPN
 # -----------------------------------------------------------------------------
-CONFIG_PACKAGE_luci-app-openvpn=y
-CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=y
-CONFIG_PACKAGE_luci-app-openvpn-server=y
-CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=y
+CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
+CONFIG_PACKAGE_luci-app-openvpn-server=m
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
 CONFIG_PACKAGE_luci-app-easytier=y
 CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y
 CONFIG_PACKAGE_easytier=y
@@ -121,15 +144,19 @@ CONFIG_PACKAGE_sqm-scripts-nss=m
 CONFIG_PACKAGE_luci-app-socat=y
 CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y
 CONFIG_PACKAGE_socat=y
-CONFIG_PACKAGE_luci-app-bandix=y
-CONFIG_PACKAGE_bandix=y
-CONFIG_PACKAGE_luci-app-turboacc=n           # FW4 方案下显式关闭 Turbo ACC
-CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=n    # FW4 方案下显式关闭 Turbo ACC 语言包
-CONFIG_PACKAGE_luci-app-mwan3=m
-CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=m
-CONFIG_PACKAGE_luci-app-mwan3helper=m
+CONFIG_PACKAGE_luci-app-bandix=m
+CONFIG_PACKAGE_bandix=m
+CONFIG_PACKAGE_luci-app-turboacc=y           # 保留配置兼容，实际 FW4 下作用有限
+CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y
+CONFIG_PACKAGE_luci-app-arpbind=m
+CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
 CONFIG_PACKAGE_luci-app-netspeedtest=m
 CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m
+CONFIG_PACKAGE_luci-app-smartdns=m
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m
+CONFIG_PACKAGE_smartdns=m
+CONFIG_PACKAGE_luci-proto-wireguard=m
+CONFIG_PACKAGE_wireguard-tools=m
 
 # -----------------------------------------------------------------------------
 #  常用服务插件
@@ -142,6 +169,7 @@ CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y
 CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y
 CONFIG_PACKAGE_luci-app-pushbot=y
+CONFIG_PACKAGE_luci-i18n-pushbot-zh-cn=y
 CONFIG_PACKAGE_luci-app-wechatpush=y
 CONFIG_PACKAGE_luci-app-vlmcsd=y
 CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y
@@ -162,13 +190,9 @@ CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y
 CONFIG_PACKAGE_luci-app-frps=m
 CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m
 CONFIG_PACKAGE_frps=m
-CONFIG_PACKAGE_luci-app-dockerman=y         # Docker 管理页面
-CONFIG_PACKAGE_luci-app-mosdns=y            # MosDNS 页面
-CONFIG_PACKAGE_luci-app-smartdns=m          # SmartDNS 页面
-CONFIG_PACKAGE_luci-app-uhttpd=m            # uHTTPd 配置页面
-CONFIG_PACKAGE_luci-app-wifischedule=m      # Wi-Fi 定时开关
 
 # -----------------------------------------------------------------------------
 #  保留的可选项
 # -----------------------------------------------------------------------------
-# CONFIG_PACKAGE_luci-app-alist=n            # Alist 网盘，当前关闭
+# CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=m # Rclone WebUI 组件
+# CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-ng=m    # Rclone NG 组件

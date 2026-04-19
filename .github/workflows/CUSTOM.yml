@@ -10,7 +10,7 @@ on:
         description: '配置文件'
         required: true
         type: string
-        default: 'IPQ60XX-NOWIFI.txt'
+        default: 'IPQ60XX-NOWIFI-FW3.txt'
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
         required: false
@@ -21,6 +21,11 @@ on:
         required: false
         type: string
         default: 'Packages.sh'
+      WRT_GENERAL_CONFIG:
+        description: '基础配置文件，支持空格分隔多个文件；留空时按配置类型自动选择'
+        required: false
+        type: string
+        default: ''
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
@@ -79,7 +84,7 @@ jobs:
       # DIY配置文件
       WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
       # 通用配置
-      WRT_GENERAL_CONFIG: GENERAL.txt
+      WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }}
       # DIY脚本
       WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置

@@ -1,30 +1,120 @@
-### === 通用基线：FW3 / iptables 方向 === ###
+### === 通用基线：全局基础层 === ###
+
+# 分层说明：
+# 1. 这里主要放三类内容：全局基础依赖、维护基线、外设扩展基线。
+# 2. 高风险能力不要默认开启；需要时可保留为注释或单独做维护版配置。
+# 3. 平台差异明显、且已有上层功能带出的包，不必强行在这里写死。
 
 # -----------------------------------------------------------------------------
 #  编译参数
 # -----------------------------------------------------------------------------
 CONFIG_DEVEL=y                          # 开发模式：显示更多调试/高级配置项
 CONFIG_CCACHE=y                         # 启用 ccache，二次编译显著提速
-CONFIG_TARGET_PER_DEVICE_ROOTFS=y       # 多机型时按设备分别生成 rootfs，便于后续单独打包
-CONFIG_TARGET_ROOTFS_EXT4FS=n           # 禁用 EXT4，仅保留 SquashFS，减少体积
+CONFIG_TARGET_PER_DEVICE_ROOTFS=y       # 多机型时按设备分别生成 rootfs
+CONFIG_TARGET_ROOTFS_EXT4FS=n           # 禁用 EXT4，仅保留 SquashFS
 CONFIG_IB=y                             # 生成 ImageBuilder
-CONFIG_IB_STANDALONE=y                  # 生成可脱离编译树使用的独立 ImageBuilder
+CONFIG_IB_STANDALONE=y                  # 生成独立 ImageBuilder
 
 # -----------------------------------------------------------------------------
-#  通用内核模块
+#  通用内核 / 网络能力
 # -----------------------------------------------------------------------------
 CONFIG_PACKAGE_kmod-fs-btrfs=y          # Btrfs 文件系统
 CONFIG_PACKAGE_kmod-fuse=y              # FUSE 用户态文件系统
-CONFIG_PACKAGE_kmod-dsa=y               # DSA 交换机核心
-CONFIG_PACKAGE_kmod-dsa-tag-dsa=y       # DSA tag 处理
-CONFIG_PACKAGE_kmod-tun=y               # TUN/TAP，VPN 必备
+CONFIG_PACKAGE_kmod-tun=y               # TUN/TAP
 CONFIG_PACKAGE_kmod-wireguard=y         # WireGuard 内核模块
 CONFIG_PACKAGE_kmod-inet-diag=y         # sock_diag，ss 命令依赖
-CONFIG_PACKAGE_kmod-mtd-rw=y            # 允许读写 MTD 分区
 
 # -----------------------------------------------------------------------------
-#  USB 控制器 / 存储 / 网卡
+#  通用运行时依赖
 # -----------------------------------------------------------------------------
+CONFIG_PACKAGE_ca-bundle=y              # CA 根证书集合
+CONFIG_PACKAGE_ca-certificates=y        # 常用 CA 证书
+CONFIG_PACKAGE_dnsmasq-full=y           # 完整版 dnsmasq
+CONFIG_PACKAGE_dnsmasq_full_dhcp=y      # DHCP
+CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y    # DHCPv6
+CONFIG_PACKAGE_dnsmasq_full_ipset=y     # ipset 支持
+CONFIG_PACKAGE_ppp=y                    # PPP 基础组件
+CONFIG_PACKAGE_ppp-mod-pppoe=y          # PPPoE
+CONFIG_PACKAGE_uhttpd-mod-ubus=y        # LuCI / ubus 交互
+
+# -----------------------------------------------------------------------------
+#  LuCI 基础库
+# -----------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-base=y              # LuCI Web 核心
+CONFIG_PACKAGE_luci-compat=y            # LuCI 兼容层
+CONFIG_PACKAGE_luci-lib-base=y          # LuCI 基础库
+CONFIG_PACKAGE_luci-lua-runtime=y       # LuCI Lua 运行时
+CONFIG_PACKAGE_luci-lib-json=y          # LuCI JSON 库
+CONFIG_PACKAGE_luci-mod-rpc=y           # LuCI JSON-RPC
+CONFIG_PACKAGE_luci-lib-fs=y            # 文件系统辅助库
+CONFIG_PACKAGE_luci-proto-ppp=y         # PPP 协议页面
+
+# -----------------------------------------------------------------------------
+#  网络拓扑 / 协议页面
+# -----------------------------------------------------------------------------
+# 说明：
+# 1. luci-proto-relay 主要用于 relayd 伪桥接 / 中继场景，常见于无线中继，但不只在开启 Wi-Fi 时才会用到。
+# 2. luci-proto-bonding 主要用于多网口链路聚合 / 主备切换，和 Wi-Fi 没有必然关系。
+CONFIG_PACKAGE_luci-proto-relay=y       # Relay / 伪桥接协议页面
+CONFIG_PACKAGE_luci-proto-bonding=y     # Bonding / 链路聚合协议页面
+
+# -----------------------------------------------------------------------------
+#  通用系统工具
+# -----------------------------------------------------------------------------
+CONFIG_PACKAGE_autocore=y               # 状态页基础信息
+CONFIG_PACKAGE_block-mount=y            # 自动生成 fstab
+CONFIG_PACKAGE_blockd=y                 # 热插拔自动挂载守护
+CONFIG_PACKAGE_blkid=y                  # 块设备 / 文件系统识别
+CONFIG_PACKAGE_coremark=y               # CPU 跑分
+CONFIG_PACKAGE_dmesg=y                  # 查看内核日志
+CONFIG_PACKAGE_fdisk=y                  # MBR 分区工具
+CONFIG_PACKAGE_gdisk=y                  # GPT 分区工具
+CONFIG_PACKAGE_htop=y                   # 进程监控
+CONFIG_PACKAGE_ip-full=y                # 完整版 iproute2
+CONFIG_PACKAGE_lsblk=y                  # 块设备列表
+CONFIG_PACKAGE_openssh-sftp-server=y    # SFTP 服务端
+CONFIG_PACKAGE_openssh-keygen=y         # SSH 密钥生成
+CONFIG_PACKAGE_openssl-util=y           # OpenSSL 命令行工具
+CONFIG_PACKAGE_curl=y                   # HTTP/HTTPS 下载上传
+CONFIG_PACKAGE_jq=y                     # JSON 命令行处理器
+
+# -----------------------------------------------------------------------------
+#  常用运维工具
+# -----------------------------------------------------------------------------
+# 说明：
+# 1. 这一组不是系统启动必需依赖，而是为了首刷后直接运维、排障和测速更方便而默认内置。
+# 2. 如果后续你希望进一步压缩体积，可以优先从这一组里取舍。
+CONFIG_PACKAGE_bash=y                   # 提供 Bash，方便交互式运维和运行 Bash 风格脚本
+CONFIG_PACKAGE_cpufreq=m                # CPU 频率调节后端，便于需要时查看与调节 CPU 运行状态
+CONFIG_PACKAGE_iperf3=y                 # 提供 iperf3，方便局域网 / 广域网吞吐测试与排障
+
+# -----------------------------------------------------------------------------
+#  交换机 / 网口架构支持
+# -----------------------------------------------------------------------------
+# 说明：
+# 1. 这一组更偏底层硬件能力，不是所有 OpenWrt 平台都必须显式开启。
+# 2. 但你当前仓库的主力路由目标以现代交换机 / 多网口设备为主，保留它们更符合实际基线。
+CONFIG_PACKAGE_kmod-dsa=y               # DSA 交换机核心
+CONFIG_PACKAGE_kmod-dsa-tag-dsa=y       # DSA tag 处理
+
+# -----------------------------------------------------------------------------
+#  存储维护工具
+# -----------------------------------------------------------------------------
+# 说明：
+# 1. 这一组用于 eMMC / NAND 设备的日常维护、排障和刷写检查。
+# 2. kmod-mtd-rw 风险较高，因此只保留显式禁用项，避免误开启。
+# 3. 其余工具不是系统运行必需依赖，但对路由器固件维护场景有实际价值，因此保留在基础层。
+# CONFIG_PACKAGE_kmod-mtd-rw is not set
+CONFIG_PACKAGE_mmc-utils=y              # eMMC 维护工具
+CONFIG_PACKAGE_nand-utils=y             # NAND 维护工具
+
+# -----------------------------------------------------------------------------
+#  USB / 外设扩展支持
+# -----------------------------------------------------------------------------
+# 说明：
+# 1. 这一组默认覆盖 U 盘、移动硬盘、USB 网卡、手机共享、4G/5G 模块等常见外设场景。
+# 2. 你已经明确希望把 USB 能力作为通用基线保留，所以统一放在 GENERAL 中集中管理。
+# 3. 如果后续某些机型需要进一步瘦身，可以从这一组里按场景裁剪。
 CONFIG_PACKAGE_kmod-usb-core=y          # USB 核心
 CONFIG_PACKAGE_kmod-usb2=y              # USB 2.0 EHCI
 CONFIG_PACKAGE_kmod-usb3=y              # USB 3.0 xHCI
@@ -46,41 +136,4 @@ CONFIG_PACKAGE_kmod-usb-net-rndis=y     # 手机 RNDIS 共享
 CONFIG_PACKAGE_kmod-usb-net-rtl8152=y   # RTL8152/8153 USB 网卡
 CONFIG_PACKAGE_kmod-usb-acm=y           # USB ACM 串口
 CONFIG_PACKAGE_kmod-usb-serial-option=y # 常见 4G/5G 模块串口
-
-# -----------------------------------------------------------------------------
-#  通用用户态工具
-# -----------------------------------------------------------------------------
-CONFIG_PACKAGE_autocore=y               # 状态页基础信息
-CONFIG_PACKAGE_block-mount=y            # 自动生成 fstab
-CONFIG_PACKAGE_blockd=y                 # 热插拔自动挂载守护
-CONFIG_PACKAGE_bash=y                   # Bash Shell
-CONFIG_PACKAGE_blkid=y                  # 块设备 / 文件系统识别
-CONFIG_PACKAGE_fdisk=y                  # MBR 分区工具
-CONFIG_PACKAGE_gdisk=y                  # GPT 分区工具
-CONFIG_PACKAGE_coremark=y               # CPU 跑分
-CONFIG_PACKAGE_cpufreq=y                # CPU 频率调节
-CONFIG_PACKAGE_dmesg=y                  # 查看内核日志
-CONFIG_PACKAGE_htop=y                   # 进程监控
-CONFIG_PACKAGE_iperf3=y                 # 网络吞吐测试
-CONFIG_PACKAGE_lsblk=y                  # 块设备列表
-CONFIG_PACKAGE_ip-full=y                # 完整版 iproute2
-CONFIG_PACKAGE_mmc-utils=y              # eMMC 维护工具
-CONFIG_PACKAGE_nand-utils=y             # NAND 维护工具
 CONFIG_PACKAGE_usbutils=y               # lsusb 等工具
-CONFIG_PACKAGE_openssh-sftp-server=y    # SFTP 服务端
-CONFIG_PACKAGE_openssh-keygen=y         # SSH 密钥生成
-CONFIG_PACKAGE_openssl-util=y           # OpenSSL 命令行工具
-CONFIG_PACKAGE_curl=y                   # HTTP/HTTPS 下载上传
-CONFIG_PACKAGE_jq=y                     # JSON 命令行处理器
-
-# -----------------------------------------------------------------------------
-#  LuCI 基础库
-# -----------------------------------------------------------------------------
-CONFIG_PACKAGE_luci-base=y              # LuCI Web 核心
-CONFIG_PACKAGE_luci-compat=y            # LuCI 兼容层
-CONFIG_PACKAGE_luci-lib-base=y          # LuCI 基础库
-CONFIG_PACKAGE_luci-lua-runtime=y       # LuCI Lua 运行时
-CONFIG_PACKAGE_luci-lib-json=y          # LuCI JSON 库
-CONFIG_PACKAGE_luci-mod-rpc=y           # LuCI JSON-RPC
-CONFIG_PACKAGE_luci-proto-bonding=y     # Bonding 协议页面
-CONFIG_PACKAGE_luci-proto-relay=y       # Relay / 无线中继页面
