@@ -381,19 +381,6 @@ update_openvpn_easy_rsa_version() {
     UPDATE_VERSION "openvpn-easy-rsa"
 }
 
-# 精简 passwall/ssr-plus 的可选变体，降低无关变体带来的编译负担与冲突面。
-trim_passwall_variants() {
-    local passwall_makefile
-
-    passwall_makefile=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
-    if [ -f "${passwall_makefile}" ]; then
-        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' "${passwall_makefile}"
-        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' "${passwall_makefile}"
-        sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' "${passwall_makefile}"
-        echo "【Lin】passwall has been fixed!"
-    fi
-}
-
 trim_ssrplus_variants() {
     local ssrplus_makefile
 
@@ -528,7 +515,6 @@ apply_post_update_fixes() {
     fix_quickfile_makefile
     apply_lang_node_prebuilt_fix
     update_openvpn_easy_rsa_version
-    trim_passwall_variants
     trim_ssrplus_variants
     fix_tailscale_makefile
     fix_rust_build

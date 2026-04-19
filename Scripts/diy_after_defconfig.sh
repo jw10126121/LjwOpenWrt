@@ -40,6 +40,49 @@ get_config_value() {
     grep -m 1 "^${key}=" ./.config | awk -F'=' '{print $2}' | tr -d '"'
 }
 
+trim_passwall_variants_after_defconfig() {
+    local choose_type_passwall
+    local passwall_makefile
+
+    choose_type_passwall=$(get_config_value "CONFIG_PACKAGE_luci-app-passwall")
+    if [ -n "${choose_type_passwall}" ] && [ "${choose_type_passwall}" != "n" ]; then
+        echo "【Lin】已启用 luci-app-passwall，跳过默认变体裁剪"
+        return 0
+    fi
+
+    passwall_makefile=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile" -print -quit 2>/dev/null)
+    if [ -z "${passwall_makefile}" ] || [ ! -f "${passwall_makefile}" ]; then
+        echo "【Lin】未找到 luci-app-passwall/Makefile，跳过默认变体裁剪"
+        return 0
+    fi
+
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Client/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Rust_Server/,/default n/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Simple_Obfs/,/default y/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Geo/,/default [ny]/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_V2ray_Plugin/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Xray/,/x86_64/d' "${passwall_makefile}"
+    sed -i '/INCLUDE_Haproxy/d; /INCLUDE_Shadowsocks_Rust_Client/d; /INCLUDE_Shadowsocks_Rust_Server/d; /INCLUDE_Simple_Obfs/d; /INCLUDE_SingBox/d; /INCLUDE_V2ray_Geo/d; /INCLUDE_V2ray_Plugin/d; /INCLUDE_Xray/d' "${passwall_makefile}"
+    sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' "${passwall_makefile}"
+
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Server=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geo/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=/d' ./.config
+    sed -i '/^CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=/d' ./.config
+
+    make defconfig >/dev/null 2>&1
+    echo "【Lin】passwall 默认变体已在 defconfig 后裁剪"
+    return 0
+}
+
 prepare_openclash_meta_core() {
     # 仅在启用了 luci-app-openclash 且架构受支持时，预置 clash_meta 二进制到插件目录。
     local choose_type_openclash openclash_dir openclash_core_arch openclash_core_url
@@ -105,6 +148,7 @@ prepare_openclash_meta_core() {
     return 0
 }
 
+trim_passwall_variants_after_defconfig
 prepare_openclash_meta_core
 
 cd "${openwrt_workdir}"
@@ -140,7 +184,6 @@ if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
         echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
-
 
 
 
