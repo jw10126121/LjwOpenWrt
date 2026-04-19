@@ -277,6 +277,9 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE
 
+    - name: Checkout (重新下载当前源码)
+      uses: actions/checkout@v6.0.1
+
     - name: Check Values (设置编译变量)
       run: |
         START_DATE=$(date +"D%y%m%d")
