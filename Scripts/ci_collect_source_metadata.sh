@@ -54,13 +54,18 @@ if [ -z "${kernel_patchver}" ]; then
     kernel_patchver="6.1"
 fi
 
-kernel_file_detail="${openwrt_path}/target/linux/generic/kernel-${kernel_patchver}"
-if [ "${wrt_is_lean}" = "true" ]; then
-    kernel_file_detail="${openwrt_path}/include/kernel-${kernel_patchver}"
-fi
+kernel_file_detail=""
+for candidate in \
+    "${openwrt_path}/include/kernel-${kernel_patchver}" \
+    "${openwrt_path}/target/linux/generic/kernel-${kernel_patchver}"; do
+    if [ -f "${candidate}" ]; then
+        kernel_file_detail="${candidate}"
+        break
+    fi
+done
 
 version_kernel=""
-if [ -f "${kernel_file_detail}" ]; then
+if [ -n "${kernel_file_detail}" ]; then
     version_kernel="$(sed -nE 's/^LINUX_KERNEL_HASH-([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' "${kernel_file_detail}" | head -n 1)"
 fi
 

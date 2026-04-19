@@ -5,6 +5,50 @@
 
 set -euo pipefail
 
+extract_config_version() {
+    local config_path=$1
+    sed -n 's/^CONFIG_VERSION_NUMBER="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "${config_path}" | \
+        head -n1 | \
+        sed -E 's/^(OpenWrt|ImmortalWrt)[[:space:]]+//'
+}
+
+extract_include_version() {
+    local version_file=$1
+    local version_value
+
+    version_value="$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${version_file}" | tail -n1 || true)"
+    if [ -z "${version_value}" ]; then
+        version_value="$(sed -nE 's/^VERSION_NUMBER:=.*\b(SNAPSHOT)\b.*/\1/p' "${version_file}" | tail -n1 || true)"
+    fi
+
+    printf '%s\n' "${version_value}"
+}
+
+extract_luci_version() {
+    local feeds_file=$1
+    local fallback_version=$2
+    local luci_value
+
+    luci_value="$(sed -nE 's|^[^#]*luci.*openwrt-([^;[:space:]]+).*|\1|p' "${feeds_file}" | head -n1 || true)"
+    if [ -n "${luci_value}" ]; then
+        printf '%s\n' "${luci_value}"
+        return 0
+    fi
+
+    luci_value="$(sed -nE 's|^[^#]*luci[^;]*;([^[:space:]]+).*|\1|p' "${feeds_file}" | head -n1 || true)"
+    if [ -n "${luci_value}" ]; then
+        printf '%s\n' "${luci_value}"
+        return 0
+    fi
+
+    if grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${feeds_file}" 2>/dev/null; then
+        printf '%s\n' "${fallback_version}"
+        return 0
+    fi
+
+    return 1
+}
+
 openwrt_path="${OPENWRT_PATH:?OPENWRT_PATH is required}"
 wrt_default_lanip="${WRT_DEFAULT_LANIP:?WRT_DEFAULT_LANIP is required}"
 wrt_has_lite="${WRT_HAS_LITE:-false}"
@@ -15,11 +59,11 @@ repo_git_hash="${REPO_GIT_HASH:-}"
 source_flavor="${SOURCE_FLAVOR:-${WRT_SOURCE_FLAVOR:-lean}}"
 device_target="${DEVICE_TARGET:-}"
 device_subtarget="${DEVICE_SUBTARGET:-}"
-device_arch="$(grep -oP '^CONFIG_TARGET_ARCH_PACKAGES="\K[^"]*' "${openwrt_path}/.config" || true)"
-luci_version="$(sed -n 's/^[^#]*luci.*openwrt-\([^;[:space:]]*\).*/\1/p' "${openwrt_path}/feeds.conf.default" || true)"
-config_version="$(grep CONFIG_VERSION_NUMBER "${openwrt_path}/.config" | cut -d '=' -f 2 | tr -d '"' | awk '{print $2}' || true)"
-include_version="$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${openwrt_path}/include/version.mk" | tail -n 1 || true)"
+device_arch="$(sed -n 's/^CONFIG_TARGET_ARCH_PACKAGES="\([^"]*\)"/\1/p' "${openwrt_path}/.config" | head -n1 || true)"
+config_version="$(extract_config_version "${openwrt_path}/.config")"
+include_version="$(extract_include_version "${openwrt_path}/include/version.mk")"
 op_version="${config_version:-${include_version}}"
+luci_version="$(extract_luci_version "${openwrt_path}/feeds.conf.default" "${op_version}" || true)"
 wrt_has_lite_text='[常规版]'
 wrt_has_wifi_text='有WIFI'
 package_manager='ipk'
