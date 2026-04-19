@@ -14,16 +14,14 @@ on:
         required: false
         type: string
         default: 'fw3'
-      WRT_REPO_URL:
-        description: '源码地址'
-        required: false
-        type: string
-        default: 'https://github.com/coolsnowwolf/lede'
-      WRT_REPO_BRANCH:
-        description: '源码分支'
-        required: false
-        type: string
-        default: ''
+      WRT_SOURCE_FLAVOR:
+        description: '源码风味'
+        required: true
+        type: choice
+        options:
+          - lean
+          - VIKINGYFY
+        default: 'lean'
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
@@ -81,18 +79,20 @@ jobs:
     - name: Run Source Metadata Script
       env:
         OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
-        WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
-        WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+        WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR }}
       run: |
         . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
-        SOURCE_FLAVOR="$(resolve_source_flavor "$WRT_REPO_URL")"
-        WRT_REPO_BRANCH="$(resolve_source_branch "$WRT_REPO_URL" "$WRT_REPO_BRANCH")"
+        selection="$(resolve_source_selection "$WRT_SOURCE_FLAVOR" "")"
+        eval "$selection"
+        WRT_REPO_URL="$REPO_URL"
+        WRT_REPO_BRANCH="$REPO_BRANCH"
+        SOURCE_FLAVOR="$SOURCE_FLAVOR"
         if [ "$SOURCE_FLAVOR" = "lean" ]; then
           WRT_IS_LEAN=true
         else
           WRT_IS_LEAN=false
         fi
-        export SOURCE_FLAVOR WRT_REPO_BRANCH WRT_IS_LEAN
+        export SOURCE_FLAVOR WRT_REPO_URL WRT_REPO_BRANCH WRT_IS_LEAN
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
         grep -q '^WRT_VER=' /tmp/source_metadata.txt
         grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt
@@ -102,11 +102,10 @@ jobs:
     - name: Run Final Metadata Script
       env:
         OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
+        WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR }}
         WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
         WRT_HAS_LITE: false
         WRT_HAS_WIFI: true
-        WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
-        WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
         WRT_USE_APK: false
         DEVICE_PROFILE: glinet_gl-mt6000
         DEVICE_TARGET: mediatek
@@ -114,11 +113,20 @@ jobs:
         VERSION_KERNEL: 6.12.80
         REPO_GIT_HASH: test-metadata
       run: |
+        . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
+        selection="$(resolve_source_selection "$WRT_SOURCE_FLAVOR" "")"
+        eval "$selection"
+        export WRT_REPO_URL="$REPO_URL" WRT_REPO_BRANCH="$REPO_BRANCH"
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_final_metadata.sh" | tee /tmp/final_metadata.txt
         grep -q '^DEVICE_ARCH=aarch64_cortex-a53$' /tmp/final_metadata.txt
         grep -q '^LUCI_VERSION=23.05$' /tmp/final_metadata.txt
         grep -q '^OP_VERSION=24.10.5$' /tmp/final_metadata.txt
+        grep -q '^SOURCE_FLAVOR_TAG=lean$' /tmp/final_metadata.txt
+        grep -q '^FW_STACK_TAG=fw3$' /tmp/final_metadata.txt
+        grep -q '^FRP_ROLE_TAG=frpc$' /tmp/final_metadata.txt
+        grep -q '^BUILD_VARIANT_TAG=lean_fw3_frpc$' /tmp/final_metadata.txt
         grep -q '^system_content<<EOF_SYSTEM$' /tmp/final_metadata.txt
+        grep -q '源码风味：lean' /tmp/final_metadata.txt
         grep -q 'FW环境：FW3' /tmp/final_metadata.txt
         grep -q 'FRP角色：FRPC' /tmp/final_metadata.txt
 

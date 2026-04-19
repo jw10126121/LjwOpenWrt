@@ -44,16 +44,14 @@ on:
         required: false
         type: string
         default: '192.168.0.1'
-      WRT_REPO_URL:
-        description: '源码'
-        required: false
-        type: string
-        default: 'https://github.com/coolsnowwolf/lede'
-      WRT_REPO_BRANCH:
-        description: '源码分支，留空时按仓库默认分支处理'
-        required: false
-        type: string
-        default: ''
+      WRT_SOURCE_FLAVOR:
+        description: '源码风味'
+        required: true
+        type: choice
+        options:
+          - lean
+          - VIKINGYFY
+        default: 'lean'
       WRT_RELEASE_FIRMWARE:
         description: '发布firmware'
         required: false
@@ -124,8 +122,7 @@ on:
 #环境变量配置
 env:
   DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
-  WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
-  WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+  WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR || 'lean' }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}           # 设备名
   WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}       # fw3 / fw4

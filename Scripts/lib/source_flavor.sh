@@ -1,21 +1,21 @@
 #!/bin/bash
 
 resolve_source_flavor() {
-    local repo_url="${1:-}"
-    local repo_url_lc
+    local source_input="${1:-}"
+    local source_input_lc
 
-    repo_url_lc=$(printf '%s' "$repo_url" | tr '[:upper:]' '[:lower:]')
+    source_input_lc=$(printf '%s' "$source_input" | tr '[:upper:]' '[:lower:]')
 
-    if [ -z "${repo_url_lc}" ]; then
+    if [ -z "${source_input_lc}" ]; then
         printf '%s\n' 'lean'
         return 0
     fi
 
-    case "$repo_url_lc" in
-        *coolsnowwolf/lede*)
+    case "$source_input_lc" in
+        lean|*coolsnowwolf/lede*)
             printf '%s\n' 'lean'
             ;;
-        *vikingyfy/immortalwrt*)
+        vikingyfy|immortalwrt|*vikingyfy/immortalwrt*)
             printf '%s\n' 'VIKINGYFY'
             ;;
         *)
@@ -24,11 +24,28 @@ resolve_source_flavor() {
     esac
 }
 
-resolve_source_default_branch() {
-    local repo_url="${1:-}"
+resolve_source_repo_url() {
     local source_flavor
 
-    source_flavor=$(resolve_source_flavor "${repo_url}")
+    source_flavor=$(resolve_source_flavor "${1:-}")
+
+    case "${source_flavor}" in
+        VIKINGYFY)
+            printf '%s\n' 'https://github.com/VIKINGYFY/immortalwrt'
+            ;;
+        generic)
+            printf '%s\n' 'https://github.com/openwrt/openwrt'
+            ;;
+        *)
+            printf '%s\n' 'https://github.com/coolsnowwolf/lede'
+            ;;
+    esac
+}
+
+resolve_source_default_branch() {
+    local source_flavor
+
+    source_flavor=$(resolve_source_flavor "${1:-}")
 
     case "${source_flavor}" in
         VIKINGYFY|generic)
@@ -40,47 +57,29 @@ resolve_source_default_branch() {
     esac
 }
 
-resolve_source_branch() {
-    local repo_url="${1:-}"
-    local repo_branch="${2:-}"
-
-    if [ -n "${repo_branch}" ]; then
-        printf '%s\n' "${repo_branch}"
-        return 0
-    fi
-
-    resolve_source_default_branch "${repo_url}"
-}
-
 resolve_source_selection() {
-    local input_repo_url="${1:-}"
-    local input_repo_branch="${2:-}"
-    local source_hash_info="${3:-}"
-    local repo_url="${input_repo_url:-https://github.com/coolsnowwolf/lede}"
+    local input_source_flavor="${1:-}"
+    local source_hash_info="${2:-}"
+    local source_flavor=''
+    local repo_url=''
     local repo_branch=''
     local repo_hash=''
     local legacy_hash=''
-    local legacy_url=''
-    local legacy_branch=''
-    local source_flavor=''
+
+    source_flavor=$(resolve_source_flavor "${input_source_flavor}")
+    repo_url=$(resolve_source_repo_url "${source_flavor}")
+    repo_branch=$(resolve_source_default_branch "${source_flavor}")
 
     if [ -n "${source_hash_info}" ]; then
         if [[ "${source_hash_info}" == *"|"* ]]; then
-            IFS='|' read -r legacy_hash legacy_url legacy_branch <<EOF
+            IFS='|' read -r legacy_hash _ <<EOF
 ${source_hash_info}
 EOF
             repo_hash="${legacy_hash}"
-            [ -n "${legacy_url}" ] && repo_url="${legacy_url}"
-            repo_branch=$(resolve_source_branch "${repo_url}" "${legacy_branch:-${input_repo_branch}}")
         else
             repo_hash="${source_hash_info}"
-            repo_branch=$(resolve_source_branch "${repo_url}" "${input_repo_branch}")
         fi
-    else
-        repo_branch=$(resolve_source_branch "${repo_url}" "${input_repo_branch}")
     fi
-
-    source_flavor=$(resolve_source_flavor "${repo_url}")
 
     cat <<EOF
 REPO_URL=${repo_url}

@@ -16,7 +16,7 @@ if [ -n "$manual_general_configs" ]; then
 fi
 
 case "${fw_selector}" in
-	fw4|FW4|*-FW4.txt|*-V.txt)
+	fw4|FW4|*-FW4.txt)
 		printf '%s\n' 'GENERAL.txt GENERAL-SERVICE.txt GENERAL-FW4.txt'
 		;;
 	*)

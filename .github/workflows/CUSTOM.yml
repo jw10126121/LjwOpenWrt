@@ -51,16 +51,14 @@ on:
         required: false
         type: string
         default: ''
-      WRT_REPO_URL:
-        description: '源码'
+      WRT_SOURCE_FLAVOR:
+        description: '源码风味'
         required: true
-        type: string
-        default: 'https://github.com/coolsnowwolf/lede'
-      WRT_REPO_BRANCH:
-        description: '源码分支，留空时按仓库默认分支处理'
-        required: false
-        type: string
-        default: ''
+        type: choice
+        options:
+          - lean
+          - VIKINGYFY
+        default: 'lean'
       WRT_SOURCE_HASH_INFO:
         description: '源码HASH，推荐只填 commit hash；兼容旧格式 hash|url|branch'
         required: false
@@ -78,7 +76,7 @@ permissions: write-all
 #CI任务
 jobs:
   config:
-    name: ${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}
+    name: ${{ inputs.WRT_SOURCE_FLAVOR }}-${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
     strategy:
       fail-fast: false
       #max-parallel: 2
@@ -91,10 +89,8 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR }}
       WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
-      # 编译分支
-      WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # 参数化配置

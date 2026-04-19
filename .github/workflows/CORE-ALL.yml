@@ -17,10 +17,7 @@ on:
       # WRT_REPO_BRANCH:
       #   required: true
       #   type: string
-      WRT_REPO_URL:
-        required: false
-        type: string
-      WRT_REPO_BRANCH:
+      WRT_SOURCE_FLAVOR:
         required: false
         type: string
       WRT_SOURCE_HASH_INFO:
@@ -82,8 +79,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
   WRT_REPO_INFO: ''
-  WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
-  WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
+  WRT_SOURCE_FLAVOR: ${{ inputs.WRT_SOURCE_FLAVOR || 'lean' }}
   WRT_SOURCE_HASH_INFO: ${{inputs.WRT_SOURCE_HASH_INFO}}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}                          # 设备名
@@ -234,20 +230,11 @@ jobs:
         echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
         echo "【Lin】读取防火墙参数：${{env.WRT_FIREWALL}}"
         echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
-        if [ -n "${WRT_REPO_URL}" ]; then
-          RESOLVED_REPO_BRANCH=$(resolve_source_branch "${WRT_REPO_URL}" "${WRT_REPO_BRANCH}")
-          WRT_REPO_INFO="${WRT_REPO_URL}|${RESOLVED_REPO_BRANCH}"
-          echo "【Lin】读取显式源码信息：${WRT_REPO_INFO}"
-        else
-          WRT_REPO_INFO='https://github.com/coolsnowwolf/lede|master'
-          echo "【Lin】未显式传源码，使用默认源码信息：${WRT_REPO_INFO}"
-        fi
-        echo "【Lin】当前源码信息：${WRT_REPO_INFO}"
         RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_GENERAL_CONFIG}" "${WRT_FIREWALL}")
         echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
         echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
-        resolved_source_selection=$(resolve_source_selection "${WRT_REPO_URL}" "${WRT_REPO_BRANCH}" "${WRT_SOURCE_HASH_INFO}")
+        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}")
         eval "${resolved_source_selection}"
         WRT_REPO_URL="${REPO_URL}"
         WRT_REPO_BRANCH="${REPO_BRANCH}"
@@ -260,6 +247,7 @@ jobs:
         echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
         echo "WRT_REPO_URL=${WRT_REPO_URL}" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}" >> $GITHUB_ENV
+        echo "WRT_SOURCE_FLAVOR=${SOURCE_FLAVOR}" >> $GITHUB_ENV
         echo "SOURCE_FLAVOR=${SOURCE_FLAVOR}" >> $GITHUB_ENV
         echo "WRT_REPO_Commit_Hash=${WRT_REPO_Commit_Hash}" >> $GITHUB_ENV
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
@@ -299,9 +287,14 @@ jobs:
       id: clone_source
       run: |
         . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
-        SOURCE_FLAVOR=$(resolve_source_flavor "$WRT_REPO_URL")
-        WRT_REPO_BRANCH=$(resolve_source_branch "$WRT_REPO_URL" "$WRT_REPO_BRANCH")
+        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}")
+        eval "${resolved_source_selection}"
+        WRT_REPO_URL="${REPO_URL}"
+        WRT_REPO_BRANCH="${REPO_BRANCH}"
+        SOURCE_FLAVOR="${SOURCE_FLAVOR}"
         echo "SOURCE_FLAVOR=$SOURCE_FLAVOR" >> $GITHUB_ENV
+        echo "WRT_SOURCE_FLAVOR=$SOURCE_FLAVOR" >> $GITHUB_ENV
+        echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
         echo "【Lin】源码风味：$SOURCE_FLAVOR"
         if [ "$SOURCE_FLAVOR" = "lean" ]; then
@@ -495,7 +488,7 @@ jobs:
     - name: Check Config (缓存配置文件)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
+        name_config_file="Config_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【Lin】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
@@ -536,7 +529,7 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+        name: config_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/config_mine
 
     # - name: Cache Toolchain (缓存工具链)
@@ -611,7 +604,7 @@ jobs:
       if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: ${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}_Firmware
+        name: Firmware_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Create Notification Content (创建推送结果内容)
@@ -646,8 +639,8 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        release_name="${{ env.START_TIME }} for ${{ env.DEVICE_SUBTARGET }}"
-        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}"
+        release_name="${{ env.START_TIME }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}"
+        release_tag="${{ env.START_TIME }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}"
         shopt -s nullglob
         release_files=( "${{ env.OPENWRT_PATH }}"/upload/*.* )
 
