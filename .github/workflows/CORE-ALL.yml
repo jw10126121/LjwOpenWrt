@@ -23,6 +23,9 @@ on:
       WRT_CONFIG:
         required: true
         type: string
+      WRT_CONFIG_OVERLAY:
+        required: false
+        type: string
       WRT_DIY_SETTING:
         required: true
         type: string
@@ -32,7 +35,7 @@ on:
         type: string
         default: diy_feeds.sh
       WRT_GENERAL_CONFIG:
-        description: 基础配置文件，支持空格分隔多个文件；留空时按配置类型自动选择
+        description: 基础配置层，可留空自动选择；也可手工填写多个文件名
         required: false
         type: string
       WRT_DIYPackages:
@@ -72,6 +75,7 @@ env:
   WRT_SOURCE_HASH_INFO: ${{inputs.WRT_SOURCE_HASH_INFO}}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_CONFIG: ${{inputs.WRT_CONFIG}}                          # 配置文件
+  WRT_CONFIG_OVERLAY: ${{inputs.WRT_CONFIG_OVERLAY || '' }}   # 配置覆盖文件
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
   WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}        # 通用配置
@@ -308,11 +312,20 @@ jobs:
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         # 临时导入config，为了获取设备信息
         [ -f ./.config ] && rm -rf ./.config
-        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-          "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-          "$RESOLVED_GENERAL_CONFIG" \
-          "$WRT_CONFIG" \
-          ".config"
+        if [ -n "$WRT_CONFIG_OVERLAY" ]; then
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
+            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
+            "$RESOLVED_GENERAL_CONFIG" \
+            "$WRT_CONFIG" \
+            "$WRT_CONFIG_OVERLAY" \
+            ".config"
+        else
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
+            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
+            "$RESOLVED_GENERAL_CONFIG" \
+            "$WRT_CONFIG" \
+            ".config"
+        fi
 
     # - name: ln mnt (合并磁盘mnt)
     #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
@@ -403,11 +416,20 @@ jobs:
       run: |
         echo '【Lin】移除所有.config并添加新的.config'
         [ -f ./.config ] && rm -rf ./.config
-        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-          "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-          "$RESOLVED_GENERAL_CONFIG" \
-          "$WRT_CONFIG" \
-          ".config"
+        if [ -n "$WRT_CONFIG_OVERLAY" ]; then
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
+            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
+            "$RESOLVED_GENERAL_CONFIG" \
+            "$WRT_CONFIG" \
+            "$WRT_CONFIG_OVERLAY" \
+            ".config"
+        else
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
+            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
+            "$RESOLVED_GENERAL_CONFIG" \
+            "$WRT_CONFIG" \
+            ".config"
+        fi
         
     - name: diy settings (加载自定义设置) 
       working-directory: ${{ env.OPENWRT_PATH }}

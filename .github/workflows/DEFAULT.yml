@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       WRT_CONFIG:
-        description: '配置：平台-NOWIFI-源码作者'
+        description: '主配置文件：先选机型，再选 FW3 / FW4 方案'
         required: true
         type: choice
         options:
@@ -14,8 +14,15 @@ on:
           - IPQ60XX-NOWIFI-FW4.txt
           - MT6000-WIFI-FW3.txt
           - MT6000-WIFI-FW4.txt
-          - IPQ60XX-NOWIFI-FW3-FRPS.txt
         default: 'IPQ60XX-NOWIFI-FW3.txt'
+      WRT_CONFIG_OVERLAY:
+        description: '可选覆盖文件：在主配置基础上追加少量差异项'
+        required: false
+        type: choice
+        options:
+          - ''
+          - IPQ60XX-NOWIFI-FW3-FRPS-override.txt
+        default: ''
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
         required: false
@@ -27,7 +34,7 @@ on:
         type: string
         default: 'Packages.sh'
       WRT_GENERAL_CONFIG:
-        description: '基础配置文件，支持空格分隔多个文件；留空时按配置类型自动选择'
+        description: '基础配置层，可留空自动选择；也可手工填写多个文件名'
         required: false
         type: string
         default: ''
@@ -93,6 +100,8 @@ jobs:
       # WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件
       WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
+      # 机型覆盖文件
+      WRT_CONFIG_OVERLAY: ${{ inputs.WRT_CONFIG_OVERLAY }}
       # 通用配置
       WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }} # GENERAL.txt
       # DIY脚本

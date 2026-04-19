@@ -10,10 +10,15 @@ on:
   workflow_dispatch:
     inputs:
       WRT_CONFIG:
-        description: '配置文件'
+        description: '主配置文件：决定机型与默认功能组合'
         required: true
         type: string
         default: 'IPQ60XX-NOWIFI-FW3.txt'
+      WRT_CONFIG_OVERLAY:
+        description: '可选覆盖文件：只追加少量差异项，例如 FRPS 变体'
+        required: false
+        type: string
+        default: ''
       WRT_DIY_SETTING:
         description: 'DIY脚本'
         required: false
@@ -25,7 +30,7 @@ on:
         type: string
         default: 'Packages.sh'
       WRT_GENERAL_CONFIG:
-        description: '基础配置文件，支持空格分隔多个文件；留空时按配置类型自动选择'
+        description: '基础配置层，可留空自动选择；也可手工填写多个文件名'
         required: false
         type: string
         default: ''
@@ -118,6 +123,7 @@ env:
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH || 'master' }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_CONFIG: ${{inputs.WRT_CONFIG}}           # 配置文件
+  WRT_CONFIG_OVERLAY: ${{inputs.WRT_CONFIG_OVERLAY || '' }} # 配置覆盖文件
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}           # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }}                         # 主要用于更新Feeds
   WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}     # 通用配置

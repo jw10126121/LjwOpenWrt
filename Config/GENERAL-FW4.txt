@@ -1,8 +1,8 @@
 ### === 通用栈层：FW4 / nftables === ###
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 #  防火墙 / 网络栈：FW4
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 CONFIG_PACKAGE_firewall4=y                   # 启用 FW4
 CONFIG_PACKAGE_firewall=n                    # 关闭 FW3
 CONFIG_PACKAGE_iptables=n                    # 关闭 iptables 用户态
@@ -12,9 +12,9 @@ CONFIG_PACKAGE_ip6tables-mod-nat=n           # 关闭 IPv6 NAT 模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=n    # 关闭 iptables FullCone
 CONFIG_PACKAGE_kmod-ipt-fullconenat=n        # 关闭 iptables FullCone 内核模块
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 #  FW4 连接跟踪 / nftables 核心
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 CONFIG_PACKAGE_kmod-nf-conntrack=y           # 连接跟踪核心
 CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y   # 连接跟踪 Netlink 接口
 CONFIG_PACKAGE_kmod-nf-conntrack6=y          # IPv6 连接跟踪
@@ -24,9 +24,9 @@ CONFIG_PACKAGE_kmod-nft-nat=y                # nft NAT 核心
 CONFIG_PACKAGE_kmod-nft-offload=y            # nft flow offload
 CONFIG_PACKAGE_kmod-nft-fullcone=y           # nft FullCone NAT
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 #  FW4 绑定的代理默认项
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 CONFIG_PACKAGE_luci-app-homeproxy=y          # FW4 主代理方案默认启用 HomeProxy
 CONFIG_PACKAGE_luci-app-ssr-plus=n           # FW4 下显式关闭 SSR Plus 主包
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n
