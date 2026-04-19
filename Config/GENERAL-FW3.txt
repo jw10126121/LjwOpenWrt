@@ -17,5 +17,6 @@ CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
 # ------------------------------------------------------------------------
 CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 方案下不启用 HomeProxy
 CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 侧默认提供 SSR Plus 主包
+CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包需与主包同层维护
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 环境默认启用 Turbo ACC 页面
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包

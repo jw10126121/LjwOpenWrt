@@ -33,7 +33,7 @@
 
 - `WRT_DEVICE`：选择设备型号，例如 `IPQ60XX-NOWIFI`、`MT6000-WIFI`
 - `WRT_FIREWALL`：选择防火墙栈，`fw3` 或 `fw4`
-- `WRT_OVERLAYS`：可选 overlays，逗号分隔，例如 `frps`、`apk`、`frps,apk`
+- `WRT_OVERLAYS`：可选 overlays，逗号分隔；除内置的 `frps`、`apk`、`ipk` 外，也支持你自己新增的 overlay 名，例如 `frps,apk`、`myvpn`、`myvpn,frps`
 
 ### GitHub Actions 源码与配置层说明
 
@@ -42,7 +42,7 @@
 - `WRT_SOURCE_HASH_INFO`：推荐只填 commit hash；旧格式 `hash|url|branch` 仍兼容，但不再推荐
 - `WRT_FIREWALL`：只表示功能配置层，不再隐含绑定特定源码
 - `WRT_GENERAL_CONFIG`：可选手工基础配置组合；一般不需要填写
-- `WRT_OVERLAYS`：叠加可选差异层；`apk` 与 `ipk` 互斥
+- `WRT_OVERLAYS`：叠加可选差异层；会按传入顺序依次覆盖，只有 `apk` 与 `ipk` 互斥
 
 脚本内部会根据 `WRT_REPO_URL` 自动解析 `source_flavor=lean|VIKINGYFY|generic`，未显式传源码时默认使用 `lean`。如果 `WRT_REPO_BRANCH` 留空，会自动选择默认分支：`lean -> master`，`VIKINGYFY -> main`。
 
@@ -53,7 +53,20 @@
 - `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt`
 - `Config/devices/<设备名>.txt`
 - `Config/device-overlays/<设备名>-<FW>.txt`（如果存在则自动叠加）
-- `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加）
+- `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加；输入时不区分大小写，内部会映射到大写文件名）
+
+自定义 overlay 的约定：
+
+- 新增一个文件到 `Config/overlays/`，例如 `Config/overlays/MYVPN.txt`
+- 在 `WRT_OVERLAYS` 里填写 `myvpn`；脚本会自动映射到 `Config/overlays/MYVPN.txt`
+- 可以同时传多个值，例如 `myvpn,frps,apk`
+- 后面的 overlay 会覆盖前面同名配置
+- 目前唯一内置冲突限制是 `apk` 与 `ipk` 不能同时启用
+
+配置维护约定：
+
+- `CONFIG_PACKAGE_luci-app-*`、`CONFIG_PACKAGE_luci-theme-*` 与对应的 `CONFIG_PACKAGE_luci-i18n-*-zh-cn` 应写在同一份配置文件里，避免主包和语言包分散到不同层级
+- 只适用于特定防火墙栈的包，应写在 `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt` 中统一控制；不要写在设备层里覆盖，例如 `luci-app-turboacc` 仅允许在 FW3 层启用
 
 ## 编译时间
 手动编译

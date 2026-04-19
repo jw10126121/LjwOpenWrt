@@ -4,7 +4,6 @@
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
 CONFIG_PACKAGE_luci-app-openlist=m           # OpenList 文件索引
 CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m    # OpenList 中文语言包
-CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y    # SSR Plus 中文语言包
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # 关闭 simple-obfs
 CONFIG_PACKAGE_luci-app-bandix=m             # 流量统计
 CONFIG_PACKAGE_bandix=m                      # Bandix 后端
