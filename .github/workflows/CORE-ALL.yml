@@ -181,6 +181,9 @@ jobs:
         sudo -E systemctl daemon-reload
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@v6.0.1
+
     # - name: Initialization Environment (初始化环境)
     #   env:
     #     DEBIAN_FRONTEND: noninteractive
@@ -273,9 +276,6 @@ jobs:
     - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
-
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@v6.0.1
 
     - name: Check Values (设置编译变量)
       run: |
