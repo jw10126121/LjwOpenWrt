@@ -4,13 +4,19 @@
 # 1. 该脚本在 OpenWrt 的 package 目录下执行，用于删除、替换和修补第三方插件包。
 # 2. 入口职责保持不变：先按源码风味应用包清单，再执行一组编译兼容性修补。
 # 3. 结构上拆成三层：通用包操作函数、源码风味包清单、后置修补函数。
+# 4. 这个脚本不负责 menuconfig 选包，只负责把 package/ 与部分 feeds 中的包替换成指定来源版本。
+# 5. 整体策略是“先清理同名包，再拉取目标仓库，再做兼容性修补”，避免不同来源的重复包互相污染。
 
 current_script_dir=$(cd "$(dirname "$0")" && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 
+# source_flavor 只决定“额外覆盖哪些包”。
+# 通用包清单所有源码风味都会执行；源码风味清单只补各自差异。
 source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
 [ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
 
+# 允许从仓库根目录执行，脚本会自行切换到 package/；
+# 如果当前目录和子目录里都没有 package/，则直接退出，避免误删其它路径。
 if [ "$(basename "$(pwd)")" != 'package' ]; then
     if [ -d "./package" ]; then
         cd ./package
@@ -27,12 +33,16 @@ source_flavor='lean'
 
 echo "【Lin】工作目录：${package_workdir}"
 
+# 在 package/、feeds/luci/、feeds/packages/ 三个常见来源中查找同名包。
+# 这样无论包来自官方 feeds 还是第三方仓库，都能先做统一清理。
 find_package_dirs() {
     local package_name=$1
 
     find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$package_name" 2>/dev/null
 }
 
+# 统一把 owner/repo 形式转换成完整 GitHub URL；
+# 已经是 github.com 全路径时保持不变，兼容脚本中两种写法。
 normalize_repo_url() {
     local package_repo=$1
 
@@ -43,6 +53,7 @@ normalize_repo_url() {
     fi
 }
 
+# 浅克隆只取目标分支最近一层历史，减小 Actions 拉取体积和时间。
 clone_repo_shallow() {
     local repo_url=$1
     local repo_branch=$2
@@ -51,6 +62,8 @@ clone_repo_shallow() {
     git clone --depth=1 --single-branch --branch "${repo_branch}" "${repo_url}" "${repo_name}"
 }
 
+# 删除同名包是所有替换动作的第一步。
+# 这里按包名删除，而不是按仓库名删除，目的是清掉官方 feeds 与旧第三方来源中的同名目录。
 DELETE_PACKAGE() {
     local package_name=$1
     local found_dirs
@@ -66,6 +79,11 @@ DELETE_PACKAGE() {
     fi
 }
 
+# UPDATE_PACKAGE 适用于“一仓库对应一个包目录”的场景。
+# package_special:
+# - 空：直接保留仓库原目录名
+# - pkg：从大杂烩仓库里抽取指定子目录
+# - name：把仓库目录重命名成 package_name
 UPDATE_PACKAGE() {
     local package_name=$1
     local package_repo=$2
@@ -88,6 +106,8 @@ UPDATE_PACKAGE() {
 
     case "${package_special}" in
         pkg)
+            # 一些仓库根目录只是包集合，真正要编译的是里面某个子目录。
+            # 这里先保留整个仓库，再把目标子目录复制到 package/ 根下。
             search_result_pkg_dir=$(find "./${repo_name}"/*/ -maxdepth 1 -type d -iname "${search_type}" -prune)
             if [ -n "${search_result_pkg_dir}" ]; then
                 mv -f "${repo_name}" "${repo_name}_bak"
@@ -96,12 +116,15 @@ UPDATE_PACKAGE() {
             fi
             ;;
         name)
+            # 对仓库名和包名不一致的情况，直接把 clone 下来的目录改成目标包名。
             mv -f "${repo_name}" "${package_name}"
             echo "【Lin】重命名插件：${package_name} <= ${repo_name}"
             ;;
     esac
 }
 
+# 用于从“包合集仓库”中逐个拷出需要的目录。
+# 这里不移动而是复制，是为了允许一个仓库中提取多个包，最后再统一删除临时仓库目录。
 MOVE_PACKAGE_FROM_LIST() {
     local package_name=$1
     local list_repo=$2
@@ -116,6 +139,12 @@ MOVE_PACKAGE_FROM_LIST() {
     fi
 }
 
+# update_package_list 适用于“一个仓库内维护多个包目录”的场景。
+# package_name_list 是空格分隔列表，函数会：
+# 1. 先删除所有同名旧包
+# 2. 临时克隆包合集仓库
+# 3. 按列表逐个复制目标目录到 package/
+# 4. 删除临时仓库，避免 package/ 中残留整个合集
 update_package_list() {
     local package_name_list=($1)
     local package_repo=$2
@@ -134,6 +163,7 @@ update_package_list() {
     full_repo=$(normalize_repo_url "${package_repo}")
     repo_url_git=${full_repo%.git}
     repo_name_last=${repo_url_git##*/}
+    # 临时仓库目录名转成 pkglist_owner_repo 形式，避免和真实包目录重名。
     repo_name=${full_repo#*//}
     repo_name=${repo_name#*/}
     repo_name=${repo_name%.git}
@@ -158,6 +188,8 @@ update_package_list() {
     rm -rf "${repo_name}"
 }
 
+# safe_update_package 适用于“要直接覆盖现有包目录，但失败时必须可回滚”的场景。
+# 它比 UPDATE_PACKAGE 更保守：先备份旧目录，再替换，clone 失败则回滚。
 safe_update_package() {
     local package_name=$1
     local package_repo=$2
@@ -182,6 +214,8 @@ safe_update_package() {
     fi
 }
 
+# UPDATE_VERSION 只处理采用 GitHub release/tarball 模式且 Makefile 可自动推导版本号的包。
+# 它不会下载源码树，只会改 Makefile 里的 PKG_VERSION 与 PKG_HASH。
 UPDATE_VERSION() {
     local package_name=$1
     local package_mark=${2:-false}
@@ -236,6 +270,8 @@ UPDATE_VERSION() {
     done
 }
 
+# 根据 WRT_REPO_URL 推断当前源码风味。
+# 这里故意给 lean 兜底，保证在没有 helper 的环境下脚本仍然可执行。
 resolve_packages_source_flavor() {
     if command -v resolve_source_flavor >/dev/null 2>&1; then
         source_flavor=$(resolve_source_flavor "${source_repo_url}")
@@ -246,6 +282,8 @@ resolve_packages_source_flavor() {
     echo "【Lin】Packages 源码风味：${source_flavor}"
 }
 
+# 通用包清单：无论 lean / VIKINGYFY / 其它源码风味，都会执行。
+# 这里应该只放“对所有风味都通用”的替换，不要放只在特定源码树中才成立的覆盖。
 apply_common_package_overrides() {
     update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
@@ -265,14 +303,21 @@ apply_common_package_overrides() {
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+    # quickfile 当前按需保留，默认不导入。
+    # 如果后续重新启用，需要同时确认设备侧是否改成 luci-nginx 路线。
+    # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
 }
 
+# lean 风味额外覆盖。
+# 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
 }
 
+# VIKINGYFY 风味额外覆盖。
+# 这里保留该源码系特有的包来源与替换关系。
 apply_VIKINGYFY_package_overrides() {
     update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
     UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
@@ -284,6 +329,8 @@ apply_VIKINGYFY_package_overrides() {
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
 }
 
+# generic 兜底风味：
+# 当源码地址无法识别时，仍然给出一套最保守的覆盖，不让脚本直接失效。
 apply_generic_package_overrides() {
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
@@ -305,6 +352,8 @@ apply_source_flavor_package_overrides() {
     esac
 }
 
+# quickfile 的上游二进制文件名和本地 OpenWrt 架构名并不总是一一对应。
+# 这个修补只在 quickfile 已经被导入时生效；当前默认未启用，所以通常会静默跳过。
 fix_quickfile_makefile() {
     local quickfile_makefile
 
@@ -320,14 +369,19 @@ fix_quickfile_makefile() {
     fi
 }
 
+# 统一调用外部 helper 处理 node 预编译包兼容问题，避免主脚本继续膨胀。
 apply_lang_node_prebuilt_fix() {
     bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${openwrt_workdir}"
 }
 
+# 下列函数都属于“后置修补链”：
+# 前提是包已经通过前面的覆盖流程存在于 package/ 或 feeds 中，
+# 然后再对 Makefile、脚本、资源文件做最小修补，使其更适配当前源码与设备配置。
 update_openvpn_easy_rsa_version() {
     UPDATE_VERSION "openvpn-easy-rsa"
 }
 
+# 精简 passwall/ssr-plus 的可选变体，降低无关变体带来的编译负担与冲突面。
 trim_passwall_variants() {
     local passwall_makefile
 
@@ -352,6 +406,7 @@ trim_ssrplus_variants() {
     fi
 }
 
+# tailscale 的 Makefile 在部分源码树中会带入不兼容 files 路径，这里直接删掉对应引用。
 fix_tailscale_makefile() {
     local tailscale_makefile
 
@@ -359,6 +414,7 @@ fix_tailscale_makefile() {
     [ -f "${tailscale_makefile}" ] && sed -i '/\/files/d' "${tailscale_makefile}" && echo "【Lin】tailscale has been fixed!"
 }
 
+# rust 在某些环境下使用 ci-llvm=true 会额外触发更重的构建路径，这里改成更稳妥的值。
 fix_rust_build() {
     local rust_makefile
 
@@ -369,6 +425,7 @@ fix_rust_build() {
     fi
 }
 
+# diskman 针对 ntfs3 做适配，避免旧依赖名在新树里继续触发编译失败。
 fix_diskman_makefile() {
     local diskman_makefile="./luci-app-diskman/applications/luci-app-diskman/Makefile"
 
@@ -379,6 +436,7 @@ fix_diskman_makefile() {
     fi
 }
 
+# Argon 主题视觉修补：统一进度条颜色变量，避免主题色与进度条色分离。
 sync_argon_progress_bar() {
     local argon_dir
 
@@ -387,6 +445,8 @@ sync_argon_progress_bar() {
         echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
 }
 
+# pushbot / wechatpush 两组修补都属于“运行时兼容性”修补：
+# 主要处理温度读取函数、展示文案，以及与当前设备环境不匹配的逻辑。
 fix_pushbot_runtime() {
     local pushbot_dir
     local pushbot_action_file
@@ -421,6 +481,7 @@ fix_wechatpush_runtime() {
     fi
 }
 
+# 某些来源缺少 vlmcsd.ini，预置一个默认配置文件，避免装上后仍要手工补文件。
 ensure_vlmcsd_ini() {
     local app_vlmcsd_dir
     local vlmcsd_ini
@@ -433,6 +494,8 @@ ensure_vlmcsd_ini() {
     fi
 }
 
+# homeproxy 这里不是简单替换包，而是预先把规则资源准备到包目录中。
+# 这样最终编译出来的镜像会自带一套规则资源，减少首次使用时的初始化成本。
 preload_homeproxy_resources() {
     local homeproxy_dir
     local homeproxy_path
@@ -458,6 +521,9 @@ preload_homeproxy_resources() {
     echo "【Lin】homeproxy date has been updated!"
 }
 
+# 后置修补链的顺序很重要：
+# 先修 Makefile / 依赖，再修运行时脚本，再补资源文件。
+# 这样可以减少后面的修补建立在“包还没准备好”的状态上。
 apply_post_update_fixes() {
     fix_quickfile_makefile
     apply_lang_node_prebuilt_fix
@@ -474,6 +540,11 @@ apply_post_update_fixes() {
     preload_homeproxy_resources
 }
 
+# 主入口保持极简，只负责串联四个阶段：
+# 1. 识别源码风味
+# 2. 应用通用包覆盖
+# 3. 应用源码风味差异覆盖
+# 4. 执行后置修补链
 main() {
     resolve_packages_source_flavor
     apply_common_package_overrides
