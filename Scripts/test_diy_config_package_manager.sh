@@ -2,7 +2,8 @@
 
 # 说明：验证 diy_config.sh 中 apk / ipk 的核心兼容逻辑：
 # 1. .config 包管理器相关开关会按模式切换；
-# 2. 运行时 feed 修补命令会指向正确的 apk/opkg 配置文件。
+# 2. 运行时 feed 修补命令会指向正确的 apk/opkg 配置文件；
+# 3. default-settings-chn 不再由包管理器切换逻辑直接控制。
 
 set -eu
 
@@ -97,7 +98,14 @@ grep -q '^CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=n$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-opkg=y$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-lib-ipkg=y$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y$' "$IPK_CONFIG"
-grep -q '^CONFIG_PACKAGE_default-settings-chn=y$' "$IPK_CONFIG"
+if grep -q '^CONFIG_PACKAGE_default-settings-chn=' "$APK_CONFIG"; then
+	echo "package manager toggle should not touch default-settings-chn in apk mode" >&2
+	exit 1
+fi
+if grep -q '^CONFIG_PACKAGE_default-settings-chn=' "$IPK_CONFIG"; then
+	echo "package manager toggle should not touch default-settings-chn in ipk mode" >&2
+	exit 1
+fi
 grep -q '/etc/opkg/distfeeds.conf' "$IPK_FEED_CMD"
 if grep -q '/etc/apk/repositories.d/distfeeds.list' "$IPK_FEED_CMD"; then
 	echo "ipk mode should not point to apk repositories" >&2

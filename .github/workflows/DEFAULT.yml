@@ -5,23 +5,27 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
-      WRT_CONFIG:
-        description: '主配置文件：先选机型，再选 FW3 / FW4 方案'
+      WRT_DEVICE:
+        description: '设备型号'
         required: true
         type: choice
         options:
-          - IPQ60XX-NOWIFI-FW3.txt
-          - IPQ60XX-NOWIFI-FW4.txt
-          - MT6000-WIFI-FW3.txt
-          - MT6000-WIFI-FW4.txt
-        default: 'IPQ60XX-NOWIFI-FW3.txt'
-      WRT_CONFIG_OVERLAY:
-        description: '可选覆盖文件：在主配置基础上追加少量差异项'
-        required: false
+          - IPQ60XX-NOWIFI
+          - IPQ60XX-NOWIFI_lite
+          - MT6000-WIFI
+        default: 'IPQ60XX-NOWIFI'
+      WRT_FIREWALL:
+        description: '防火墙栈'
+        required: true
         type: choice
         options:
-          - ''
-          - IPQ60XX-NOWIFI-FW3-FRPS-override.txt
+          - fw3
+          - fw4
+        default: 'fw3'
+      WRT_OVERLAYS:
+        description: '可选 overlays，逗号分隔，例如 frps,apk'
+        required: false
+        type: string
         default: ''
       WRT_DIY_SETTING:
         description: 'diy_setting脚本'
@@ -48,11 +52,6 @@ on:
         required: false
         type: boolean
         default: true
-      WRT_USE_APK:
-        description: '是否使用 APK 包管理器（false=ipk，true=apk）'
-        required: false
-        type: boolean
-        default: false
       WHAT_MY_SAY:
         description: '编译说明'
         required: false
@@ -88,7 +87,7 @@ permissions: write-all
 #CI任务
 jobs:
   config:
-    name: ${{inputs.WRT_CONFIG}}
+    name: ${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}
     strategy:
       fail-fast: false
       #max-parallel: 2
@@ -108,10 +107,10 @@ jobs:
       # WRT_REPO_BRANCH: ${{ 'master' }}
       # 编译指定版本
       # WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
-      # DIY配置文件
-      WRT_CONFIG: ${{ inputs.WRT_CONFIG }}
-      # 机型覆盖文件
-      WRT_CONFIG_OVERLAY: ${{ inputs.WRT_CONFIG_OVERLAY }}
+      # 参数化配置
+      WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
+      WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
+      WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
       # 通用配置
       WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG }} # GENERAL.txt
       # DIY脚本
@@ -128,8 +127,6 @@ jobs:
       WRT_TOKEN_DINGDING: ${{inputs.iTOKEN_DINGDING}}
       # 编译说明
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
-      # 是否使用APK包管理器
-      WRT_USE_APK: ${{ inputs.WRT_USE_APK || false }}
     secrets:
       # 钉钉TOKEN
       DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}

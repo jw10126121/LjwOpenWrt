@@ -55,6 +55,27 @@ create_makefile "$APK_MAKEFILE"
 grep -q 'set -- \*\.apk; \\' "$APK_MAKEFILE"
 grep -q 'if \[ "\$\$1" = '\''\*\.apk'\'' \]; then \\' "$APK_MAKEFILE"
 grep -q '\$\$@; \\' "$APK_MAKEFILE"
+grep -q '^[[:space:]]*); \\$' "$APK_MAKEFILE"
+awk '
+	/^\t\); \\$/ { close_line=NR }
+	/^\tfi$/ { fi_line=NR }
+	END {
+		if (!close_line || !fi_line || fi_line <= close_line) {
+			exit 1
+		}
+	}
+' "$APK_MAKEFILE"
+
+SYNTAX_CHECK_SH="$TMPDIR/apk-index-check.sh"
+sed -n '/set -- \*\.apk; \\/,/^\tfi$/p' "$APK_MAKEFILE" \
+	| sed \
+		-e 's/\$(PACKAGE_DIR)/package_dir/g' \
+		-e 's/\$(STAGING_DIR_HOST)/staging_dir_host/g' \
+		-e 's/\$(TOPDIR)/topdir/g' \
+		-e 's/\$(BUILD_KEY)/build_key/g' \
+		-e 's/\$\$/\$/g' \
+	> "$SYNTAX_CHECK_SH"
+bash -n "$SYNTAX_CHECK_SH"
 
 cp "$APK_MAKEFILE" "$TMPDIR/apk-package.mk.once"
 (

@@ -12,6 +12,8 @@ CONFIG_PACKAGE_luci-theme-argon=y            # Argon 主题
 CONFIG_PACKAGE_luci-app-onliner=y            # 在线设备列表
 CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
 CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
+CONFIG_PACKAGE_luci-app-netdata=m            # Netdata 监控面板
+CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m     # Netdata 中文语言包
 
 # ------------------------------------------------------------------------
 #  系统管理
@@ -22,6 +24,21 @@ CONFIG_PACKAGE_luci-app-filetransfer=y       # 文件传输
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y # 文件传输中文语言包
 CONFIG_PACKAGE_luci-app-ttyd=y               # Web 终端
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y        # ttyd 中文语言包
+CONFIG_PACKAGE_luci-app-cpufreq=m            # CPU 频率调节
+CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m     # CPU 频率调节中文语言包
+CONFIG_PACKAGE_luci-app-advancedsetting=m    # 高级设置
+CONFIG_PACKAGE_luci-i18n-advancedsetting-zh-cn=m # 高级设置中文语言包
+CONFIG_PACKAGE_luci-app-advancedplus=m       # 高级设置增强版
+CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m # 高级设置增强版中文语言包
+
+# ------------------------------------------------------------------------
+#  VPN / 组网
+# ------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-easytier=y           # EasyTier 组网
+CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y    # EasyTier 中文语言包
+CONFIG_PACKAGE_easytier=y                    # EasyTier 后端
+CONFIG_PACKAGE_luci-app-zerotier=y           # ZeroTier 组网
+CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=y    # ZeroTier 中文语言包
 
 # ------------------------------------------------------------------------
 #  网络服务
@@ -39,10 +56,27 @@ CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y        # DDNS 中文语言包
 CONFIG_PACKAGE_luci-app-ddns-go=m            # DDNS-GO
 CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m     # DDNS-GO 中文语言包
 CONFIG_PACKAGE_ddns-go=m                     # DDNS-GO 后端
+CONFIG_PACKAGE_luci-app-netspeedtest=m       # 网速测试
+CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m # 网速测试中文语言包
+CONFIG_PACKAGE_luci-app-smartdns=m           # SmartDNS
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m    # SmartDNS 中文语言包
+CONFIG_PACKAGE_smartdns=m                    # SmartDNS 后端
 
 # ------------------------------------------------------------------------
 #  常用服务插件
 # ------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-oaf=y                # OpenAppFilter 应用过滤
+CONFIG_PACKAGE_luci-app-adguardhome=y        # AdGuard Home
+CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
+CONFIG_PACKAGE_luci-app-pushbot=y            # PushBot 推送
+CONFIG_PACKAGE_luci-app-wechatpush=y         # 微信推送
+CONFIG_PACKAGE_luci-app-vlmcsd=y             # KMS 服务
+CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y      # KMS 中文语言包
+CONFIG_PACKAGE_vlmcsd=y                      # KMS 后端
+CONFIG_PACKAGE_luci-app-wol=y                # Wake on LAN
+CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y         # WOL 中文语言包
+CONFIG_PACKAGE_luci-app-wolplus=y            # 增强版 WOL
+CONFIG_PACKAGE_luci-app-timewol=y            # 定时 WOL
 CONFIG_PACKAGE_frpc=y                        # FRP 客户端后端
 CONFIG_PACKAGE_luci-app-frpc=y               # FRP 客户端页面
 CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y        # FRP 客户端中文语言包

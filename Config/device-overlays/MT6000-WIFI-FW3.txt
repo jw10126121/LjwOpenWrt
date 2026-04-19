@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------------
+#  设备叠加层：MT6000-WIFI + FW3
+# ------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
+CONFIG_PACKAGE_luci-app-openlist=m           # OpenList 文件索引
+CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m    # OpenList 中文语言包
+CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y    # SSR Plus 中文语言包
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # 关闭 simple-obfs
+CONFIG_PACKAGE_luci-app-bandix=m             # 流量统计
+CONFIG_PACKAGE_bandix=m                      # Bandix 后端
+CONFIG_PACKAGE_luci-app-hd-idle=m            # 硬盘休眠
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m     # 硬盘休眠中文语言包
+CONFIG_PACKAGE_hd-idle=m                     # 硬盘休眠后端
+CONFIG_PACKAGE_luci-app-nlbwmon=m            # nlbwmon 流量统计
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m     # nlbwmon 中文语言包
+CONFIG_PACKAGE_luci-app-openvpn=m            # OpenVPN 客户端页面
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m     # OpenVPN 中文语言包
+CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
+CONFIG_PACKAGE_luci-app-samba4=m             # Samba 共享
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m      # Samba 中文语言包
+CONFIG_PACKAGE_luci-app-usb-printer=m        # USB 打印服务
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m # USB 打印中文语言包
+CONFIG_PACKAGE_luci-app-verysync=m           # 微力同步
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m    # 微力同步中文语言包
+CONFIG_PACKAGE_luci-app-vsftpd=m             # FTP 服务
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m      # FTP 中文语言包
+CONFIG_PACKAGE_luci-app-wrtbwmon=y           # wrtbwmon 实时流量统计
+CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=y    # wrtbwmon 中文语言包
+CONFIG_PACKAGE_wrtbwmon=y                    # wrtbwmon 后端

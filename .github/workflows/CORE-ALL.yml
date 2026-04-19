@@ -29,10 +29,13 @@ on:
       WRT_REPO_Commit_Hash:
         required: false
         type: string
-      WRT_CONFIG:
+      WRT_DEVICE:
         required: true
         type: string
-      WRT_CONFIG_OVERLAY:
+      WRT_FIREWALL:
+        required: true
+        type: string
+      WRT_OVERLAYS:
         required: false
         type: string
       WRT_DIY_SETTING:
@@ -83,8 +86,10 @@ env:
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_SOURCE_HASH_INFO: ${{inputs.WRT_SOURCE_HASH_INFO}}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
-  WRT_CONFIG: ${{inputs.WRT_CONFIG}}                          # 配置文件
-  WRT_CONFIG_OVERLAY: ${{inputs.WRT_CONFIG_OVERLAY || '' }}   # 配置覆盖文件
+  WRT_DEVICE: ${{inputs.WRT_DEVICE}}                          # 设备名
+  WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}                      # fw3 / fw4
+  WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }}               # 可选 overlays
+  WRT_CONFIG_LABEL: ''                                        # 组合标签
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
   WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}        # 通用配置
@@ -106,7 +111,7 @@ env:
   CLASH_KERNEL: amd64
   UPLOAD_BIN_DIR_FORCE: true                                 # 强制上传bin
   WRT_HAS_WIFI: true
-  WRT_USE_APK: ${{inputs.WRT_USE_APK || false }}
+  WRT_USE_APK: false
   OPENWRT_PATH: './openwrt'
   DEVICE_TARGET: ''
   DEVICE_SUBTARGET: ''
@@ -195,12 +200,21 @@ jobs:
       run: |
         . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
         WRT_HAS_WIFI=true
-        [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
+        [[ "$WRT_DEVICE" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
 
         WRT_HAS_LITE=false
-        [[ "${WRT_CONFIG,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
+        [[ "${WRT_DEVICE,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
+
+        WRT_CONFIG_LABEL="${WRT_DEVICE}-${WRT_FIREWALL^^}"
+        echo "WRT_CONFIG_LABEL=$WRT_CONFIG_LABEL" >> $GITHUB_ENV
+
+        if printf '%s' ",${WRT_OVERLAYS}," | grep -qi ',apk,'; then
+            echo "WRT_USE_APK=true" >> $GITHUB_ENV
+        else
+            echo "WRT_USE_APK=false" >> $GITHUB_ENV
+        fi
 
         if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
             echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
@@ -214,15 +228,9 @@ jobs:
             echo "${{ env.WRT_MINE_SAY }}"
         fi
 
-        echo "【Lin】读取配置名：${{env.WRT_CONFIG}}"
-        WRT_CONFIG_TMP="${{env.WRT_CONFIG}}"
-        IFS='-' read -r INPUT_PLATFORM INPUT_WIFI INPUT_SOURCE_TYPE <<< "${WRT_CONFIG_TMP%.txt}"
-        echo "INPUT_PLATFORM=$INPUT_PLATFORM" >> $GITHUB_ENV
-        echo "【Lin】配置名读取平台：${INPUT_PLATFORM}"
-
-        [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
-        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
-        echo "【Lin】配置名读取WIFI：${WRT_HAS_WIFI}"
+        echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
+        echo "【Lin】读取防火墙参数：${{env.WRT_FIREWALL}}"
+        echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
         if [ -n "${WRT_REPO_URL}" ]; then
           RESOLVED_REPO_BRANCH=$(resolve_source_branch "${WRT_REPO_URL}" "${WRT_REPO_BRANCH}")
           WRT_REPO_INFO="${WRT_REPO_URL}|${RESOLVED_REPO_BRANCH}"
@@ -232,7 +240,7 @@ jobs:
           echo "【Lin】未显式传源码，使用默认源码信息：${WRT_REPO_INFO}"
         fi
         echo "【Lin】当前源码信息：${WRT_REPO_INFO}"
-        RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_GENERAL_CONFIG}" "${WRT_CONFIG}")
+        RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_GENERAL_CONFIG}" "${WRT_FIREWALL}")
         echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
         echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
@@ -329,20 +337,19 @@ jobs:
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         # 临时导入config，为了获取设备信息
         [ -f ./.config ] && rm -rf ./.config
-        if [ -n "$WRT_CONFIG_OVERLAY" ]; then
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-            "$RESOLVED_GENERAL_CONFIG" \
-            "$WRT_CONFIG" \
-            "$WRT_CONFIG_OVERLAY" \
-            ".config"
-        else
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-            "$RESOLVED_GENERAL_CONFIG" \
-            "$WRT_CONFIG" \
-            ".config"
+        EXPORT_ARGS=(
+          --config-dir "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS"
+          --device "$WRT_DEVICE"
+          --fw "$WRT_FIREWALL"
+          --output ".config"
+        )
+        if [ -n "$WRT_OVERLAYS" ]; then
+          EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
         fi
+        if [ -n "$WRT_GENERAL_CONFIG" ]; then
+          EXPORT_ARGS+=(--general "$WRT_GENERAL_CONFIG")
+        fi
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
 
     # - name: ln mnt (合并磁盘mnt)
     #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
@@ -433,20 +440,19 @@ jobs:
       run: |
         echo '【Lin】移除所有.config并添加新的.config'
         [ -f ./.config ] && rm -rf ./.config
-        if [ -n "$WRT_CONFIG_OVERLAY" ]; then
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-            "$RESOLVED_GENERAL_CONFIG" \
-            "$WRT_CONFIG" \
-            "$WRT_CONFIG_OVERLAY" \
-            ".config"
-        else
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/merge_configs.sh" \
-            "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
-            "$RESOLVED_GENERAL_CONFIG" \
-            "$WRT_CONFIG" \
-            ".config"
+        EXPORT_ARGS=(
+          --config-dir "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS"
+          --device "$WRT_DEVICE"
+          --fw "$WRT_FIREWALL"
+          --output ".config"
+        )
+        if [ -n "$WRT_OVERLAYS" ]; then
+          EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
         fi
+        if [ -n "$WRT_GENERAL_CONFIG" ]; then
+          EXPORT_ARGS+=(--general "$WRT_GENERAL_CONFIG")
+        fi
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
         
     - name: diy settings (加载自定义设置) 
       working-directory: ${{ env.OPENWRT_PATH }}
@@ -454,7 +460,7 @@ jobs:
         cp $GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/patch/custom_usage.txt $OPENWRT_PATH/custom_usage.txt
         if [ -e "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" ]; then
           echo "【Lin】加载自定义配置成功：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
-          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "${{env.WRT_THEME_NAME}}" -m "${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipk' }}" -c "${{ env.WRT_CONFIG }}"
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING" -n "Linjw" -i "${{env.WRT_DEFAULT_LANIP}}" -p "${{env.IS_RESET_PASSWORD}}" -t "${{env.WRT_THEME_NAME}}" -m "${{ env.WRT_USE_APK == 'true' && 'apk' || 'ipk' }}" -c "${{ env.WRT_CONFIG_LABEL }}"
         else
           echo "【Lin】未找到DIY设置：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIY_SETTING"
         fi

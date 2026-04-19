@@ -4,11 +4,16 @@ name: TEST-NOTIFY
 on:
   workflow_dispatch:
     inputs:
-      WRT_CONFIG:
-        description: '显示用配置名'
+      WRT_DEVICE:
+        description: '显示用设备名'
         required: false
         type: string
-        default: 'MT6000-WIFI-FW3.txt'
+        default: 'MT6000-WIFI'
+      WRT_FIREWALL:
+        description: '显示用防火墙栈'
+        required: false
+        type: string
+        default: 'fw3'
       WRT_RELEASE_FIRMWARE:
         description: '模拟显示 Release 链接'
         required: false
@@ -42,7 +47,7 @@ jobs:
         readme_script="$GITHUB_WORKSPACE/Scripts/readme.sh"
         has_wifi="有WIFI"
 
-        if printf '%s' "${{ inputs.WRT_CONFIG }}" | grep -Eq 'NOWIFI|WIFINO|NO-WIFI|WIFI-NO'; then
+        if printf '%s' "${{ inputs.WRT_DEVICE }}" | grep -Eq 'NOWIFI|WIFINO|NO-WIFI|WIFI-NO'; then
           has_wifi="无WIFI"
         fi
 
@@ -56,10 +61,10 @@ jobs:
           "编译开始：TEST_${TEST_START_TIME}" \
           "" \
           "### --- 编译说明 --- ###" \
-          "支持设备：${{ inputs.WRT_CONFIG }}" \
+          "支持设备：${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}" \
           "固件类型：[测试通知]" \
           "支持平台：mediatek-filogic" \
-          "FW环境：FW3" \
+          "FW环境：${{ inputs.WRT_FIREWALL }}" \
           "FRP角色：FRPC" \
           "设备架构：aarch64_cortex-a53" \
           "内核版本：6.12.80" \

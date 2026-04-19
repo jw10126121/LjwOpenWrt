@@ -1,0 +1,9 @@
+# ------------------------------------------------------------------------
+#  可选覆盖层：IPK
+# ------------------------------------------------------------------------
+CONFIG_USE_APK=n
+CONFIG_PACKAGE_luci-app-package-manager=n
+CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=n
+CONFIG_PACKAGE_luci-app-opkg=y
+CONFIG_PACKAGE_luci-lib-ipkg=y
+CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y

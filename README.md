@@ -28,23 +28,32 @@
 [![CUSTOM](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/CUSTOM.yml)
 [![DEFAULT](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml/badge.svg)](https://github.com/jw10126121/LjwOpenWrt/actions/workflows/DEFAULT.yml)
 
-### GitHub Actions 包管理器模式
-在 GitHub Actions 页面手动点击 `Run workflow` 时，可通过 `WRT_USE_APK` 选择固件的插件包格式：
+### GitHub Actions 配置组合方式
+在 GitHub Actions 页面手动点击 `Run workflow` 时，配置组合改为参数化输入：
 
-- `false`：使用传统 `ipk` 插件模式
-- `true`：使用新版 `apk` 插件模式
-
-目前 `DEFAULT`、`CUSTOM` 与 `main` 三个手动入口都已支持该选项，无需再手动改源码切换。
+- `WRT_DEVICE`：选择设备型号，例如 `IPQ60XX-NOWIFI`、`MT6000-WIFI`
+- `WRT_FIREWALL`：选择防火墙栈，`fw3` 或 `fw4`
+- `WRT_OVERLAYS`：可选 overlays，逗号分隔，例如 `frps`、`apk`、`frps,apk`
 
 ### GitHub Actions 源码与配置层说明
 
 - `WRT_REPO_URL`：决定使用哪个上游源码仓库
 - `WRT_REPO_BRANCH`：决定拉取哪个源码分支；留空时按仓库默认分支处理
 - `WRT_SOURCE_HASH_INFO`：推荐只填 commit hash；旧格式 `hash|url|branch` 仍兼容，但不再推荐
-- `FW3` / `FW4`：只表示功能配置层，不再隐含绑定特定源码
-- `WRT_GENERAL_CONFIG`：决定基础配置组合；留空时按主配置文件自动解析
+- `WRT_FIREWALL`：只表示功能配置层，不再隐含绑定特定源码
+- `WRT_GENERAL_CONFIG`：可选手工基础配置组合；一般不需要填写
+- `WRT_OVERLAYS`：叠加可选差异层；`apk` 与 `ipk` 互斥
 
 脚本内部会根据 `WRT_REPO_URL` 自动解析 `source_flavor=lean|VIKINGYFY|generic`，未显式传源码时默认使用 `lean`。如果 `WRT_REPO_BRANCH` 留空，会自动选择默认分支：`lean -> master`，`VIKINGYFY -> main`。
+
+当前配置目录按以下层级组合：
+
+- `Config/GENERAL.txt`
+- `Config/GENERAL-SERVICE.txt`
+- `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt`
+- `Config/devices/<设备名>.txt`
+- `Config/device-overlays/<设备名>-<FW>.txt`（如果存在则自动叠加）
+- `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加）
 
 ## 编译时间
 手动编译

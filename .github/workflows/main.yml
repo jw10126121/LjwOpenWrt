@@ -9,13 +9,18 @@ on:
   workflow_call:
   workflow_dispatch:
     inputs:
-      WRT_CONFIG:
-        description: '主配置文件：决定机型与默认功能组合'
+      WRT_DEVICE:
+        description: '设备型号'
         required: true
         type: string
-        default: 'IPQ60XX-NOWIFI-FW3.txt'
-      WRT_CONFIG_OVERLAY:
-        description: '可选覆盖文件：只追加少量差异项，例如 FRPS 变体'
+        default: 'IPQ60XX-NOWIFI'
+      WRT_FIREWALL:
+        description: '防火墙栈，fw3 或 fw4'
+        required: true
+        type: string
+        default: 'fw3'
+      WRT_OVERLAYS:
+        description: '可选 overlays，逗号分隔，例如 frps,apk'
         required: false
         type: string
         default: ''
@@ -54,11 +59,6 @@ on:
         required: false
         type: boolean
         default: true
-      WRT_USE_APK:
-        description: '是否使用 APK 包管理器（false=ipk，true=apk）'
-        required: false
-        type: boolean
-        default: false
       WRT_MINE_SAY:
         description: '编译说明'
         required: false
@@ -91,7 +91,7 @@ on:
   #     WRT_REPO_Commit_Hash:
   #       required: true
   #       type: string
-  #     WRT_CONFIG:
+  #     WRT_DEVICE:
   #       required: true
   #       type: string
   #     WRT_DIY_SETTING:
@@ -127,8 +127,9 @@ env:
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
   WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
-  WRT_CONFIG: ${{inputs.WRT_CONFIG}}           # 配置文件
-  WRT_CONFIG_OVERLAY: ${{inputs.WRT_CONFIG_OVERLAY || '' }} # 配置覆盖文件
+  WRT_DEVICE: ${{inputs.WRT_DEVICE}}           # 设备名
+  WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}       # fw3 / fw4
+  WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }} # overlays
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}           # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }}                         # 主要用于更新Feeds
   WRT_GENERAL_CONFIG: ${{ inputs.WRT_GENERAL_CONFIG || '' }}     # 通用配置
@@ -148,7 +149,7 @@ env:
   FREE_UP_DISK: true
   WRT_HAS_WIFI: true
   UPLOAD_BIN_DIR_WSS: false
-  WRT_USE_APK: ${{ inputs.WRT_USE_APK || false }}
+  WRT_USE_APK: false
 
 
   

@@ -167,8 +167,19 @@ configure_package_manager_mode() {
         set_kconfig_value "CONFIG_PACKAGE_luci-app-opkg" "y"
         set_kconfig_value "CONFIG_PACKAGE_luci-lib-ipkg" "y"
         set_kconfig_value "CONFIG_PACKAGE_luci-i18n-opkg-zh-cn" "y"
-        set_kconfig_value "CONFIG_PACKAGE_default-settings-chn" "y"
         echo "【Lin】包管理器模式：ipk（保留旧版 LuCI 包管理器）"
+    fi
+}
+
+configure_source_default_settings_package() {
+    local emortal_default_settings="./package/emortal/default-settings/Makefile"
+
+    if [ -f "${emortal_default_settings}" ] && [ "${package_manager}" = 'apk' ]; then
+        set_kconfig_value "CONFIG_PACKAGE_default-settings-chn" "y"
+        echo "【Lin】检测到 emortal default-settings，APK 模式启用 default-settings-chn"
+    else
+        set_kconfig_value "CONFIG_PACKAGE_default-settings-chn" "n"
+        echo "【Lin】当前源码/包管理器组合不启用 default-settings-chn"
     fi
 }
 
@@ -239,6 +250,7 @@ configure_common_system_defaults() {
     adjust_luci_menu_positions
     configure_openvpn_defaults
     configure_base_package_options
+    configure_source_default_settings_package
     patch_apk_empty_feed_indexing
 }
 
@@ -346,7 +358,11 @@ patch_apk_empty_feed_indexing() {
             if (in_block && $0 ~ /^[[:space:]]*\*\.apk; \\$/) {
                 sub(/\*\.apk; \\$/, "$$@; \\")
                 print
-                print indent "fi; \\"
+                next
+            }
+            if (in_block && $0 ~ /^[[:space:]]*\)$/) {
+                print indent "); \\"
+                print indent "fi"
                 in_block = 0
                 next
             }
