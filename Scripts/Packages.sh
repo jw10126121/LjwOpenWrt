@@ -2,264 +2,239 @@
 
 # 说明：
 # 1. 该脚本在 OpenWrt 的 package 目录下执行，用于删除、替换和修补第三方插件包。
-# 2. 前半部分提供通用的包管理函数，后半部分是当前项目的插件更新清单与兼容性修补。
-# 3. 脚本会直接修改 package/ 与 feeds/ 下的目录，适合在 feeds 更新后、编译前执行。
+# 2. 入口职责保持不变：先按源码风味应用包清单，再执行一组编译兼容性修补。
+# 3. 结构上拆成三层：通用包操作函数、源码风味包清单、后置修补函数。
 
-# 运行在openwrt/package目录下
-current_script_dir=$(cd $(dirname $0) && pwd)
+current_script_dir=$(cd "$(dirname "$0")" && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 
 source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
 [ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
 
-if [ $(basename "$(pwd)") != 'package' ]; then
+if [ "$(basename "$(pwd)")" != 'package' ]; then
     if [ -d "./package" ]; then
         cd ./package
     else
-        echo "【Lin】请在package目录下执行，当前工作目录：$(pwd)" 
-        exit 0;
+        echo "【Lin】请在package目录下执行，当前工作目录：$(pwd)"
+        exit 0
     fi
 fi
 
-current_dir=$(pwd)
-current_script_dir=$(cd $(dirname $0) && pwd)
-echo "【Lin】工作目录：${current_dir}"
-current_dirname=$(basename "${current_dir}")
-
+package_workdir=$(pwd)
 openwrt_workdir="$(readlink -f ..)"
-package_workdir="${openwrt_workdir}/package"
 source_repo_url="${WRT_REPO_URL:-}"
 source_flavor='lean'
 
-#删除软件包
+echo "【Lin】工作目录：${package_workdir}"
+
+find_package_dirs() {
+    local package_name=$1
+
+    find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$package_name" 2>/dev/null
+}
+
+normalize_repo_url() {
+    local package_repo=$1
+
+    if [[ "${package_repo}" == *github.com* ]]; then
+        printf '%s\n' "${package_repo}"
+    else
+        printf 'https://github.com/%s.git\n' "${package_repo}"
+    fi
+}
+
+clone_repo_shallow() {
+    local repo_url=$1
+    local repo_branch=$2
+    local repo_name=$3
+
+    git clone --depth=1 --single-branch --branch "${repo_branch}" "${repo_url}" "${repo_name}"
+}
+
 DELETE_PACKAGE() {
+    local package_name=$1
+    local found_dirs
 
-    local PKG_NAME=$1
-    
-    # 在本地 package 与常见 feeds 中查找同名目录并删除，避免旧包残留。
-    local FOUND_DIRS=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" 2>/dev/null)
-    # 删除找到的目录
-    if [ -n "$FOUND_DIRS" ]; then
-        while read -r DIR; do
-            rm -rf "$DIR"
-            echo "【Lin】删除文件夹：$DIR"
-        done <<< "$FOUND_DIRS"
+    found_dirs=$(find_package_dirs "${package_name}")
+    if [ -n "${found_dirs}" ]; then
+        while read -r dir; do
+            rm -rf "${dir}"
+            echo "【Lin】删除文件夹：${dir}"
+        done <<< "${found_dirs}"
     else
-        echo "【Lin】未找到文件夹：$PKG_NAME"
+        echo "【Lin】未找到文件夹：${package_name}"
     fi
-    # rm -rf $(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    # echo "【Lin】删除插件：$PKG_NAME"
 }
 
-# 删除并备份插件(包名是文件夹名)
-DELETE_AND_BACKUP_PACKAGE() {
-    local PKG_NAME=$1
-    path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    path_default_bak="${path_default}_bak"
-    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份${PKG_NAME}：${path_default} -> ${path_default_bak}"
-}
-
-# 删除备份的包(包名是文件夹名)
-DELETE_BACKUP_PACKAGE() {
-    local PKG_NAME=$1
-    path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    path_default_bak="${path_default}_bak"
-    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-}
-
-#安装和更新软件包
 UPDATE_PACKAGE() {
-    PKG_NAME=$1
-    PKG_REPO=$2
-    PKG_BRANCH=$3
-    PKG_SPECIAL=$4
-    searchType="$PKG_NAME"
+    local package_name=$1
+    local package_repo=$2
+    local package_branch=$3
+    local package_special=${4:-}
+    local search_type=$package_name
+    local full_repo
+    local repo_url_git
+    local repo_name
+    local search_result_pkg_dir
 
-    # 删除原本同名的软件包
-    # local the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$searchType" -prune)
-    # if [ -n "$the_exist_pkg" ]; then
-    #     echo "【Lin】删除同名插件：$the_exist_pkg"
-    #     rm -rf $the_exist_pkg
-    # fi
+    DELETE_PACKAGE "${package_name}"
 
-    DELETE_PACKAGE "${PKG_NAME}"
+    full_repo=$(normalize_repo_url "${package_repo}")
+    repo_url_git=${full_repo%.git}
+    repo_name=${repo_url_git##*/}
 
-    # 兼容 owner/repo 与完整 GitHub URL 两种写法。
-    if [[ $PKG_REPO == *github.com* ]]; then
-        the_full_repo=$PKG_REPO
-    else
-        the_full_repo="https://github.com/${PKG_REPO}.git"
-    fi
+    clone_repo_shallow "${full_repo}" "${package_branch}" "${repo_name}"
+    echo "【Lin】成功clone插件：${package_name} [库：${repo_name}]"
 
-    REPO_URL_git=${the_full_repo%.git}; 
-    REPO_NAME=${REPO_URL_git##*/}
-
-    # 统一浅克隆，减少 CI 下载量。
-    git clone --depth=1 --single-branch --branch $PKG_BRANCH "${the_full_repo}" "${REPO_NAME}"
-    echo "【Lin】成功clone插件：$PKG_NAME [库：${REPO_NAME}]"
-    # pkg: 从大仓库里只提取指定目录；name: 克隆后按包名重命名目录。
-    if [[ $PKG_SPECIAL == "pkg" ]]; then
-        search_result_pkg_dir=$(find ./${REPO_NAME}/*/ -maxdepth 1 -type d -iname "$searchType" -prune)
-        if [ -n "${search_result_pkg_dir}" ]; then
-            mv -f "$REPO_NAME" "${REPO_NAME}_bak"
-            cp -rf $(find ./${REPO_NAME}_bak/*/ -maxdepth 1 -type d -iname "$searchType" -prune) ./$searchType
-            rm -rf ./${REPO_NAME}_bak/
-        fi
-    elif [[ $PKG_SPECIAL == "name" ]]; then
-        mv -f $REPO_NAME $PKG_NAME
-        echo "【Lin】重命名插件：$PKG_NAME <= $REPO_NAME"
-    fi
-}
-
-# 安装和更新同一个仓库下的软件包
-UPDATE_PACKAGE_FROM_REPO() {
-    local PKG_NAME=$1
-    local PKG_REPO=$2
-    local PKG_BRANCH=$3
-
-    # 删除原本同名的软件包
-    the_exist_pkg=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$PKG_NAME" -prune)
-    if [ -n "$the_exist_pkg" ]; then
-        echo "【Lin】删除同名插件包库：$the_exist_pkg"
-        rm -rf $the_exist_pkg
-    fi
-
-    # Clone插件
-    git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git" $PKG_NAME
-    echo "【Lin】成功clone插件包库：$PKG_NAME"
-    echo ""
+    case "${package_special}" in
+        pkg)
+            search_result_pkg_dir=$(find "./${repo_name}"/*/ -maxdepth 1 -type d -iname "${search_type}" -prune)
+            if [ -n "${search_result_pkg_dir}" ]; then
+                mv -f "${repo_name}" "${repo_name}_bak"
+                cp -rf $(find "./${repo_name}_bak"/*/ -maxdepth 1 -type d -iname "${search_type}" -prune) "./${search_type}"
+                rm -rf "./${repo_name}_bak/"
+            fi
+            ;;
+        name)
+            mv -f "${repo_name}" "${package_name}"
+            echo "【Lin】重命名插件：${package_name} <= ${repo_name}"
+            ;;
+    esac
 }
 
 MOVE_PACKAGE_FROM_LIST() {
-    local PKG_NAME=$1
-    local LIST_REPO=$2
+    local package_name=$1
+    local list_repo=$2
+    local found
 
-    # 从已克隆的“包合集仓库”里抽取单个子目录到 package 根目录。
-    found=$(find ./"$LIST_REPO"/*/ -maxdepth 1 -type d -iname "$PKG_NAME" -print)
-    if [ $? -eq 0 ]; then
-        cp -rf $found ./
-        echo "【Lin】复制插件包库${LIST_REPO}的${PKG_NAME}到package中"
+    found=$(find "./${list_repo}"/*/ -maxdepth 1 -type d -iname "${package_name}" -print)
+    if [ -n "${found}" ]; then
+        cp -rf ${found} ./
+        echo "【Lin】复制插件包库${list_repo}的${package_name}到package中"
     else
-        echo "【Lin】未找到插件包库${LIST_REPO}的${PKG_NAME}"
+        echo "【Lin】未找到插件包库${list_repo}的${package_name}"
     fi
 }
 
-# 从库集中添加多个库
 update_package_list() {
+    local package_name_list=($1)
+    local package_repo=$2
+    local package_branch=$3
+    local full_repo
+    local repo_url_git
+    local repo_name_last
+    local repo_name
+    local existing_repo
+    local package_name
 
-    pkg_name_list=($1)
-    pkg_repo=$2
-    pkg_branch=$3
-
-        # 使用for循环遍历数组
-    for pkg_name in "${pkg_name_list[@]}"; do
-        DELETE_PACKAGE "$pkg_name"
+    for package_name in "${package_name_list[@]}"; do
+        DELETE_PACKAGE "${package_name}"
     done
 
-    if [[ $pkg_repo == http* ]]; then
-        the_full_repo=$pkg_repo
-    else
-        the_full_repo="https://github.com/${pkg_repo}.git"
+    full_repo=$(normalize_repo_url "${package_repo}")
+    repo_url_git=${full_repo%.git}
+    repo_name_last=${repo_url_git##*/}
+    repo_name=${full_repo#*//}
+    repo_name=${repo_name#*/}
+    repo_name=${repo_name%.git}
+    repo_name=${repo_name//\//_}
+    repo_name="pkglist_${repo_name:-$repo_name_last}"
+
+    existing_repo=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${repo_name}" -prune)
+    if [ -n "${existing_repo}" ]; then
+        echo "【Lin】删除同名插件包库：${existing_repo}"
+        rm -rf "${existing_repo}"
     fi
 
-    # 获取仓库名
-    REPO_URL_git=${the_full_repo%.git}; 
-    REPO_NAME_LAST=${REPO_URL_git##*/}
+    echo "【Lin】下载插件库${repo_name}：【${package_branch}】${full_repo}"
+    clone_repo_shallow "${full_repo}" "${package_branch}" "${repo_name}"
+    echo "【Lin】成功clone插件包库：${repo_name}"
 
-    # 获取用户名_仓库名，并生成不会与普通包目录冲突的临时仓库名。
-    REPO_NAME=${the_full_repo#*//}  # 删除前面的协议部分
-    REPO_NAME=${REPO_NAME#*/}       # 删除第一个/后面的内容，保留用户名和仓库名
-    REPO_NAME=${REPO_NAME%.git}     # 删除后面的.git
-    REPO_NAME=${REPO_NAME//\//_}    # 将所有的/替换为_，最终的结果是：作者名_仓库名
-    REPO_NAME="pkglist_${REPO_NAME:-$REPO_NAME_LAST}"
-
-    # REPO_NAME="pkglist_$(sed 's#.*/\([^/]*\)/\([^/.]*\)\.git#\1_\2#' <<<"$the_full_repo")" # 以上代码可以精简成这句
-
-
-    exist_pkg_list=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "$REPO_NAME" -prune)
-    if [ -n "$exist_pkg_list" ]; then
-        echo "【Lin】删除同名插件包库：${exist_pkg_list}"
-        rm -rf "${exist_pkg_list}"
-    fi
-    echo "【Lin】下载插件库${REPO_NAME}：【${pkg_branch}】${the_full_repo}"
-    git clone --depth=1 --single-branch --branch $pkg_branch "${the_full_repo}" ${REPO_NAME}
-    echo "【Lin】成功clone插件包库：${REPO_NAME}"
-
-    # 使用for循环遍历数组
-    for pkg_name in "${pkg_name_list[@]}"; do
-        MOVE_PACKAGE_FROM_LIST "${pkg_name}" "${REPO_NAME}"
+    for package_name in "${package_name_list[@]}"; do
+        MOVE_PACKAGE_FROM_LIST "${package_name}" "${repo_name}"
     done
 
-    echo "【Lin】删除插件包库：${REPO_NAME}"
-    rm -rf ${REPO_NAME}
-
+    echo "【Lin】删除插件包库：${repo_name}"
+    rm -rf "${repo_name}"
 }
 
 safe_update_package() {
-    package_name=$1
-    pkg_repo=$2
-    pkg_branch=$3
+    local package_name=$1
+    local package_repo=$2
+    local package_branch=$3
+    local path_default
+    local path_default_bak
+
     path_default=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "${package_name}" -prune)
     path_default_bak="${path_default}_bak"
-    [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
-    # 先备份旧目录，替换失败时自动回滚，降低直接覆盖的风险。
-    [ -d "$path_default" ] && mv -f ${path_default} ${path_default_bak} && echo "【Lin】备份${package_name}：${path_default} -> ${path_default_bak}"
-    git clone --depth=1 --single-branch -b "${pkg_branch}" "${pkg_repo}" ${path_default}
-    if [ -d ${path_default} ]; then
-         echo "【Lin】替换${package_name}成功：${path_default}"
-         [ -d "$path_default_bak" ] && rm -fr "$path_default_bak"
+    [ -d "${path_default_bak}" ] && rm -rf "${path_default_bak}"
+
+    [ -d "${path_default}" ] && mv -f "${path_default}" "${path_default_bak}" && \
+        echo "【Lin】备份${package_name}：${path_default} -> ${path_default_bak}"
+
+    git clone --depth=1 --single-branch -b "${package_branch}" "${package_repo}" "${path_default}"
+    if [ -d "${path_default}" ]; then
+        echo "【Lin】替换${package_name}成功：${path_default}"
+        [ -d "${path_default_bak}" ] && rm -rf "${path_default_bak}"
     else
         mv -f "${path_default_bak}" "${path_default}"
         echo "【Lin】替换${package_name}失败，还原${package_name}"
     fi
 }
 
-#更新软件包版本
 UPDATE_VERSION() {
-    local PKG_NAME=$1
-    local PKG_MARK=${2:-false}
-    local PKG_FILES=$(find ./ ../feeds/packages/ -maxdepth 3 -type f -wholename "*/$PKG_NAME/Makefile")
+    local package_name=$1
+    local package_mark=${2:-false}
+    local package_files
+    local package_file
 
+    package_files=$(find ./ ../feeds/packages/ -maxdepth 3 -type f -wholename "*/${package_name}/Makefile")
     echo " "
 
-    if [ -z "$PKG_FILES" ]; then
-        echo "$PKG_NAME not found!"
+    if [ -z "${package_files}" ]; then
+        echo "${package_name} not found!"
         return
     fi
 
-    echo -e "\n$PKG_NAME version update has started!"
+    echo -e "\n${package_name} version update has started!"
 
-    for PKG_FILE in $PKG_FILES; do
-        local PKG_REPO=$(grep -Po "PKG_SOURCE_URL:=https://.*github.com/\K[^/]+/[^/]+(?=.*)" $PKG_FILE)
-        # 直接取 GitHub Releases 的最新标签，并同步更新 Makefile 中的版本与哈希。
-        local PKG_TAG=$(curl -sL "https://api.github.com/repos/$PKG_REPO/releases" | jq -r "map(select(.prerelease == $PKG_MARK)) | first | .tag_name")
+    for package_file in ${package_files}; do
+        local package_repo
+        local package_tag
+        local old_ver
+        local old_url
+        local old_file
+        local old_hash
+        local package_url
+        local new_ver
+        local new_url
+        local new_hash
 
-        local OLD_VER=$(grep -Po "PKG_VERSION:=\K.*" "$PKG_FILE")
-        local OLD_URL=$(grep -Po "PKG_SOURCE_URL:=\K.*" "$PKG_FILE")
-        local OLD_FILE=$(grep -Po "PKG_SOURCE:=\K.*" "$PKG_FILE")
-        local OLD_HASH=$(grep -Po "PKG_HASH:=\K.*" "$PKG_FILE")
+        package_repo=$(grep -Po "PKG_SOURCE_URL:=https://.*github.com/\K[^/]+/[^/]+(?=.*)" "${package_file}")
+        package_tag=$(curl -sL "https://api.github.com/repos/${package_repo}/releases" | jq -r "map(select(.prerelease == ${package_mark})) | first | .tag_name")
 
-        local PKG_URL=$([[ $OLD_URL == *"releases"* ]] && echo "${OLD_URL%/}/$OLD_FILE" || echo "${OLD_URL%/}")
+        old_ver=$(grep -Po "PKG_VERSION:=\K.*" "${package_file}")
+        old_url=$(grep -Po "PKG_SOURCE_URL:=\K.*" "${package_file}")
+        old_file=$(grep -Po "PKG_SOURCE:=\K.*" "${package_file}")
+        old_hash=$(grep -Po "PKG_HASH:=\K.*" "${package_file}")
 
-        local NEW_VER=$(echo $PKG_TAG | sed -E 's/[^0-9]+/\./g; s/^\.|\.$//g')
-        local NEW_URL=$(echo $PKG_URL | sed "s/\$(PKG_VERSION)/$NEW_VER/g; s/\$(PKG_NAME)/$PKG_NAME/g")
-        local NEW_HASH=$(curl -sL "$NEW_URL" | sha256sum | cut -d ' ' -f 1)
+        package_url=$([[ ${old_url} == *"releases"* ]] && echo "${old_url%/}/${old_file}" || echo "${old_url%/}")
+        new_ver=$(echo "${package_tag}" | sed -E 's/[^0-9]+/\./g; s/^\.|\.$//g')
+        new_url=$(echo "${package_url}" | sed "s/\$(PKG_VERSION)/${new_ver}/g; s/\$(PKG_NAME)/${package_name}/g")
+        new_hash=$(curl -sL "${new_url}" | sha256sum | cut -d ' ' -f 1)
 
-        echo "old version: $OLD_VER $OLD_HASH"
-        echo "new version: $NEW_VER $NEW_HASH"
+        echo "old version: ${old_ver} ${old_hash}"
+        echo "new version: ${new_ver} ${new_hash}"
 
-        if [[ $NEW_VER =~ ^[0-9].* ]] && dpkg --compare-versions "$OLD_VER" lt "$NEW_VER"; then
-            sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$NEW_VER/g" "$PKG_FILE"
-            sed -i "s/PKG_HASH:=.*/PKG_HASH:=$NEW_HASH/g" "$PKG_FILE"
-            echo "【Lin】$PKG_FILE version has been updated!"
+        if [[ ${new_ver} =~ ^[0-9].* ]] && dpkg --compare-versions "${old_ver}" lt "${new_ver}"; then
+            sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=${new_ver}/g" "${package_file}"
+            sed -i "s/PKG_HASH:=.*/PKG_HASH:=${new_hash}/g" "${package_file}"
+            echo "【Lin】${package_file} version has been updated!"
         else
-            echo "【Lin】$PKG_FILE version is already the latest!"
+            echo "【Lin】${package_file} version is already the latest!"
         fi
     done
 }
-
-### ---------- 执行 ---------- ###
 
 resolve_packages_source_flavor() {
     if command -v resolve_source_flavor >/dev/null 2>&1; then
@@ -278,15 +253,11 @@ apply_common_package_overrides() {
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
     update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
     update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
-
-    # 应用过滤
     update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
 
-    # 替换frp
     safe_update_package "frp" "https://github.com/jw10126121/openwrt_frp" "main"
     update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
-    # luci-app-wechatpush依赖wrtbwmon
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
@@ -320,10 +291,7 @@ apply_generic_package_overrides() {
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
 }
 
-main() {
-    resolve_packages_source_flavor
-    apply_common_package_overrides
-
+apply_source_flavor_package_overrides() {
     case "${source_flavor}" in
         lean)
             apply_lean_package_overrides
@@ -337,235 +305,180 @@ main() {
     esac
 }
 
-#UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名" "是否精准搜索插件"
+fix_quickfile_makefile() {
+    local quickfile_makefile
 
-main
-
-# 对比easytier版本，并替换
-# if [ -f "${package_workdir}/easytier/Makefile" ]; then
-#     easytier_origin_version_raw=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/easytier/Makefile")
-#     easytier_origin_version=$(printf '%s\n' "${easytier_origin_version_raw}" | sed -E 's/^\$\(or \$\(EASYTIER_VERSION\),([^)]*)\)$/\1/')
-#     echo "【Lin】easytier原版本：${easytier_origin_version_raw}"
-#     echo "【Lin】easytier当前有效默认版本：${easytier_origin_version}"
-#     easytier_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/EasyTier/EasyTier/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
-#     if [ -n "${easytier_latest_version}" ]; then
-#         echo "【Lin】easytier最新版本： ${easytier_latest_version}"
-#         if dpkg --compare-versions "${easytier_origin_version}" lt "${easytier_latest_version}"; then
-#             if [ "${easytier_origin_version_raw}" != "${easytier_origin_version}" ]; then
-#                 sed -i "s|^\(PKG_VERSION:=\).*$|\1\$(or \$(EASYTIER_VERSION),${easytier_latest_version})|" "${package_workdir}/easytier/Makefile"
-#             else
-#                 sed -i "s/^\(PKG_VERSION:=\).*/\1${easytier_latest_version}/" "${package_workdir}/easytier/Makefile"
-#             fi
-#             echo "【Lin】easytier版本更新： ${easytier_origin_version} -> ${easytier_latest_version}"
-#         else
-#             echo "【Lin】easytier无需更新，保留版本：${easytier_origin_version}"
-#         fi
-#     fi
-# fi
-
-# # 对比frp版本，并替换
-# if [ -f "${package_workdir}/frp/Makefile" ]; then
-#     frp_origin_version=$(sed -n 's/^PKG_VERSION:=//p' "${package_workdir}/frp/Makefile")
-#     echo "【Lin】frp原版本：${frp_origin_version}"
-#     frp_latest_version=$(curl -fsSL -A 'Mozilla/5.0' -o /dev/null -w '%{url_effective}' https://github.com/fatedier/frp/releases/latest | awk -F/ '{sub(/^v/,"",$NF); print $NF}')
-#     if [ -n "${frp_latest_version}" ]; then
-#         echo "【Lin】frp最新版本： ${frp_latest_version}"
-#         if [ "${frp_latest_version}" != "${frp_origin_version}" ]; then
-#             sed -i "s/^\(PKG_VERSION:=\).*/\1${frp_latest_version}/" "${package_workdir}/frp/Makefile"
-#             echo "【Lin】frp版本更新： ${frp_origin_version} -> ${frp_latest_version}"
-#         fi
-#     fi
-# fi
-
-
-Quickfile_Makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
-
-if [ -f "${Quickfile_Makefile}" ]; then
-    # quickfile 官方脚本对架构名兼容性一般，这里按常用架构手动兜底安装路径。
-# 下面这句同时兼容 Linux 与 macOS
-#     sed -i.bak '/^define Build\/Compile$/,/^endef$/c\
-# define Build/Compile\
-# \t$(CP) $(PKG_BUILD_DIR)/quickfile-$(if $(CONFIG_aarch64),aarch64_generic,x86_64) \
-# \t      $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES)\
-# endef' "${Quickfile_Makefile}"
-            sed -i '/\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-\$(ARCH_PACKAGES)/c\
+    quickfile_makefile=$(find ./ -maxdepth 3 -type f -wholename "*/quickfile/Makefile")
+    if [ -f "${quickfile_makefile}" ]; then
+        sed -i '/\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-\$(ARCH_PACKAGES)/c\
 \tif [ "\$(ARCH_PACKAGES)" = "x86_64" ]; then \\\
 \t\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-x86_64 \$(1)\/usr\/bin\/quickfile; \\\
 \telse \\\
 \t\t\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/quickfile-aarch64_generic \$(1)\/usr\/bin\/quickfile; \\\
-\tfi' "$Quickfile_Makefile"
-    # sed -i 's|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-$(ARCH_PACKAGES) $(1)/usr/bin/quickfile|$(INSTALL_BIN) $(PKG_BUILD_DIR)/quickfile-aarch64_generic $(1)/usr/bin/quickfile|' "${Quickfile_Makefile}"
-    echo "【Lin】修复quickfile问题： ${Quickfile_Makefile}"
-# else
-#     echo "【Lin】未找到 quickfile/Makefile"
-fi
+\tfi' "${quickfile_makefile}"
+        echo "【Lin】修复quickfile问题：${quickfile_makefile}"
+    fi
+}
 
+apply_lang_node_prebuilt_fix() {
+    bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${openwrt_workdir}"
+}
 
-version_workdir="${openwrt_workdir}"
+update_openvpn_easy_rsa_version() {
+    UPDATE_VERSION "openvpn-easy-rsa"
+}
 
-# 修复 lang_node 编译问题：按当前 OpenWrt 版本切换到预编译 node 包仓库。
-bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${version_workdir}"
+trim_passwall_variants() {
+    local passwall_makefile
 
-# UPDATE_VERSION "软件包名" "测试版，true，可选，默认为否"
-# UPDATE_VERSION "sing-box"
-# UPDATE_VERSION "tailscale"
-#UPDATE_VERSION "alist"
-#修复Openvpnserver一键生成证书
-UPDATE_VERSION "openvpn-easy-rsa" 
+    passwall_makefile=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
+    if [ -f "${passwall_makefile}" ]; then
+        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' "${passwall_makefile}"
+        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' "${passwall_makefile}"
+        sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' "${passwall_makefile}"
+        echo "【Lin】passwall has been fixed!"
+    fi
+}
 
-# 精简 PassWall / SSR Plus 的 Shadowsocks 选项，避免引入当前不需要的变体组件。
-PW_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-passwall/Makefile")
-if [ -f "$PW_FILE" ]; then
-    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/x86_64/d' $PW_FILE
-    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/default n/d' $PW_FILE
-    sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $PW_FILE
+trim_ssrplus_variants() {
+    local ssrplus_makefile
 
-    echo "【Lin】passwall has been fixed!"
-fi
+    ssrplus_makefile=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-ssr-plus/Makefile")
+    if [ -f "${ssrplus_makefile}" ]; then
+        sed -i '/default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/libev/d' "${ssrplus_makefile}"
+        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' "${ssrplus_makefile}"
+        sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' "${ssrplus_makefile}"
+        echo "【Lin】ssr-plus has been fixed!"
+    fi
+}
 
-SP_FILE=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-ssr-plus/Makefile")
-if [ -f "$SP_FILE" ]; then
-    sed -i '/default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/libev/d' $SP_FILE
-    sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' $SP_FILE
-    sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' $SP_FILE
+fix_tailscale_makefile() {
+    local tailscale_makefile
 
-    echo "【Lin】ssr-plus has been fixed!"
-fi
+    tailscale_makefile=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
+    [ -f "${tailscale_makefile}" ] && sed -i '/\/files/d' "${tailscale_makefile}" && echo "【Lin】tailscale has been fixed!"
+}
 
-# 修复 TailScale 配置文件冲突。
-TS_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/tailscale/Makefile")
-[ -f "$TS_FILE" ] && sed -i '/\/files/d' "$TS_FILE" && echo "【Lin】tailscale has been fixed!"
+fix_rust_build() {
+    local rust_makefile
 
-# 修复 Rust 编译失败。
-RUST_FILE=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
-if [ -f "$RUST_FILE" ]; then
-    echo " "
+    rust_makefile=$(find ../feeds/packages/ -maxdepth 3 -type f -wholename "*/rust/Makefile")
+    if [ -f "${rust_makefile}" ]; then
+        sed -i 's/ci-llvm=true/ci-llvm=false/g' "${rust_makefile}"
+        cd "${package_workdir}" && echo "【Lin】rust has been fixed!"
+    fi
+}
 
-    sed -i 's/ci-llvm=true/ci-llvm=false/g' $RUST_FILE
+fix_diskman_makefile() {
+    local diskman_makefile="./luci-app-diskman/applications/luci-app-diskman/Makefile"
 
-    cd $package_workdir && echo "【Lin】rust has been fixed!"
-fi
+    if [ -f "${diskman_makefile}" ]; then
+        sed -i 's/fs-ntfs/fs-ntfs3/g' "${diskman_makefile}"
+        sed -i '/ntfs-3g-utils /d' "${diskman_makefile}"
+        cd "${package_workdir}" && echo "【Lin】diskman has been fixed!"
+    fi
+}
 
-# 修复 DiskMan 编译失败。
-DM_FILE="./luci-app-diskman/applications/luci-app-diskman/Makefile"
-if [ -f "$DM_FILE" ]; then
-    echo " "
+sync_argon_progress_bar() {
+    local argon_dir
 
-    sed -i 's/fs-ntfs/fs-ntfs3/g' $DM_FILE
-    sed -i '/ntfs-3g-utils /d' $DM_FILE
+    argon_dir=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
+    [ -n "${argon_dir}" ] && find "${argon_dir}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && \
+        echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+}
 
-    cd $package_workdir && echo "【Lin】diskman has been fixed!"
-fi
+fix_pushbot_runtime() {
+    local pushbot_dir
+    local pushbot_action_file
+    local net_fix_test_del=' https://www.qidian.com https://www.douban.com'
 
+    pushbot_dir=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
+    if [ -n "${pushbot_dir}" ] && [ -f "${pushbot_dir}/root/usr/bin/pushbot/pushbot" ]; then
+        pushbot_action_file="${pushbot_dir}/root/usr/bin/pushbot/pushbot"
+        sed -i 's/local cputemp=`soc_temp`/local cputemp=`tempinfo`/' "${pushbot_action_file}"
+        sed -i 's/CPU：\${cputemp}℃/\${cputemp}/' "${pushbot_action_file}"
+        sed -i "s|${net_fix_test_del}||g" "${pushbot_action_file}"
+        echo "【Lin】app-pushbot has been fixed"
+    fi
+}
 
-ARGON_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
-# 修改argon主题进度条颜色与主题色一致
-[ -n "${ARGON_DIR}" ] && find "${ARGON_DIR}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
+fix_wechatpush_runtime() {
+    local wechatpush_dir
+    local wechatpush_bin
+    local wechatpush_config
 
+    wechatpush_dir=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-wechatpush" -prune)
+    wechatpush_bin="${wechatpush_dir}/root/usr/share/wechatpush/wechatpush"
+    if [ -n "${wechatpush_dir}" ] && [ -f "${wechatpush_bin}" ]; then
+        sed -i '/^#/!{/^[[:blank:]]*\[ -z "\$1" \] && get_disk/s/^[[:blank:]]*/#&/;}' "${wechatpush_bin}" && echo "【Lin】微信推送去掉硬盘检查"
+        sed -i '\|>"\$output_dir/cputemp"|s/soc_temp/tempinfo/g' "${wechatpush_bin}"
+        sed -i 's/$(translate "CPU:") ${cputemp}℃/${cputemp}/g' "${wechatpush_bin}"
+        echo "【Lin】微信推送添加CPU和WIFI显示"
 
-# 目前仅 Lean 源码测试过，V 佬源码也支持。
-pushbot_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-pushbot" -prune)
-if [ -n "${pushbot_DIR}" ] && [ -f "${pushbot_DIR}/root/usr/bin/pushbot/pushbot" ]; then
-    pushbot_action_file="${pushbot_DIR}/root/usr/bin/pushbot/pushbot"
-    # 显示wifi温度
-    sed -i 's/local cputemp=`soc_temp`/local cputemp=`tempinfo`/' "${pushbot_action_file}"
-    sed -i 's/CPU：\${cputemp}℃/\${cputemp}/' "${pushbot_action_file}"
-    # 日志不停报网络断开
-    net_fix_test_del=' https://www.qidian.com https://www.douban.com'
-    sed -i "s|${net_fix_test_del}||g" "${pushbot_action_file}"
-    echo "【Lin】app-pushbot has been fixed"
-fi
+        wechatpush_config="${current_script_dir}/patch/wechatpush_diy.json"
+        [ -f "${wechatpush_config}" ] && cp -p "${wechatpush_config}" "${wechatpush_dir}/root/usr/share/wechatpush/api/diy.json" && \
+            echo "【Lin】wechatpush的diy.json成功！"
+    fi
+}
 
-wechatpush_DIR=$(find ./*/ -maxdepth 3 -type d -iname "luci-app-wechatpush" -prune)
-wechatpush_bin="${wechatpush_DIR}/root/usr/share/wechatpush/wechatpush"
-if [ -n "${wechatpush_DIR}" ] && [ -f "${wechatpush_bin}" ]; then
-    sed -i '/^#/!{/^[[:blank:]]*\[ -z "\$1" \] && get_disk/s/^[[:blank:]]*/#&/;}' "${wechatpush_bin}" && echo "【Lin】微信推送去掉硬盘检查"
-    sed -i '\|>"\$output_dir/cputemp"|s/soc_temp/tempinfo/g' "${wechatpush_bin}"
-    sed -i 's/$(translate "CPU:") ${cputemp}℃/${cputemp}/g' "${wechatpush_bin}"
-    echo "【Lin】微信推送添加CPU和WIFI显示"
-    my_config_wechatpush_file="${current_script_dir}/patch/wechatpush_diy.json"
-    [ -f "${my_config_wechatpush_file}" ] && cp -p "${my_config_wechatpush_file}" "${wechatpush_DIR}/root/usr/share/wechatpush/api/diy.json" && echo "【Lin】wechatpush的diy.json成功！"
-fi
+ensure_vlmcsd_ini() {
+    local app_vlmcsd_dir
+    local vlmcsd_ini
 
-# 修复luci-app-vlmcsd未自带vlmcsd.ini的问题
-app_vlmcsd_DIR=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
-echo "【Lin】检索到luci-app-vlmcsd目录：${app_vlmcsd_DIR}"
-if [ -n "${app_vlmcsd_DIR}" ] && [ -d "${app_vlmcsd_DIR}/root/etc/" ] && [ ! -f "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" ]; then
-    my_config_vlmcsd_file="${current_script_dir}/patch/vlmcsd.ini"
-    [ -f "${my_config_vlmcsd_file}" ] && cp -fr "${my_config_vlmcsd_file}" "${app_vlmcsd_DIR}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
-fi
+    app_vlmcsd_dir=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
+    echo "【Lin】检索到luci-app-vlmcsd目录：${app_vlmcsd_dir}"
+    if [ -n "${app_vlmcsd_dir}" ] && [ -d "${app_vlmcsd_dir}/root/etc/" ] && [ ! -f "${app_vlmcsd_dir}/root/etc/vlmcsd.ini" ]; then
+        vlmcsd_ini="${current_script_dir}/patch/vlmcsd.ini"
+        [ -f "${vlmcsd_ini}" ] && cp -fr "${vlmcsd_ini}" "${app_vlmcsd_dir}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
+    fi
+}
 
+preload_homeproxy_resources() {
+    local homeproxy_dir
+    local homeproxy_path
+    local homeproxy_rule_dir="./surge"
+    local resource_version
 
-# echo "【Lin】修改ttyd为免密"
-# if [ -f "${current_script_dir}/patch/99_ttyd-nopass.sh" ]; then
-#     if [ -d "${package_workdir}/base-files/files/etc/uci-defaults/" ]; then
-#        install -Dm755 "${current_script_dir}/patch/99_ttyd-nopass.sh" "${package_workdir}/base-files/files/etc/uci-defaults/99_ttyd-nopass" 
-#     fi
-#     if [ -d "${package_workdir}/lean/default-settings/files/" ]; then
-#         install -Dm755 "${current_script_dir}/patch/99_ttyd-nopass.sh" "${package_workdir}/lean/default-settings/files/99_ttyd-nopass"
-#     fi
-# fi
+    homeproxy_dir=$(find . -maxdepth 3 -type d -iname "homeproxy" -prune | head -n 1)
+    [ -n "${homeproxy_dir}" ] || return 0
 
+    homeproxy_path="${homeproxy_dir}/root/etc/homeproxy"
+    rm -rf "${homeproxy_path}/resources/"*
+    git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" "${homeproxy_rule_dir}"
+    cd "${homeproxy_rule_dir}" && resource_version=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
 
-###### ------- 以下为备用代码 ---------
-
-# UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon-config" "master"
-# UPDATE_PACKAGE "luci-theme-argon" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
-# UPDATE_PACKAGE "luci-theme-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10" "pkg"
-# lean源码不可用：luci-theme-design
-# update_package_list "luci-theme-design" "kenzok8/openwrt-packages" "master"
-# DELETE_PACKAGE "wrtbwmon"
-# DELETE_PACKAGE "luci-app-wrtbwmon"
-# DELETE_PACKAGE "luci-app-onliner"
-# UPDATE_PACKAGE "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main" "pkg"
-# UPDATE_PACKAGE "wrtbwmon" "brvphoenix/wrtbwmon" "master" "pkg"
-# UPDATE_PACKAGE "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master" "pkg"
-# UPDATE_PACKAGE "luci-app-netwizard" "kiddin9/luci-app-netwizard" "master"     # 测试不能用，不加
-# UPDATE_PACKAGE "luci-app-netspeedtest" "muink/luci-app-netspeedtest" "master"
-
-#UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-
-# UPDATE_PACKAGE "luci-app-wolplus" "VIKINGYFY/packages" "main" "pkg"
-# # 注意，需要luci-app-nlbwmon支持
-# # UPDATE_PACKAGE "luci-app-onliner" "selfcan/luci-app-onliner" "master"
-#UPDATE_PACKAGE "passwall" "xiaorouji/openwrt-passwall" "main" "pkg"
-#UPDATE_PACKAGE "ssr-plus" "fw876/helloworld" "master"
-#UPDATE_PACKAGE "kucat" "sirpdboy/luci-theme-kucat" "js"
-#UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
-
-# if [[ $WRT_REPO == *"lede"* ]]; then
-#   UPDATE_PACKAGE "alist" "sbwml/luci-app-alist" "main" # 2024年12月3日测试依旧报错
-# fi
-
-#UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5"
-#UPDATE_PACKAGE "vnt" "lazyoop/networking-artifact" "main" "pkg"
-#UPDATE_PACKAGE "easytier" "lazyoop/networking-artifact" "main" "pkg"
-
-# UPDATE_PACKAGE "luci-app-advancedplus" "VIKINGYFY/packages" "main" "pkg"
-#UPDATE_PACKAGE "luci-app-gecoosac" "lwb1978/openwrt-gecoosac" "main"
-#UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
-
-# if [[ $WRT_REPO != *"immortalwrt"* ]]; then
-#   UPDATE_PACKAGE "qmi-wwan" "immortalwrt/wwan-packages" "master" "pkg"
-# fi
-
-# 预置HomeProxy数据
-if [ -d *"homeproxy"* ]; then
-    HP_RULE="surge"
-    HP_PATH="./homeproxy/root/etc/homeproxy"
-
-    # chmod +x ./$HP_PATH/scripts/*
-    rm -rf ./$HP_PATH/resources/*
-    git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULE/
-    cd ./$HP_RULE/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
-
-    echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+    echo "${resource_version}" | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
     awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
+    sed 's/^\.//g' direct.txt > china_list.txt
+    sed 's/^\.//g' gfw.txt > gfw_list.txt
+    mv -f ./{china_*,gfw_list}.{ver,txt} "../${homeproxy_path}/resources/"
 
-    sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
-    mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATH/resources/
-
-    cd .. && rm -rf ./$HP_RULE/
-
+    cd ..
+    rm -rf "${homeproxy_rule_dir}"
     echo "【Lin】homeproxy date has been updated!"
-fi
+}
+
+apply_post_update_fixes() {
+    fix_quickfile_makefile
+    apply_lang_node_prebuilt_fix
+    update_openvpn_easy_rsa_version
+    trim_passwall_variants
+    trim_ssrplus_variants
+    fix_tailscale_makefile
+    fix_rust_build
+    fix_diskman_makefile
+    sync_argon_progress_bar
+    fix_pushbot_runtime
+    fix_wechatpush_runtime
+    ensure_vlmcsd_ini
+    preload_homeproxy_resources
+}
+
+main() {
+    resolve_packages_source_flavor
+    apply_common_package_overrides
+    apply_source_flavor_package_overrides
+    apply_post_update_fixes
+}
+
+main
