@@ -58,6 +58,16 @@ on:
         required: false
         type: string
         default: ''
+      WRT_REPO_URL:
+        description: '源码仓库地址，留空时按当前默认值处理'
+        required: false
+        type: string
+        default: ''
+      WRT_REPO_BRANCH:
+        description: '源码分支，留空时按仓库默认分支处理'
+        required: false
+        type: string
+        default: ''
       # WRT_REPO_INFO:
       #   description: '源码'
       #   required: true
@@ -67,7 +77,7 @@ on:
       #     - 'https://github.com/VIKINGYFY/immortalwrt|main'
       #   default: 'https://github.com/coolsnowwolf/lede|master'
       WRT_SOURCE_HASH_INFO:
-        description: '版本HASH|URL|BRANCH'
+        description: '源码HASH，推荐只填 commit hash；兼容旧格式 hash|url|branch'
         required: false
         type: string
         default: ''
@@ -91,8 +101,8 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       # 源码
-      # WRT_REPO_INFO: ${{ inputs.WRT_REPO_INFO || 'https://github.com/coolsnowwolf/lede|master' }}
-      # WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
+      WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
       WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
       # 编译分支
       # WRT_REPO_BRANCH: ${{ 'master' }}

@@ -44,6 +44,11 @@ on:
         required: false
         type: string
         default: 'https://github.com/coolsnowwolf/lede'
+      WRT_REPO_BRANCH:
+        description: '源码分支，留空时按仓库默认分支处理'
+        required: false
+        type: string
+        default: ''
       WRT_RELEASE_FIRMWARE:
         description: '发布firmware'
         required: false
@@ -120,7 +125,7 @@ on:
 env:
   DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
   WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
-  WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH || 'master' }}
+  WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
   WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_CONFIG: ${{inputs.WRT_CONFIG}}           # 配置文件
   WRT_CONFIG_OVERLAY: ${{inputs.WRT_CONFIG_OVERLAY || '' }} # 配置覆盖文件

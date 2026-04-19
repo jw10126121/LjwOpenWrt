@@ -56,6 +56,16 @@ on:
         required: true
         type: string
         default: 'https://github.com/coolsnowwolf/lede'
+      WRT_REPO_BRANCH:
+        description: '源码分支，留空时按仓库默认分支处理'
+        required: false
+        type: string
+        default: ''
+      WRT_SOURCE_HASH_INFO:
+        description: '源码HASH，推荐只填 commit hash；兼容旧格式 hash|url|branch'
+        required: false
+        type: string
+        default: ''
       WRT_REPO_Commit_Hash:
         description: '历史版本HASH'
         required: false
@@ -82,8 +92,9 @@ jobs:
     with:
       # 源码
       WRT_REPO_URL: ${{ inputs.WRT_REPO_URL || 'https://github.com/coolsnowwolf/lede' }}
+      WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
       # 编译分支
-      WRT_REPO_BRANCH: ${{ matrix.BRANCH || 'master' }}
+      WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
       # 编译指定版本
       WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # DIY配置文件

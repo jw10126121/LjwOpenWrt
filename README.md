@@ -36,6 +36,16 @@
 
 目前 `DEFAULT`、`CUSTOM` 与 `main` 三个手动入口都已支持该选项，无需再手动改源码切换。
 
+### GitHub Actions 源码与配置层说明
+
+- `WRT_REPO_URL`：决定使用哪个上游源码仓库
+- `WRT_REPO_BRANCH`：决定拉取哪个源码分支；留空时按仓库默认分支处理
+- `WRT_SOURCE_HASH_INFO`：推荐只填 commit hash；旧格式 `hash|url|branch` 仍兼容，但不再推荐
+- `FW3` / `FW4`：只表示功能配置层，不再隐含绑定特定源码
+- `WRT_GENERAL_CONFIG`：决定基础配置组合；留空时按主配置文件自动解析
+
+脚本内部会根据 `WRT_REPO_URL` 自动解析 `source_flavor=lean|VIKINGYFY|generic`，未显式传源码时默认使用 `lean`。如果 `WRT_REPO_BRANCH` 留空，会自动选择默认分支：`lean -> master`，`VIKINGYFY -> main`。
+
 ## 编译时间
 手动编译
 
@@ -49,7 +59,7 @@
     默认密码：无 | password
 
 ## 固件下载
-只编译LEDE，如需OWRT、LibWRT,请前往对应的仓库下载.
+当前仓库默认以本仓库发布页为主；其它上游如需直接下载成品固件，可前往各自发布页。
 
 ### LEDE: 
 

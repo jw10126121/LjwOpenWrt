@@ -18,7 +18,7 @@ on:
         description: '源码分支'
         required: false
         type: string
-        default: 'master'
+        default: ''
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false
@@ -78,10 +78,19 @@ jobs:
         OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
         WRT_REPO_URL: ${{ inputs.WRT_REPO_URL }}
         WRT_REPO_BRANCH: ${{ inputs.WRT_REPO_BRANCH }}
-        WRT_IS_LEAN: true
       run: |
+        . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
+        SOURCE_FLAVOR="$(resolve_source_flavor "$WRT_REPO_URL")"
+        WRT_REPO_BRANCH="$(resolve_source_branch "$WRT_REPO_URL" "$WRT_REPO_BRANCH")"
+        if [ "$SOURCE_FLAVOR" = "lean" ]; then
+          WRT_IS_LEAN=true
+        else
+          WRT_IS_LEAN=false
+        fi
+        export SOURCE_FLAVOR WRT_REPO_BRANCH WRT_IS_LEAN
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
         grep -q '^WRT_VER=' /tmp/source_metadata.txt
+        grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt
         grep -q '^DEVICE_TARGET=mediatek$' /tmp/source_metadata.txt
         grep -q '^DEVICE_SUBTARGET=filogic$' /tmp/source_metadata.txt
 

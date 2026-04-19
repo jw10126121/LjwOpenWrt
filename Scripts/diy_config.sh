@@ -13,6 +13,9 @@ work_dir=$(pwd)
 current_script_dir=$(cd $(dirname $0) && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 
+source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
+[ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
+
 if [ $(basename "$(pwd)") != 'openwrt' ]; then
     if [ -d "./openwrt" ]; then
         cd ./openwrt
@@ -35,7 +38,7 @@ show_help() {
     echo "  -t default_theme_name 默认主题，默认不修改"
     echo "  -m package_manager    包管理器类型，默认ipk，可选apk"
     echo "  -c config_name        配置名，如IPQ60XX-NOWIFI-LEAN"
-    echo "  -s source_code_info   源码信息，格式为：hash|url|branch"
+    echo "  -s source_code_info   源码信息，兼容格式：hash|url|branch（不再推荐）"
 }
 
 # 检查是否需要显示帮助信息
@@ -48,6 +51,8 @@ default_theme_name=''
 package_manager='ipk'
 config_name=''
 source_code_info=''
+source_repo_url="${WRT_REPO_URL:-}"
+source_flavor='lean'
 
 # 解析外部传入的定制参数，后续所有修改都围绕这些参数展开。
 while getopts "hi:n:p:t:m:c:s:" opt; do
@@ -198,6 +203,43 @@ configure_default_system() {
         sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" "$CFG_FILE_LEDE"
         echo "【Lin】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
     fi
+}
+
+resolve_source_flavor_from_input() {
+    local parsed_hash parsed_url parsed_branch
+
+    if [ -n "${source_code_info}" ]; then
+        IFS='|' read -r parsed_hash parsed_url parsed_branch <<EOF
+${source_code_info}
+EOF
+        if [ -n "${parsed_url}" ]; then
+            source_repo_url="${parsed_url}"
+        fi
+    fi
+
+    if command -v resolve_source_flavor >/dev/null 2>&1; then
+        source_flavor=$(resolve_source_flavor "${source_repo_url}")
+    else
+        source_flavor='lean'
+    fi
+
+    if [ "${source_flavor}" = 'lean' ]; then
+        is_code_lean=true
+    else
+        is_code_lean=false
+    fi
+
+    echo "【Lin】源码风味：${source_flavor}"
+}
+
+configure_common_system_defaults() {
+    configure_default_system
+    configure_theme
+    clear_passwords
+    adjust_luci_menu_positions
+    configure_openvpn_defaults
+    configure_base_package_options
+    patch_apk_empty_feed_indexing
 }
 
 configure_theme() {
@@ -492,7 +534,11 @@ apply_ipq_init_tuning() {
     fi
 }
 
-apply_nonlean_runtime_defaults() {
+apply_VIKINGYFY_runtime_customizations() {
+    echo "【Lin】当前源码风味为 VIKINGYFY，暂未追加专属运行时修补"
+}
+
+apply_generic_runtime_defaults() {
     local default_bash_dir='./package/base-files/files/etc/uci-defaults'
     local default_bash_script='./package/base-files/files/etc/uci-defaults/99-lin-defaults'
     local dhcp_ip_start=10
@@ -528,28 +574,29 @@ EOF
 }
 
 main() {
-    is_code_lean=false
-    [ -f "$file_default_settings" ] && is_code_lean=true
     WRT_TARGET="${config_name}"
+    resolve_source_flavor_from_input
 
-    if [ "${is_code_lean}" = true ]; then
-        echo "【Lin】当前源码是否LEAN：${is_code_lean}"
-    fi
-
-    configure_default_system
-    configure_theme
-    apply_lean_runtime_customizations
-    clear_passwords
-    adjust_luci_menu_positions
+    configure_common_system_defaults
     update_build_revision
-    configure_nss_usage_display
-    configure_openvpn_defaults
-    configure_base_package_options
-    patch_apk_empty_feed_indexing
-    apply_ipq_optimizations
-    apply_ipq_init_tuning
-    apply_nonlean_runtime_defaults
+
+    case "${source_flavor}" in
+        lean)
+            apply_lean_runtime_customizations
+            configure_nss_usage_display
+            ;;
+        VIKINGYFY)
+            apply_VIKINGYFY_runtime_customizations
+            apply_ipq_optimizations
+            apply_ipq_init_tuning
+            apply_generic_runtime_defaults
+            ;;
+        *)
+            apply_ipq_optimizations
+            apply_ipq_init_tuning
+            apply_generic_runtime_defaults
+            ;;
+    esac
 }
 
 main
-

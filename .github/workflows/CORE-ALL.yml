@@ -17,8 +17,17 @@ on:
       # WRT_REPO_BRANCH:
       #   required: true
       #   type: string
+      WRT_REPO_URL:
+        required: false
+        type: string
+      WRT_REPO_BRANCH:
+        required: false
+        type: string
       WRT_SOURCE_HASH_INFO:
         required: true
+        type: string
+      WRT_REPO_Commit_Hash:
+        required: false
         type: string
       WRT_CONFIG:
         required: true
@@ -107,6 +116,7 @@ env:
   DEVICE_ARCH: ''
   REPO_GIT_HASH: ''
   REPO_GIT_hash_simple: ''
+  SOURCE_FLAVOR: lean
   system_content_note: ''
   system_content: ''
   readme_desc_file: ''
@@ -183,6 +193,7 @@ jobs:
 
     - name: Check Config Values (检查配置变量)
       run: |
+        . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
         WRT_HAS_WIFI=true
         [[ "$WRT_CONFIG" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
@@ -212,35 +223,36 @@ jobs:
         [[ "$INPUT_WIFI" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
         echo "【Lin】配置名读取WIFI：${WRT_HAS_WIFI}"
-        if [[ "${WRT_CONFIG_TMP}" =~ -FW4\.txt$|-V\.txt$ ]]; then
-          WRT_REPO_INFO='https://github.com/VIKINGYFY/immortalwrt|main'
+        if [ -n "${WRT_REPO_URL}" ]; then
+          RESOLVED_REPO_BRANCH=$(resolve_source_branch "${WRT_REPO_URL}" "${WRT_REPO_BRANCH}")
+          WRT_REPO_INFO="${WRT_REPO_URL}|${RESOLVED_REPO_BRANCH}"
+          echo "【Lin】读取显式源码信息：${WRT_REPO_INFO}"
         else
           WRT_REPO_INFO='https://github.com/coolsnowwolf/lede|master'
+          echo "【Lin】未显式传源码，使用默认源码信息：${WRT_REPO_INFO}"
         fi
-        echo "【Lin】配置名读取源码信息：${WRT_REPO_INFO}"
+        echo "【Lin】当前源码信息：${WRT_REPO_INFO}"
         RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_GENERAL_CONFIG}" "${WRT_CONFIG}")
         echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
         echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
-        # 判断是否有Hash
-        if [ -n "${{ env.WRT_SOURCE_HASH_INFO }}" ]; then
-          IFS='|' read -r WRT_SOURCE_HASH WRT_SOURCE_URL WRT_SOURCE_BRANCH <<< "${{ env.WRT_SOURCE_HASH_INFO }}"
-          WRT_REPO_Commit_Hash="${WRT_SOURCE_HASH}"
-          echo "WRT_REPO_Commit_Hash=$WRT_SOURCE_HASH" >> $GITHUB_ENV
-          echo "【Lin】源码HASH值：${WRT_SOURCE_HASH}"
-          if [ -n "${WRT_SOURCE_URL}" ]; then
-            WRT_REPO_INFO="${WRT_SOURCE_URL}|${WRT_SOURCE_BRANCH}"
-            echo "【Lin】源码HASH值读取源码信息：${WRT_REPO_INFO}"
-          fi
+        resolved_source_selection=$(resolve_source_selection "${WRT_REPO_URL}" "${WRT_REPO_BRANCH}" "${WRT_SOURCE_HASH_INFO}")
+        eval "${resolved_source_selection}"
+        WRT_REPO_URL="${REPO_URL}"
+        WRT_REPO_BRANCH="${REPO_BRANCH}"
+        SOURCE_FLAVOR="${SOURCE_FLAVOR}"
+        if [ -n "${REPO_HASH}" ]; then
+          WRT_REPO_Commit_Hash="${REPO_HASH}"
+          echo "【Lin】源码HASH值：${REPO_HASH}"
         fi
+        WRT_REPO_INFO="${WRT_REPO_URL}|${WRT_REPO_BRANCH}"
         echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
-
-        IFS='|' read -r WRT_REPO_URL WRT_REPO_BRANCH <<< "${WRT_REPO_INFO}"
-        WRT_REPO_URL="${WRT_REPO_URL}"
-        WRT_REPO_BRANCH="${WRT_REPO_BRANCH}"
         echo "WRT_REPO_URL=${WRT_REPO_URL}" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}" >> $GITHUB_ENV
+        echo "SOURCE_FLAVOR=${SOURCE_FLAVOR}" >> $GITHUB_ENV
+        echo "WRT_REPO_Commit_Hash=${WRT_REPO_Commit_Hash}" >> $GITHUB_ENV
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
+        echo "【Lin】源码风味：${SOURCE_FLAVOR}"
 
     - name: Combine Disks (合并磁盘)
       uses: easimon/maximize-build-space@master
@@ -275,23 +287,28 @@ jobs:
     - name: Clone Source Code (克隆源代码)
       id: clone_source
       run: |
-        if [[ "${WRT_REPO_URL}" == *"immortalwrt"* ]]; then
-          WRT_IS_LEAN=false
-          echo "WRT_IS_LEAN=false" >> $GITHUB_ENV
-        else
+        . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
+        SOURCE_FLAVOR=$(resolve_source_flavor "$WRT_REPO_URL")
+        WRT_REPO_BRANCH=$(resolve_source_branch "$WRT_REPO_URL" "$WRT_REPO_BRANCH")
+        echo "SOURCE_FLAVOR=$SOURCE_FLAVOR" >> $GITHUB_ENV
+        echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
+        echo "【Lin】源码风味：$SOURCE_FLAVOR"
+        if [ "$SOURCE_FLAVOR" = "lean" ]; then
           WRT_IS_LEAN=true
-          echo "WRT_IS_LEAN=true" >> $GITHUB_ENV
+        else
+          WRT_IS_LEAN=false
         fi
+        echo "WRT_IS_LEAN=$WRT_IS_LEAN" >> $GITHUB_ENV
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
         if [ ! -d ./openwrt ]; then
           change_branceh=''
-          if [ "$WRT_REPO_URL" == 'master' ]; then
+          if [ "$WRT_REPO_BRANCH" = 'master' ]; then
             change_branceh='main'
-          elif [ "$WRT_REPO_URL" == 'main' ]; then
+          elif [ "$WRT_REPO_BRANCH" = 'main' ]; then
             change_branceh='master'
           fi
-          echo "【Lin】修改克隆源代码：【$change_branceh】$WRT_REPO_URL"
+          echo "【Lin】修改克隆源代码分支：【$change_branceh】$WRT_REPO_URL"
           if [ -n "${change_branceh}" ]; then
             git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL openwrt
           fi

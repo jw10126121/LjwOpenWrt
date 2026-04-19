@@ -8,12 +8,13 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 TARGET_SCRIPT="$SCRIPT_DIR/diy_config.sh"
 
 required_functions='
+resolve_source_flavor_from_input
+configure_common_system_defaults
 append_default_settings_snippet
-configure_default_system
-configure_theme
 apply_lean_runtime_customizations
+apply_VIKINGYFY_runtime_customizations
 patch_apk_empty_feed_indexing
-apply_nonlean_runtime_defaults
+apply_generic_runtime_defaults
 apply_ipq_optimizations
 apply_ipq_init_tuning
 main

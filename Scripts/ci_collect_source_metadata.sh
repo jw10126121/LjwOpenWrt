@@ -10,6 +10,15 @@ config_path="${openwrt_path}/.config"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
 wrt_is_lean="${WRT_IS_LEAN:-true}"
+source_flavor="${SOURCE_FLAVOR:-lean}"
+
+if [ -n "${source_flavor}" ]; then
+    if [ "${source_flavor}" = "lean" ]; then
+        wrt_is_lean="true"
+    else
+        wrt_is_lean="false"
+    fi
+fi
 
 the_repo="${wrt_repo_url%/}"
 wrt_ver="${the_repo##*/}-${wrt_repo_branch}"
@@ -52,12 +61,13 @@ fi
 
 version_kernel=""
 if [ -f "${kernel_file_detail}" ]; then
-    version_kernel="$(grep -oP 'LINUX_KERNEL_HASH-\K[0-9]+\.[0-9]+\.[0-9]+' "${kernel_file_detail}" || true)"
+    version_kernel="$(sed -nE 's/^LINUX_KERNEL_HASH-([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' "${kernel_file_detail}" | head -n 1)"
 fi
 
 cat <<EOF
 WRT_VER=${wrt_ver}
 SOURCE_REPO=${source_repo}
+SOURCE_FLAVOR=${source_flavor:-lean}
 DEVICE_TARGET=${device_target}
 DEVICE_SUBTARGET=${device_subtarget}
 DEVICE_PROFILE=${device_profile}
