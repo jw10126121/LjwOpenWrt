@@ -229,7 +229,7 @@ jobs:
         echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
         echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
-        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}")
+        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}" "${WRT_DEVICE}")
         eval "${resolved_source_selection}"
         WRT_REPO_URL="${REPO_URL}"
         WRT_REPO_BRANCH="${REPO_BRANCH}"
@@ -282,7 +282,7 @@ jobs:
       id: clone_source
       run: |
         . "$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
-        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}")
+        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}" "${WRT_DEVICE}")
         eval "${resolved_source_selection}"
         WRT_REPO_URL="${REPO_URL}"
         WRT_REPO_BRANCH="${REPO_BRANCH}"

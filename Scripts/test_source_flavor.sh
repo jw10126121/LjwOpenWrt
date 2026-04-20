@@ -14,20 +14,26 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 [ "$(resolve_source_repo_url "VIKINGYFY")" = "https://github.com/VIKINGYFY/immortalwrt" ]
 
 [ "$(resolve_source_default_branch "lean")" = "master" ]
-[ "$(resolve_source_default_branch "VIKINGYFY")" = "main" ]
+[ "$(resolve_source_default_branch "VIKINGYFY" "IPQ60XX-NOWIFI")" = "main" ]
+[ "$(resolve_source_default_branch "VIKINGYFY" "MT6000-WIFI")" = "owrt" ]
 
-selection=$(resolve_source_selection "lean" "")
+selection=$(resolve_source_selection "lean" "" "IPQ60XX-NOWIFI")
 printf '%s\n' "$selection" | grep -q '^REPO_URL=https://github.com/coolsnowwolf/lede$'
 printf '%s\n' "$selection" | grep -q '^REPO_BRANCH=master$'
 printf '%s\n' "$selection" | grep -q '^REPO_HASH=$'
 printf '%s\n' "$selection" | grep -q '^SOURCE_FLAVOR=lean$'
 
-selection=$(resolve_source_selection "VIKINGYFY" "")
+selection=$(resolve_source_selection "VIKINGYFY" "" "IPQ60XX-NOWIFI")
 printf '%s\n' "$selection" | grep -q '^REPO_URL=https://github.com/VIKINGYFY/immortalwrt$'
 printf '%s\n' "$selection" | grep -q '^REPO_BRANCH=main$'
 printf '%s\n' "$selection" | grep -q '^SOURCE_FLAVOR=VIKINGYFY$'
 
-selection=$(resolve_source_selection "lean" "abcdef123456")
+selection=$(resolve_source_selection "VIKINGYFY" "" "MT6000-WIFI")
+printf '%s\n' "$selection" | grep -q '^REPO_URL=https://github.com/VIKINGYFY/immortalwrt$'
+printf '%s\n' "$selection" | grep -q '^REPO_BRANCH=owrt$'
+printf '%s\n' "$selection" | grep -q '^SOURCE_FLAVOR=VIKINGYFY$'
+
+selection=$(resolve_source_selection "lean" "abcdef123456" "IPQ60XX-NOWIFI")
 printf '%s\n' "$selection" | grep -q '^REPO_URL=https://github.com/coolsnowwolf/lede$'
 printf '%s\n' "$selection" | grep -q '^REPO_BRANCH=master$'
 printf '%s\n' "$selection" | grep -q '^REPO_HASH=abcdef123456$'

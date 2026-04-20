@@ -44,7 +44,7 @@ src-git packages https://github.com/immortalwrt/packages.git
 src-git luci https://github.com/immortalwrt/luci.git
 EOF
 
-selection="$(resolve_source_selection "VIKINGYFY" "")"
+selection="$(resolve_source_selection "VIKINGYFY" "" "MT6000-WIFI")"
 eval "$selection"
 
 OPENWRT_PATH="$OPENWRT_PATH" \

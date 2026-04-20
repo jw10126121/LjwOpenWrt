@@ -44,11 +44,19 @@ resolve_source_repo_url() {
 
 resolve_source_default_branch() {
     local source_flavor
+    local device_name="${2:-}"
 
     source_flavor=$(resolve_source_flavor "${1:-}")
 
     case "${source_flavor}" in
-        VIKINGYFY|generic)
+        VIKINGYFY)
+            if [[ "${device_name}" == IPQ* ]]; then
+                printf '%s\n' 'main'
+            else
+                printf '%s\n' 'owrt'
+            fi
+            ;;
+        generic)
             printf '%s\n' 'main'
             ;;
         *)
@@ -60,6 +68,7 @@ resolve_source_default_branch() {
 resolve_source_selection() {
     local input_source_flavor="${1:-}"
     local source_hash_info="${2:-}"
+    local device_name="${3:-}"
     local source_flavor=''
     local repo_url=''
     local repo_branch=''
@@ -68,7 +77,7 @@ resolve_source_selection() {
 
     source_flavor=$(resolve_source_flavor "${input_source_flavor}")
     repo_url=$(resolve_source_repo_url "${source_flavor}")
-    repo_branch=$(resolve_source_default_branch "${source_flavor}")
+    repo_branch=$(resolve_source_default_branch "${source_flavor}" "${device_name}")
 
     if [ -n "${source_hash_info}" ]; then
         if [[ "${source_hash_info}" == *"|"* ]]; then
