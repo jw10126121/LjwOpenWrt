@@ -44,6 +44,26 @@ touch "$TMPDIR/coreutils-base64_1_aarch64.ipk"
 touch "$TMPDIR/ca-bundle_1_all.ipk"
 touch "$TMPDIR/libopenssl3_1_aarch64.ipk"
 touch "$TMPDIR/libubox20240329_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-openclash_1_all.ipk"
+touch "$TMPDIR/kmod-inet-diag_1_aarch64.ipk"
+touch "$TMPDIR/coreutils-nohup_1_aarch64.ipk"
+touch "$TMPDIR/libcap-bin_1_aarch64.ipk"
+touch "$TMPDIR/libgmp10_1_aarch64.ipk"
+touch "$TMPDIR/libruby_1_aarch64.ipk"
+touch "$TMPDIR/libyaml_1_aarch64.ipk"
+touch "$TMPDIR/ruby_1_aarch64.ipk"
+touch "$TMPDIR/ruby-bigdecimal_1_aarch64.ipk"
+touch "$TMPDIR/ruby-date_1_aarch64.ipk"
+touch "$TMPDIR/ruby-digest_1_aarch64.ipk"
+touch "$TMPDIR/ruby-enc_1_aarch64.ipk"
+touch "$TMPDIR/ruby-forwardable_1_aarch64.ipk"
+touch "$TMPDIR/ruby-pstore_1_aarch64.ipk"
+touch "$TMPDIR/ruby-psych_1_aarch64.ipk"
+touch "$TMPDIR/ruby-stringio_1_aarch64.ipk"
+touch "$TMPDIR/ruby-strscan_1_aarch64.ipk"
+touch "$TMPDIR/ruby-yaml_1_aarch64.ipk"
+touch "$TMPDIR/unzip_1_aarch64.ipk"
+touch "$TMPDIR/kmod-nft-tproxy_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-openvpn_1_all.ipk"
 touch "$TMPDIR/luci-i18n-openvpn-zh-cn_1_all.ipk"
 touch "$TMPDIR/luci-app-basic_1_all.ipk"
@@ -51,6 +71,7 @@ touch "$TMPDIR/luci-i18n-basic-zh-cn_1_all.ipk"
 
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-ssr-plus=m
+CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-openvpn=m
 CONFIG_PACKAGE_luci-app-basic=m
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
@@ -79,6 +100,37 @@ libubox20240329_1_aarch64.ipk
 for filename in $required_files; do
 	if [ ! -f "$SSRPLUS_DIR/$filename" ]; then
 		echo "Missing expected file: $filename" >&2
+		exit 1
+	fi
+done
+
+OPENCLASH_DIR="$TMPDIR/luci-app-openclash"
+openclash_required_files="
+luci-app-openclash_1_all.ipk
+kmod-inet-diag_1_aarch64.ipk
+coreutils-nohup_1_aarch64.ipk
+libcap-bin_1_aarch64.ipk
+libgmp10_1_aarch64.ipk
+libruby_1_aarch64.ipk
+libyaml_1_aarch64.ipk
+ruby_1_aarch64.ipk
+ruby-bigdecimal_1_aarch64.ipk
+ruby-date_1_aarch64.ipk
+ruby-digest_1_aarch64.ipk
+ruby-enc_1_aarch64.ipk
+ruby-forwardable_1_aarch64.ipk
+ruby-pstore_1_aarch64.ipk
+ruby-psych_1_aarch64.ipk
+ruby-stringio_1_aarch64.ipk
+ruby-strscan_1_aarch64.ipk
+ruby-yaml_1_aarch64.ipk
+unzip_1_aarch64.ipk
+kmod-nft-tproxy_1_aarch64.ipk
+"
+
+for filename in $openclash_required_files; do
+	if [ ! -f "$OPENCLASH_DIR/$filename" ]; then
+		echo "Missing expected OpenClash file: $filename" >&2
 		exit 1
 	fi
 done

@@ -3,9 +3,6 @@
 # ------------------------------------------------------------------------
 CONFIG_PACKAGE_luci-app-bandix=y             # Bandix 页面
 CONFIG_PACKAGE_bandix=y                      # Bandix 后端
-CONFIG_PACKAGE_luci-app-mwan3=m              # Mwan3
-CONFIG_PACKAGE_luci-i18n-mwan3-zh-cn=m       # Mwan3 中文语言包
-CONFIG_PACKAGE_luci-app-mwan3helper=m        # Mwan3 Helper
 CONFIG_PACKAGE_luci-app-dockerman=y          # Docker 管理页面
 CONFIG_PACKAGE_luci-app-mosdns=y             # MosDNS 页面
 CONFIG_PACKAGE_luci-app-nlbwmon=y            # nlbwmon 流量统计
