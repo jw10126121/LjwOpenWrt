@@ -14,6 +14,8 @@ echo "【Lin】脚本目录：${current_script_dir}"
 # 通用包清单所有源码风味都会执行；源码风味清单只补各自差异。
 source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
 [ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
+luci_feed_helper="${current_script_dir}/lib/luci_feed_compat.sh"
+[ -f "${luci_feed_helper}" ] && . "${luci_feed_helper}"
 
 # 允许从仓库根目录执行，脚本会自行切换到 package/；
 # 如果当前目录和子目录里都没有 package/，则直接退出，避免误删其它路径。
@@ -30,6 +32,7 @@ package_workdir=$(pwd)
 openwrt_workdir="$(readlink -f ..)"
 source_repo_url="${WRT_REPO_URL:-}"
 source_flavor='lean'
+luci_feed_branch='unknown'
 
 echo "【Lin】工作目录：${package_workdir}"
 
@@ -130,9 +133,9 @@ MOVE_PACKAGE_FROM_LIST() {
     local list_repo=$2
     local found
 
-    found=$(find "./${list_repo}"/*/ -maxdepth 1 -type d -iname "${package_name}" -print)
+    found=$(find "./${list_repo}" -mindepth 1 -maxdepth 2 -type d -iname "${package_name}" -print | head -n 1)
     if [ -n "${found}" ]; then
-        cp -rf ${found} ./
+        cp -rf "${found}" ./
         echo "【Lin】复制插件包库${list_repo}的${package_name}到package中"
     else
         echo "【Lin】未找到插件包库${list_repo}的${package_name}"
@@ -282,6 +285,16 @@ resolve_packages_source_flavor() {
     echo "【Lin】Packages 源码风味：${source_flavor}"
 }
 
+resolve_packages_luci_feed_branch() {
+    if command -v resolve_luci_feed_branch >/dev/null 2>&1; then
+        luci_feed_branch=$(resolve_luci_feed_branch "${openwrt_workdir}/feeds.conf.default")
+    else
+        luci_feed_branch='unknown'
+    fi
+
+    echo "【Lin】LuCI feed 分支：${luci_feed_branch}"
+}
+
 # 通用包清单：无论 lean / VIKINGYFY / 其它源码风味，都会执行。
 # 这里应该只放“对所有风味都通用”的替换，不要放只在特定源码树中才成立的覆盖。
 apply_common_package_overrides() {
@@ -315,6 +328,12 @@ apply_lean_package_overrides() {
     update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
+
+    if is_lean_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "master"
+    fi
 }
 
 # VIKINGYFY 风味额外覆盖。
@@ -472,19 +491,6 @@ fix_wechatpush_runtime() {
     fi
 }
 
-# 某些来源缺少 vlmcsd.ini，预置一个默认配置文件，避免装上后仍要手工补文件。
-ensure_vlmcsd_ini() {
-    local app_vlmcsd_dir
-    local vlmcsd_ini
-
-    app_vlmcsd_dir=$(find ./ ../feeds/luci/ ../feeds/packages/ -maxdepth 3 -type d -iname "luci-app-vlmcsd" -prune)
-    echo "【Lin】检索到luci-app-vlmcsd目录：${app_vlmcsd_dir}"
-    if [ -n "${app_vlmcsd_dir}" ] && [ -d "${app_vlmcsd_dir}/root/etc/" ] && [ ! -f "${app_vlmcsd_dir}/root/etc/vlmcsd.ini" ]; then
-        vlmcsd_ini="${current_script_dir}/patch/vlmcsd.ini"
-        [ -f "${vlmcsd_ini}" ] && cp -fr "${vlmcsd_ini}" "${app_vlmcsd_dir}/root/etc/vlmcsd.ini" && echo "【Lin】预置vlmcsd.ini成功！"
-    fi
-}
-
 # homeproxy 这里不是简单替换包，而是预先把规则资源准备到包目录中。
 # 这样最终编译出来的镜像会自带一套规则资源，减少首次使用时的初始化成本。
 preload_homeproxy_resources() {
@@ -525,7 +531,6 @@ apply_post_update_fixes() {
     fix_diskman_makefile
     fix_pushbot_runtime
     fix_wechatpush_runtime
-    ensure_vlmcsd_ini
     preload_homeproxy_resources
 }
 
@@ -536,6 +541,7 @@ apply_post_update_fixes() {
 # 4. 执行后置修补链
 main() {
     resolve_packages_source_flavor
+    resolve_packages_luci_feed_branch
     apply_common_package_overrides
     apply_source_flavor_package_overrides
     apply_post_update_fixes

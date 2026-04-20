@@ -9,4 +9,26 @@ for fn in resolve_packages_source_flavor apply_lean_package_overrides apply_VIKI
     grep -q "^${fn}() {" "$TARGET_SCRIPT"
 done
 
+extract_function_body() {
+	local fn="$1"
+
+	awk -v name="$fn" '
+		$0 ~ "^" name "\\(\\) \\{" { in_fn=1; next }
+		in_fn && /^}/ { exit }
+		in_fn { print }
+	' "$TARGET_SCRIPT"
+}
+
+extract_function_body "apply_VIKINGYFY_package_overrides" | grep -q 'update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"'
+extract_function_body "apply_generic_package_overrides" | grep -q 'update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"'
+extract_function_body "apply_lean_package_overrides" | grep -q 'is_lean_luci_feed_25_12'
+extract_function_body "apply_lean_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "apply_lean_package_overrides" | grep -q 'update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "apply_lean_package_overrides" | grep -q 'update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "master"'
+grep -q 'find "./${list_repo}" -mindepth 1 -maxdepth 2 -type d -iname "${package_name}" -print | head -n 1' "$TARGET_SCRIPT"
+if grep -q '^ensure_vlmcsd_ini() {' "$TARGET_SCRIPT"; then
+	echo "Packages.sh should no longer carry the legacy ensure_vlmcsd_ini hook" >&2
+	exit 1
+fi
+
 echo "test_packages_source_flavor: ok"
