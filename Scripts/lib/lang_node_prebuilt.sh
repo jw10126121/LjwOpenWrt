@@ -63,23 +63,23 @@ minor_version_to_number() {
 # 函数执行后会设置以下全局变量，供后续流程使用：
 #   CONFIG_VERSION_MINOR
 #   INCLUDE_VERSION_MINOR
-#   PACKAGE_VERSION_MINOR
+#   LUCI_FEED_VERSION_MINOR
 #   OPENWRT_VERSION_MINOR
 resolve_openwrt_versions() {
     local version_workdir=$1
-    local config_raw include_raw package_raw
+    local config_raw include_raw luci_feed_raw
 
     config_raw=$(sed -n 's/^CONFIG_VERSION_NUMBER="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "${version_workdir}/.config" 2>/dev/null | head -n1)
     include_raw=$(sed -nE 's/^VERSION_NUMBER:=.*,[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+(-[^)]*)?).*/\1/p' "${version_workdir}/include/version.mk" 2>/dev/null | tail -n1)
     if [ -z "${include_raw}" ]; then
         include_raw=$(sed -nE 's/^VERSION_NUMBER:=.*\b(SNAPSHOT)\b.*/\1/p' "${version_workdir}/include/version.mk" 2>/dev/null | tail -n1)
     fi
-    package_raw=$(sed -nE 's|^[^#]*luci.*openwrt-([^;[:space:]]+).*|\1|p' "${version_workdir}/feeds.conf.default" 2>/dev/null | head -n1)
+    luci_feed_raw=$(sed -nE 's|^[^#]*luci.*openwrt-([^;[:space:]]+).*|\1|p' "${version_workdir}/feeds.conf.default" 2>/dev/null | head -n1)
 
     CONFIG_VERSION_MINOR=$(extract_openwrt_minor_version "${config_raw}")
     INCLUDE_VERSION_MINOR=$(extract_openwrt_minor_version "${include_raw}")
-    PACKAGE_VERSION_MINOR=$(extract_openwrt_minor_version "${package_raw}")
-    OPENWRT_VERSION_MINOR="${CONFIG_VERSION_MINOR:-${INCLUDE_VERSION_MINOR:-${PACKAGE_VERSION_MINOR:-}}}"
+    LUCI_FEED_VERSION_MINOR=$(extract_openwrt_minor_version "${luci_feed_raw}")
+    OPENWRT_VERSION_MINOR="${CONFIG_VERSION_MINOR:-${INCLUDE_VERSION_MINOR:-${LUCI_FEED_VERSION_MINOR:-}}}"
 
     if [ -z "${OPENWRT_VERSION_MINOR}" ] && \
        grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${version_workdir}/feeds.conf.default" 2>/dev/null; then
@@ -259,7 +259,7 @@ replace_lang_node_with_prebuilt() {
     # 第三步：基于“当前版本 + 可用分支”选一个兼容版本。
     selected_version=$(pick_lang_node_prebuilt_version "${OPENWRT_VERSION_MINOR:-}" "${supported_versions}" "${fallback_version}" || true)
 
-    log_info "openwrt版本号：${OPENWRT_VERSION_MINOR:-未知}；config_version：${CONFIG_VERSION_MINOR:-无}；include_version：${INCLUDE_VERSION_MINOR:-无}；package_version：${PACKAGE_VERSION_MINOR:-无}；supported_versions：${supported_versions:-无}；prebuilt_version：${selected_version:-无}"
+    log_info "主源码版本号：${OPENWRT_VERSION_MINOR:-未知}；config_version：${CONFIG_VERSION_MINOR:-无}；include_version：${INCLUDE_VERSION_MINOR:-无}；luci_feed_version：${LUCI_FEED_VERSION_MINOR:-无}；supported_versions：${supported_versions:-无}；prebuilt_version：${selected_version:-无}"
 
     if [ ! -d "${node_dir}" ]; then
         log_info "未找到原始 lang_node 目录：${node_dir}"
