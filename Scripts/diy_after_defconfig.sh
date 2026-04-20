@@ -156,7 +156,7 @@ cd "${openwrt_workdir}"
 choose_type_homeproxy=$(grep -m 1 "^CONFIG_PACKAGE_luci-app-homeproxy=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
 # homeproxy_DIR=$(find ./package ./feeds/luci/ ./feeds/packages/ -maxdepth 3 -type d -iname "luci-app-homeproxy" -prune)
 app_homeproxy_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-homeproxy" -print -quit 2>/dev/null)
-if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
+if [ -n "${choose_type_homeproxy}" ] && [ "${choose_type_homeproxy}" != "n" ] && [ -d "${app_homeproxy_dir}" ]; then
 
     homeproxy_DIR=$(readlink -f "${app_homeproxy_dir}")
 
@@ -184,7 +184,6 @@ if [ -n "${choose_type_homeproxy}" ] && [ -d "${app_homeproxy_dir}" ]; then
         echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
-
 
 
 

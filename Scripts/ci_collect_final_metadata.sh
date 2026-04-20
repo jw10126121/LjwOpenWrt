@@ -132,7 +132,11 @@ if [ "${WRT_USE_APK:-false}" = "true" ]; then
     package_manager='apk'
 fi
 
-if grep -q '^CONFIG_PACKAGE_firewall4=y$' "${openwrt_path}/.config" 2>/dev/null; then
+if grep -q '^CONFIG_PACKAGE_firewall4=y$' "${openwrt_path}/.config" 2>/dev/null && \
+   grep -q '^CONFIG_PACKAGE_firewall=y$' "${openwrt_path}/.config" 2>/dev/null; then
+    fw_stack='FW3+FW4(冲突)'
+    fw_stack_tag='mixed'
+elif grep -q '^CONFIG_PACKAGE_firewall4=y$' "${openwrt_path}/.config" 2>/dev/null; then
     fw_stack='FW4'
     fw_stack_tag='fw4'
 elif grep -q '^CONFIG_PACKAGE_firewall=y$' "${openwrt_path}/.config" 2>/dev/null; then

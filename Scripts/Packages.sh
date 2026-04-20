@@ -371,6 +371,11 @@ fix_quickfile_makefile() {
 
 # 统一调用外部 helper 处理 node 预编译包兼容问题，避免主脚本继续膨胀。
 apply_lang_node_prebuilt_fix() {
+    if [ "${WRT_USE_APK:-false}" = "true" ]; then
+        echo "【Lin】APK 模式跳过 sbwml lang_node 预编译，继续使用官方 lang/node"
+        return 0
+    fi
+
     echo "【Lin】尝试使用 sbwml/feeds_packages_lang_node-prebuilt 加速 lang_node 编译"
     if LANG_NODE_PREBUILT_REPO="https://github.com/sbwml/feeds_packages_lang_node-prebuilt" \
         bash "${current_script_dir}/lib/lang_node_prebuilt.sh" "${openwrt_workdir}"; then

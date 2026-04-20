@@ -495,11 +495,29 @@ configure_nss_usage_display() {
 
 configure_openvpn_defaults() {
     local wrt_ippart
+    local firewall_user_path="./package/network/config/firewall/files/firewall.user"
+    local fw4_openvpn_nat_dir="./package/base-files/files/usr/share/nftables.d/chain-post/srcnat"
+    local fw4_openvpn_nat_file="${fw4_openvpn_nat_dir}/99-openvpn-masq.nft"
+    local fw3_openvpn_nat_rule="iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE"
 
     wrt_ippart=$(echo "$WRT_IP" | cut -d'.' -f1-3)
-    if [ -f "./package/network/config/firewall/files/firewall.user" ]; then
-        echo "iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o br-lan -j MASQUERADE" >> ./package/network/config/firewall/files/firewall.user
-        echo "【Lin】OpenVPN Server has been fixed and is now accessible on the network!"
+
+    if grep -q '^CONFIG_PACKAGE_firewall=y$' "${op_config}" 2>/dev/null; then
+        rm -f "${fw4_openvpn_nat_file}"
+        if [ -f "${firewall_user_path}" ] && ! grep -Fq "${fw3_openvpn_nat_rule}" "${firewall_user_path}"; then
+            echo "${fw3_openvpn_nat_rule}" >> "${firewall_user_path}"
+            echo "【Lin】OpenVPN Server 已追加 FW3 iptables NAT 规则"
+        fi
+    elif grep -q '^CONFIG_PACKAGE_firewall4=y$' "${op_config}" 2>/dev/null; then
+        if [ -f "${firewall_user_path}" ]; then
+            sed -i "\|${fw3_openvpn_nat_rule}|d" "${firewall_user_path}"
+        fi
+
+        mkdir -p "${fw4_openvpn_nat_dir}"
+        cat > "${fw4_openvpn_nat_file}" <<'EOF'
+ip saddr 10.8.0.0/24 oifname "br-lan" masquerade comment "OpenVPN server LAN NAT"
+EOF
+        echo "【Lin】OpenVPN Server 已生成 FW4 nftables NAT 规则"
     fi
 
     if [ -f "./package/feeds/luci/luci-app-openvpn-server/root/etc/config/openvpn" ]; then

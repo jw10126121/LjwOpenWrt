@@ -26,7 +26,9 @@ assert_lacks_line() {
 	fi
 }
 
-assert_has_line '    echo "【Lin】尝试使用 sbwml/feeds_packages_lang_node-prebuilt 加速 lang_node 编译"' "Packages.sh should announce the sbwml prebuilt attempt"
+assert_has_line '    if [ "${WRT_USE_APK:-false}" = "true" ]; then' "Packages.sh should special-case apk mode before invoking the prebuilt helper"
+assert_has_line '        echo "【Lin】APK 模式跳过 sbwml lang_node 预编译，继续使用官方 lang/node"' "Packages.sh should explain that apk mode falls back to the official node"
+assert_has_line '    echo "【Lin】尝试使用 sbwml/feeds_packages_lang_node-prebuilt 加速 lang_node 编译"' "Packages.sh should announce the sbwml prebuilt attempt in ipk mode"
 assert_has_line '    if LANG_NODE_PREBUILT_REPO="https://github.com/sbwml/feeds_packages_lang_node-prebuilt" \' "Packages.sh should invoke the sbwml prebuilt helper behind an if guard"
 assert_has_line '    echo "【Lin】未命中可用的 sbwml lang_node 预编译分支，继续使用官方 lang/node"' "Packages.sh should log the official fallback"
 assert_lacks_line 'nxhack/openwrt-node-packages' "Packages.sh should remove the nxhack node feed path entirely"

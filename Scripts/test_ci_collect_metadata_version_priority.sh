@@ -16,13 +16,28 @@ make_openwrt_tree() {
     local config_version=$2
     local include_version_line=$3
     local feeds_content=$4
+    local firewall_mode=${5:-fw4}
 
     mkdir -p "$root_dir"
+
+    local firewall_line='CONFIG_PACKAGE_firewall=n'
+    local firewall4_line='CONFIG_PACKAGE_firewall4=y'
+    case "$firewall_mode" in
+        fw3)
+            firewall_line='CONFIG_PACKAGE_firewall=y'
+            firewall4_line='CONFIG_PACKAGE_firewall4=n'
+            ;;
+        mixed)
+            firewall_line='CONFIG_PACKAGE_firewall=y'
+            firewall4_line='CONFIG_PACKAGE_firewall4=y'
+            ;;
+    esac
 
     cat > "$root_dir/.config" <<EOF
 CONFIG_TARGET_ARCH_PACKAGES="aarch64_cortex-a53"
 CONFIG_VERSION_NUMBER="${config_version}"
-CONFIG_PACKAGE_firewall4=y
+${firewall_line}
+${firewall4_line}
 CONFIG_PACKAGE_frpc=y
 CONFIG_PACKAGE_frps=m
 EOF
@@ -86,5 +101,22 @@ run_case "$CASE_DIR2" "$TMPDIR/case2.env"
 
 grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case2.env"
 grep -q '^LUCI_VERSION=23.05$' "$TMPDIR/case2.env"
+
+CASE_DIR3="$TMPDIR/mixed-fw-stack"
+make_openwrt_tree \
+    "$CASE_DIR3" \
+    "OpenWrt 24.10.5" \
+    "VERSION_NUMBER:= OpenWrt, 24.10.5" \
+    "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" \
+    "mixed"
+
+mv "$CASE_DIR3/include.version.mk" "$CASE_DIR3/version.mk.tmp"
+mkdir -p "$CASE_DIR3/include"
+mv "$CASE_DIR3/version.mk.tmp" "$CASE_DIR3/include/version.mk"
+
+run_case "$CASE_DIR3" "$TMPDIR/case3.env"
+
+grep -q '^FW_STACK_TAG=mixed$' "$TMPDIR/case3.env"
+grep -q 'FW环境：FW3+FW4(冲突)' "$TMPDIR/case3.env"
 
 echo "test_ci_collect_metadata_version_priority: ok"

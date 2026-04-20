@@ -26,7 +26,9 @@ assert_lacks_line() {
 	fi
 }
 
-assert_has_line '    echo "【Lin】尝试使用 sbwml/feeds_packages_lang_node-prebuilt 加速 lang_node 编译"' "Packages.sh should use the same sbwml-only path for VIKINGYFY"
+assert_has_line '    if [ "${WRT_USE_APK:-false}" = "true" ]; then' "Packages.sh should guard the sbwml helper behind an apk-mode check"
+assert_has_line '        echo "【Lin】APK 模式跳过 sbwml lang_node 预编译，继续使用官方 lang/node"' "Packages.sh should skip sbwml prebuilt in apk mode for every source flavor"
+assert_has_line '    echo "【Lin】尝试使用 sbwml/feeds_packages_lang_node-prebuilt 加速 lang_node 编译"' "Packages.sh should use the same sbwml-only path for VIKINGYFY in ipk mode"
 assert_has_line '    if LANG_NODE_PREBUILT_REPO="https://github.com/sbwml/feeds_packages_lang_node-prebuilt" \' "Packages.sh should wrap the sbwml helper in an if guard"
 assert_has_line '    echo "【Lin】未命中可用的 sbwml lang_node 预编译分支，继续使用官方 lang/node"' "Packages.sh should fall back to official lang/node when sbwml cannot be used"
 assert_lacks_line 'nxhack/openwrt-node-packages' "Packages.sh should not retain the nxhack node feed path"
