@@ -332,7 +332,8 @@ apply_lean_package_overrides() {
     update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
 
     if is_lean_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-        update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "master"
+        echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
+        update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
     fi
 }
 
