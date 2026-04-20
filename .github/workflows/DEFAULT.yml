@@ -54,8 +54,9 @@ on:
         type: choice
         options:
           - IPQ60XX-NOWIFI
-          - IPQ60XX-NOWIFI_lite
+          - IPQ60XX-NOWIFI-MINI
           - MT6000-WIFI
+          - MT6000-WIFI-MINI
         default: 'IPQ60XX-NOWIFI'
       WRT_FIREWALL:
         description: '防火墙栈'

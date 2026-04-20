@@ -1,0 +1,65 @@
+# ------------------------------------------------------------------------
+#  设备层：IPQ60XX-NOWIFI-MINI
+# ------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------
+#  目标平台 / 机型
+# ------------------------------------------------------------------------
+CONFIG_TARGET_qualcommax=y
+CONFIG_TARGET_qualcommax_ipq60xx=y
+CONFIG_TARGET_MULTI_PROFILE=y                # 一次编译多个机型
+
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-axt1800=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_linksys_mr7350=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_qihoo_360v6=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_redmi_ax5-jdcloud=n
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=n
+
+# ------------------------------------------------------------------------
+#  无线能力关闭
+# ------------------------------------------------------------------------
+CONFIG_PACKAGE_kmod-ath11k=n                 # 关闭 Wi-Fi 驱动
+CONFIG_PACKAGE_kmod-ath11k-ahb=n             # 关闭 AHB 版 ath11k
+CONFIG_PACKAGE_kmod-ath11k-pci=n             # 关闭 PCI 版 ath11k
+CONFIG_PACKAGE_ath11k-firmware-ipq6018=n     # 关闭 IPQ6018 固件
+CONFIG_PACKAGE_ath11k-firmware-qcn9074=n     # 关闭 QCN9074 固件
+CONFIG_PACKAGE_wpad-openssl=n                # 关闭 AP 认证组件
+CONFIG_PACKAGE_hostapd-common=n              # 关闭 hostapd 公共库
+
+# ------------------------------------------------------------------------
+#  设备专属可选插件关闭
+# ------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-arpbind=m
+CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m
+CONFIG_PACKAGE_luci-app-bandix=m
+CONFIG_PACKAGE_bandix=m
+CONFIG_PACKAGE_luci-app-hd-idle=m
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m
+CONFIG_PACKAGE_luci-app-nlbwmon=m
+CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m
+CONFIG_PACKAGE_luci-app-openclash=m
+CONFIG_PACKAGE_luci-app-wrtbwmon=m
+CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
+CONFIG_PACKAGE_wrtbwmon=m
+CONFIG_PACKAGE_luci-app-openlist=m
+CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m
+CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m
+CONFIG_PACKAGE_luci-app-openvpn-server=m
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m
+CONFIG_PACKAGE_luci-app-samba4=m
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m
+CONFIG_PACKAGE_luci-app-usb-printer=m
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m
+CONFIG_PACKAGE_luci-app-verysync=m
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m
+CONFIG_PACKAGE_luci-app-vsftpd=m
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m
+CONFIG_PACKAGE_luci-proto-wireguard=m
+CONFIG_PACKAGE_wireguard-tools=m
+CONFIG_PACKAGE_sqm-scripts-nss=m

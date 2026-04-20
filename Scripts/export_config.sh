@@ -2,7 +2,7 @@
 
 # 说明：
 # 1. 导出一份可直接分享的参数化合并配置文件。
-# 2. 固定加载 GENERAL.txt + GENERAL-SERVICE.txt + GENERAL-FW3|FW4，再按 device / overlays 叠加。
+# 2. 固定加载 GENERAL.txt + GENERAL-SERVICE.txt + GENERAL-FW3|FW4，再按需要叠加变体层、device / overlays。
 # 3. overlay 支持多个同时叠加，按传入顺序覆盖。
 
 set -eu
@@ -16,6 +16,7 @@ device=''
 fw=''
 overlay_list=''
 output_config=''
+variant_configs=''
 
 show_help() {
 	cat <<'EOF'
@@ -120,6 +121,17 @@ fi
 
 resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
 
+case "$device" in
+	*-MINI)
+		variant_configs="variants/MINI-SERVICE.txt"
+		case "$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]')" in
+			FW4)
+				variant_configs="${variant_configs} variants/MINI-FW4.txt"
+				;;
+		esac
+		;;
+esac
+
 device_config="devices/${device}.txt"
 if [ ! -f "$config_dir/$device_config" ]; then
 	echo "缺少设备配置：$config_dir/$device_config" >&2
@@ -130,7 +142,7 @@ device_overlay_config="device-overlays/${device}-$(printf '%s' "$fw" | tr '[:low
 
 bash "$MERGE_SCRIPT" \
 	"$config_dir" \
-	"$resolved_general_configs" \
+	"${resolved_general_configs}${variant_configs:+ $variant_configs}" \
 	"$device_config" \
 	"$output_config"
 

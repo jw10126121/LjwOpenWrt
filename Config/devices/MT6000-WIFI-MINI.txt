@@ -1,0 +1,24 @@
+# ------------------------------------------------------------------------
+#  设备层：MT6000-WIFI-MINI
+# ------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------
+#  目标平台 / 机型
+# ------------------------------------------------------------------------
+CONFIG_TARGET_mediatek=y
+CONFIG_TARGET_mediatek_filogic=y
+CONFIG_TARGET_MULTI_PROFILE=y                # 多机型并行输出
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y
+
+# ------------------------------------------------------------------------
+#  设备专属可选插件关闭
+# ------------------------------------------------------------------------
+CONFIG_PACKAGE_luci-app-openclash=m
+CONFIG_PACKAGE_luci-app-openlist=m
+CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m
+CONFIG_PACKAGE_luci-theme-kucat=m
+CONFIG_PACKAGE_luci-app-uhttpd=m
+CONFIG_PACKAGE_luci-app-wifischedule=m
+CONFIG_PACKAGE_luci-app-wrtbwmon=m
+CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m
+CONFIG_PACKAGE_wrtbwmon=m

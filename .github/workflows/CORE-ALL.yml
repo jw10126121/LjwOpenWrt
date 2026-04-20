@@ -198,7 +198,7 @@ jobs:
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
 
         WRT_HAS_LITE=false
-        [[ "${WRT_DEVICE,,}" =~ lite ]] && { WRT_HAS_LITE=true; }
+        [[ "${WRT_DEVICE,,}" =~ lite|mini ]] && { WRT_HAS_LITE=true; }
         echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
 
         WRT_CONFIG_LABEL="${WRT_DEVICE}-${WRT_FIREWALL^^}"

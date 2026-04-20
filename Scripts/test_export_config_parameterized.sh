@@ -12,7 +12,7 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$TMPDIR/devices" "$TMPDIR/overlays"
-mkdir -p "$TMPDIR/device-overlays"
+mkdir -p "$TMPDIR/device-overlays" "$TMPDIR/variants"
 
 cat > "$TMPDIR/GENERAL.txt" <<'EOF'
 CONFIG_COMMON=y
@@ -32,8 +32,22 @@ cat > "$TMPDIR/GENERAL-FW4.txt" <<'EOF'
 CONFIG_FW=fw4
 EOF
 
+cat > "$TMPDIR/variants/MINI-SERVICE.txt" <<'EOF'
+CONFIG_VARIANT=mini
+CONFIG_FEATURE=module
+EOF
+
+cat > "$TMPDIR/variants/MINI-FW4.txt" <<'EOF'
+CONFIG_VARIANT_FW=mini-fw4
+EOF
+
 cat > "$TMPDIR/devices/DEVICE-A.txt" <<'EOF'
 CONFIG_DEVICE=device-a
+EOF
+
+cat > "$TMPDIR/devices/DEVICE-A-MINI.txt" <<'EOF'
+CONFIG_DEVICE=device-a-mini
+CONFIG_FEATURE=device-override
 EOF
 
 cat > "$TMPDIR/device-overlays/DEVICE-A-FW3.txt" <<'EOF'
@@ -65,5 +79,18 @@ grep -q '^CONFIG_DEVICE=device-a$' "$OUT"
 grep -q '^CONFIG_DEVICE_FW=device-a-fw3$' "$OUT"
 grep -n '^CONFIG_FRP_ROLE=' "$OUT" | tail -n 1 | grep -q 'CONFIG_FRP_ROLE=server'
 grep -n '^CONFIG_PKG_FORMAT=' "$OUT" | tail -n 1 | grep -q 'CONFIG_PKG_FORMAT=apk'
+
+OUT_MINI="$TMPDIR/merged-mini.txt"
+
+bash "$EXPORT_SCRIPT" \
+	--config-dir "$TMPDIR" \
+	--device "DEVICE-A-MINI" \
+	--fw "fw4" \
+	--output "$OUT_MINI"
+
+grep -q '^CONFIG_DEVICE=device-a-mini$' "$OUT_MINI"
+grep -q '^CONFIG_VARIANT=mini$' "$OUT_MINI"
+grep -q '^CONFIG_VARIANT_FW=mini-fw4$' "$OUT_MINI"
+grep -n '^CONFIG_FEATURE=' "$OUT_MINI" | tail -n 1 | grep -q 'CONFIG_FEATURE=device-override'
 
 echo "test_export_config_parameterized: ok"
