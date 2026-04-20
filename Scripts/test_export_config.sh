@@ -18,22 +18,36 @@ CONFIG_ALPHA=y
 EOF
 
 cat > "$TMPDIR/GENERAL-SERVICE.txt" <<'EOF'
-CONFIG_SERVICE_ONLY=y
+CONFIG_SERVICE_ONLY=general-service
+CONFIG_GENERAL_SERVICE_LAYER=y
 EOF
 
 cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
 CONFIG_STACK=fw3
+CONFIG_GENERAL_FW_LAYER=y
 EOF
 
 cat > "$TMPDIR/GENERAL-FW4.txt" <<'EOF'
 CONFIG_STACK=fw4
+CONFIG_GENERAL_FW_LAYER=y
 EOF
 
-mkdir -p "$TMPDIR/devices" "$TMPDIR/overlays" "$TMPDIR/device-overlays"
+mkdir -p "$TMPDIR/overlays" "$TMPDIR/device-overlays"
 
-cat > "$TMPDIR/devices/DEVICE-A.txt" <<'EOF'
+cat > "$TMPDIR/DEVICE-A-FW3.txt" <<'EOF'
 CONFIG_DEVICE_ONLY=y
 CONFIG_FRP_ROLE=client
+# >>> SERVICE-BEGIN
+CONFIG_SERVICE_ONLY=device-service
+# <<< SERVICE-END
+# >>> FW3-BEGIN
+CONFIG_STACK=fw3
+CONFIG_DEVICE_STACK=fw3-device
+# <<< FW3-END
+# >>> FW4-BEGIN
+# CONFIG_STACK=fw4
+# CONFIG_DEVICE_STACK=fw4-device
+# <<< FW4-END
 EOF
 
 cat > "$TMPDIR/device-overlays/DEVICE-A-FW4.txt" <<'EOF'
@@ -57,9 +71,18 @@ bash "$EXPORT_SCRIPT" \
 	--output "$FW3_OUTPUT"
 
 grep -q '^CONFIG_ALPHA=y$' "$FW3_OUTPUT"
-grep -q '^CONFIG_SERVICE_ONLY=y$' "$FW3_OUTPUT"
+grep -q '^CONFIG_SERVICE_ONLY=device-service$' "$FW3_OUTPUT"
+if grep -q '^CONFIG_GENERAL_SERVICE_LAYER=y$' "$FW3_OUTPUT"; then
+	echo "fw3 export should skip GENERAL-SERVICE when device file embeds service config" >&2
+	exit 1
+fi
 grep -q '^CONFIG_STACK=fw3$' "$FW3_OUTPUT"
 grep -q '^CONFIG_DEVICE_ONLY=y$' "$FW3_OUTPUT"
+grep -q '^CONFIG_DEVICE_STACK=fw3-device$' "$FW3_OUTPUT"
+if grep -q '^CONFIG_GENERAL_FW_LAYER=y$' "$FW3_OUTPUT"; then
+	echo "fw3 export should skip GENERAL-FW3 when device file embeds stack config" >&2
+	exit 1
+fi
 grep -q '^CONFIG_OVERLAY_ONLY=y$' "$FW3_OUTPUT"
 grep -n '^CONFIG_FRP_ROLE=' "$FW3_OUTPUT" | tail -n 1 | grep -q 'CONFIG_FRP_ROLE=server'
 
@@ -70,9 +93,22 @@ bash "$EXPORT_SCRIPT" \
 	--output "$FW4_OUTPUT"
 
 grep -q '^CONFIG_ALPHA=y$' "$FW4_OUTPUT"
-grep -q '^CONFIG_SERVICE_ONLY=y$' "$FW4_OUTPUT"
+grep -q '^CONFIG_SERVICE_ONLY=device-service$' "$FW4_OUTPUT"
+if grep -q '^CONFIG_GENERAL_SERVICE_LAYER=y$' "$FW4_OUTPUT"; then
+	echo "fw4 export should skip GENERAL-SERVICE when device file embeds service config" >&2
+	exit 1
+fi
 grep -q '^CONFIG_STACK=fw4$' "$FW4_OUTPUT"
 grep -q '^CONFIG_DEVICE_ONLY=y$' "$FW4_OUTPUT"
+grep -q '^CONFIG_DEVICE_STACK=fw4-device$' "$FW4_OUTPUT"
+if grep -q '^CONFIG_GENERAL_FW_LAYER=y$' "$FW4_OUTPUT"; then
+	echo "fw4 export should skip GENERAL-FW4 when device file embeds stack config" >&2
+	exit 1
+fi
+if grep -q '^CONFIG_DEVICE_STACK=fw3-device$' "$FW4_OUTPUT"; then
+	echo "fw4 export should not keep fw3-only device stack config" >&2
+	exit 1
+fi
 grep -q '^CONFIG_DEVICE_FW_ONLY=y$' "$FW4_OUTPUT"
 if grep -q '^CONFIG_OVERLAY_ONLY=y$' "$FW4_OUTPUT"; then
 	echo "fw4 export should not include overlay content when overlay is omitted" >&2

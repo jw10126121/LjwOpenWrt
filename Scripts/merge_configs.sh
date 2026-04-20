@@ -37,19 +37,25 @@ for general_cfg in $general_configs; do
 	cat "$config_path" >> "$output_config"
 done
 
-device_config_path="$config_dir/$device_config"
+device_config_path="$device_config"
 if [ ! -f "$device_config_path" ]; then
-	echo "Missing device config: $device_config_path" >&2
-	exit 1
+	device_config_path="$config_dir/$device_config"
+	if [ ! -f "$device_config_path" ]; then
+		echo "Missing device config: $device_config_path" >&2
+		exit 1
+	fi
 fi
 
 cat "$device_config_path" >> "$output_config"
 
 if [ -n "$overlay_config" ]; then
-	overlay_config_path="$config_dir/$overlay_config"
+	overlay_config_path="$overlay_config"
 	if [ ! -f "$overlay_config_path" ]; then
-		echo "Missing overlay config: $overlay_config_path" >&2
-		exit 1
+		overlay_config_path="$config_dir/$overlay_config"
+		if [ ! -f "$overlay_config_path" ]; then
+			echo "Missing overlay config: $overlay_config_path" >&2
+			exit 1
+		fi
 	fi
 	cat "$overlay_config_path" >> "$output_config"
 fi

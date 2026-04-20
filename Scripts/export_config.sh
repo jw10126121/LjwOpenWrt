@@ -17,6 +17,127 @@ fw=''
 overlay_list=''
 output_config=''
 variant_configs=''
+cleanup_files=''
+
+resolve_device_config() {
+	local config_root=$1
+	local device_name=$2
+	local fw_name=$3
+	local fw_upper
+	local candidate
+
+	fw_upper=$(printf '%s' "$fw_name" | tr '[:lower:]' '[:upper:]')
+
+	for candidate in \
+		"${device_name}-${fw_upper}.txt" \
+		"${device_name}.txt" \
+		"${device_name}-FW3.txt"
+	do
+		if [ -f "$config_root/$candidate" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+cleanup() {
+	if [ -n "$cleanup_files" ]; then
+		rm -f $cleanup_files
+	fi
+}
+
+remove_variant_config() {
+	local target=$1
+	local kept=''
+	local item
+
+	for item in $variant_configs; do
+		[ "$item" = "$target" ] && continue
+		kept="${kept}${kept:+ }$item"
+	done
+
+	variant_configs=$kept
+}
+
+device_config_embeds_fw_stack() {
+	local config_path=$1
+
+	grep -Eq '^# >>> FW[34]-BEGIN$' "$config_path"
+}
+
+device_config_embeds_service_layer() {
+	local config_path=$1
+
+	grep -Eq '^# >>> SERVICE-BEGIN$' "$config_path"
+}
+
+preprocess_device_config() {
+	local input_config=$1
+	local fw_name=$2
+	local output_config_path=$3
+	local current_block=''
+	local fw_upper line
+
+	fw_upper=$(printf '%s' "$fw_name" | tr '[:lower:]' '[:upper:]')
+	: > "$output_config_path"
+
+	while IFS= read -r line || [ -n "$line" ]; do
+		case "$line" in
+			'# >>> FW3-BEGIN')
+				current_block='FW3'
+				continue
+				;;
+			'# <<< FW3-END')
+				current_block=''
+				continue
+				;;
+			'# >>> SERVICE-BEGIN')
+				current_block='SERVICE'
+				continue
+				;;
+			'# <<< SERVICE-END')
+				current_block=''
+				continue
+				;;
+			'# >>> FW4-BEGIN')
+				current_block='FW4'
+				continue
+				;;
+			'# <<< FW4-END')
+				current_block=''
+				continue
+				;;
+		esac
+
+		case "$current_block" in
+			'')
+				printf '%s\n' "$line" >> "$output_config_path"
+				;;
+			SERVICE)
+				printf '%s\n' "$line" >> "$output_config_path"
+				;;
+			FW3)
+				if [ "$fw_upper" = 'FW3' ]; then
+					printf '%s\n' "$line" >> "$output_config_path"
+				fi
+				;;
+			FW4)
+				if [ "$fw_upper" = 'FW4' ]; then
+					case "$line" in
+						\#[[:space:]]*CONFIG_*=*)
+							printf '%s\n' "$(printf '%s' "$line" | sed 's/^#[[:space:]]*//')" >> "$output_config_path"
+							;;
+						*)
+							printf '%s\n' "$line" >> "$output_config_path"
+							;;
+					esac
+				fi
+				;;
+		esac
+	done < "$input_config"
+}
 
 show_help() {
 	cat <<'EOF'
@@ -74,6 +195,8 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
+trap cleanup EXIT
+
 [ -n "$device" ] || {
 	echo "缺少设备参数，请使用 --device。" >&2
 	exit 1
@@ -119,8 +242,6 @@ if [ "$has_apk" = true ] && [ "$has_ipk" = true ]; then
 	exit 1
 fi
 
-resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
-
 case "$device" in
 	*-MINI)
 		variant_configs="variants/MINI-SERVICE.txt"
@@ -132,10 +253,49 @@ case "$device" in
 		;;
 esac
 
-device_config="devices/${device}.txt"
-if [ ! -f "$config_dir/$device_config" ]; then
-	echo "缺少设备配置：$config_dir/$device_config" >&2
+device_config=$(resolve_device_config "$config_dir" "$device" "$fw" || true)
+if [ -z "$device_config" ]; then
+	echo "缺少设备配置：$config_dir/${device}-$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]').txt 或 $config_dir/${device}.txt" >&2
 	exit 1
+fi
+
+resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
+device_config_path="$config_dir/$device_config"
+processed_device_config="$device_config_path"
+embeds_fw_stack=false
+embeds_service_layer=false
+
+if device_config_embeds_fw_stack "$device_config_path"; then
+	embeds_fw_stack=true
+fi
+
+if device_config_embeds_service_layer "$device_config_path"; then
+	embeds_service_layer=true
+fi
+
+if [ "$embeds_fw_stack" = true ] || [ "$embeds_service_layer" = true ]; then
+	case "${embeds_service_layer}:${embeds_fw_stack}" in
+		true:true)
+			resolved_general_configs='GENERAL.txt'
+			;;
+		true:false)
+			resolved_general_configs="GENERAL.txt $(bash "$RESOLVE_SCRIPT" "$fw" | sed 's/^GENERAL.txt GENERAL-SERVICE.txt //')"
+			;;
+		false:true)
+			resolved_general_configs='GENERAL.txt GENERAL-SERVICE.txt'
+			;;
+	esac
+	processed_device_config=$(mktemp)
+	cleanup_files="$processed_device_config"
+	preprocess_device_config "$device_config_path" "$fw" "$processed_device_config"
+fi
+
+if [ "$embeds_service_layer" = true ]; then
+	remove_variant_config "variants/MINI-SERVICE.txt"
+fi
+
+if [ "$embeds_fw_stack" = true ]; then
+	remove_variant_config "variants/MINI-FW4.txt"
 fi
 
 device_overlay_config="device-overlays/${device}-$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]').txt"
@@ -143,7 +303,7 @@ device_overlay_config="device-overlays/${device}-$(printf '%s' "$fw" | tr '[:low
 bash "$MERGE_SCRIPT" \
 	"$config_dir" \
 	"${resolved_general_configs}${variant_configs:+ $variant_configs}" \
-	"$device_config" \
+	"$processed_device_config" \
 	"$output_config"
 
 if [ -f "$config_dir/$device_overlay_config" ]; then

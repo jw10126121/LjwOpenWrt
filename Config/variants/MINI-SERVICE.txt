@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------
 # 说明：
 # 1. MINI 版统一把一批默认内置的可选服务下沉为安装包。
-# 2. 这里只放跨设备共享的降级项；设备专属差异仍放在 devices/ 或 device-overlays/。
+# 2. 这里只放跨设备共享的降级项；设备专属差异仍放在 Config 根目录或 device-overlays/。
 
 CONFIG_PACKAGE_luci-app-onliner=m
 CONFIG_PACKAGE_luci-app-ramfree=m

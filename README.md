@@ -32,14 +32,14 @@
 在 GitHub Actions 页面手动点击 `Run workflow` 时，配置组合改为参数化输入：
 
 - `WRT_DEVICE`：选择设备型号，例如 `IPQ60XX-NOWIFI`、`MT6000-WIFI`
-- `WRT_FIREWALL`：选择防火墙栈，`fw3` 或 `fw4`
+- `WRT_FIREWALL`：显式选择防火墙栈，`fw3` 或 `fw4`
 - `WRT_OVERLAYS`：可选 overlays，逗号分隔；除内置的 `frps`、`apk`、`ipk` 外，也支持你自己新增的 overlay 名，例如 `frps,apk`、`myvpn`、`myvpn,frps`
 
 ### GitHub Actions 源码与配置层说明
 
 - `WRT_SOURCE_FLAVOR`：选择源码风味；当前仅支持 `lean` 与 `VIKINGYFY`
 - `WRT_SOURCE_HASH_INFO`：可选指定 commit hash；推荐只填 hash 本身
-- `WRT_FIREWALL`：只表示功能配置层，不再隐含绑定特定源码
+- `WRT_FIREWALL`：显式选择要导出的防火墙配置段；是否跳过 `GENERAL-SERVICE` / `GENERAL-FW*` 由设备主文件自动决定
 - `WRT_OVERLAYS`：叠加可选差异层；会按传入顺序依次覆盖，只有 `apk` 与 `ipk` 互斥
 
 脚本内部会根据 `WRT_SOURCE_FLAVOR` 映射固定源码信息：`lean -> https://github.com/coolsnowwolf/lede @ master`，`VIKINGYFY -> https://github.com/VIKINGYFY/immortalwrt @ main`。
@@ -49,9 +49,23 @@
 - `Config/GENERAL.txt`
 - `Config/GENERAL-SERVICE.txt`
 - `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt`
-- `Config/devices/<设备名>.txt`
+- `Config/<设备名>-FW3.txt` 或 `Config/<设备名>.txt`
 - `Config/device-overlays/<设备名>-<FW>.txt`（如果存在则自动叠加）
 - `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加；输入时不区分大小写，内部会映射到大写文件名）
+
+当前 `IPQ60XX-NOWIFI` 已先收口为单主文件模式：
+
+- 主文件使用 `Config/IPQ60XX-NOWIFI-FW3.txt`
+- `GENERAL-SERVICE` 的服务插件也已抽入这个主文件，方便在一个文件内查看自定义插件
+- `lean` 现阶段主走 FW3，文件中的 FW3 段落默认生效
+- 同一文件中的 FW4 注释段会在导出 `fw4` 时被激活
+- 该设备导出时会跳过 `GENERAL-SERVICE.txt` / `GENERAL-FW3.txt` / `GENERAL-FW4.txt`，由主文件自己承接服务层与防火墙栈配置
+
+当前 `MT6000-WIFI` 与 `MT6000-WIFI-MINI` 也已收口为单主文件模式：
+
+- 主文件分别使用 `Config/MT6000-WIFI-FW3.txt`、`Config/MT6000-WIFI-MINI-FW3.txt`
+- 同一文件中的 FW4 注释段会在导出 `fw4` 时被激活
+- `MT6000-WIFI-MINI` 还会在主文件内直接承接原先的 `MINI-SERVICE` 与 `MINI-FW4` 差异，不再额外叠加对应 variants 文件
 
 自定义 overlay 的约定：
 

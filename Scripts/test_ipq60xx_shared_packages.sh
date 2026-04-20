@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 说明：IPQ60XX-NOWIFI 的一组设备共用包不区分 FW3/FW4，
-# 应统一由 devices/IPQ60XX-NOWIFI.txt 提供，而不是分别散落在 device-overlays。
+# 说明：IPQ60XX-NOWIFI 的一组设备共用包与 FW3 设备差异
+# 已统一收口到 Config/IPQ60XX-NOWIFI-FW3.txt，不再拆成普通设备层 + device-overlays。
 
 set -eu
 

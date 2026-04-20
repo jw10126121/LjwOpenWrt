@@ -11,7 +11,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$TMPDIR/devices" "$TMPDIR/overlays"
+mkdir -p "$TMPDIR/overlays"
 
 cat > "$TMPDIR/GENERAL.txt" <<'EOF'
 CONFIG_COMMON=y
@@ -25,7 +25,7 @@ cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
 CONFIG_FW=fw3
 EOF
 
-cat > "$TMPDIR/devices/DEVICE-A.txt" <<'EOF'
+cat > "$TMPDIR/DEVICE-A.txt" <<'EOF'
 CONFIG_DEVICE=device-a
 EOF
 

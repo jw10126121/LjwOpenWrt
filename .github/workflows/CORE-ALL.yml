@@ -84,7 +84,6 @@ env:
   WRT_CONFIG_LABEL: ''                                        # 组合标签
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
-  RESOLVED_GENERAL_CONFIG: ''
   WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}                # 自定义包配置
   WRT_RELEASE_FIRMWARE: ${{inputs.WRT_RELEASE_FIRMWARE}}      # 发布固件
   WRT_DEFAULT_LANIP: ${{inputs.WRT_DEFAULT_LANIP}}            # 默认lanIP
@@ -223,11 +222,8 @@ jobs:
         fi
 
         echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
-        echo "【Lin】读取防火墙参数：${{env.WRT_FIREWALL}}"
+        echo "【Lin】读取防火墙参数：${WRT_FIREWALL}"
         echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
-        RESOLVED_GENERAL_CONFIG=$(bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_general_configs.sh" "${WRT_FIREWALL}")
-        echo "RESOLVED_GENERAL_CONFIG=$RESOLVED_GENERAL_CONFIG" >> $GITHUB_ENV
-        echo "【Lin】基础配置组合：${RESOLVED_GENERAL_CONFIG}"
 
         resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}" "${WRT_DEVICE}")
         eval "${resolved_source_selection}"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 说明：MT6000-WIFI 的一组设备共用包不区分 FW3/FW4，
-# 应统一由 devices/MT6000-WIFI.txt 提供，而不是分别散落在 device-overlays。
+# 说明：MT6000-WIFI 的一组设备共用包
+# 已统一收口到 Config/MT6000-WIFI-FW3.txt，不再拆成普通设备层 + device-overlays。
 
 set -eu
 
@@ -36,6 +36,31 @@ for output in "$FW3_OUT" "$FW4_OUT"; do
 	grep -n '^CONFIG_PACKAGE_wrtbwmon=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_wrtbwmon=y'
 	grep -n '^CONFIG_PACKAGE_luci-app-openlist=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-openlist=m'
 	grep -n '^CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-dockerman=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-dockerman=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-mosdns=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-mosdns=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-bandix=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-bandix=m'
+	grep -n '^CONFIG_PACKAGE_bandix=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_bandix=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-nlbwmon=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-nlbwmon=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-openvpn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-openvpn=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-openvpn-server=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-openvpn-server=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-samba4=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-samba4=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-hd-idle=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-hd-idle=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_hd-idle=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_hd-idle=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-usb-printer=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-usb-printer=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m'
+	grep -n '^CONFIG_PACKAGE_luci-app-vsftpd=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-vsftpd=m'
+	grep -n '^CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=' "$output" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m'
 done
+
+grep -n '^CONFIG_PACKAGE_luci-app-verysync=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-verysync=m'
+grep -n '^CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m'
+grep -n '^CONFIG_PACKAGE_luci-app-verysync=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-verysync=m'
+grep -n '^CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m'
+grep -n '^CONFIG_PACKAGE_verysync=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_verysync=m'
 
 echo "test_mt6000_shared_packages: ok"
