@@ -345,7 +345,7 @@ patch_apk_empty_feed_indexing() {
     if ! awk '
         BEGIN { in_block=0; patched=0 }
         {
-            if (!in_block && $0 ~ /\$\(STAGING_DIR_HOST\)\/bin\/apk mkndx \\$/) {
+            if (!in_block && $0 ~ /mkndx[[:space:]]*\\$/) {
                 match($0, /^[[:space:]]*/)
                 indent = substr($0, RSTART, RLENGTH)
                 print indent "set -- *.apk; \\"
@@ -362,8 +362,12 @@ patch_apk_empty_feed_indexing() {
                 print
                 next
             }
-            if (in_block && $0 ~ /^[[:space:]]*\)$/) {
-                print indent "); \\"
+            if (in_block && $0 ~ /^[[:space:]]*\)[[:space:]]*(;[[:space:]]*\\)?[[:space:]]*$/) {
+                if ($0 ~ /;[[:space:]]*\\[[:space:]]*$/) {
+                    print
+                } else {
+                    print indent "); \\"
+                }
                 print indent "fi"
                 in_block = 0
                 next

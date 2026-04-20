@@ -42,6 +42,22 @@ endef
 EOF
 }
 
+create_variant_makefile() {
+	local target_file=$1
+	cat > "$target_file" <<'EOF'
+define Package/merge-index
+	(cd $(PACKAGE_DIR_ALL) && $(APK) mkndx \
+		--root $(TOPDIR) \
+		--keys-dir $(TOPDIR) \
+		--allow-untrusted \
+		--sign $(BUILD_KEY) \
+		--output packages.adb \
+		*.apk; \
+	); \
+endef
+EOF
+}
+
 APK_MAKEFILE="$TMPDIR/apk-package.mk"
 create_makefile "$APK_MAKEFILE"
 
@@ -96,5 +112,20 @@ cp "$IPK_MAKEFILE" "$TMPDIR/ipk-package.mk.orig"
 	patch_apk_empty_feed_indexing "$IPK_MAKEFILE"
 )
 cmp -s "$IPK_MAKEFILE" "$TMPDIR/ipk-package.mk.orig"
+
+VARIANT_MAKEFILE="$TMPDIR/variant-package.mk"
+create_variant_makefile "$VARIANT_MAKEFILE"
+
+(
+	package_manager='apk'
+	# shellcheck disable=SC1090
+	. "$FUNCTIONS_FILE"
+	patch_apk_empty_feed_indexing "$VARIANT_MAKEFILE"
+)
+
+grep -q 'set -- \*\.apk; \\' "$VARIANT_MAKEFILE"
+grep -q 'if \[ "\$\$1" = '\''\*\.apk'\'' \]; then \\' "$VARIANT_MAKEFILE"
+grep -q '\$\$@; \\' "$VARIANT_MAKEFILE"
+grep -q '^[[:space:]]*fi$' "$VARIANT_MAKEFILE"
 
 echo "test_diy_config_apk_index_patch: ok"
