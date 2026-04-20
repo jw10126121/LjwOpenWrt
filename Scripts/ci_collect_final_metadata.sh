@@ -114,6 +114,7 @@ luci_version="$(extract_luci_version "${openwrt_path}/feeds.conf.default" "${op_
 wrt_has_lite_text='[常规版]'
 wrt_has_wifi_text='有WIFI'
 package_manager='ipk'
+package_manager_tag='ipk'
 fw_stack='未知'
 fw_stack_tag='unknown'
 frp_role='未集成'
@@ -130,6 +131,7 @@ fi
 
 if [ "${WRT_USE_APK:-false}" = "true" ]; then
     package_manager='apk'
+    package_manager_tag='apk'
 fi
 
 if grep -q '^CONFIG_PACKAGE_firewall4=y$' "${openwrt_path}/.config" 2>/dev/null && \
@@ -162,7 +164,7 @@ elif grep -q '^CONFIG_PACKAGE_frpc=m$' "${openwrt_path}/.config" 2>/dev/null && 
     frp_role_tag='pkg'
 fi
 
-build_variant_tag="${source_flavor_tag}_${fw_stack_tag}_${frp_role_tag}"
+build_variant_tag="${source_flavor_tag}_${fw_stack_tag}_${frp_role_tag}_${package_manager_tag}"
 
 # 统一拼接给 README / 通知消息使用的固件说明正文。
 # 文案仍保持“内核版本 / LUCI版本 / OP版本”，以兼容现有通知与 README，
@@ -190,6 +192,7 @@ DEVICE_ARCH=${device_arch}
 LUCI_VERSION=${luci_version}
 OP_VERSION=${op_version}
 SOURCE_FLAVOR_TAG=${source_flavor_tag}
+PACKAGE_MANAGER_TAG=${package_manager_tag}
 FW_STACK_TAG=${fw_stack_tag}
 FRP_ROLE_TAG=${frp_role_tag}
 BUILD_VARIANT_TAG=${build_variant_tag}

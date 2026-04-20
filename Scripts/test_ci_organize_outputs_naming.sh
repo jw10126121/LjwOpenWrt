@@ -67,7 +67,7 @@ system_content="支持设备：cmiot_ax18" \
 SOURCE_FLAVOR_TAG="lean" \
 FW_STACK_TAG="fw3" \
 FRP_ROLE_TAG="frpc" \
-BUILD_VARIANT_TAG="lean_fw3_frpc" \
+BUILD_VARIANT_TAG="lean_fw3_frpc_ipk" \
 DEVICE_SUBTARGET="ipq60xx" \
 DEVICE_NAME_LIST="cmiot_ax18" \
 DEVICE_NAME_LIST_LIAN="cmiot_ax18" \
@@ -76,9 +76,9 @@ START_TIME="D260419_T120000" \
 PATH="$TEST_BIN:$PATH" \
 bash "$TARGET_SCRIPT" >/dev/null
 
-test -f "$OPENWRT_PATH/upload/config_lean_fw3_frpc_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
-test -f "$OPENWRT_PATH/upload/readme_lean_fw3_frpc_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
-test -f "$OPENWRT_PATH/upload/Packages_lean_fw3_frpc_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.tar.gz"
-test -f "$OPENWRT_PATH/upload/lean_fw3_frpc_ipq60xx_cmiot_ax18-squashfs-sysupgrade_lede-master_D260419_T120000.bin"
+test -f "$OPENWRT_PATH/upload/config_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
+test -f "$OPENWRT_PATH/upload/readme_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
+test -f "$OPENWRT_PATH/upload/Packages_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.tar.gz"
+test -f "$OPENWRT_PATH/upload/lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18-squashfs-sysupgrade_lede-master_D260419_T120000.bin"
 
 echo "test_ci_organize_outputs_naming: ok"

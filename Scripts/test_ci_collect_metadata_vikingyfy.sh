@@ -73,6 +73,8 @@ bash "$FINAL_SCRIPT" > "$TMPDIR/final.env"
 
 grep -q '^LUCI_VERSION=SNAPSHOT$' "$TMPDIR/final.env"
 grep -q '^OP_VERSION=SNAPSHOT$' "$TMPDIR/final.env"
+grep -q '^PACKAGE_MANAGER_TAG=ipk$' "$TMPDIR/final.env"
+grep -q '^BUILD_VARIANT_TAG=vikingyfy_fw4_frpc_ipk$' "$TMPDIR/final.env"
 grep -q '内核版本：6.12.80' "$TMPDIR/final.env"
 grep -q 'LUCI版本：SNAPSHOT' "$TMPDIR/final.env"
 grep -q 'OP版本：SNAPSHOT' "$TMPDIR/final.env"

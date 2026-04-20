@@ -85,6 +85,8 @@ run_case "$CASE_DIR" "$TMPDIR/case1.env"
 
 grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case1.env"
 grep -q '^LUCI_VERSION=24.10.5$' "$TMPDIR/case1.env"
+grep -q '^PACKAGE_MANAGER_TAG=ipk$' "$TMPDIR/case1.env"
+grep -q '^BUILD_VARIANT_TAG=lean_fw4_frpc_ipk$' "$TMPDIR/case1.env"
 
 CASE_DIR2="$TMPDIR/explicit-luci-branch"
 make_openwrt_tree \
@@ -101,6 +103,7 @@ run_case "$CASE_DIR2" "$TMPDIR/case2.env"
 
 grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case2.env"
 grep -q '^LUCI_VERSION=23.05$' "$TMPDIR/case2.env"
+grep -q '^BUILD_VARIANT_TAG=lean_fw4_frpc_ipk$' "$TMPDIR/case2.env"
 
 CASE_DIR3="$TMPDIR/mixed-fw-stack"
 make_openwrt_tree \
@@ -118,5 +121,6 @@ run_case "$CASE_DIR3" "$TMPDIR/case3.env"
 
 grep -q '^FW_STACK_TAG=mixed$' "$TMPDIR/case3.env"
 grep -q 'FW环境：FW3+FW4(冲突)' "$TMPDIR/case3.env"
+grep -q '^BUILD_VARIANT_TAG=lean_mixed_frpc_ipk$' "$TMPDIR/case3.env"
 
 echo "test_ci_collect_metadata_version_priority: ok"

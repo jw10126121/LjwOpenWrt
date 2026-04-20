@@ -122,9 +122,10 @@ jobs:
         grep -q '^LUCI_VERSION=23.05$' /tmp/final_metadata.txt
         grep -q '^OP_VERSION=24.10.5$' /tmp/final_metadata.txt
         grep -q '^SOURCE_FLAVOR_TAG=lean$' /tmp/final_metadata.txt
+        grep -q '^PACKAGE_MANAGER_TAG=ipk$' /tmp/final_metadata.txt
         grep -q '^FW_STACK_TAG=fw3$' /tmp/final_metadata.txt
         grep -q '^FRP_ROLE_TAG=frpc$' /tmp/final_metadata.txt
-        grep -q '^BUILD_VARIANT_TAG=lean_fw3_frpc$' /tmp/final_metadata.txt
+        grep -q '^BUILD_VARIANT_TAG=lean_fw3_frpc_ipk$' /tmp/final_metadata.txt
         grep -q '^system_content<<EOF_SYSTEM$' /tmp/final_metadata.txt
         grep -q '源码风味：lean' /tmp/final_metadata.txt
         grep -q 'FW环境：FW3' /tmp/final_metadata.txt
