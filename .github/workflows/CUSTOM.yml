@@ -61,6 +61,21 @@ jobs:
       WRT_SOURCE_FLAVOR: lean
     secrets: inherit
 
+  ipq60xx_nowifi_fw4_vikingyfy:
+    name: VIKINGYFY-IPQ60XX-NOWIFI-fw4-base
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_FIREWALL: fw4
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: VIKINGYFY
+    secrets: inherit
+    
   mt6000_wifi_fw4_vikingyfy:
     name: VIKINGYFY-MT6000-WIFI-fw4-base
     uses: ./.github/workflows/DEFAULT.yml
@@ -75,3 +90,4 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
       WRT_SOURCE_FLAVOR: VIKINGYFY
     secrets: inherit
+
