@@ -311,7 +311,8 @@ apply_common_package_overrides() {
 # lean 风味额外覆盖。
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
 }
@@ -322,8 +323,8 @@ apply_VIKINGYFY_package_overrides() {
     update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
     UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
     update_package_list "luci-app-momo momo" "nikkinikki-org/OpenWrt-momo" "main"
-    update_package_list "luci-app-nikki nikki" "nikkinikki-org/OpenWrt-nikki" "main"
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    update_package_list "luci-app-nikki nikki mihomo-meta mihomo-alpha" "nikkinikki-org/OpenWrt-nikki" "main"
+    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
@@ -435,15 +436,6 @@ fix_diskman_makefile() {
     fi
 }
 
-# Argon 主题视觉修补：统一进度条颜色变量，避免主题色与进度条色分离。
-sync_argon_progress_bar() {
-    local argon_dir
-
-    argon_dir=$(find ./*/ -maxdepth 3 -type d -iname "luci-theme-argon" -prune)
-    [ -n "${argon_dir}" ] && find "${argon_dir}" -type f -name "cascade*" -exec sed -i 's/--bar-bg/--primary/g' {} \; && \
-        echo "【Lin】theme-argon has been fixed：修改进度条颜色与主题色一致！"
-}
-
 # pushbot / wechatpush 两组修补都属于“运行时兼容性”修补：
 # 主要处理温度读取函数、展示文案，以及与当前设备环境不匹配的逻辑。
 fix_pushbot_runtime() {
@@ -531,7 +523,6 @@ apply_post_update_fixes() {
     fix_tailscale_makefile
     fix_rust_build
     fix_diskman_makefile
-    sync_argon_progress_bar
     fix_pushbot_runtime
     fix_wechatpush_runtime
     ensure_vlmcsd_ini
