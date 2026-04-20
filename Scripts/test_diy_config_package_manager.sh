@@ -54,7 +54,8 @@ run_case() {
 	local config_path="$case_dir/.config"
 
 	mkdir -p "$case_dir"
-	cat > "$config_path" <<'EOF'
+cat > "$config_path" <<'EOF'
+CONFIG_PKG_FORMAT=ipk
 CONFIG_USE_APK=n
 CONFIG_PACKAGE_luci-app-opkg=y
 CONFIG_PACKAGE_luci-lib-ipkg=y
@@ -81,6 +82,7 @@ IPK_CONFIG="$TMPDIR/ipk/.config"
 IPK_FEED_CMD="$TMPDIR/ipk/feed_cmd.txt"
 
 grep -q '^CONFIG_USE_APK=y$' "$APK_CONFIG"
+grep -q '^CONFIG_PKG_FORMAT=apk$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-package-manager=y$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=y$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-opkg=n$' "$APK_CONFIG"
@@ -93,6 +95,7 @@ if grep -q '/etc/opkg/distfeeds.conf' "$APK_FEED_CMD"; then
 fi
 
 grep -q '^CONFIG_USE_APK=n$' "$IPK_CONFIG"
+grep -q '^CONFIG_PKG_FORMAT=ipk$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-package-manager=n$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=n$' "$IPK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-opkg=y$' "$IPK_CONFIG"

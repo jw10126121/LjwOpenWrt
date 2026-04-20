@@ -153,6 +153,7 @@ build_disable_feed_cmd() {
 
 configure_package_manager_mode() {
     if [ "${package_manager}" = 'apk' ]; then
+        set_kconfig_value "CONFIG_PKG_FORMAT" "apk"
         set_kconfig_value "CONFIG_USE_APK" "y"
         set_kconfig_value "CONFIG_PACKAGE_luci-app-package-manager" "y"
         set_kconfig_value "CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn" "y"
@@ -161,6 +162,7 @@ configure_package_manager_mode() {
         set_kconfig_value "CONFIG_PACKAGE_luci-i18n-opkg-zh-cn" "n"
         echo "【Lin】包管理器模式：apk（启用新版 LuCI 包管理器）"
     else
+        set_kconfig_value "CONFIG_PKG_FORMAT" "ipk"
         set_kconfig_value "CONFIG_USE_APK" "n"
         set_kconfig_value "CONFIG_PACKAGE_luci-app-package-manager" "n"
         set_kconfig_value "CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn" "n"
