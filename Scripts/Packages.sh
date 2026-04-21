@@ -329,10 +329,12 @@ apply_common_package_overrides() {
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
     if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+        UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+        UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
+        # update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     else
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-        UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-app-argon-config" "master"
+        UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
     fi
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
@@ -356,7 +358,7 @@ apply_VIKINGYFY_package_overrides() {
 # 当源码地址无法识别时，仍然给出一套最保守的覆盖，不让脚本直接失效。
 apply_generic_package_overrides() {
     UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-app-argon-config" "master"
+    UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     #update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
