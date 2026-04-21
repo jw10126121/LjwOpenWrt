@@ -328,12 +328,12 @@ apply_common_package_overrides() {
 # lean 风味额外覆盖。
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
-    # if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-    #     update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
-    # else
+    if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+    else
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-app-argon-config" "master"
-    # fi
+    fi
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
