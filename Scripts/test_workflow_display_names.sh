@@ -10,6 +10,7 @@ printf '%s\n' "$default_line" | grep -q 'inputs.WRT_SOURCE_FLAVOR'
 printf '%s\n' "$default_line" | grep -q 'inputs.WRT_DEVICE'
 printf '%s\n' "$default_line" | grep -q 'inputs.WRT_FIREWALL'
 printf '%s\n' "$default_line" | grep -q 'inputs.WRT_OVERLAYS'
+grep -q 'WRT_LUCI_BRANCH:' .github/workflows/DEFAULT.yml
 
 if grep -n 'name: \$' .github/workflows/CUSTOM.yml | head -n 1 | cut -d: -f2- | grep -q 'inputs.WRT_'; then
 	echo "CUSTOM workflow name should not depend on dispatch inputs" >&2

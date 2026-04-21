@@ -317,8 +317,9 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
-    update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
-    update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-vlmcsd vlmcsd luci-app-socat" "sbwml/openwrt_pkgs" "main"
+    # update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
+    # update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
 
     # quickfile 当前按需保留，默认不导入。
     # 如果后续重新启用，需要同时确认设备侧是否改成 luci-nginx 路线。
@@ -427,7 +428,7 @@ apply_luci_feed_25_12_package_overrides() {
 
     echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
     update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
-    ensure_accesscontrol_menu_compat
+    # ensure_accesscontrol_menu_compat
 
     # echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
     # update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"

@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: ''
+      WRT_LUCI_BRANCH:
+        description: '可选 LuCI feed 分支，例如 openwrt-23.05、23.05 或 2305'
+        required: false
+        type: string
+        default: ''
       WRT_DIY_SETTING:
         description: 'DIY脚本'
         required: false
@@ -113,6 +118,7 @@ env:
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}           # 设备名
   WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}       # fw3 / fw4
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }} # overlays
+  WRT_LUCI_BRANCH: ${{inputs.WRT_LUCI_BRANCH || '' }} # LuCI feed branch
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}           # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }}                         # 主要用于更新Feeds
   WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}          # 自定义包配置

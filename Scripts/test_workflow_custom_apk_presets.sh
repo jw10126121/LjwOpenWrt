@@ -34,6 +34,7 @@ assert_not_contains_before_jobs() {
 
 assert_contains "$default_workflow" "workflow_call:" "DEFAULT should be reusable from CUSTOM-APK"
 assert_contains "$default_workflow" "WRT_OVERLAYS:" "DEFAULT reusable workflow should expose overlays input"
+assert_contains "$default_workflow" "WRT_LUCI_BRANCH:" "DEFAULT reusable workflow should expose LuCI branch input"
 assert_contains "$default_workflow" "IPQ60XX-NOWIFI-MINI" "DEFAULT should expose IPQ MINI in manual choices"
 assert_contains "$default_workflow" "MT6000-WIFI-MINI" "DEFAULT should expose MT6000 MINI in manual choices"
 

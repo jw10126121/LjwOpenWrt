@@ -10,10 +10,14 @@
 
 set -eu
 
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+. "$SCRIPT_DIR/lib/luci_feed_compat.sh"
+
 feed_config_name='feeds.conf.default'
 device_name="${WRT_DEVICE:-}"
 source_flavor="${WRT_SOURCE_FLAVOR:-${SOURCE_FLAVOR:-lean}}"
 source_flavor_lc="$(printf '%s' "${source_flavor}" | tr '[:upper:]' '[:lower:]')"
+luci_branch_input="${WRT_LUCI_BRANCH:-}"
 
 has_active_feed() {
 	local feed_name="$1"
@@ -46,8 +50,32 @@ dedupe_active_feeds() {
 	mv "$tmp_file" "$feed_config_name"
 }
 
+resolve_luci_branch_override() {
+	local canonical_branch
+
+	if canonical_branch="$(canonicalize_luci_feed_branch_token "$luci_branch_input")"; then
+		printf '%s\n' "$canonical_branch"
+		return 0
+	fi
+
+	return 1
+}
+
+apply_luci_branch_override() {
+	local target_branch=$1
+
+	sed -i "s#https://github.com/coolsnowwolf/luci\\.git;[^[:space:]]*#https://github.com/coolsnowwolf/luci.git;${target_branch}#" "$feed_config_name"
+}
+
 # 默认启用 helloworld feed。
 sed -i "s/#src-git helloworld/src-git helloworld/g" "$feed_config_name"
+
+# 仅在 WRT_LUCI_BRANCH 能识别为已知版本线时才覆盖 LuCI feed；
+# 未识别时保留 feeds.conf.default 原始分支不动。
+if target_luci_branch="$(resolve_luci_branch_override)"; then
+	apply_luci_branch_override "$target_luci_branch"
+fi
+
 dedupe_active_feeds
 
 # 只有“IPQ 设备 + 支持 NSS 的源码风味”才追加 qosmio 的 NSS 相关 feeds。

@@ -35,6 +35,9 @@ on:
       WRT_OVERLAYS:
         required: false
         type: string
+      WRT_LUCI_BRANCH:
+        required: false
+        type: string
       WRT_DIY_SETTING:
         required: true
         type: string
@@ -81,6 +84,7 @@ env:
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}                          # 设备名
   WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}                      # fw3 / fw4
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }}               # 可选 overlays
+  WRT_LUCI_BRANCH: ${{inputs.WRT_LUCI_BRANCH || '' }}         # 可选 LuCI feed 分支
   WRT_CONFIG_LABEL: ''                                        # 组合标签
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
@@ -224,6 +228,7 @@ jobs:
         echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
         echo "【Lin】读取防火墙参数：${WRT_FIREWALL}"
         echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
+        echo "【Lin】读取 LuCI 分支：${{env.WRT_LUCI_BRANCH != '' && env.WRT_LUCI_BRANCH || '源码默认' }}"
 
         resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}" "${WRT_DEVICE}")
         eval "${resolved_source_selection}"

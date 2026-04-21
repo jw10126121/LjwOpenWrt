@@ -33,7 +33,8 @@
 
 - `WRT_DEVICE`：选择设备型号，例如 `IPQ60XX-NOWIFI`、`MT6000-WIFI`
 - `WRT_FIREWALL`：显式选择防火墙栈，`fw3` 或 `fw4`
-- `WRT_OVERLAYS`：可选 overlays，逗号分隔；除内置的 `frps`、`apk`、`ipk` 外，也支持你自己新增的 overlay 名，例如 `frps,apk`、`myvpn`、`myvpn,frps`
+- `WRT_OVERLAYS`：可选 overlays，逗号分隔；除内置的 `frps`、`apk`、`ipk` 外，也支持你自己新增的 overlay 名，例如 `frps,apk`、`myvpn`
+- `WRT_LUCI_BRANCH`：可选 LuCI feed 分支，例如 `openwrt-23.05`、`23.05`、`2305`；留空或未识别时使用源码默认值
 
 ### GitHub Actions 源码与配置层说明
 
@@ -41,6 +42,7 @@
 - `WRT_SOURCE_HASH_INFO`：可选指定 commit hash；推荐只填 hash 本身
 - `WRT_FIREWALL`：显式选择要导出的防火墙配置段；是否跳过 `GENERAL-SERVICE` / `GENERAL-FW*` 由设备主文件自动决定
 - `WRT_OVERLAYS`：叠加可选差异层；会按传入顺序依次覆盖，只有 `apk` 与 `ipk` 互斥
+- `WRT_LUCI_BRANCH`：优先控制 LuCI feed 版本；例如传 `openwrt-23.05`、`23.05` 或 `2305` 时，会把 lean 源码中的 LuCI feed 切到 `openwrt-23.05`
 
 脚本内部会根据 `WRT_SOURCE_FLAVOR` 映射固定源码信息：`lean -> https://github.com/coolsnowwolf/lede @ master`，`VIKINGYFY -> https://github.com/VIKINGYFY/immortalwrt @ main`。
 
@@ -74,6 +76,8 @@
 - 可以同时传多个值，例如 `myvpn,frps,apk`
 - 后面的 overlay 会覆盖前面同名配置
 - 目前唯一内置冲突限制是 `apk` 与 `ipk` 不能同时启用
+- 如需切换 LuCI feed，使用 `WRT_LUCI_BRANCH=openwrt-23.05`，也支持 `23.05`、`2305`
+- 如果 `WRT_LUCI_BRANCH` 未识别到已知版本线，就保持 `feeds.conf.default` 里原本写好的版本不变
 
 配置维护约定：
 

@@ -14,6 +14,10 @@ on:
         required: false
         type: string
         default: ''
+      WRT_LUCI_BRANCH:
+        required: false
+        type: string
+        default: ''
       WRT_DIY_SETTING:
         required: false
         type: string
@@ -68,6 +72,11 @@ on:
         default: 'fw3'
       WRT_OVERLAYS:
         description: '可选 overlays，逗号分隔，例如 frps,apk'
+        required: false
+        type: string
+        default: ''
+      WRT_LUCI_BRANCH:
+        description: '可选 LuCI feed 分支，例如 openwrt-23.05、23.05 或 2305；留空则使用源码默认值'
         required: false
         type: string
         default: ''
@@ -147,6 +156,7 @@ jobs:
       WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
       WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
       WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
+      WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}
       # DIY脚本
       WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
       # DIY包配置

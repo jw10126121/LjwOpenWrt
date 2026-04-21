@@ -17,49 +17,55 @@ permissions: write-all
 #CI任务
 jobs:
   ipq60xx_nowifi_fw3:
-    name: lean-IPQ60XX-NOWIFI-fw3-base-ecec1ef
+    name: lean-IPQ60XX-NOWIFI-fw3-base
     uses: ./.github/workflows/DEFAULT.yml
     with:
       WRT_DEVICE: IPQ60XX-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
+      WRT_LUCI_BRANCH: openwrt-23.05
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
       WRT_SOURCE_FLAVOR: lean
-      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+      # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
+      # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit
 
   ipq60xx_nowifi_fw3_frps:
-    name: lean-IPQ60XX-NOWIFI-fw3-frps-ecec1ef
+    name: lean-IPQ60XX-NOWIFI-fw3-frps
     uses: ./.github/workflows/DEFAULT.yml
     with:
       WRT_DEVICE: IPQ60XX-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: frps
+      WRT_LUCI_BRANCH: openwrt-23.05
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
       WRT_SOURCE_FLAVOR: lean
-      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+      # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
+      # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit
 
   mt6000_wifi_fw3:
-    name: lean-MT6000-WIFI-fw3-base-ecec1ef
+    name: lean-MT6000-WIFI-fw3-base
     uses: ./.github/workflows/DEFAULT.yml
     with:
       WRT_DEVICE: MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
+      WRT_LUCI_BRANCH: openwrt-23.05
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
       WRT_SOURCE_FLAVOR: lean
-      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+      # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
+      # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit
