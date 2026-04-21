@@ -298,7 +298,7 @@ resolve_packages_luci_feed_branch() {
 # 通用包清单：无论 lean / VIKINGYFY / 其它源码风味，都会执行。
 # 这里应该只放“对所有风味都通用”的替换，不要放只在特定源码树中才成立的覆盖。
 apply_common_package_overrides() {
-    update_package_list "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
+    UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
