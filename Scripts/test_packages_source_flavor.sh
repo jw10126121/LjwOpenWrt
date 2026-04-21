@@ -6,6 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 TARGET_SCRIPT="$SCRIPT_DIR/Packages.sh"
 
 for fn in \
+	UPDATE_PACKAGE \
 	resolve_packages_source_flavor \
 	apply_lean_package_overrides \
 	apply_VIKINGYFY_package_overrides \
@@ -32,6 +33,7 @@ extract_function_body "apply_generic_package_overrides" | grep -q 'update_packag
 extract_function_body "apply_common_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"'
 extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"'
 extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "UPDATE_PACKAGE" | grep -q '成功clone插件：${package_name} \[库：${repo_name} | 分支：${package_branch}\]'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'is_luci_feed_25_12'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"'
 extract_function_body "package_has_adguardhome_translation_zh" | grep -q 'zh_Hans/adguardhome.po'

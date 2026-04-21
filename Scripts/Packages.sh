@@ -105,7 +105,7 @@ UPDATE_PACKAGE() {
     repo_name=${repo_url_git##*/}
 
     clone_repo_shallow "${full_repo}" "${package_branch}" "${repo_name}"
-    echo "【Lin】成功clone插件：${package_name} [库：${repo_name}]"
+    echo "【Lin】成功clone插件：${package_name} [库：${repo_name} | 分支：${package_branch}]"
 
     case "${package_special}" in
         pkg)
