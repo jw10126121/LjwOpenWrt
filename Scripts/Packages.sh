@@ -335,8 +335,8 @@ apply_lean_package_overrides() {
         update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     else
         echo "【Lin】luci-theme-argon使用的分支openwrt-24.10"
-        #UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
+        UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+        # update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
     fi
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
