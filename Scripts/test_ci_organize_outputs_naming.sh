@@ -76,9 +76,9 @@ START_TIME="D260419_T120000" \
 PATH="$TEST_BIN:$PATH" \
 bash "$TARGET_SCRIPT" >/dev/null
 
-test -f "$OPENWRT_PATH/upload/config_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
-test -f "$OPENWRT_PATH/upload/readme_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.txt"
-test -f "$OPENWRT_PATH/upload/Packages_lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18_lede-master_D260419_T120000.tar.gz"
-test -f "$OPENWRT_PATH/upload/lean_fw3_frpc_ipk_ipq60xx_cmiot_ax18-squashfs-sysupgrade_lede-master_D260419_T120000.bin"
+test -f "$OPENWRT_PATH/upload/config_ipq60xx_cmiot_ax18_lean_fw3_frpc_ipk_lede-master_D260419_T120000.txt"
+test -f "$OPENWRT_PATH/upload/readme_ipq60xx_cmiot_ax18_lean_fw3_frpc_ipk_lede-master_D260419_T120000.txt"
+test -f "$OPENWRT_PATH/upload/Packages_ipq60xx_cmiot_ax18_lean_fw3_frpc_ipk_lede-master_D260419_T120000.tar.gz"
+test -f "$OPENWRT_PATH/upload/ipq60xx_cmiot_ax18-squashfs-sysupgrade_lean_fw3_frpc_ipk_lede-master_D260419_T120000.bin"
 
 echo "test_ci_organize_outputs_naming: ok"

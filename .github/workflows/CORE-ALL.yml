@@ -460,7 +460,7 @@ jobs:
     - name: Check Config (缓存配置文件)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        name_config_file="Config_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
+        name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
         echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【Lin】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
@@ -501,7 +501,7 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: config_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/config_mine
 
     # - name: Cache Toolchain (缓存工具链)
@@ -576,7 +576,7 @@ jobs:
       if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: Firmware_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.START_TIME }}
+        name: openwrt_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.START_TIME }}
         path: ${{ env.OPENWRT_PATH }}/upload
 
     - name: Create Notification Content (创建推送结果内容)
@@ -611,8 +611,8 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        release_name="${{ env.START_TIME }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}"
-        release_tag="${{ env.START_TIME }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}"
+        release_name="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
+        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
         shopt -s nullglob
         release_files=( "${{ env.OPENWRT_PATH }}"/upload/*.* )
 

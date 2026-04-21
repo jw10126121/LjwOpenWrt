@@ -39,9 +39,9 @@ echo "readme_desc_file=${readme_desc_file}" >> "${GITHUB_ENV}"
 echo "release_desc_file=${release_desc_file}" >> "${GITHUB_ENV}"
 
 # build_name_prefix 是所有导出文件共享的命名前缀。
-# 里面包含源码风味 / FW / FRP / 平台 / 设备 / 版本 / 编译开始时间，
-# 这样从文件名本身就能直接判断这一包到底是什么配置。
-build_name_prefix="${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${DEVICE_NAME_LIST_LIAN:?DEVICE_NAME_LIST_LIAN is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}"
+# 调整为“平台 / 设备 / 源码风味+FW+FRP / 版本 / 编译开始时间”，
+# 让同平台同设备的产物在目录和发布页里更容易聚在一起。
+build_name_prefix="${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${DEVICE_NAME_LIST_LIAN:?DEVICE_NAME_LIST_LIAN is required}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}"
 
 # 导出配置说明与 README 到 upload/ 根目录。
 cp -f ./my_config.txt "./upload/config_${build_name_prefix}.txt"
@@ -62,7 +62,7 @@ tar -zcf "./upload/Packages_${build_name_prefix}.tar.gz" -C "${tmp_dir}" --trans
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
 
-# 固件镜像文件按“源码风味_FW_FRP_子平台_设备名_版本_开始时间”重命名，方便发布页辨认。
+# 固件镜像文件按“子平台_设备名_源码风味_FW_FRP_版本_开始时间”重命名，方便发布页辨认。
 # type 来自 DEVICE_NAME_LIST，例如 cmiot_ax18 / glinet_gl-mt6000。
 # 对每个设备，扫描 bin/targets 下属于该设备的镜像文件并统一改名后放进 upload/。
 for type in ${DEVICE_NAME_LIST:-}; do
@@ -74,7 +74,7 @@ for type in ${DEVICE_NAME_LIST:-}; do
         # 从原始文件名中提取“设备名起始后的剩余主体”，
         # 例如 cmiot_ax18-squashfs-sysupgrade，用于保留镜像种类信息。
         name="$(basename "${file}" | cut -d '.' -f 1 | grep -io "\(${type}\).*")"
-        new_file="${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${name}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}.${ext}"
+        new_file="${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${name}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}.${ext}"
         mv -f "${file}" "./upload/${new_file}"
     done < <(find ./bin/targets/ -type f -iname "*${type}*.*")
 done
