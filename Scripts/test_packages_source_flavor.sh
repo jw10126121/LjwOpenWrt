@@ -37,7 +37,7 @@ extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'updat
 extract_function_body "package_has_adguardhome_translation_zh" | grep -q 'zh_Hans/adguardhome.po'
 extract_function_body "package_has_adguardhome_translation_zh" | grep -q 'zh/adguardhome.po'
 extract_function_body "fallback_adguardhome_package_25_12" | grep -q 'package_has_adguardhome_translation_zh'
-extract_function_body "fallback_adguardhome_package_25_12" | grep -q 'UPDATE_PACKAGE "luci-app-adguardhome" "xptsp/luci-app-adguardhome" "main"'
+extract_function_body "fallback_adguardhome_package_25_12" | grep -q 'update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"'
 grep -q 'find "./${list_repo}" -mindepth 1 -maxdepth 2 -type d -iname "${package_name}" -print | head -n 1' "$TARGET_SCRIPT"
 if grep -q '^ensure_vlmcsd_ini() {' "$TARGET_SCRIPT"; then
 	echo "Packages.sh should no longer carry the legacy ensure_vlmcsd_ini hook" >&2

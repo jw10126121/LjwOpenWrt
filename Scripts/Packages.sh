@@ -381,7 +381,7 @@ apply_source_flavor_package_overrides() {
 
 # OpenWrt 25.12 的 LuCI 菜单机制与语言包状态和旧分支不同，这里统一补一层兼容：
 # 1. vlmcsd / socat 强制切到带 menu.d 与 ACL 的新版包源，避免旧控制器在 25.12 下不显示。
-# 2. accesscontrol 暂时从 coolsnowwolf/luci 的 openwrt-23.05 分支补回。
+# 2. accesscontrol / adguardhome 暂时从 coolsnowwolf/luci 的 openwrt-23.05 分支补回。
 apply_luci_feed_25_12_package_overrides() {
     if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
         return 0
@@ -446,7 +446,7 @@ package_has_adguardhome_translation_zh() {
 
 # 25.12 下先尊重当前上游 LuCI 包：
 # 如果官方/当前包已经带中文，就保持原样；
-# 只有仍然缺中文时，才回退到 xptsp 的整包实现。
+# 只有仍然缺中文时，才回退到 coolsnowwolf/luci 的 openwrt-23.05 包实现。
 fallback_adguardhome_package_25_12() {
     local adguardhome_dir
 
@@ -465,8 +465,8 @@ fallback_adguardhome_package_25_12() {
         return 0
     fi
 
-    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，回退到 xptsp/luci-app-adguardhome"
-    UPDATE_PACKAGE "luci-app-adguardhome" "xptsp/luci-app-adguardhome" "main"
+    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
+    update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"
 }
 
 # 下列函数都属于“后置修补链”：
