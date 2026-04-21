@@ -160,10 +160,12 @@ CONFIG_PACKAGE_ip6tables-extra=y             # IPv6 扩展模块
 CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
-#  代理相关：SSR Plus 主包、中文包和附加组件集中维护。
-CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
+
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
+#  代理相关：HomeProxy
+CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
+
 # <<< FW3-END
 
 # ------------------------------------------------------------------------
@@ -189,9 +191,20 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
 # CONFIG_PACKAGE_kmod-nft-nat=y              # nft NAT 核心
 # CONFIG_PACKAGE_kmod-nft-offload=y          # nft flow offload
 # CONFIG_PACKAGE_kmod-nft-fullcone=y         # nft FullCone NAT
-# CONFIG_PACKAGE_luci-app-homeproxy=y        # FW4 默认启用 HomeProxy
 # CONFIG_PACKAGE_luci-app-turboacc=n         # FW4 下关闭 Turbo ACC
 # CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=n  # FW4 下关闭 Turbo ACC 中文语言包
+# CONFIG_PACKAGE_luci-app-homeproxy=y        # FW4 默认启用 HomeProxy
+# [最新包已支持FW4，但如果有homeproxy，就不用ssr-plus，但可以编译着]SSR Plus 主包、中文包和附加组件集中维护。
+#CONFIG_PACKAGE_luci-app-ssr-plus=n           # FW3 默认提供 SSR Plus 主包
+#CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=n    # SSR Plus 中文语言包
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n # HTTPS 流支持
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=n # Rust 客户端
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=n # Rust 服务端
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=n # Xray 核心
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=n # MosDNS 组件
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # simple-obfs
+#CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n # SSR Libev 客户端
+
 # <<< FW4-END
 
 # ------------------------------------------------------------------------
