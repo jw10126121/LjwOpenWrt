@@ -26,7 +26,13 @@ EOF
 
 [ "$(resolve_luci_feed_branch "$FEEDS_25")" = "openwrt-25.12" ]
 [ "$(resolve_luci_feed_branch "$FEEDS_23")" = "openwrt-23.05" ]
+[ "$(resolve_luci_feed_branch "$TMPDIR/missing.conf")" = "unknown" ]
+is_luci_feed_25_12 "$FEEDS_25"
 is_lean_luci_feed_25_12 "$FEEDS_25"
+if is_luci_feed_25_12 "$FEEDS_23"; then
+	echo "23.05 should not be treated as 25.12 by the generic helper" >&2
+	exit 1
+fi
 if is_lean_luci_feed_25_12 "$FEEDS_23"; then
 	echo "23.05 should not be treated as 25.12" >&2
 	exit 1

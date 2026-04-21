@@ -94,6 +94,12 @@ CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
 CONFIG_PACKAGE_socat=y                       # Socat 后端
 CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
 CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
+CONFIG_PACKAGE_luci-app-wifischedule=m       # Wi-Fi 定时开关
+
+# ------------------------------------------------------------------------
+#  菜单整理：VPN
+# ------------------------------------------------------------------------
+#  维护提示：组网、穿透、VPN、代理相关都集中在这里。
 CONFIG_PACKAGE_luci-app-easytier=y           # EasyTier 组网
 CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y    # EasyTier 中文语言包
 CONFIG_PACKAGE_easytier=y                    # EasyTier 后端
@@ -110,7 +116,16 @@ CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m     # OpenVPN 中文语言包
 CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
 CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
-CONFIG_PACKAGE_luci-app-wifischedule=m       # Wi-Fi 定时开关
+# [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
+CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
+CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=m # HTTPS 流支持
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=m # Rust 客户端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=m # Rust 服务端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=m # Xray 核心
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=m # MosDNS 组件
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # simple-obfs
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=m # SSR Libev 客户端
 
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
@@ -145,15 +160,10 @@ CONFIG_PACKAGE_ip6tables-extra=y             # IPv6 扩展模块
 CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
-
 #  代理相关：SSR Plus 主包、中文包和附加组件集中维护。
 CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
-CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
-CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # 关闭 simple-obfs
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
-
 # <<< FW3-END
 
 # ------------------------------------------------------------------------
@@ -180,15 +190,6 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
 # CONFIG_PACKAGE_kmod-nft-offload=y          # nft flow offload
 # CONFIG_PACKAGE_kmod-nft-fullcone=y         # nft FullCone NAT
 # CONFIG_PACKAGE_luci-app-homeproxy=y        # FW4 默认启用 HomeProxy
-# CONFIG_PACKAGE_luci-app-ssr-plus=n         # FW4 下关闭 SSR Plus 主包
-# CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=n  # FW4 下关闭 SSR Plus 中文语言包
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n
 # CONFIG_PACKAGE_luci-app-turboacc=n         # FW4 下关闭 Turbo ACC
 # CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=n  # FW4 下关闭 Turbo ACC 中文语言包
 # <<< FW4-END

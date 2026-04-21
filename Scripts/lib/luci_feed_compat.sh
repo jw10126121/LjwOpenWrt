@@ -24,6 +24,10 @@ resolve_luci_feed_branch() {
 	fi
 }
 
-is_lean_luci_feed_25_12() {
+is_luci_feed_25_12() {
 	[ "$(resolve_luci_feed_branch "${1:-./feeds.conf.default}")" = "openwrt-25.12" ]
+}
+
+is_lean_luci_feed_25_12() {
+	is_luci_feed_25_12 "${1:-./feeds.conf.default}"
 }

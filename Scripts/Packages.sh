@@ -316,6 +316,10 @@ apply_common_package_overrides() {
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
+
+    update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
+
     # quickfile 当前按需保留，默认不导入。
     # 如果后续重新启用，需要同时确认设备侧是否改成 luci-nginx 路线。
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
@@ -324,17 +328,19 @@ apply_common_package_overrides() {
 # lean 风味额外覆盖。
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
-    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+    # 
+    
+    if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        echo "【Lin】luci-theme-argon使用的分支openwrt-25.12"
+        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+    else
+        echo "【Lin】luci-theme-argon使用的分支openwrt-24.10"
+        #UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
+    fi
+    
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
-    update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
-    update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
-
-    if is_lean_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-        echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
-        update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
-    fi
 }
 
 # VIKINGYFY 风味额外覆盖。
@@ -346,16 +352,17 @@ apply_VIKINGYFY_package_overrides() {
     update_package_list "luci-app-nikki nikki mihomo-meta mihomo-alpha" "nikkinikki-org/OpenWrt-nikki" "main"
     update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
-    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
+    # update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
 }
 
 # generic 兜底风味：
 # 当源码地址无法识别时，仍然给出一套最保守的覆盖，不让脚本直接失效。
 apply_generic_package_overrides() {
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
-    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
+    #update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
 }
 
@@ -371,6 +378,20 @@ apply_source_flavor_package_overrides() {
             apply_generic_package_overrides
             ;;
     esac
+}
+
+# OpenWrt 25.12 的 LuCI 菜单机制与语言包状态和旧分支不同，这里统一补一层兼容：
+# 1. vlmcsd / socat 强制切到带 menu.d 与 ACL 的新版包源，避免旧控制器在 25.12 下不显示。
+# 2. accesscontrol 暂时从 coolsnowwolf/luci 的 openwrt-23.05 分支补回。
+apply_luci_feed_25_12_package_overrides() {
+    if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        return 0
+    fi
+
+    echo "【Lin】检测到 LuCI feed 为 openwrt-25.12，补齐 25.12 兼容包源"
+
+    echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
+    update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
 }
 
 # quickfile 的上游二进制文件名和本地 OpenWrt 架构名并不总是一一对应。
@@ -405,6 +426,48 @@ apply_lang_node_prebuilt_fix() {
 
     echo "【Lin】未命中可用的 sbwml lang_node 预编译分支，继续使用官方 lang/node"
     return 0
+}
+
+find_adguardhome_package_dir() {
+    find ./ ../feeds/luci -maxdepth 4 -type d -iname "luci-app-adguardhome" -print | head -n 1
+}
+
+package_has_adguardhome_translation_zh() {
+    local adguardhome_dir=$1
+
+    [ -n "${adguardhome_dir}" ] || return 1
+
+    find "${adguardhome_dir}/po" -maxdepth 2 -type f \( \
+        -path "*/zh_Hans/adguardhome.po" -o \
+        -path "*/zh-cn/adguardhome.po" -o \
+        -path "*/zh_CN/adguardhome.po" -o \
+        -path "*/zh/adguardhome.po" \
+    \) -print -quit 2>/dev/null | grep -q .
+}
+
+# 25.12 下先尊重当前上游 LuCI 包：
+# 如果官方/当前包已经带中文，就保持原样；
+# 只有仍然缺中文时，才回退到 xptsp 的整包实现。
+fallback_adguardhome_package_25_12() {
+    local adguardhome_dir
+
+    if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        return 0
+    fi
+
+    adguardhome_dir=$(find_adguardhome_package_dir)
+    if [ -z "${adguardhome_dir}" ]; then
+        echo "【Lin】25.12未找到luci-app-adguardhome目录，跳过 adguardhome 中文检查"
+        return 0
+    fi
+
+    if package_has_adguardhome_translation_zh "${adguardhome_dir}"; then
+        echo "【Lin】当前 luci-app-adguardhome 已带中文，保持现有上游：${adguardhome_dir}"
+        return 0
+    fi
+
+    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，回退到 xptsp/luci-app-adguardhome"
+    UPDATE_PACKAGE "luci-app-adguardhome" "xptsp/luci-app-adguardhome" "main"
 }
 
 # 下列函数都属于“后置修补链”：
@@ -525,6 +588,7 @@ preload_homeproxy_resources() {
 apply_post_update_fixes() {
     fix_quickfile_makefile
     apply_lang_node_prebuilt_fix
+    fallback_adguardhome_package_25_12
     update_openvpn_easy_rsa_version
     trim_ssrplus_variants
     fix_tailscale_makefile
@@ -545,6 +609,7 @@ main() {
     resolve_packages_luci_feed_branch
     apply_common_package_overrides
     apply_source_flavor_package_overrides
+    apply_luci_feed_25_12_package_overrides
     apply_post_update_fixes
 }
 

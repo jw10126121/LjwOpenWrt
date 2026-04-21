@@ -122,6 +122,17 @@ CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
 CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
 
+# [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
+CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
+CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=m # HTTPS 流支持
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=m # Rust 客户端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=m # Rust 服务端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=m # Xray 核心
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=m # MosDNS 组件
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=m # simple-obfs
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=m # SSR Libev 客户端
+
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
 # ------------------------------------------------------------------------
@@ -154,17 +165,8 @@ CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
 
-#  代理相关：SSR Plus 主包、中文包和附加组件集中维护。
+#  代理相关：homeproxy
 CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
-CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
-CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=m # HTTPS 流支持
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=m # Rust 客户端
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=m # Rust 服务端
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=m # Xray 核心
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=m # MosDNS 组件
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=m # simple-obfs
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=m # SSR Libev 客户端
 
 #  加速相关：Turbo ACC 放在代理组件后面，便于一起排查 FW3 侧网络加速。
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC
@@ -188,15 +190,6 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
 
 #  代理相关：FW4 默认切到 HomeProxy，并关闭 SSR Plus 及其附加组件。
 # CONFIG_PACKAGE_luci-app-homeproxy=y        # FW4 默认启用 HomeProxy
-# CONFIG_PACKAGE_luci-app-ssr-plus=n         # FW4 下关闭 SSR Plus 主包
-# CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=n  # FW4 下关闭 SSR Plus 中文语言包
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n
-# CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n
 
 #  加速相关：FW4 下关闭 Turbo ACC，避免和当前栈能力混淆。
 # CONFIG_PACKAGE_luci-app-turboacc=n         # FW4 下关闭 Turbo ACC
@@ -218,8 +211,8 @@ CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
 # ------------------------------------------------------------------------
 #  维护提示：这里只改机型目标、编译 profile；日常插件维护一般不用碰这里。
 CONFIG_TARGET_qualcommax=y
-CONFIG_TARGET_qualcommax_ipq60xx=y
-CONFIG_TARGET_MULTI_PROFILE=y                # 一次编译多个机型
+CONFIG_TARGET_qualcommax_ipq60xx=y	# ipq60xx
+CONFIG_TARGET_MULTI_PROFILE=y		# 一次编译多个机型
 
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=n
