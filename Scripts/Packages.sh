@@ -376,6 +376,43 @@ apply_source_flavor_package_overrides() {
     esac
 }
 
+ensure_accesscontrol_menu_compat() {
+    local package_dir
+    local menu_dir
+    local menu_file
+
+    package_dir=$(find ./ -maxdepth 2 -type d -iname 'luci-app-accesscontrol' -print | head -n 1)
+    [ -n "${package_dir}" ] || return 0
+
+    menu_dir="${package_dir}/root/usr/share/luci/menu.d"
+    menu_file="${menu_dir}/luci-app-accesscontrol.json"
+
+    if [ -f "${menu_file}" ]; then
+        echo "【Lin】luci-app-accesscontrol 已自带 menu.d，跳过兼容补丁"
+        return 0
+    fi
+
+    mkdir -p "${menu_dir}"
+    cat > "${menu_file}" <<'EOF'
+{
+	"admin/services/mia": {
+		"title": "Internet Access Schedule Control",
+		"order": 30,
+		"action": {
+			"type": "cbi",
+			"path": "mia",
+			"post": { "cbi.submit": true }
+		},
+		"depends": {
+			"acl": [ "luci-app-accesscontrol" ],
+			"uci": { "mia": true }
+		}
+	}
+}
+EOF
+    echo "【Lin】已为 luci-app-accesscontrol 补齐 LuCI 25.12 menu.d 兼容文件"
+}
+
 # OpenWrt 25.12 的 LuCI 菜单机制与语言包状态和旧分支不同，这里统一补一层兼容：
 # 1. vlmcsd / socat 强制切到带 menu.d 与 ACL 的新版包源，避免旧控制器在 25.12 下不显示。
 # 2. accesscontrol / adguardhome 暂时从 coolsnowwolf/luci 的 openwrt-23.05 分支补回。
@@ -388,6 +425,7 @@ apply_luci_feed_25_12_package_overrides() {
 
     echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
     update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
+    ensure_accesscontrol_menu_compat
 
     # echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
     # update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"
@@ -444,9 +482,70 @@ package_has_adguardhome_translation_zh() {
     \) -print -quit 2>/dev/null | grep -q .
 }
 
+ensure_adguardhome_menu_compat() {
+    local package_dir
+    local menu_dir
+    local menu_file
+
+    package_dir=$(find ./ -maxdepth 2 -type d -iname 'luci-app-adguardhome' -print | head -n 1)
+    [ -n "${package_dir}" ] || return 0
+
+    menu_dir="${package_dir}/root/usr/share/luci/menu.d"
+    menu_file="${menu_dir}/luci-app-adguardhome.json"
+
+    if [ -f "${menu_file}" ]; then
+        echo "【Lin】luci-app-adguardhome 已自带 menu.d，跳过兼容补丁"
+        return 0
+    fi
+
+    mkdir -p "${menu_dir}"
+    cat > "${menu_file}" <<'EOF'
+{
+	"admin/services/AdGuardHome": {
+		"title": "AdGuard Home",
+		"order": 11,
+		"action": {
+			"type": "firstchild"
+		},
+		"depends": {
+			"acl": [ "luci-app-adguardhome" ],
+			"uci": { "AdGuardHome": true }
+		}
+	},
+	"admin/services/AdGuardHome/base": {
+		"title": "Base Setting",
+		"order": 1,
+		"action": {
+			"type": "cbi",
+			"path": "AdGuardHome/base",
+			"post": { "cbi.submit": true }
+		}
+	},
+	"admin/services/AdGuardHome/log": {
+		"title": "Log",
+		"order": 2,
+		"action": {
+			"type": "form",
+			"path": "AdGuardHome/log"
+		}
+	},
+	"admin/services/AdGuardHome/manual": {
+		"title": "Manual Config",
+		"order": 3,
+		"action": {
+			"type": "cbi",
+			"path": "AdGuardHome/manual",
+			"post": { "cbi.submit": true }
+		}
+	}
+}
+EOF
+    echo "【Lin】已为 luci-app-adguardhome 补齐 LuCI 25.12 menu.d 兼容文件"
+}
+
 # 25.12 下先尊重当前上游 LuCI 包：
 # 如果官方/当前包已经带中文，就保持原样；
-# 只有仍然缺中文时，才回退到 coolsnowwolf/luci 的 openwrt-23.05 包实现。
+# 只有仍然缺中文时，才回退到 kenzok8/openwrt-packages 的兼容版实现。
 fallback_adguardhome_package_25_12() {
     local adguardhome_dir
 
@@ -465,8 +564,9 @@ fallback_adguardhome_package_25_12() {
         return 0
     fi
 
-    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
-    update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"
+    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 kenzok8/openwrt-packages 的兼容版补回"
+    update_package_list "luci-app-adguardhome" "kenzok8/openwrt-packages" "master"
+    ensure_adguardhome_menu_compat
 }
 
 # 下列函数都属于“后置修补链”：
