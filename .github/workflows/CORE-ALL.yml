@@ -406,6 +406,12 @@ jobs:
         echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
 
+    - name: Refresh Package Metadata After DIY Packages (刷新注入包后的元数据)
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        rm -f ./tmp/.packageinfo ./tmp/.packagedeps ./tmp/.packageauxvars
+        ./scripts/feeds install -a
+
     - name: diy config (自定义配置)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
