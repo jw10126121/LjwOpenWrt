@@ -1,0 +1,65 @@
+#CI项目
+name: CUSTOM-ECEC
+
+#CI计划
+on:
+  workflow_dispatch:
+    inputs:
+      WHAT_MY_SAY:
+        description: '编译说明'
+        required: false
+        type: string
+        default: ''
+
+#CI权限
+permissions: write-all
+
+#CI任务
+jobs:
+  ipq60xx_nowifi_fw3:
+    name: lean-IPQ60XX-NOWIFI-fw3-base-ecec1ef
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
+
+  ipq60xx_nowifi_fw3_frps:
+    name: lean-IPQ60XX-NOWIFI-fw3-frps-ecec1ef
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: frps
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
+
+  mt6000_wifi_fw3:
+    name: lean-MT6000-WIFI-fw3-base-ecec1ef
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: true
+      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
+      WRT_SOURCE_FLAVOR: lean
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
