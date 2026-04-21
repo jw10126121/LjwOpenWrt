@@ -175,18 +175,10 @@ jobs:
         sudo -E systemctl daemon-reload
         sudo -E timedatectl set-timezone "Asia/Shanghai"
 
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@v6.0.1
-
     - name: Prepare Source Flavor Resolver (准备源码风味解析器)
       run: |
         resolver_path="${RUNNER_TEMP}/source_flavor.sh"
-        repo_resolver="$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
-
-        if [ -f "$repo_resolver" ]; then
-          cp "$repo_resolver" "$resolver_path"
-        else
-          cat > "${resolver_path}" <<'EOF_RESOLVER'
+        cat > "${resolver_path}" <<'EOF_RESOLVER'
         #!/bin/bash
 
         resolve_source_flavor() {
@@ -287,7 +279,6 @@ jobs:
         EOF_OUTPUT
         }
         EOF_RESOLVER
-        fi
 
         chmod +x "$resolver_path"
         echo "SOURCE_FLAVOR_RESOLVER=$resolver_path" >> "$GITHUB_ENV"
@@ -376,7 +367,7 @@ jobs:
         temp-reserve-mb: 100
         root-reserve-mb: 1024
 
-    - name: Restore Workspace (扩容后重新检出当前源码)
+    - name: Checkout (下载当前源码)
       uses: actions/checkout@v6.0.1
 
     - name: Check Disk (磁盘信息)
