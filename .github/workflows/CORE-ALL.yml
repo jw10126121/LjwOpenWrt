@@ -229,6 +229,11 @@ jobs:
         echo "【Lin】读取防火墙参数：${WRT_FIREWALL}"
         echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
         echo "【Lin】读取 LuCI 分支：${{env.WRT_LUCI_BRANCH != '' && env.WRT_LUCI_BRANCH || '源码默认' }}"
+        START_DATE=$(date +"D%y%m%d")
+        START_TIME=$(date +"D%y%m%d_T%H%M%S")
+        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
+        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
+        echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
 
         resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_FLAVOR}" "${WRT_SOURCE_HASH_INFO}" "${WRT_DEVICE}")
         eval "${resolved_source_selection}"
@@ -260,17 +265,6 @@ jobs:
     - name: Check Disk (磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
-
-    - name: Checkout (重新下载当前源码)
-      uses: actions/checkout@v6.0.1
-
-    - name: Check Values (设置编译变量)
-      run: |
-        START_DATE=$(date +"D%y%m%d")
-        START_TIME=$(date +"D%y%m%d_T%H%M%S")
-        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
-        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
 
     - name: config git (修改git下载缓冲大小)
       run: |
@@ -410,12 +404,6 @@ jobs:
         cd ./package
         echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
-
-    - name: Refresh Package Metadata After DIY Packages (刷新注入包后的元数据)
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
-        rm -f ./tmp/.packageinfo ./tmp/.packagedeps ./tmp/.packageauxvars
-        ./scripts/feeds install -a
 
     - name: diy config (自定义配置)
       working-directory: ${{ env.OPENWRT_PATH }}
