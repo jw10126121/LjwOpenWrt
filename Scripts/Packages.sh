@@ -328,15 +328,12 @@ apply_common_package_overrides() {
 # lean 风味额外覆盖。
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
-    # 
-    
-    if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-        # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
-    else
-        # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
-    fi
+    # if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+    #     update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+    # else
+        UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+        UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-app-argon-config" "master"
+    # fi
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
@@ -358,8 +355,8 @@ apply_VIKINGYFY_package_overrides() {
 # generic 兜底风味：
 # 当源码地址无法识别时，仍然给出一套最保守的覆盖，不让脚本直接失效。
 apply_generic_package_overrides() {
-    # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-24.10"
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
+    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-app-argon-config" "master"
     UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
     #update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
     update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
@@ -391,6 +388,9 @@ apply_luci_feed_25_12_package_overrides() {
 
     echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
     update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"
+
+    # echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
+    # update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"
 }
 
 # quickfile 的上游二进制文件名和本地 OpenWrt 架构名并不总是一一对应。
