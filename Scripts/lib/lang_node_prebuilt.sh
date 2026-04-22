@@ -81,10 +81,6 @@ resolve_openwrt_versions() {
     LUCI_FEED_VERSION_MINOR=$(extract_openwrt_minor_version "${luci_feed_raw}")
     OPENWRT_VERSION_MINOR="${CONFIG_VERSION_MINOR:-${INCLUDE_VERSION_MINOR:-${LUCI_FEED_VERSION_MINOR:-}}}"
 
-    if [ -z "${OPENWRT_VERSION_MINOR}" ] && \
-       grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${version_workdir}/feeds.conf.default" 2>/dev/null; then
-        OPENWRT_VERSION_MINOR="${LANG_NODE_DEFAULT_FALLBACK_VERSION:-24.10}"
-    fi
 }
 
 ### ---------- 远端分支匹配 ---------- ###

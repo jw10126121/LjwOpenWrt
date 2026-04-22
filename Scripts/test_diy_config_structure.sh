@@ -8,7 +8,6 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 TARGET_SCRIPT="$SCRIPT_DIR/diy_config.sh"
 
 required_functions='
-resolve_source_flavor_from_input
 configure_common_system_defaults
 configure_source_default_settings_package
 append_default_settings_snippet

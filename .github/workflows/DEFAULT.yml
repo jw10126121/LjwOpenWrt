@@ -109,7 +109,7 @@ on:
       #     - 'https://github.com/coolsnowwolf/lede|master'
       #   default: 'https://github.com/coolsnowwolf/lede|master'
       WRT_SOURCE_HASH_INFO:
-        description: '源码HASH，推荐只填 commit hash；兼容旧格式 hash|url|branch'
+        description: '源码 HASH，可选填写 commit hash'
         required: false
         type: string
         default: ''

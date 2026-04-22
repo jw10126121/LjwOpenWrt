@@ -40,45 +40,14 @@ jobs:
           cat > "${resolver_path}" <<'EOF_RESOLVER'
         #!/bin/bash
 
-        resolve_source_flavor() {
-            printf '%s\n' 'lean'
-        }
-
-        resolve_source_repo_url() {
-            printf '%s\n' 'https://github.com/coolsnowwolf/lede'
-        }
-
-        resolve_source_default_branch() {
-            printf '%s\n' 'master'
-        }
-
         resolve_source_selection() {
-            local source_hash_info="${1:-}"
-            local source_flavor='lean'
-            local repo_url=''
-            local repo_branch=''
-            local repo_hash=''
-            local legacy_hash=''
-
-            repo_url=$(resolve_source_repo_url)
-            repo_branch=$(resolve_source_default_branch)
-
-            if [ -n "${source_hash_info}" ]; then
-                if [[ "${source_hash_info}" == *"|"* ]]; then
-                    IFS='|' read -r legacy_hash _ <<EOF_HASH
-        ${source_hash_info}
-        EOF_HASH
-                    repo_hash="${legacy_hash}"
-                else
-                    repo_hash="${source_hash_info}"
-                fi
-            fi
+            local repo_hash="${1:-}"
 
             cat <<EOF_OUTPUT
-        REPO_URL=${repo_url}
-        REPO_BRANCH=${repo_branch}
+        REPO_URL=https://github.com/coolsnowwolf/lede
+        REPO_BRANCH=master
         REPO_HASH=${repo_hash}
-        SOURCE_FLAVOR=${source_flavor}
+        SOURCE_FLAVOR=lean
         EOF_OUTPUT
         }
         EOF_RESOLVER
@@ -136,12 +105,7 @@ jobs:
         WRT_REPO_URL="$REPO_URL"
         WRT_REPO_BRANCH="$REPO_BRANCH"
         SOURCE_FLAVOR="$SOURCE_FLAVOR"
-        if [ "$SOURCE_FLAVOR" = "lean" ]; then
-          WRT_IS_LEAN=true
-        else
-          WRT_IS_LEAN=false
-        fi
-        export SOURCE_FLAVOR WRT_REPO_URL WRT_REPO_BRANCH WRT_IS_LEAN
+        export SOURCE_FLAVOR WRT_REPO_URL WRT_REPO_BRANCH
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
         grep -q '^WRT_VER=' /tmp/source_metadata.txt
         grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt

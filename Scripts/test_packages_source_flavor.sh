@@ -41,11 +41,6 @@ if grep -q '^ensure_vlmcsd_ini() {' "$TARGET_SCRIPT"; then
 	exit 1
 fi
 
-if grep -q '^apply_VIKINGYFY_package_overrides() {' "$TARGET_SCRIPT"; then
-	echo "Packages.sh should no longer keep VIKINGYFY-only package overrides" >&2
-	exit 1
-fi
-
 if grep -q '^apply_generic_package_overrides() {' "$TARGET_SCRIPT"; then
 	echo "Packages.sh should no longer keep generic source overrides" >&2
 	exit 1

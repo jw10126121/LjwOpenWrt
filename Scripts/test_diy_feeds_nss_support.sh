@@ -30,7 +30,6 @@ chmod +x "$TEST_BIN/sed"
 run_case() {
 	local case_name=$1
 	local device=$2
-	local flavor=$3
 	local case_dir="$TMPDIR/$case_name"
 	mkdir -p "$case_dir"
 
@@ -42,7 +41,6 @@ EOF
 		cd "$case_dir"
 		PATH="$TEST_BIN:$PATH" \
 		WRT_DEVICE="$device" \
-		WRT_SOURCE_FLAVOR="$flavor" \
 		bash "$TARGET_SCRIPT"
 	)
 }
@@ -60,13 +58,12 @@ EOF
 		cd "$case_dir"
 		PATH="$TEST_BIN:$PATH" \
 		WRT_DEVICE="IPQ60XX-NOWIFI" \
-		WRT_SOURCE_FLAVOR="lean" \
 		bash "$TARGET_SCRIPT"
 	)
 }
 
-run_case ipq_lean IPQ60XX-NOWIFI lean
-run_case mt6000_lean MT6000-WIFI lean
+run_case ipq_lean IPQ60XX-NOWIFI
+run_case mt6000_lean MT6000-WIFI
 run_case_with_existing_nss_feed
 
 sqm_count=$(grep -Ec '^[[:space:]]*src-[^[:space:]]+[[:space:]]+sqm_scripts_nss([[:space:]]|$)' "$TMPDIR/ipq_existing_sqm/feeds.conf.default")

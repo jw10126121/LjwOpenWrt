@@ -63,9 +63,5 @@ assert_contains "$custom_apk_workflow" "name: lean-MT6000-WIFI-fw3-apk" "MT6000 
 
 assert_contains "$custom_apk_workflow" "mt6000_wifi_mini_fw3_apk:" "CUSTOM-APK should include MT6000 MINI fw3 apk preset"
 assert_contains "$custom_apk_workflow" "name: lean-MT6000-WIFI-MINI-fw3-apk" "MT6000 MINI fw3 apk preset should have a stable display name"
-if grep -q 'VIKINGYFY' "$custom_apk_workflow"; then
-	echo "CUSTOM-APK should no longer contain non-lean presets" >&2
-	exit 1
-fi
 
 echo "test_workflow_custom_apk_presets: ok"

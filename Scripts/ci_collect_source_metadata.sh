@@ -47,16 +47,7 @@ openwrt_path="${OPENWRT_PATH:?OPENWRT_PATH is required}"
 config_path="${openwrt_path}/.config"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
-wrt_is_lean="${WRT_IS_LEAN:-true}"
 source_flavor="${SOURCE_FLAVOR:-lean}"
-
-if [ -n "${source_flavor}" ]; then
-    if [ "${source_flavor}" = "lean" ]; then
-        wrt_is_lean="true"
-    else
-        wrt_is_lean="false"
-    fi
-fi
 
 the_repo="${wrt_repo_url%/}"
 wrt_ver="${the_repo##*/}-${wrt_repo_branch}"

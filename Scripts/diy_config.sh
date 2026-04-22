@@ -13,9 +13,6 @@ work_dir=$(pwd)
 current_script_dir=$(cd $(dirname $0) && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 
-source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
-[ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
-
 if [ $(basename "$(pwd)") != 'openwrt' ]; then
     if [ -n "${OPENWRT_PATH:-}" ] && [ -d "${OPENWRT_PATH}" ]; then
         cd "${OPENWRT_PATH}"
@@ -40,7 +37,6 @@ show_help() {
     echo "  -t default_theme_name 默认主题，默认不修改"
     echo "  -m package_manager    包管理器类型，默认ipk，可选apk"
     echo "  -c config_name        配置名，如IPQ60XX-NOWIFI-LEAN"
-    echo "  -s source_code_info   源码信息，兼容格式：hash|url|branch（不再推荐）"
 }
 
 # 检查是否需要显示帮助信息
@@ -52,11 +48,9 @@ is_reset_password=true
 default_theme_name=''
 package_manager='ipk'
 config_name=''
-source_code_info=''
-source_flavor='lean'
 
 # 解析外部传入的定制参数，后续所有修改都围绕这些参数展开。
-while getopts "hi:n:p:t:m:c:s:" opt; do
+while getopts "hi:n:p:t:m:c:" opt; do
     case $opt in
         h)
             show_help
@@ -84,9 +78,6 @@ while getopts "hi:n:p:t:m:c:s:" opt; do
             ;;
         c)
             config_name=$OPTARG
-            ;;
-        s)
-            source_code_info=$OPTARG
             ;;
         \?)
             echo "无效选项: -$OPTARG" >&2
@@ -207,23 +198,11 @@ configure_default_system() {
         echo "【Lin】添加编译日期标识成功：${default_name}-$(date +%Y%m%d)"
     fi
 
-    if [ "${is_code_lean}" != true ]; then
-        sed -i "s/\[sid\]\.hasOwnProperty/\[sid\]\?\.hasOwnProperty/g" $(find ./feeds/luci/modules/luci-base/ -type f -name "uci.js")
-        echo "【Lin】临时修复luci无法保存的问题"
-    fi
-
     if [ -f "$CFG_FILE_LEDE" ]; then
         sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" "$CFG_FILE_LEDE"
         sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" "$CFG_FILE_LEDE"
         echo "【Lin】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
     fi
-}
-
-resolve_source_flavor_from_input() {
-    source_flavor='lean'
-    is_code_lean=true
-
-    echo "【Lin】源码风味：${source_flavor}"
 }
 
 configure_common_system_defaults() {
@@ -533,7 +512,7 @@ configure_nss_feed_options() {
 
 main() {
     WRT_TARGET="${config_name}"
-    resolve_source_flavor_from_input
+    echo "【Lin】源码风味：lean"
 
     configure_common_system_defaults
     update_build_revision

@@ -67,9 +67,5 @@ assert_contains "$custom_workflow" "WRT_OVERLAYS: frps" "frps preset should pass
 
 assert_contains "$custom_workflow" "mt6000_wifi_fw3:" "CUSTOM should include MT6000 fw3 preset"
 assert_contains "$custom_workflow" "WRT_DEVICE: MT6000-WIFI" "MT6000 preset should pass the correct device"
-if grep -q 'VIKINGYFY' "$custom_workflow"; then
-	echo "CUSTOM should no longer contain non-lean presets" >&2
-	exit 1
-fi
 
 echo "test_workflow_custom_presets: ok"

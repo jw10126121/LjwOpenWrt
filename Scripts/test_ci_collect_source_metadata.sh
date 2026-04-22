@@ -28,7 +28,7 @@ cat > "$OPENWRT_PATH/target/linux/generic/kernel-6.1" <<'EOF'
 LINUX_KERNEL_HASH-6.1.42:=dummy
 EOF
 
-selection="$(resolve_source_selection "lean" "")"
+selection="$(resolve_source_selection "")"
 eval "$selection"
 
 OPENWRT_PATH="$OPENWRT_PATH" \

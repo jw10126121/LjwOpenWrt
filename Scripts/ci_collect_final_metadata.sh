@@ -6,12 +6,12 @@
 set -euo pipefail
 
 # 这三个值的职责不同，取值也故意分开：
-# 1. OP_VERSION：主源码版本。用于描述当前 OpenWrt / ImmortalWrt 本体版本，也更适合做包兼容性判断。
+# 1. OP_VERSION：主源码版本。用于描述当前 OpenWrt 本体版本，也更适合做包兼容性判断。
 # 2. LUCI_VERSION：LuCI feed 版本。仅在 feeds.conf.default 里能解析出明确版本线时单独展示，否则回退到 OP_VERSION。
 # 3. VERSION_KERNEL：由上游 source metadata 阶段按目标平台实际内核版本线解析后传入，这里只负责展示。
 
 normalize_version_value() {
-    printf '%s\n' "$1" | sed -E 's/^(OpenWrt|ImmortalWrt)[[:space:]]+//' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g'
+    printf '%s\n' "$1" | sed -E 's/^OpenWrt[[:space:]]+//' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g'
 }
 
 is_snapshot_version() {
@@ -88,7 +88,7 @@ extract_luci_version() {
         fi
     fi
 
-    if grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${feeds_file}" 2>/dev/null; then
+    if [ -n "${fallback_version}" ]; then
         printf '%s\n' "${fallback_version}"
         return 0
     fi
@@ -103,7 +103,7 @@ wrt_has_wifi="${WRT_HAS_WIFI:-true}"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
 repo_git_hash="${REPO_GIT_HASH:-}"
-source_flavor="${SOURCE_FLAVOR:-${WRT_SOURCE_FLAVOR:-lean}}"
+source_flavor="${SOURCE_FLAVOR:-lean}"
 device_target="${DEVICE_TARGET:-}"
 device_subtarget="${DEVICE_SUBTARGET:-}"
 device_arch="$(sed -n 's/^CONFIG_TARGET_ARCH_PACKAGES="\([^"]*\)"/\1/p' "${openwrt_path}/.config" | head -n1 || true)"
