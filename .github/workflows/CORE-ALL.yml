@@ -139,53 +139,53 @@ jobs:
     - name: Check Config Values (检查配置变量)
       run: |
         WRT_HAS_WIFI=true
-        [[ "$WRT_DEVICE" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
-        echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
-
+        [[ "$WRT_DEVICE" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && WRT_HAS_WIFI=false
         WRT_HAS_LITE=false
-        [[ "${WRT_DEVICE,,}" =~ lite|mini ]] && { WRT_HAS_LITE=true; }
-        echo "WRT_HAS_LITE=$WRT_HAS_LITE" >> $GITHUB_ENV
-
+        [[ "${WRT_DEVICE,,}" =~ lite|mini ]] && WRT_HAS_LITE=true
         WRT_CONFIG_LABEL="${WRT_DEVICE}-${WRT_FIREWALL^^}"
-        echo "WRT_CONFIG_LABEL=$WRT_CONFIG_LABEL" >> $GITHUB_ENV
+        WRT_USE_APK=false
+        printf '%s' ",${WRT_OVERLAYS}," | grep -qi ',apk,' && WRT_USE_APK=true
 
-        if printf '%s' ",${WRT_OVERLAYS}," | grep -qi ',apk,'; then
-            echo "WRT_USE_APK=true" >> $GITHUB_ENV
-        else
-            echo "WRT_USE_APK=false" >> $GITHUB_ENV
+        if [ -n "${{ inputs.WRT_TOKEN_DINGDING }}" ]; then
+          echo "DINGDING_TOKEN=${{ inputs.WRT_TOKEN_DINGDING }}" >> "$GITHUB_ENV"
         fi
 
-        if [ -n "${{inputs.WRT_TOKEN_DINGDING}}" ]; then
-            echo "DINGDING_TOKEN=${{inputs.WRT_TOKEN_DINGDING}}" >> $GITHUB_ENV
-            echo "【Lin】配置TOKEN_DINGDING：${{inputs.WRT_TOKEN_DINGDING}}"
-        fi
-
-        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_WIFI" == 'true' ]; then echo '有WIFI'; else echo '无WIFI'; fi)"
-        echo "【Lin】读取文件名配置：$(if [ "$WRT_HAS_LITE" == 'true' ]; then echo '[精简版]'; else echo '[常规版]'; fi)"
-        echo "【Lin】编译说明内容：${{ env.WRT_MINE_SAY != '' && env.WRT_MINE_SAY || '无' }}"
-        if [ -n "${{ env.WRT_MINE_SAY }}" ]; then
-            echo "${{ env.WRT_MINE_SAY }}"
-        fi
-
-        echo "【Lin】读取设备参数：${{env.WRT_DEVICE}}"
-        echo "【Lin】读取防火墙参数：${WRT_FIREWALL}"
-        echo "【Lin】读取 overlays：${{env.WRT_OVERLAYS != '' && env.WRT_OVERLAYS || '无' }}"
-        echo "【Lin】读取 LuCI 分支：${{env.WRT_LUCI_BRANCH != '' && env.WRT_LUCI_BRANCH || '源码默认' }}"
         START_DATE=$(date +"D%y%m%d")
         START_TIME=$(date +"D%y%m%d_T%H%M%S")
-        echo "START_DATE=$START_DATE" >> $GITHUB_ENV
-        echo "START_TIME=$START_TIME" >> $GITHUB_ENV
-        echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
-
         WRT_REPO_URL="https://github.com/coolsnowwolf/lede"
         WRT_REPO_BRANCH="master"
-        echo "WRT_REPO_URL=${WRT_REPO_URL}" >> $GITHUB_ENV
-        echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}" >> $GITHUB_ENV
+
+        {
+          echo "WRT_HAS_WIFI=$WRT_HAS_WIFI"
+          echo "WRT_HAS_LITE=$WRT_HAS_LITE"
+          echo "WRT_CONFIG_LABEL=$WRT_CONFIG_LABEL"
+          echo "WRT_USE_APK=$WRT_USE_APK"
+          echo "START_DATE=$START_DATE"
+          echo "START_TIME=$START_TIME"
+          echo "WRT_REPO_URL=${WRT_REPO_URL}"
+          echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}"
+        } >> "$GITHUB_ENV"
+
+        wifi_label='无WIFI'
+        [ "$WRT_HAS_WIFI" = 'true' ] && wifi_label='有WIFI'
+        lite_label='常规版'
+        [ "$WRT_HAS_LITE" = 'true' ] && lite_label='精简版'
+        overlays_label="${WRT_OVERLAYS:-无}"
+        luci_branch_label="${WRT_LUCI_BRANCH:-源码默认}"
+        mine_say_label="${WRT_MINE_SAY:-无}"
+        dingding_status='未配置'
+        if [ -n "${{ inputs.WRT_TOKEN_DINGDING }}" ] || [ -n "$DINGDING_TOKEN" ]; then
+          dingding_status='已配置'
+        fi
+
+        echo "【Lin】设备配置：${WRT_DEVICE} | 防火墙：${WRT_FIREWALL} | ${wifi_label} | ${lite_label}"
+        echo "【Lin】扩展配置：overlays=${overlays_label} | LuCI=${luci_branch_label} | APK模式=${WRT_USE_APK} | 钉钉通知=${dingding_status}"
+        echo "【Lin】编译说明：${mine_say_label}"
+        echo "【Lin】编译时间：${START_DATE} ${START_TIME}"
         if [ -n "${WRT_SOURCE_HASH_INFO}" ]; then
           echo "【Lin】源码HASH值：${WRT_SOURCE_HASH_INFO}"
         fi
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
-        echo "【Lin】源码风味：lean"
 
     - name: Checkout (下载当前源码)
       uses: actions/checkout@v6.0.1
