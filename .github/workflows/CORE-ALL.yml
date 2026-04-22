@@ -354,6 +354,23 @@ jobs:
           -H 'Content-Type: application/json' \
           -d "$payload" \
           "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
+
+    - name: Prepare Artifact And Release Names (准备产物与发布命名)
+      run: |
+        naming_suffix="${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.START_TIME }}"
+        config_artifact_name="config_${naming_suffix}"
+        firmware_artifact_name="openwrt_${naming_suffix}"
+        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
+        config_artifact_path="${{ env.OPENWRT_PATH }}/config_mine"
+        firmware_artifact_path="${{ env.OPENWRT_PATH }}/upload"
+        release_notes_file="${{ env.OPENWRT_PATH }}/readme_release.txt"
+
+        echo "CONFIG_ARTIFACT_NAME=${config_artifact_name}" >> "$GITHUB_ENV"
+        echo "FIRMWARE_ARTIFACT_NAME=${firmware_artifact_name}" >> "$GITHUB_ENV"
+        echo "RELEASE_TAG=${release_tag}" >> "$GITHUB_ENV"
+        echo "CONFIG_ARTIFACT_PATH=${config_artifact_path}" >> "$GITHUB_ENV"
+        echo "FIRMWARE_ARTIFACT_PATH=${firmware_artifact_path}" >> "$GITHUB_ENV"
+        echo "RELEASE_NOTES_FILE=${release_notes_file}" >> "$GITHUB_ENV"
           
     - name: Upload Config (上传配置文件)
       id: config_upload
@@ -361,8 +378,8 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.START_TIME }}
-        path: ${{ env.OPENWRT_PATH }}/config_mine
+        name: ${{ env.CONFIG_ARTIFACT_NAME }}
+        path: ${{ env.CONFIG_ARTIFACT_PATH }}
 
     # - name: Cache Toolchain (缓存工具链)
     #   if: env.CACHE_TOOLCHAIN == 'true'
@@ -436,8 +453,8 @@ jobs:
       if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true'
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: openwrt_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.START_TIME }}
-        path: ${{ env.OPENWRT_PATH }}/upload
+        name: ${{ env.FIRMWARE_ARTIFACT_NAME }}
+        path: ${{ env.FIRMWARE_ARTIFACT_PATH }}
 
     - name: Create Notification Content (创建推送结果内容)
       id: notification_content
@@ -465,9 +482,11 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
+        release_tag="${RELEASE_TAG}"
+        release_title="${RELEASE_TAG}"
+        release_notes_file="${RELEASE_NOTES_FILE}"
         shopt -s nullglob
-        release_files=( "${{ env.OPENWRT_PATH }}"/upload/*.* )
+        release_files=( "${FIRMWARE_ARTIFACT_PATH}"/*.* )
 
         if [ ${#release_files[@]} -eq 0 ]; then
           echo "【Lin】错误：未找到可上传的固件文件"
@@ -476,11 +495,11 @@ jobs:
 
         if gh release view "${release_tag}" >/dev/null 2>&1; then
           echo "【Lin】更新已有 Release：${release_tag}"
-          gh release edit "${release_tag}" --title "${release_tag}" --notes-file "${{ env.OPENWRT_PATH }}/readme_release.txt"
+          gh release edit "${release_tag}" --title "${release_title}" --notes-file "${release_notes_file}"
           gh release upload "${release_tag}" "${release_files[@]}" --clobber
         else
           echo "【Lin】创建新的 Release：${release_tag}"
-          gh release create "${release_tag}" "${release_files[@]}" --title "${release_tag}" --notes-file "${{ env.OPENWRT_PATH }}/readme_release.txt"
+          gh release create "${release_tag}" "${release_files[@]}" --title "${release_title}" --notes-file "${release_notes_file}"
         fi
         # body: |
         #   **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
