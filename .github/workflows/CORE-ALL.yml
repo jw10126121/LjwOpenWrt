@@ -106,6 +106,7 @@ env:
   UPLOAD_BIN_DIR_FORCE: true                                 # 强制上传bin
   WRT_HAS_WIFI: true
   WRT_USE_APK: false
+  INSTALL_LLVM: false                                        # 是否安装 LLVM/Clang 工具链，默认关闭
   OPENWRT_PATH: '/builder/openwrt'
   DEVICE_TARGET: ''
   DEVICE_SUBTARGET: ''
@@ -127,7 +128,7 @@ permissions: write-all
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
 
@@ -157,19 +158,21 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE /builder
 
-    - name: Initialization Environment (初始化环境)
-      env:
-        DEBIAN_FRONTEND: noninteractive
+    - name: Build System Setup (初始化编译环境)
+      uses: sbwml/actions@openwrt-build-setup
+
+    - name: Install Workflow Extras (安装补充工具)
       run: |
-        sudo -E apt -yqq update
-        sudo -E apt -yqq full-upgrade
-        sudo -E apt -yqq autoremove --purge
-        sudo -E apt -yqq autoclean
-        sudo -E apt -yqq clean
-        sudo -E apt -yqq install dos2unix libfuse-dev
-        sudo bash -c 'bash <(curl -sL https://build-scripts.immortalwrt.org/init_build_environment.sh)'
-        sudo -E systemctl daemon-reload
-        sudo -E timedatectl set-timezone "Asia/Shanghai"
+        sudo apt-get update
+        sudo apt-get install -y dos2unix
+
+    - name: Set Timezone (设置时区)
+      run: |
+        sudo timedatectl set-timezone 'Asia/Shanghai'
+
+    - name: Install LLVM
+      if: env.INSTALL_LLVM == 'true'
+      uses: sbwml/actions@install-llvm
 
     - name: Prepare Source Flavor Resolver (准备源码风味解析器)
       run: |
