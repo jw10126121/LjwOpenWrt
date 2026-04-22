@@ -34,9 +34,6 @@ to_my_say_detail="${system_content:-}"
 
 readme_desc_file="${openwrt_path}/config_mine/readme.txt"
 release_desc_file="${openwrt_path}/readme_release.txt"
-# 把说明文件路径回写给后续 workflow 步骤使用。
-echo "readme_desc_file=${readme_desc_file}" >> "${GITHUB_ENV}"
-echo "release_desc_file=${release_desc_file}" >> "${GITHUB_ENV}"
 
 # build_name_prefix 是所有导出文件共享的命名前缀。
 # 调整为“平台 / 设备 / 源码风味+FW+FRP / 版本 / 编译开始时间”，

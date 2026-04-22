@@ -86,18 +86,7 @@ env:
   WRT_USE_APK: false
   INSTALL_LLVM: false                                        # 是否安装 LLVM/Clang 工具链，默认关闭
   OPENWRT_PATH: '/builder/openwrt'
-  DEVICE_TARGET: ''
-  DEVICE_SUBTARGET: ''
-  DEVICE_PROFILE: ''
-  DEVICE_NAME_LIST: ''
-  DEVICE_NAME_LIST_LIAN: ''
-  DEVICE_ARCH: ''
-  REPO_GIT_HASH: ''
-  REPO_GIT_hash_simple: ''
-  system_content_note: ''
   system_content: ''
-  readme_desc_file: ''
-  release_desc_file: ''
   
 #CI权限
 permissions: write-all
@@ -210,13 +199,6 @@ jobs:
         echo "【Lin】配置脚本执行权限..."
         find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
-    - name: config git (修改git下载缓冲大小)
-      run: |
-        git config --global http.postBuffer 524288000
-        git config --global http.lowSpeedLimit 0
-        git config --global http.lowSpeedTime 999999
-        git config --global advice.detachedHead false
-
     - name: Clone Source Code (克隆源代码)
       id: clone_source
       run: |
@@ -226,19 +208,7 @@ jobs:
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         rm -rf "$OPENWRT_PATH"
         mkdir -p "$(dirname "$OPENWRT_PATH")"
-        git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL $OPENWRT_PATH
-        if [ ! -d "$OPENWRT_PATH" ]; then
-          change_branceh=''
-          if [ "$WRT_REPO_BRANCH" = 'master' ]; then
-            change_branceh='main'
-          elif [ "$WRT_REPO_BRANCH" = 'main' ]; then
-            change_branceh='master'
-          fi
-          echo "【Lin】修改克隆源代码分支：【$change_branceh】$WRT_REPO_URL"
-          if [ -n "${change_branceh}" ]; then
-            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL $OPENWRT_PATH
-          fi
-        fi
+        git clone --depth=1 --single-branch --branch "$WRT_REPO_BRANCH" "$WRT_REPO_URL" "$OPENWRT_PATH"
         cd "$OPENWRT_PATH"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         if [ -n "${WRT_SOURCE_HASH_INFO}" ]; then
@@ -251,8 +221,6 @@ jobs:
         echo "REPO_GIT_HASH=$REPO_GIT_HASH" >> $GITHUB_ENV
         echo "REPO_GIT_hash_simple=$REPO_GIT_hash_simple" >> $GITHUB_ENV
         echo "【Lin】GIT HASH：${REPO_GIT_HASH}，hash: ${REPO_GIT_hash_simple}"
-        VERSION_INFO=$(git show -s --date=short --format="作者: %an<br/>时间: %cd<br/>内容: %s<br/>hash: %H")
-        echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         # 临时导入config，为了获取设备信息
         [ -f ./.config ] && rm -rf ./.config
         EXPORT_ARGS=(
@@ -265,6 +233,7 @@ jobs:
           EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
         fi
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
+        cp -f ./.config ./base_config.txt
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_collect_source_metadata.sh" >> "$GITHUB_ENV"
 
     - name: Check Toolchain Cache
@@ -323,18 +292,9 @@ jobs:
     - name: diy config (自定义配置)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        echo '【Lin】移除所有.config并添加新的.config'
+        echo '【Lin】恢复预导出的基础.config'
         [ -f ./.config ] && rm -rf ./.config
-        EXPORT_ARGS=(
-          --config-dir "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS"
-          --device "$WRT_DEVICE"
-          --fw "$WRT_FIREWALL"
-          --output ".config"
-        )
-        if [ -n "$WRT_OVERLAYS" ]; then
-          EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
-        fi
-        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
+        cp -f ./base_config.txt ./.config
         
     - name: diy settings (加载自定义设置) 
       working-directory: ${{ env.OPENWRT_PATH }}
@@ -372,7 +332,6 @@ jobs:
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         name_config_file="Config_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}_${{ env.WRT_VER }}_${{ env.START_TIME }}"
-        echo "name_config_file=$name_config_file" >> $GITHUB_ENV
         echo "【Lin】配置文件名为：$name_config_file"
         mkdir -p ./config_mine
         cp -f ./my_config.txt ./config_mine/${name_config_file}_mine.txt
@@ -384,22 +343,12 @@ jobs:
         [ -f "$readme_script" ] && chmod +x "$readme_script"
         TO_MY_SAY_DETAIL=$(printf '%s\n\n编译开始：%s\n' "${system_content}" "${{ env.START_TIME }}")
         [ -f "$readme_script" ] && bash "$readme_script" -c "./.config" -o "./config_mine/readme.txt" -s "$TO_MY_SAY_DETAIL" -a "${{ env.WRT_MINE_SAY }}" -r 'false'
-        readme_desc_file="$OPENWRT_PATH/config_mine/readme.txt"
-        echo "readme_desc_file=$readme_desc_file" >> $GITHUB_ENV
-        # 把内容保存到环境变量system_content_note中
-        echo 'system_content_note<<EOF' >> $GITHUB_ENV
-        cat "${readme_desc_file}" >> $GITHUB_ENV
-        echo 'EOF' >> $GITHUB_ENV
-        echo 'system_content_note: ${{ env.system_content_note }}' > /dev/null 2>&1 # 读一下，防止下个步骤读不到
-        sleep 1
 
     - name: Send dingding notify
       continue-on-error: true
       if: env.DINGDING_TOKEN != ''
-      env:
-        DINGDING_MESSAGE: |
-          ${{ env.system_content_note }}
       run: |
+        DINGDING_MESSAGE="$(cat "$OPENWRT_PATH/config_mine/readme.txt")"
         payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
         curl --fail --silent --show-error \
           -H 'Content-Type: application/json' \
@@ -510,19 +459,12 @@ jobs:
           -d "$payload" \
           "https://oapi.dingtalk.com/robot/send?access_token=${DINGDING_TOKEN}"
 
-    - name: Prepare Release Body (读取发布内容)
-      run: |
-        echo "【Lin】发布内容: ${{ env.release_desc_file }}"
-        the_release_content=$(cat ${{ env.release_desc_file }})
-        echo "${the_release_content}"
-
     - name: Upload Firmware To Release (发布固件)
       id: release
       if: steps.finalize_compile.outputs.status == 'success' && env.WRT_RELEASE_FIRMWARE == 'true'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        release_name="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
         release_tag="${{ env.START_TIME }}_${{ env.DEVICE_SUBTARGET }}_${{ env.DEVICE_NAME_LIST_LIAN }}_${{ env.BUILD_VARIANT_TAG }}"
         shopt -s nullglob
         release_files=( "${{ env.OPENWRT_PATH }}"/upload/*.* )
@@ -534,11 +476,11 @@ jobs:
 
         if gh release view "${release_tag}" >/dev/null 2>&1; then
           echo "【Lin】更新已有 Release：${release_tag}"
-          gh release edit "${release_tag}" --title "${release_name}" --notes-file "${{ env.release_desc_file }}"
+          gh release edit "${release_tag}" --title "${release_tag}" --notes-file "${{ env.OPENWRT_PATH }}/readme_release.txt"
           gh release upload "${release_tag}" "${release_files[@]}" --clobber
         else
           echo "【Lin】创建新的 Release：${release_tag}"
-          gh release create "${release_tag}" "${release_files[@]}" --title "${release_name}" --notes-file "${{ env.release_desc_file }}"
+          gh release create "${release_tag}" "${release_files[@]}" --title "${release_tag}" --notes-file "${{ env.OPENWRT_PATH }}/readme_release.txt"
         fi
         # body: |
         #   **This is OpenWrt Firmware for ${{ env.DEVICE_PROFILE }}**
@@ -554,7 +496,6 @@ jobs:
         #   ### 🧊 固件版本
         #   - 固件内核：${{ env.VERSION_KERNEL }}
         #   - 固件编译前最后一次➦[主源码](${{ env.WRT_REPO_URL }})更新记录
-        #   - ${{ env.VERSION_INFO }}
 
     - name: Cleanup Workspace Before Cache Save
       if: always()

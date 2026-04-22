@@ -76,7 +76,10 @@ jobs:
       run: |
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
         grep -q '^WRT_VER=' /tmp/source_metadata.txt
-        grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt
+        if grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt; then
+          echo "SOURCE_FLAVOR should no longer be emitted by ci_collect_source_metadata.sh" >&2
+          exit 1
+        fi
         grep -q '^DEVICE_TARGET=mediatek$' /tmp/source_metadata.txt
         grep -q '^DEVICE_SUBTARGET=filogic$' /tmp/source_metadata.txt
 

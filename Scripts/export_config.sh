@@ -8,7 +8,6 @@
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-RESOLVE_SCRIPT="$SCRIPT_DIR/resolve_general_configs.sh"
 MERGE_SCRIPT="$SCRIPT_DIR/merge_configs.sh"
 
 config_dir='Config'
@@ -40,6 +39,19 @@ resolve_device_config() {
 	done
 
 	return 1
+}
+
+resolve_general_configs() {
+	local fw_selector=$1
+
+	case "${fw_selector}" in
+		fw4|FW4|*-FW4.txt)
+			printf '%s\n' 'GENERAL.txt GENERAL-SERVICE.txt GENERAL-FW4.txt'
+			;;
+		*)
+			printf '%s\n' 'GENERAL.txt GENERAL-SERVICE.txt GENERAL-FW3.txt'
+			;;
+	esac
 }
 
 cleanup() {
@@ -259,7 +271,7 @@ if [ -z "$device_config" ]; then
 	exit 1
 fi
 
-resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
+resolved_general_configs=$(resolve_general_configs "$fw")
 device_config_path="$config_dir/$device_config"
 processed_device_config="$device_config_path"
 embeds_fw_stack=false
@@ -279,7 +291,7 @@ if [ "$embeds_fw_stack" = true ] || [ "$embeds_service_layer" = true ]; then
 			resolved_general_configs='GENERAL.txt'
 			;;
 		true:false)
-			resolved_general_configs="GENERAL.txt $(bash "$RESOLVE_SCRIPT" "$fw" | sed 's/^GENERAL.txt GENERAL-SERVICE.txt //')"
+			resolved_general_configs="GENERAL.txt $(resolve_general_configs "$fw" | sed 's/^GENERAL.txt GENERAL-SERVICE.txt //')"
 			;;
 		false:true)
 			resolved_general_configs='GENERAL.txt GENERAL-SERVICE.txt'

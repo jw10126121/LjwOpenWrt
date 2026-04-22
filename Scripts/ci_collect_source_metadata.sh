@@ -83,7 +83,6 @@ version_kernel="$(extract_kernel_version "${openwrt_path}" "${kernel_patchver}")
 cat <<EOF
 WRT_VER=${wrt_ver}
 SOURCE_REPO=${source_repo}
-SOURCE_FLAVOR=lean
 DEVICE_TARGET=${device_target}
 DEVICE_SUBTARGET=${device_subtarget}
 DEVICE_PROFILE=${device_profile}
