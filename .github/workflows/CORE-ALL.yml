@@ -106,7 +106,7 @@ env:
   UPLOAD_BIN_DIR_FORCE: true                                 # 强制上传bin
   WRT_HAS_WIFI: true
   WRT_USE_APK: false
-  OPENWRT_PATH: './openwrt'
+  OPENWRT_PATH: '/builder/openwrt'
   DEVICE_TARGET: ''
   DEVICE_SUBTARGET: ''
   DEVICE_PROFILE: ''
@@ -149,13 +149,13 @@ jobs:
       if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true' || env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true' || env.WRT_HAS_WIFI == 'true'
       uses: sbwml/actions@free-disk
       with:
-        build-mount-path: ${{ github.workspace }}
+        build-mount-path: /builder
         root-reserve-gb: '1'
         swap-size-gb: '1'
         
     - name: Check Disk (磁盘信息)
       run: |
-        df -hT $GITHUB_WORKSPACE
+        df -hT $GITHUB_WORKSPACE /builder
 
     - name: Initialization Environment (初始化环境)
       env:
@@ -395,8 +395,10 @@ jobs:
         fi
         echo "WRT_IS_LEAN=$WRT_IS_LEAN" >> $GITHUB_ENV
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
-        git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
-        if [ ! -d ./openwrt ]; then
+        rm -rf "$OPENWRT_PATH"
+        mkdir -p "$(dirname "$OPENWRT_PATH")"
+        git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL $OPENWRT_PATH
+        if [ ! -d "$OPENWRT_PATH" ]; then
           change_branceh=''
           if [ "$WRT_REPO_BRANCH" = 'master' ]; then
             change_branceh='main'
@@ -405,10 +407,10 @@ jobs:
           fi
           echo "【Lin】修改克隆源代码分支：【$change_branceh】$WRT_REPO_URL"
           if [ -n "${change_branceh}" ]; then
-            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL openwrt
+            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL $OPENWRT_PATH
           fi
         fi
-        cd openwrt
+        cd "$OPENWRT_PATH"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         if [ -n "${{ env.WRT_REPO_Commit_Hash }}" ]; then
           echo "【Lin】GIT检出到指定版本：${{ env.WRT_REPO_Commit_Hash }}"
@@ -616,7 +618,7 @@ jobs:
     
     - name: Check Disk (磁盘信息)
       run: |
-        df -hT $GITHUB_WORKSPACE
+        df -hT $GITHUB_WORKSPACE /builder
 
     - name: 编译固件 Build firmware
       id: compile
@@ -748,7 +750,7 @@ jobs:
         if [ -d staging_dir ]; then
           find staging_dir -maxdepth 1 -mindepth 1 -type d \( -name 'target-*' -o -name 'packages' -o -name 'pkginfo' \) -exec rm -rf {} +
         fi
-        df -hT "$GITHUB_WORKSPACE"
+        df -hT "$GITHUB_WORKSPACE" /builder
 
     - name: Fail Workflow If Compile Failed
       if: always() && steps.finalize_compile.outputs.status != 'success'
