@@ -106,7 +106,7 @@ env:
   UPLOAD_BIN_DIR_FORCE: true                                 # 强制上传bin
   WRT_HAS_WIFI: true
   WRT_USE_APK: false
-  OPENWRT_PATH: './openwrt'
+  OPENWRT_PATH: '/builder/openwrt'
   DEVICE_TARGET: ''
   DEVICE_SUBTARGET: ''
   DEVICE_PROFILE: ''
@@ -145,21 +145,17 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
-    - name: Free Disk Space (清理磁盘)
-      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true'
-      uses: FirelightFlagboy/gh-runner-free-disk-space@main
+    - name: Prepare Build Disk Space (清理并合并磁盘)
+      if: env.FREE_UP_DISK == true || env.FREE_UP_DISK == 'true' || env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true' || env.WRT_HAS_WIFI == 'true'
+      uses: sbwml/actions@free-disk
       with:
-        android: true
-        dotnet: true
-        haskell: true
-        docker-images: true
-        large-packages: true
-        swap-storage: true
-        tool-cache: true
+        build-mount-path: /builder
+        root-reserve-gb: '1'
+        swap-size-gb: '1'
         
     - name: Check Disk (磁盘信息)
       run: |
-        df -hT $GITHUB_WORKSPACE
+        df -hT $GITHUB_WORKSPACE /builder
 
     - name: Initialization Environment (初始化环境)
       env:
@@ -359,14 +355,6 @@ jobs:
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
         echo "【Lin】源码风味：${SOURCE_FLAVOR}"
 
-    - name: Combine Disks (合并磁盘)
-      uses: easimon/maximize-build-space@master
-      if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true' || env.WRT_HAS_WIFI == 'true'
-      with:
-        swap-size-mb: 1024
-        temp-reserve-mb: 100
-        root-reserve-mb: 1024
-
     - name: Checkout (下载当前源码)
       uses: actions/checkout@v6.0.1
 
@@ -407,8 +395,10 @@ jobs:
         fi
         echo "WRT_IS_LEAN=$WRT_IS_LEAN" >> $GITHUB_ENV
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
-        git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL openwrt
-        if [ ! -d ./openwrt ]; then
+        rm -rf "$OPENWRT_PATH"
+        mkdir -p "$(dirname "$OPENWRT_PATH")"
+        git clone --depth=1 --single-branch --branch $WRT_REPO_BRANCH $WRT_REPO_URL $OPENWRT_PATH
+        if [ ! -d "$OPENWRT_PATH" ]; then
           change_branceh=''
           if [ "$WRT_REPO_BRANCH" = 'master' ]; then
             change_branceh='main'
@@ -417,10 +407,10 @@ jobs:
           fi
           echo "【Lin】修改克隆源代码分支：【$change_branceh】$WRT_REPO_URL"
           if [ -n "${change_branceh}" ]; then
-            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL openwrt
+            git clone --depth=1 --single-branch --branch $change_branceh $WRT_REPO_URL $OPENWRT_PATH
           fi
         fi
-        cd openwrt
+        cd "$OPENWRT_PATH"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         if [ -n "${{ env.WRT_REPO_Commit_Hash }}" ]; then
           echo "【Lin】GIT检出到指定版本：${{ env.WRT_REPO_Commit_Hash }}"
@@ -628,7 +618,7 @@ jobs:
     
     - name: Check Disk (磁盘信息)
       run: |
-        df -hT $GITHUB_WORKSPACE
+        df -hT $GITHUB_WORKSPACE /builder
 
     - name: 编译固件 Build firmware
       id: compile
@@ -760,7 +750,7 @@ jobs:
         if [ -d staging_dir ]; then
           find staging_dir -maxdepth 1 -mindepth 1 -type d \( -name 'target-*' -o -name 'packages' -o -name 'pkginfo' \) -exec rm -rf {} +
         fi
-        df -hT "$GITHUB_WORKSPACE"
+        df -hT "$GITHUB_WORKSPACE" /builder
 
     - name: Fail Workflow If Compile Failed
       if: always() && steps.finalize_compile.outputs.status != 'success'

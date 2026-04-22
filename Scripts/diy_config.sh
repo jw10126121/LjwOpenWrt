@@ -17,10 +17,12 @@ source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
 [ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
 
 if [ $(basename "$(pwd)") != 'openwrt' ]; then
-    if [ -d "./openwrt" ]; then
+    if [ -n "${OPENWRT_PATH:-}" ] && [ -d "${OPENWRT_PATH}" ]; then
+        cd "${OPENWRT_PATH}"
+    elif [ -d "./openwrt" ]; then
         cd ./openwrt
     else
-        echo "【Lin】请在openwrt目录下执行，当前工作目录：$(pwd)" 
+        echo "【Lin】请在openwrt目录下执行，当前工作目录：$(pwd)，OPENWRT_PATH：${OPENWRT_PATH:-未设置}" 
         exit 0;
     fi
 fi
