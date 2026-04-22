@@ -13,11 +13,7 @@ configure_common_system_defaults
 configure_source_default_settings_package
 append_default_settings_snippet
 apply_lean_runtime_customizations
-apply_VIKINGYFY_runtime_customizations
 patch_apk_empty_feed_indexing
-apply_generic_runtime_defaults
-apply_ipq_optimizations
-apply_ipq_init_tuning
 main
 '
 

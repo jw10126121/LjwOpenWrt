@@ -53,7 +53,6 @@ default_theme_name=''
 package_manager='ipk'
 config_name=''
 source_code_info=''
-source_repo_url="${WRT_REPO_URL:-}"
 source_flavor='lean'
 
 # 解析外部传入的定制参数，后续所有修改都围绕这些参数展开。
@@ -221,28 +220,8 @@ configure_default_system() {
 }
 
 resolve_source_flavor_from_input() {
-    local parsed_hash parsed_url parsed_branch
-
-    if [ -n "${source_code_info}" ]; then
-        IFS='|' read -r parsed_hash parsed_url parsed_branch <<EOF
-${source_code_info}
-EOF
-        if [ -n "${parsed_url}" ]; then
-            source_repo_url="${parsed_url}"
-        fi
-    fi
-
-    if command -v resolve_source_flavor >/dev/null 2>&1; then
-        source_flavor=$(resolve_source_flavor "${source_repo_url}")
-    else
-        source_flavor='lean'
-    fi
-
-    if [ "${source_flavor}" = 'lean' ]; then
-        is_code_lean=true
-    else
-        is_code_lean=false
-    fi
+    source_flavor='lean'
+    is_code_lean=true
 
     echo "【Lin】源码风味：${source_flavor}"
 }
@@ -547,94 +526,9 @@ configure_base_package_options() {
 }
 
 configure_nss_feed_options() {
-    # lean源码不支持nss，nss只支持ipq平台，VIKINGYFY支持nss
-    # lean：禁止 sqm-scripts-nss
-    # VIKINGYFY + IPQ：允许 sqm-scripts-nss
-    # MT6000：不允许 sqm-scripts-nss
-
-    local target_ref="${WRT_TARGET:-${WRT_DEVICE:-}}"
-    local source_ref="${source_flavor:-${WRT_SOURCE_FLAVOR:-lean}}"
-    local source_ref_lc
-
-    source_ref_lc=$(printf '%s' "${source_ref}" | tr '[:upper:]' '[:lower:]')
-
-    if [[ "${target_ref}" == *"IPQ"* ]] && [[ "${source_ref_lc}" == "vikingyfy" || "${source_ref_lc}" == nss* ]]; then
-        set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "y"
-        set_kconfig_value "CONFIG_FEED_nss_packages" "y"
-        set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "m"
-    else
-        set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
-        set_kconfig_value "CONFIG_FEED_nss_packages" "n"
-        set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "n"
-    fi
-}
-
-apply_ipq_optimizations() {
-    [ "${is_code_lean}" = true ] && return 0
-    [[ ${WRT_TARGET} == *"IPQ"* ]] || return 0
-
-    set_kconfig_value "CONFIG_TARGET_OPTIONS" "y"
-    set_kconfig_value "CONFIG_TARGET_OPTIMIZATION" "\"-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\""
-    configure_nss_feed_options
-    set_kconfig_value "CONFIG_NSS_FIRMWARE_VERSION_11_4" "n"
-    set_kconfig_value "CONFIG_NSS_FIRMWARE_VERSION_12_5" "y"
-}
-
-apply_ipq_init_tuning() {
-    local nss_drv="./feeds/nss_packages/qca-nss-drv/files/qca-nss-drv.init"
-    local nss_pbuf="${package_workdir}/kernel/mac80211/files/qca-nss-pbuf.init"
-
-    [ "${is_code_lean}" = true ] && return 0
-    [[ ${WRT_TARGET} == *"IPQ"* ]] || return 0
-
-    if [ -f "$nss_drv" ]; then
-        sed -i 's/START=.*/START=85/g' "$nss_drv"
-        cd "$package_workdir" && echo "【Lin】qca-nss-drv has been fixed!"
-    fi
-
-    if [ -f "$nss_pbuf" ]; then
-        sed -i 's/START=.*/START=86/g' "$nss_pbuf"
-        cd "$package_workdir" && echo "【Lin】qca-nss-pbuf has been fixed!"
-    fi
-}
-
-apply_VIKINGYFY_runtime_customizations() {
-    echo "【Lin】当前源码风味为 VIKINGYFY，暂未追加专属运行时修补"
-}
-
-apply_generic_runtime_defaults() {
-    local default_bash_dir='./package/base-files/files/etc/uci-defaults'
-    local default_bash_script='./package/base-files/files/etc/uci-defaults/99-lin-defaults'
-    local dhcp_ip_start=10
-    local dhcp_ip_end=254
-    local dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
-
-    [ "${is_code_lean}" = true ] && return 0
-
-    mkdir -p "$default_bash_dir"
-    touch "$default_bash_script"
-cat <<EOF > "$default_bash_script"
-[ -f /usr/bin/frpc ] && chmod +x /usr/bin/frpc
-[ -f /usr/bin/frps ] && chmod +x /usr/bin/frps
-[ -f /etc/init.d/frpc ] && chmod +x /etc/init.d/frpc
-[ -f /etc/init.d/frps ] && chmod +x /etc/init.d/frps
-
-uci set dhcp.@dnsmasq[0].sequential_ip=1
-uci set dhcp.lan.start=${dhcp_ip_start}
-uci set dhcp.lan.limit=${dhcp_ip_limit}
-uci commit dhcp
-
-uci set luci.apply.holdoff=3
-uci commit luci
-
-exit 0
-EOF
-
-    chmod +x "$default_bash_script"
-    echo "【Lin】配置首次运行脚本成功："
-    echo "【Lin】1、修改frpc、frps权限"
-    echo "【Lin】2、配置dhcp，起：${dhcp_ip_start}，数：${dhcp_ip_limit}"
-    echo "【Lin】3、修改luci响应时间3s"
+    set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
+    set_kconfig_value "CONFIG_FEED_nss_packages" "n"
+    set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "n"
 }
 
 main() {
@@ -643,24 +537,8 @@ main() {
 
     configure_common_system_defaults
     update_build_revision
-
-    case "${source_flavor}" in
-        lean)
-            apply_lean_runtime_customizations
-            configure_nss_usage_display
-            ;;
-        VIKINGYFY)
-            apply_VIKINGYFY_runtime_customizations
-            apply_ipq_optimizations
-            apply_ipq_init_tuning
-            apply_generic_runtime_defaults
-            ;;
-        *)
-            apply_ipq_optimizations
-            apply_ipq_init_tuning
-            apply_generic_runtime_defaults
-            ;;
-    esac
+    apply_lean_runtime_customizations
+    configure_nss_usage_display
 }
 
 main

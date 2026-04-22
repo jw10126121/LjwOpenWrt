@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# 说明：验证 NSS 相关 feed 只对“IPQ + 支持 NSS 的源码风味”启用。
-# 当前 lean 风味下关闭；VIKINGYFY 的 IPQ 目标允许开启。
+# 说明：lean 成为唯一源码后，NSS 相关 feed 不应再自动启用。
 
 set -eu
 
@@ -49,7 +48,7 @@ EOF
 }
 
 run_case_with_existing_nss_feed() {
-	local case_dir="$TMPDIR/ipq_vikingyfy_existing_sqm"
+	local case_dir="$TMPDIR/ipq_existing_sqm"
 	mkdir -p "$case_dir"
 
 	cat > "$case_dir/feeds.conf.default" <<'EOF'
@@ -61,21 +60,16 @@ EOF
 		cd "$case_dir"
 		PATH="$TEST_BIN:$PATH" \
 		WRT_DEVICE="IPQ60XX-NOWIFI" \
-		WRT_SOURCE_FLAVOR="VIKINGYFY" \
+		WRT_SOURCE_FLAVOR="lean" \
 		bash "$TARGET_SCRIPT"
 	)
 }
 
 run_case ipq_lean IPQ60XX-NOWIFI lean
-run_case ipq_vikingyfy IPQ60XX-NOWIFI VIKINGYFY
 run_case mt6000_lean MT6000-WIFI lean
 run_case_with_existing_nss_feed
 
-grep -q '^src-git helloworld ' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
-grep -q 'src-git nss_packages https://github.com/qosmio/nss-packages.git' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
-grep -q 'src-git sqm_scripts_nss https://github.com/qosmio/sqm-scripts-nss.git' "$TMPDIR/ipq_vikingyfy/feeds.conf.default"
-
-sqm_count=$(grep -Ec '^[[:space:]]*src-[^[:space:]]+[[:space:]]+sqm_scripts_nss([[:space:]]|$)' "$TMPDIR/ipq_vikingyfy_existing_sqm/feeds.conf.default")
+sqm_count=$(grep -Ec '^[[:space:]]*src-[^[:space:]]+[[:space:]]+sqm_scripts_nss([[:space:]]|$)' "$TMPDIR/ipq_existing_sqm/feeds.conf.default")
 if [ "$sqm_count" -ne 1 ]; then
 	echo "existing sqm_scripts_nss feed should not be duplicated" >&2
 	exit 1

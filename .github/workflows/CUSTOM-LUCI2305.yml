@@ -29,7 +29,6 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
       # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
       # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit
@@ -47,7 +46,6 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
       # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
       # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit
@@ -65,7 +63,6 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
       # 如需恢复到当时的整套 lean 源码状态，可取消下一行注释。
       # WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
     secrets: inherit

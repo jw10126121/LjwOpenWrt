@@ -28,7 +28,7 @@ cat > "$OPENWRT_PATH/target/linux/generic/kernel-6.1" <<'EOF'
 LINUX_KERNEL_HASH-6.1.42:=dummy
 EOF
 
-selection="$(resolve_source_selection "VIKINGYFY" "")"
+selection="$(resolve_source_selection "lean" "")"
 eval "$selection"
 
 OPENWRT_PATH="$OPENWRT_PATH" \
@@ -37,6 +37,6 @@ WRT_REPO_BRANCH="$REPO_BRANCH" \
 SOURCE_FLAVOR="$SOURCE_FLAVOR" \
 bash "$TARGET_SCRIPT" > "$TMPDIR/meta.env"
 
-grep -q '^SOURCE_FLAVOR=VIKINGYFY$' "$TMPDIR/meta.env"
+grep -q '^SOURCE_FLAVOR=lean$' "$TMPDIR/meta.env"
 
 echo "test_ci_collect_source_metadata: ok"
