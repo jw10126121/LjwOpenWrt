@@ -407,8 +407,25 @@ jobs:
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         echo -e "$(nproc) thread build."
+        run_build_with_keepalive() {
+          "$@" &
+          BUILD_PID=$!
+          (
+            while kill -0 "$BUILD_PID" >/dev/null 2>&1; do
+              echo "【Lin】编译仍在进行中：$(date '+%F %T')"
+              sleep 120
+            done
+          ) &
+          KEEPALIVE_PID=$!
+
+          wait "$BUILD_PID"
+          BUILD_STATUS=$?
+          kill "$KEEPALIVE_PID" >/dev/null 2>&1 || true
+          wait "$KEEPALIVE_PID" >/dev/null 2>&1 || true
+          return "$BUILD_STATUS"
+        }
         # make -j$(nproc) V=s || make -j1 V=s
-        make -j$(nproc) || make -j1 V=s
+        run_build_with_keepalive make -j"$(nproc)" || run_build_with_keepalive make -j1 V=s
 
     - name: Finalize Compile Status
       id: finalize_compile
