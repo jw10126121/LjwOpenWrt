@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 说明：确保所有 workflow 在引用仓库内脚本/配置文件前已 checkout 当前仓库；
-# 当前不再要求在 maximize-build-space 之后强制二次 checkout。
+# 当前只要求在引用仓库内文件前，必须已经完成 checkout。
 
 set -eu
 

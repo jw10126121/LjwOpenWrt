@@ -9,17 +9,17 @@ import sys
 workflow_path = Path(".github/workflows/CORE-ALL.yml")
 lines = workflow_path.read_text().splitlines()
 
-combine_line = None
+disk_prepare_line = None
 checkout_lines = []
 
 for idx, line in enumerate(lines, start=1):
-    if "- name: Combine Disks" in line:
-        combine_line = idx
+    if "uses: sbwml/actions@free-disk" in line:
+        disk_prepare_line = idx
     if "uses: actions/checkout@" in line:
         checkout_lines.append(idx)
 
-if combine_line is None:
-    print("Combine Disks step not found", file=sys.stderr)
+if disk_prepare_line is None:
+    print("free-disk step not found", file=sys.stderr)
     sys.exit(1)
 
 if len(checkout_lines) != 1:
@@ -29,9 +29,9 @@ if len(checkout_lines) != 1:
     )
     sys.exit(1)
 
-if checkout_lines[0] <= combine_line:
+if checkout_lines[0] <= disk_prepare_line:
     print(
-        "CORE-ALL.yml checkout step should appear after Combine Disks",
+        "CORE-ALL.yml checkout step should appear after free-disk",
         file=sys.stderr,
     )
     sys.exit(1)
