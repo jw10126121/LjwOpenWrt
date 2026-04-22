@@ -4,7 +4,6 @@ set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 TARGET_SCRIPT="$SCRIPT_DIR/ci_collect_source_metadata.sh"
-. "$SCRIPT_DIR/lib/source_flavor.sh"
 
 TMPDIR=$(mktemp -d)
 cleanup() {
@@ -28,13 +27,9 @@ cat > "$OPENWRT_PATH/target/linux/generic/kernel-6.1" <<'EOF'
 LINUX_KERNEL_HASH-6.1.42:=dummy
 EOF
 
-selection="$(resolve_source_selection "")"
-eval "$selection"
-
 OPENWRT_PATH="$OPENWRT_PATH" \
-WRT_REPO_URL="$REPO_URL" \
-WRT_REPO_BRANCH="$REPO_BRANCH" \
-SOURCE_FLAVOR="$SOURCE_FLAVOR" \
+WRT_REPO_URL="https://github.com/coolsnowwolf/lede" \
+WRT_REPO_BRANCH="master" \
 bash "$TARGET_SCRIPT" > "$TMPDIR/meta.env"
 
 grep -q '^SOURCE_FLAVOR=lean$' "$TMPDIR/meta.env"

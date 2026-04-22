@@ -35,7 +35,6 @@ EOF
 OPENWRT_PATH="$OPENWRT_PATH" \
 WRT_REPO_URL="https://github.com/example/openwrt" \
 WRT_REPO_BRANCH="main" \
-SOURCE_FLAVOR="lean" \
 bash "$SOURCE_SCRIPT" > "$TMPDIR/source.env"
 
 grep -q '^VERSION_KERNEL=6.12$' "$TMPDIR/source.env"

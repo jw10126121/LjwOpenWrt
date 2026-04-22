@@ -8,20 +8,8 @@ name:  CORE-ALL
 on:
   workflow_call:
     inputs:
-      # WRT_REPO_INFO:
-      #   required: true
-      #   type: string
-      # WRT_REPO_URL:
-      #   required: true
-      #   type: string
-      # WRT_REPO_BRANCH:
-      #   required: true
-      #   type: string
       WRT_SOURCE_HASH_INFO:
         required: true
-        type: string
-      WRT_REPO_Commit_Hash:
-        required: false
         type: string
       WRT_DEVICE:
         required: true
@@ -64,19 +52,13 @@ on:
     secrets:
       DINGDING_TOKEN: 
         required: false
-      # UPLOAD_FIRMWARE_DIR:
-      #   required: false
-      #   type: boolean
-      #   default: true
         
 #环境变量配置
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   DINGDING_TOKEN: ${{ secrets.DINGDING_TOKEN }}
-  WRT_REPO_INFO: ''
   WRT_SOURCE_HASH_INFO: ${{inputs.WRT_SOURCE_HASH_INFO}}
-  WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}                          # 设备名
   WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}                      # fw3 / fw4
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }}               # 可选 overlays
@@ -112,7 +94,6 @@ env:
   DEVICE_ARCH: ''
   REPO_GIT_HASH: ''
   REPO_GIT_hash_simple: ''
-  SOURCE_FLAVOR: lean
   system_content_note: ''
   system_content: ''
   readme_desc_file: ''
@@ -160,54 +141,14 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y dos2unix
-
-    - name: Set Timezone (设置时区)
-      run: |
         sudo timedatectl set-timezone 'Asia/Shanghai'
 
     - name: Install LLVM
       if: env.INSTALL_LLVM == 'true'
       uses: sbwml/actions@install-llvm
 
-    - name: Prepare Source Flavor Resolver (准备源码风味解析器)
-      run: |
-        resolver_path="${RUNNER_TEMP}/source_flavor.sh"
-        cat > "${resolver_path}" <<'EOF_RESOLVER'
-        #!/bin/bash
-
-        resolve_source_selection() {
-            local repo_hash="${1:-}"
-
-            cat <<EOF_OUTPUT
-        REPO_URL=https://github.com/coolsnowwolf/lede
-        REPO_BRANCH=master
-        REPO_HASH=${repo_hash}
-        SOURCE_FLAVOR=lean
-        EOF_OUTPUT
-        }
-        EOF_RESOLVER
-
-        chmod +x "$resolver_path"
-        echo "SOURCE_FLAVOR_RESOLVER=$resolver_path" >> "$GITHUB_ENV"
-
-    # - name: Initialization Environment (初始化环境)
-    #   env:
-    #     DEBIAN_FRONTEND: noninteractive
-    #   run: |
-    #     docker rmi $(docker images -q)
-    #     sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
-    #     sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-    #     sudo -E apt-get -y update
-    #     sudo -E apt -yqq install dos2unix libfuse-dev
-    #     sudo -E apt-get -y install $(curl -fsSL is.gd/depends_ubuntu_2204)
-    #     sudo -E systemctl daemon-reload
-    #     sudo -E apt-get -y autoremove --purge
-    #     sudo -E apt-get -y clean
-    #     sudo timedatectl set-timezone 'Asia/Shanghai'
-
     - name: Check Config Values (检查配置变量)
       run: |
-        . "$SOURCE_FLAVOR_RESOLVER"
         WRT_HAS_WIFI=true
         [[ "$WRT_DEVICE" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
@@ -247,23 +188,15 @@ jobs:
         echo "START_TIME=$START_TIME" >> $GITHUB_ENV
         echo "【Lin】编译日期：$START_DATE；编译时间：$START_TIME；"
 
-        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_HASH_INFO}")
-        eval "${resolved_source_selection}"
-        WRT_REPO_URL="${REPO_URL}"
-        WRT_REPO_BRANCH="${REPO_BRANCH}"
-        SOURCE_FLAVOR="${SOURCE_FLAVOR}"
-        if [ -n "${REPO_HASH}" ]; then
-          WRT_REPO_Commit_Hash="${REPO_HASH}"
-          echo "【Lin】源码HASH值：${REPO_HASH}"
-        fi
-        WRT_REPO_INFO="${WRT_REPO_URL}|${WRT_REPO_BRANCH}"
-        echo "WRT_REPO_INFO=$WRT_REPO_INFO" >> $GITHUB_ENV
+        WRT_REPO_URL="https://github.com/coolsnowwolf/lede"
+        WRT_REPO_BRANCH="master"
         echo "WRT_REPO_URL=${WRT_REPO_URL}" >> $GITHUB_ENV
         echo "WRT_REPO_BRANCH=${WRT_REPO_BRANCH}" >> $GITHUB_ENV
-        echo "SOURCE_FLAVOR=${SOURCE_FLAVOR}" >> $GITHUB_ENV
-        echo "WRT_REPO_Commit_Hash=${WRT_REPO_Commit_Hash}" >> $GITHUB_ENV
+        if [ -n "${WRT_SOURCE_HASH_INFO}" ]; then
+          echo "【Lin】源码HASH值：${WRT_SOURCE_HASH_INFO}"
+        fi
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
-        echo "【Lin】源码风味：${SOURCE_FLAVOR}"
+        echo "【Lin】源码风味：lean"
 
     - name: Checkout (下载当前源码)
       uses: actions/checkout@v6.0.1
@@ -287,16 +220,9 @@ jobs:
     - name: Clone Source Code (克隆源代码)
       id: clone_source
       run: |
-        . "$SOURCE_FLAVOR_RESOLVER"
-        resolved_source_selection=$(resolve_source_selection "${WRT_SOURCE_HASH_INFO}")
-        eval "${resolved_source_selection}"
-        WRT_REPO_URL="${REPO_URL}"
-        WRT_REPO_BRANCH="${REPO_BRANCH}"
-        SOURCE_FLAVOR="${SOURCE_FLAVOR}"
-        echo "SOURCE_FLAVOR=$SOURCE_FLAVOR" >> $GITHUB_ENV
-        echo "WRT_REPO_URL=$WRT_REPO_URL" >> $GITHUB_ENV
-        echo "WRT_REPO_BRANCH=$WRT_REPO_BRANCH" >> $GITHUB_ENV
-        echo "【Lin】源码风味：$SOURCE_FLAVOR"
+        WRT_REPO_URL="https://github.com/coolsnowwolf/lede"
+        WRT_REPO_BRANCH="master"
+        echo "【Lin】源码风味：lean"
         echo "【Lin】克隆源代码：【$WRT_REPO_BRANCH】$WRT_REPO_URL"
         rm -rf "$OPENWRT_PATH"
         mkdir -p "$(dirname "$OPENWRT_PATH")"
@@ -315,10 +241,10 @@ jobs:
         fi
         cd "$OPENWRT_PATH"
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
-        if [ -n "${{ env.WRT_REPO_Commit_Hash }}" ]; then
-          echo "【Lin】GIT检出到指定版本：${{ env.WRT_REPO_Commit_Hash }}"
-          git fetch --depth=1 origin ${{ env.WRT_REPO_Commit_Hash }}
-          git checkout ${{ env.WRT_REPO_Commit_Hash }}
+        if [ -n "${WRT_SOURCE_HASH_INFO}" ]; then
+          echo "【Lin】GIT检出到指定版本：${WRT_SOURCE_HASH_INFO}"
+          git fetch --depth=1 origin "${WRT_SOURCE_HASH_INFO}"
+          git checkout "${WRT_SOURCE_HASH_INFO}"
         fi
         REPO_GIT_HASH=$(git log -1 --pretty=format:'%H')
         REPO_GIT_hash_simple=$(git log -1 --pretty=format:'%h')
@@ -339,17 +265,6 @@ jobs:
           EXPORT_ARGS+=(--overlay "$WRT_OVERLAYS")
         fi
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh" "${EXPORT_ARGS[@]}"
-
-    # - name: ln mnt (合并磁盘mnt)
-    #   if: env.IS_RESIZE_SPACE == true || env.IS_RESIZE_SPACE == 'true'
-    #   run: |
-    #     sudo mkdir -p /mnt/build_wrt
-    #     sudo chown $USER:$USER /mnt/build_wrt
-    #     sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/openwrt
-
-    - name: Read Variables (读取变量)
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_collect_source_metadata.sh" >> "$GITHUB_ENV"
 
     - name: Check Toolchain Cache
@@ -450,9 +365,6 @@ jobs:
         file_diy="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/diy_after_defconfig.sh"
         [ -f "${file_diy}" ] && chmod +x "${file_diy}" && bash "${file_diy}"
 
-    - name: Read Variables (读取变量)
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_collect_final_metadata.sh" >> "$GITHUB_ENV"
         echo "【Lin】已刷新 defconfig 后元数据"
 

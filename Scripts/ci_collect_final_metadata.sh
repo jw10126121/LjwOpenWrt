@@ -103,7 +103,6 @@ wrt_has_wifi="${WRT_HAS_WIFI:-true}"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
 repo_git_hash="${REPO_GIT_HASH:-}"
-source_flavor="${SOURCE_FLAVOR:-lean}"
 device_target="${DEVICE_TARGET:-}"
 device_subtarget="${DEVICE_SUBTARGET:-}"
 device_arch="$(sed -n 's/^CONFIG_TARGET_ARCH_PACKAGES="\([^"]*\)"/\1/p' "${openwrt_path}/.config" | head -n1 || true)"
@@ -119,7 +118,7 @@ fw_stack='未知'
 fw_stack_tag='unknown'
 frp_role='未集成'
 frp_role_tag='none'
-source_flavor_tag="$(printf '%s' "${source_flavor}" | tr '[:upper:]' '[:lower:]')"
+source_flavor_tag='lean'
 
 if [ "${wrt_has_lite}" = "true" ]; then
     wrt_has_lite_text='[精简版]'
@@ -172,7 +171,7 @@ build_variant_tag="${source_flavor_tag}_${fw_stack_tag}_${frp_role_tag}_${packag
 system_content="支持设备：${DEVICE_PROFILE}
 固件类型：${wrt_has_lite_text}
 支持平台：${device_target}-${device_subtarget}
-源码风味：${source_flavor}
+源码风味：lean
 FW环境：${fw_stack}
 FRP角色：${frp_role}
 设备架构：${device_arch}

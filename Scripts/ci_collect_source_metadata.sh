@@ -47,7 +47,6 @@ openwrt_path="${OPENWRT_PATH:?OPENWRT_PATH is required}"
 config_path="${openwrt_path}/.config"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
-source_flavor="${SOURCE_FLAVOR:-lean}"
 
 the_repo="${wrt_repo_url%/}"
 wrt_ver="${the_repo##*/}-${wrt_repo_branch}"
@@ -84,7 +83,7 @@ version_kernel="$(extract_kernel_version "${openwrt_path}" "${kernel_patchver}")
 cat <<EOF
 WRT_VER=${wrt_ver}
 SOURCE_REPO=${source_repo}
-SOURCE_FLAVOR=${source_flavor:-lean}
+SOURCE_FLAVOR=lean
 DEVICE_TARGET=${device_target}
 DEVICE_SUBTARGET=${device_subtarget}
 DEVICE_PROFILE=${device_profile}

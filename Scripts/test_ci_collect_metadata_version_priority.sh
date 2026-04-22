@@ -61,7 +61,6 @@ run_case() {
     WRT_HAS_WIFI=true \
     WRT_REPO_URL="https://github.com/example/openwrt" \
     WRT_REPO_BRANCH="main" \
-    SOURCE_FLAVOR="lean" \
     DEVICE_TARGET="qualcommax" \
     DEVICE_SUBTARGET="ipq60xx" \
     DEVICE_PROFILE="cmiot_ax18" \

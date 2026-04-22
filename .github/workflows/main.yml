@@ -54,58 +54,16 @@ on:
         required: false
         type: string
         default: ''
-      WRT_REPO_Commit_Hash:
-        description: '历史版本HASH'
-        required: false
-        type: string
-        default: ''
       # DINGDING_TOKEN:
       #   description: '钉钉TOKEN'
       #   required: false
       #   type: string
       #   default: ''
-  # workflow_call:
-  #   inputs:
-  #     WRT_REPO_URL:
-  #       required: true
-  #       type: string
-  #     WRT_REPO_BRANCH:
-  #       required: true
-  #       type: string
-  #     WRT_REPO_Commit_Hash:
-  #       required: true
-  #       type: string
-  #     WRT_DEVICE:
-  #       required: true
-  #       type: string
-  #     WRT_DIY_SETTING:
-  #       required: true
-  #       type: string
-  #     WRT_DIY_FEEDS:
-  #       required: true
-  #       type: string
-  #       default: diy_feeds.sh
-      #     WRT_DIYPackages:
-      #       required: true
-      #       type: string
-  #     WRT_RELEASE_FIRMWARE:
-  #       required: true
-  #       type: boolean
-  #     WRT_DEFAULT_LANIP:
-  #       required: true
-  #       type: string
-  #     WRT_MINE_SAY:
-  #       required: true
-  #       type: string
-  #     WRT_TOKEN_DINGDING:
-  #       required: false
-  #       type: string
 
         
 #环境变量配置
 env:
   DINGDING_TOKEN: ${{secrets.DINGDING_TOKEN}}
-  WRT_REPO_Commit_Hash: ${{inputs.WRT_REPO_Commit_Hash}}
   WRT_DEVICE: ${{inputs.WRT_DEVICE}}           # 设备名
   WRT_FIREWALL: ${{inputs.WRT_FIREWALL}}       # fw3 / fw4
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }} # overlays

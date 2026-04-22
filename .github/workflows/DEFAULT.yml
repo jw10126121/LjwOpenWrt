@@ -101,13 +101,6 @@ on:
         required: false
         type: string
         default: ''
-      # WRT_REPO_INFO:
-      #   description: '源码'
-      #   required: true
-      #   type: choice
-      #   options:
-      #     - 'https://github.com/coolsnowwolf/lede|master'
-      #   default: 'https://github.com/coolsnowwolf/lede|master'
       WRT_SOURCE_HASH_INFO:
         description: '源码 HASH，可选填写 commit hash'
         required: false
@@ -134,10 +127,6 @@ jobs:
     with:
       # 源码
       WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}
-      # 编译分支
-      # WRT_REPO_BRANCH: ${{ 'master' }}
-      # 编译指定版本
-      # WRT_REPO_Commit_Hash: ${{ inputs.WRT_REPO_Commit_Hash }}
       # 参数化配置
       WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
       WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}

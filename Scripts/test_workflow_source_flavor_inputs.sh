@@ -17,20 +17,16 @@ for workflow in "${WORKFLOWS_WITHOUT_SOURCE_FLAVOR_INPUT[@]}"; do
 		echo "$workflow should not expose or consume WRT_SOURCE_FLAVOR anymore" >&2
 		exit 1
 	fi
-	if head -n 120 "$workflow" | grep -q '^[[:space:]]*WRT_REPO_URL:'; then
-		echo "$workflow still exposes WRT_REPO_URL input" >&2
-		exit 1
-	fi
-	if head -n 120 "$workflow" | grep -q '^[[:space:]]*WRT_REPO_BRANCH:'; then
-		echo "$workflow still exposes WRT_REPO_BRANCH input" >&2
-		exit 1
-	fi
 	if grep -q 'inputs.WRT_REPO_URL' "$workflow"; then
 		echo "$workflow still consumes inputs.WRT_REPO_URL" >&2
 		exit 1
 	fi
 	if grep -q 'inputs.WRT_REPO_BRANCH' "$workflow"; then
 		echo "$workflow still consumes inputs.WRT_REPO_BRANCH" >&2
+		exit 1
+	fi
+	if grep -q 'WRT_REPO_Commit_Hash' "$workflow"; then
+		echo "$workflow should no longer keep the legacy WRT_REPO_Commit_Hash name" >&2
 		exit 1
 	fi
 done

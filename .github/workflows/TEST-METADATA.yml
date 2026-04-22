@@ -29,33 +29,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v6.0.1
 
-    - name: Prepare Source Flavor Resolver
-      run: |
-        resolver_path="${RUNNER_TEMP}/source_flavor.sh"
-        repo_resolver="$GITHUB_WORKSPACE/Scripts/lib/source_flavor.sh"
-
-        if [ -f "$repo_resolver" ]; then
-          cp "$repo_resolver" "$resolver_path"
-        else
-          cat > "${resolver_path}" <<'EOF_RESOLVER'
-        #!/bin/bash
-
-        resolve_source_selection() {
-            local repo_hash="${1:-}"
-
-            cat <<EOF_OUTPUT
-        REPO_URL=https://github.com/coolsnowwolf/lede
-        REPO_BRANCH=master
-        REPO_HASH=${repo_hash}
-        SOURCE_FLAVOR=lean
-        EOF_OUTPUT
-        }
-        EOF_RESOLVER
-        fi
-
-        chmod +x "$resolver_path"
-        echo "SOURCE_FLAVOR_RESOLVER=$resolver_path" >> "$GITHUB_ENV"
-
     - name: Build Test Fixture
       run: |
         tmp_root="$(mktemp -d)"
@@ -98,14 +71,9 @@ jobs:
     - name: Run Source Metadata Script
       env:
         OPENWRT_PATH: ${{ env.TEST_OPENWRT_PATH }}
+        WRT_REPO_URL: https://github.com/coolsnowwolf/lede
+        WRT_REPO_BRANCH: master
       run: |
-        . "$SOURCE_FLAVOR_RESOLVER"
-        selection="$(resolve_source_selection "")"
-        eval "$selection"
-        WRT_REPO_URL="$REPO_URL"
-        WRT_REPO_BRANCH="$REPO_BRANCH"
-        SOURCE_FLAVOR="$SOURCE_FLAVOR"
-        export SOURCE_FLAVOR WRT_REPO_URL WRT_REPO_BRANCH
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_source_metadata.sh" | tee /tmp/source_metadata.txt
         grep -q '^WRT_VER=' /tmp/source_metadata.txt
         grep -q '^SOURCE_FLAVOR=' /tmp/source_metadata.txt
@@ -124,11 +92,9 @@ jobs:
         DEVICE_SUBTARGET: filogic
         VERSION_KERNEL: 6.12.80
         REPO_GIT_HASH: test-metadata
+        WRT_REPO_URL: https://github.com/coolsnowwolf/lede
+        WRT_REPO_BRANCH: master
       run: |
-        . "$SOURCE_FLAVOR_RESOLVER"
-        selection="$(resolve_source_selection "")"
-        eval "$selection"
-        export WRT_REPO_URL="$REPO_URL" WRT_REPO_BRANCH="$REPO_BRANCH"
         bash "$GITHUB_WORKSPACE/Scripts/ci_collect_final_metadata.sh" | tee /tmp/final_metadata.txt
         grep -q '^DEVICE_ARCH=aarch64_cortex-a53$' /tmp/final_metadata.txt
         grep -q '^LUCI_VERSION=23.05$' /tmp/final_metadata.txt
