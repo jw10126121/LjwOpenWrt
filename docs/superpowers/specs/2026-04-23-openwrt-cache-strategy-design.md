@@ -214,6 +214,49 @@
 
 这些都属于例外情况，不应作为本次默认设计。
 
+## External Reference Notes
+
+本次设计额外参考了 `sbwml/builder` 的公开 workflow：
+
+- [sbwml/builder build-release.yml](https://github.com/sbwml/builder/blob/main/.github/workflows/build-release.yml)
+
+参考结论不是“整体迁移到 sbwml 的构建方式”，而是只提取对当前仓库有直接价值的缓存经验。
+
+### Worth Borrowing
+
+1. `ccache` 恢复优先于复杂的 toolchain 加速技巧
+   - `sbwml` 的公开 workflow 明确把 `.ccache` 恢复作为加速入口之一
+   - 这说明在 OpenWrt 的反复试编场景里，`.ccache` 的收益通常稳定且容易观察
+
+2. restore/save 分离比单步 `actions/cache` 更可控
+   - 公开 workflow 已使用 `actions/cache/restore`
+   - 这与本设计优先解决“首次编译后缓存未成功写回”的方向一致
+
+3. cache 需要可观察性
+   - 参考 workflow 在恢复 `.ccache` 后会输出缓存体积
+   - 当前仓库也应补上 restore 后和编译后的 cache 体积日志，必要时输出 `ccache -s`
+
+### Not Worth Copying Directly
+
+1. 不直接照搬其全部构建加速开关
+   - 公开 workflow 中的 `BUILD_FAST`、`ENABLE_MOLD`、`USE_GCC15`、`ENABLE_LTO` 等开关，真正行为依赖远端脚本
+   - 仅从 YAML 入口无法证明这些选项对当前 lean 流程安全且有效
+
+2. 不把当前仓库直接改成“只依赖 `.ccache`”
+   - 当前仓库已经存在 `toolchain` 缓存结构
+   - 本次目标仍然是保留 `toolchain + ccache + dl` 三层缓存，而不是退回单层缓存
+
+3. 不在第一阶段引入 release asset 作为主要缓存介质
+   - `sbwml` 的某些 `.ccache` 恢复逻辑依赖 release 资产
+   - 这可以作为后续备选方案，但不应替代当前基于 `actions/cache` 的第一阶段实现
+
+### Impact On This Design
+
+外部参考不会改变本设计的主决策，但会补充两条实现建议：
+
+1. 在 `ccache` restore/save 步骤中增加显式体积日志
+2. 如果 GitHub Actions cache 对 `.ccache` 的稳定性仍不足，再单独评估“release asset 恢复 `.ccache`”作为第二阶段方案
+
 ## Out of Scope
 
 以下内容不属于本次设计范围：
