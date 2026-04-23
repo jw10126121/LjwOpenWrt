@@ -14,13 +14,13 @@ if grep -q 'echo "readme_desc_file=' "$workflow_file"; then
 	exit 1
 fi
 
-if grep -q 'sleep 1' "$workflow_file"; then
+if grep -Eq '^[[:space:]]*sleep 1$' "$workflow_file"; then
 	echo "CORE-ALL should not keep the legacy sleep workaround in Check Config" >&2
 	exit 1
 fi
 
-grep -Fq 'DINGDING_MESSAGE="$(cat "$OPENWRT_PATH/config_mine/readme.txt")"' "$workflow_file" || {
-	echo "CORE-ALL should read the precompile notify body directly from config_mine/readme.txt" >&2
+grep -Fq 'export DINGDING_MESSAGE="$(cat "$OPENWRT_PATH/config_mine/readme.txt")"' "$workflow_file" || {
+	echo "CORE-ALL should export the precompile notify body so python can read DINGDING_MESSAGE" >&2
 	exit 1
 }
 
