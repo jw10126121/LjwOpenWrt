@@ -1,0 +1,148 @@
+#CI项目
+name: CACHE-BENCH
+
+on:
+  workflow_dispatch:
+    inputs:
+      BENCH_MODE:
+        description: 'benchmark 模式'
+        required: true
+        type: choice
+        options:
+          - warm-and-measure
+          - measure-only
+        default: 'warm-and-measure'
+      WRT_DEVICE:
+        description: '设备型号'
+        required: true
+        type: choice
+        options:
+          - IPQ60XX-NOWIFI
+          - IPQ60XX-NOWIFI-MINI
+          - MT6000-WIFI
+          - MT6000-WIFI-MINI
+        default: 'IPQ60XX-NOWIFI'
+      WRT_FIREWALL:
+        description: '防火墙栈'
+        required: true
+        type: choice
+        options:
+          - fw3
+          - fw4
+        default: 'fw3'
+      WRT_OVERLAYS:
+        description: '可选 overlays，逗号分隔，例如 frps,apk'
+        required: false
+        type: string
+        default: ''
+      WRT_LUCI_BRANCH:
+        description: '可选 LuCI feed 分支，例如 openwrt-23.05、23.05 或 2305；留空则使用源码默认值'
+        required: false
+        type: string
+        default: ''
+      WRT_DIY_SETTING:
+        description: 'diy_setting脚本'
+        required: false
+        type: string
+        default: 'diy_config.sh'
+      WRT_DIYPackages:
+        description: 'DIY包配置'
+        required: false
+        type: string
+        default: 'Packages.sh'
+      WRT_DEFAULT_LANIP:
+        description: '默认LAN-IP'
+        required: false
+        type: string
+        default: '192.168.0.1'
+      WRT_RELEASE_FIRMWARE:
+        description: '发布firmware'
+        required: false
+        type: boolean
+        default: false
+      WHAT_MY_SAY:
+        description: '编译说明'
+        required: false
+        type: string
+        default: ''
+
+permissions: write-all
+
+jobs:
+  warm_cache:
+    if: inputs.BENCH_MODE == 'warm-and-measure'
+    name: warm-${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
+      WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
+      WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
+      WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
+      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WHAT_MY_SAY: ${{ format('[cache-bench warm] {0}', inputs.WHAT_MY_SAY) }}
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
+
+  measure_after_warm:
+    if: inputs.BENCH_MODE == 'warm-and-measure'
+    name: measure-${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
+    needs: warm_cache
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
+      WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
+      WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
+      WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
+      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WHAT_MY_SAY: ${{ format('[cache-bench measure] {0}', inputs.WHAT_MY_SAY) }}
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
+
+  measure_only:
+    if: inputs.BENCH_MODE == 'measure-only'
+    name: measure-only-${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
+    uses: ./.github/workflows/DEFAULT.yml
+    with:
+      WRT_DEVICE: ${{ inputs.WRT_DEVICE }}
+      WRT_FIREWALL: ${{ inputs.WRT_FIREWALL }}
+      WRT_OVERLAYS: ${{ inputs.WRT_OVERLAYS }}
+      WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}
+      WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}
+      WRT_DIYPackages: ${{ inputs.WRT_DIYPackages }}
+      WRT_DEFAULT_LANIP: ${{ inputs.WRT_DEFAULT_LANIP }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WHAT_MY_SAY: ${{ format('[cache-bench measure] {0}', inputs.WHAT_MY_SAY) }}
+      WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6
+    secrets: inherit
+
+  benchmark_summary:
+    name: benchmark-summary
+    runs-on: ubuntu-24.04
+    needs:
+      - warm_cache
+      - measure_after_warm
+      - measure_only
+    if: always()
+    steps:
+      - name: Write Summary
+        run: |
+          {
+            echo "## Cache Benchmark"
+            echo ""
+            echo "固定源码 HASH：\`ecec1ef93a8920f30ef927d989b13b674d614ca6\`"
+            echo "当前模式：\`${{ inputs.BENCH_MODE }}\`"
+            echo ""
+            echo "对比 warm 和 measure 两个 job 的这些日志："
+            echo "- Restore Toolchain Cache"
+            echo "- Restore ccache Cache"
+            echo "- Download tools 中的 prep/download 耗时"
+            echo "- Report ccache Stats Before Build"
+            echo "- 编译固件 Build firmware 中的 compile 耗时"
+            echo "- Report ccache Stats After Build"
+          } >> "$GITHUB_STEP_SUMMARY"

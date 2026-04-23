@@ -285,6 +285,10 @@ jobs:
         else
           echo "【Lin】caches missed!"
         fi
+
+    - name: Initialize Build Observability
+      run: |
+        echo "PREP_STAGE_START_TS=$(date +%s)" >> "$GITHUB_ENV"
         
     - name: diy Feeds (自定义feeds)
       working-directory: ${{ env.OPENWRT_PATH }}
@@ -408,8 +412,17 @@ jobs:
     - name: Download tools (下载工具包) 
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
+        prep_end_ts=$(date +%s)
+        if [ -n "${PREP_STAGE_START_TS:-}" ]; then
+          echo "【Lin】prep stage duration: $((prep_end_ts - PREP_STAGE_START_TS))s"
+        else
+          echo "【Lin】prep stage duration: unavailable"
+        fi
+        download_start_ts=$(date +%s)
         echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j$(nproc)
+        download_end_ts=$(date +%s)
+        echo "【Lin】download stage duration: $((download_end_ts - download_start_ts))s"
         # find dl -size -1024c -exec ls -l {} \;
         # find dl -size -1024c -exec rm -f {} \;
     
@@ -417,14 +430,28 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE /builder
 
+    - name: Report ccache Stats Before Build
+      continue-on-error: true
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        if command -v ccache >/dev/null 2>&1; then
+          echo "【Lin】ccache stats before build"
+          ccache -s || true
+        else
+          echo "【Lin】ccache command not found before build"
+        fi
+
     - name: 编译固件 Build firmware
       id: compile
       continue-on-error: true
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
+        compile_start_ts=$(date +%s)
         echo -e "$(nproc) thread build."
         # make -j$(nproc) V=s || make -j1 V=s
         make -j"$(nproc)" || make -j1 V=s
+        compile_end_ts=$(date +%s)
+        echo "【Lin】compile stage duration: $((compile_end_ts - compile_start_ts))s"
 
     - name: Finalize Compile Status
       id: finalize_compile
@@ -437,6 +464,18 @@ jobs:
         echo "status=${{ steps.compile.outcome }}" >> $GITHUB_OUTPUT
         echo "COMPILE_STATUS=${{ steps.compile.outcome }}" >> $GITHUB_ENV
         echo "【Lin】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译状态：${{ steps.compile.outcome }}，结束时间：$END_TIME"
+
+    - name: Report ccache Stats After Build
+      if: always()
+      continue-on-error: true
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        if command -v ccache >/dev/null 2>&1; then
+          echo "【Lin】ccache stats after build"
+          ccache -s || true
+        else
+          echo "【Lin】ccache command not found after build"
+        fi
 
     - name: Machine Information
       continue-on-error: true

@@ -49,6 +49,14 @@ assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT
 
 assert_contains '- name: Cache Diagnostics After Restore' "workflow should log cache state after restore"
 assert_contains '- name: Cache Diagnostics Before Save' "workflow should log cache state before save"
+assert_contains '- name: Initialize Build Observability' "workflow should initialize build timing observability"
+assert_contains 'echo "PREP_STAGE_START_TS=$(date +%s)" >> "$GITHUB_ENV"' "workflow should record the prep stage start timestamp"
+assert_contains '- name: Report ccache Stats Before Build' "workflow should print ccache stats before compilation"
+assert_contains '- name: Report ccache Stats After Build' "workflow should print ccache stats after compilation"
+assert_contains 'ccache -s || true' "workflow should tolerate ccache stats collection failures"
+assert_contains '【Lin】prep stage duration:' "workflow should log prep stage duration"
+assert_contains '【Lin】download stage duration:' "workflow should log download stage duration"
+assert_contains '【Lin】compile stage duration:' "workflow should log compile stage duration"
 assert_not_contains '- name: Restore dl Cache' "workflow should not introduce dl cache in this change"
 assert_not_contains '- name: Save dl Cache' "workflow should not introduce dl cache in this change"
 
