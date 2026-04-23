@@ -9,7 +9,7 @@ assert_contains() {
 	local pattern="$1"
 	local message="$2"
 
-	if ! grep -Fq "$pattern" "$workflow_file"; then
+	if ! grep -Fq -- "$pattern" "$workflow_file"; then
 		echo "ASSERT FAILED: ${message}" >&2
 		echo "Missing pattern: ${pattern}" >&2
 		exit 1
@@ -20,7 +20,7 @@ assert_not_contains() {
 	local pattern="$1"
 	local message="$2"
 
-	if grep -Fq "$pattern" "$workflow_file"; then
+	if grep -Fq -- "$pattern" "$workflow_file"; then
 		echo "ASSERT FAILED: ${message}" >&2
 		echo "Unexpected pattern: ${pattern}" >&2
 		exit 1
@@ -28,17 +28,28 @@ assert_not_contains() {
 }
 
 assert_toolchain_has_no_restore_keys() {
-	if awk '/Check Toolchain Cache/,/Check ccache Cache/' "$workflow_file" | grep -Fq 'restore-keys:'; then
+	if awk '/Restore Toolchain Cache/,/Restore ccache Cache/' "$workflow_file" | grep -Fq -- 'restore-keys:'; then
 		echo "ASSERT FAILED: toolchain cache should not restore older prefixes" >&2
 		exit 1
 	fi
 }
 
-assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}' "toolchain cache key should include the source commit hash"
-assert_not_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ hashFiles(' "toolchain cache should not rely on broad hashFiles invalidation anymore"
+assert_contains '- name: Restore Toolchain Cache' "workflow should restore toolchain cache explicitly"
+assert_contains 'uses: actions/cache/restore@v5' "workflow should use cache restore actions"
+assert_contains '- name: Save Toolchain Cache' "workflow should save toolchain cache explicitly"
+assert_contains 'uses: actions/cache/save@v5' "workflow should use cache save actions"
+assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}' "toolchain cache key should still include the source commit hash"
 assert_toolchain_has_no_restore_keys
+
+assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
+assert_contains '- name: Save ccache Cache' "workflow should save ccache explicitly"
 assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}' "ccache key should no longer include commit hash"
-assert_not_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}' "ccache key should not include commit hash"
-assert_not_contains 'gh cache delete' "workflow should not delete ccache entries on cache miss"
+assert_contains 'restore-keys: |' "ccache restore step should still keep restore-keys"
+assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-' "ccache restore prefix should remain unchanged"
+
+assert_contains '- name: Cache Diagnostics After Restore' "workflow should log cache state after restore"
+assert_contains '- name: Cache Diagnostics Before Save' "workflow should log cache state before save"
+assert_not_contains '- name: Restore dl Cache' "workflow should not introduce dl cache in this change"
+assert_not_contains '- name: Save dl Cache' "workflow should not introduce dl cache in this change"
 
 echo "test_workflow_cache_keys: ok"
