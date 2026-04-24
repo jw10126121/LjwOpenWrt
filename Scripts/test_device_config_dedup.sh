@@ -68,31 +68,17 @@ check_config_file \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI.txt" \
-    "$CONFIG_DIR/GENERAL.txt" \
-    "$CONFIG_DIR/GENERAL-SERVICE.txt" \
-    "$CONFIG_DIR/variants/MINI-SERVICE.txt" || has_duplicate=1
+    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI-FW3.txt" \
+    "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
     "$CONFIG_DIR/MT6000-WIFI-MINI-FW3.txt" \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
-    "$CONFIG_DIR/device-overlays/IPQ60XX-NOWIFI-MINI-FW3.txt" \
-    "$CONFIG_DIR/GENERAL.txt" \
-    "$CONFIG_DIR/GENERAL-SERVICE.txt" \
-    "$CONFIG_DIR/GENERAL-FW3.txt" \
-    "$CONFIG_DIR/variants/MINI-SERVICE.txt" \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI.txt" || has_duplicate=1
-
-check_config_file \
     "$CONFIG_DIR/device-overlays/IPQ60XX-NOWIFI-MINI-FW4.txt" \
     "$CONFIG_DIR/GENERAL.txt" \
-    "$CONFIG_DIR/GENERAL-SERVICE.txt" \
-    "$CONFIG_DIR/GENERAL-FW4.txt" \
-    "$CONFIG_DIR/variants/MINI-SERVICE.txt" \
-    "$CONFIG_DIR/variants/MINI-FW4.txt" \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI.txt" || has_duplicate=1
+    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI-FW3.txt" || has_duplicate=1
 
 if [ "$has_duplicate" -ne 0 ]; then
     echo "发现设备层或设备叠加层与其下层基础配置重复的同值配置，请继续收敛。" >&2

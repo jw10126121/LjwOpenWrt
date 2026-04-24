@@ -21,7 +21,7 @@ on:
           - IPQ60XX-NOWIFI-MINI
           - MT6000-WIFI
           - MT6000-WIFI-MINI
-        default: 'IPQ60XX-NOWIFI'
+        default: 'IPQ60XX-NOWIFI-MINI'
       WRT_FIREWALL:
         description: '防火墙栈'
         required: true

@@ -26,7 +26,7 @@ check_file() {
 	sed 's/[[:space:]]*#.*$//' "$file" | grep -q '^CONFIG_PACKAGE_luci-app-frps=m$'
 }
 
-check_file "$REPO_ROOT/Config/IPQ60XX-NOWIFI-FW3-MINI.txt"
-check_file "$REPO_ROOT/Config/MT6000-WIFI-FW3-MINI.txt"
+check_file "$REPO_ROOT/Config/IPQ60XX-NOWIFI-MINI-FW3.txt"
+check_file "$REPO_ROOT/Config/MT6000-WIFI-MINI-FW3.txt"
 
 echo "test_mini_fw3_module_scope: ok"

@@ -55,13 +55,14 @@
 - `Config/device-overlays/<设备名>-<FW>.txt`（如果存在则自动叠加）
 - `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加；输入时不区分大小写，内部会映射到大写文件名）
 
-当前 `IPQ60XX-NOWIFI` 已先收口为单主文件模式：
+当前 `IPQ60XX-NOWIFI` 与 `IPQ60XX-NOWIFI-MINI` 已先收口为单主文件模式：
 
-- 主文件使用 `Config/IPQ60XX-NOWIFI-FW3.txt`
+- 主文件分别使用 `Config/IPQ60XX-NOWIFI-FW3.txt`、`Config/IPQ60XX-NOWIFI-MINI-FW3.txt`
 - `GENERAL-SERVICE` 的服务插件也已抽入这个主文件，方便在一个文件内查看自定义插件
 - `lean` 现阶段主走 FW3，文件中的 FW3 段落默认生效
 - 同一文件中的 FW4 注释段会在导出 `fw4` 时被激活
-- 该设备导出时会跳过 `GENERAL-SERVICE.txt` / `GENERAL-FW3.txt` / `GENERAL-FW4.txt`，由主文件自己承接服务层与防火墙栈配置
+- 这两个设备导出时都会跳过 `GENERAL-SERVICE.txt` / `GENERAL-FW3.txt` / `GENERAL-FW4.txt`，由主文件自己承接服务层与防火墙栈配置
+- `IPQ60XX-NOWIFI-MINI` 的 FW3 不再额外叠加 `device-overlays/IPQ60XX-NOWIFI-MINI-FW3.txt`
 
 当前 `MT6000-WIFI` 与 `MT6000-WIFI-MINI` 也已收口为单主文件模式：
 

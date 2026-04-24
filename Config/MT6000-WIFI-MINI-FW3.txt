@@ -1,12 +1,11 @@
 # ------------------------------------------------------------------------
-#  设备主配置：IPQ60XX-NOWIFI-FW3-MINI（当前主维护文件）
+#  设备主配置：MT6000-WIFI-MINI-FW3（当前主维护文件）
 # ------------------------------------------------------------------------
 #  使用说明：
 #  1. lean 现阶段主走 FW3，本文件中的 FW3 防火墙关联插件为当前主维护参考。
 #  2. 如需使用FW4，需单独调整，请优先查看本文件内
 #     “FW4 替换说明” 区域维护替换项，再视情况决定是否恢复独立 FW4 文件。
 #  3. mini版只编译当前在用的插件，不编译安装包
-
 
 # ------------------------------------------------------------------------
 #  菜单整理：系统
@@ -15,6 +14,7 @@
 # >>> SERVICE-BEGIN
 CONFIG_PACKAGE_luci-theme-bootstrap=y        # LuCI 默认主题
 CONFIG_PACKAGE_luci-theme-argon=y            # Argon 主题
+CONFIG_PACKAGE_luci-theme-kucat=n            # Kucat 主题
 CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
 CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
 CONFIG_PACKAGE_luci-app-autoreboot=y         # 定时重启
@@ -23,6 +23,7 @@ CONFIG_PACKAGE_luci-app-filetransfer=y       # 文件传输
 CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y # 文件传输中文语言包
 CONFIG_PACKAGE_luci-app-ttyd=y               # Web 终端
 CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y        # ttyd 中文语言包
+CONFIG_PACKAGE_luci-app-uhttpd=n             # uHTTPd 配置页面
 CONFIG_PACKAGE_luci-app-cpufreq=n            # CPU 频率调节
 CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=n     # CPU 频率调节中文语言包
 CONFIG_PACKAGE_luci-app-advancedsetting=n    # 高级设置
@@ -33,19 +34,16 @@ CONFIG_PACKAGE_luci-app-wol=y                # Wake on LAN
 CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y         # WOL 中文语言包
 CONFIG_PACKAGE_luci-app-wolplus=y            # 增强版 WOL
 CONFIG_PACKAGE_luci-app-timewol=y            # 定时 WOL
-# <<< SERVICE-END
 
 # ------------------------------------------------------------------------
 #  菜单整理：状态
 # ------------------------------------------------------------------------
 #  维护提示：在线设备、流量、监控和测速都归到这一组。
-# >>> SERVICE-BEGIN
 CONFIG_PACKAGE_luci-app-onliner=y            # 在线设备列表
 CONFIG_PACKAGE_luci-app-netdata=n            # Netdata 监控面板
 CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=n     # Netdata 中文语言包
 CONFIG_PACKAGE_luci-app-netspeedtest=n       # 网速测试
 CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=n # 网速测试中文语言包
-# <<< SERVICE-END
 CONFIG_PACKAGE_luci-app-bandix=n             # 流量统计
 CONFIG_PACKAGE_bandix=n                      # Bandix 后端
 CONFIG_PACKAGE_luci-app-nlbwmon=n            # nlbwmon 流量统计
@@ -58,7 +56,6 @@ CONFIG_PACKAGE_wrtbwmon=y                    # wrtbwmon 后端
 #  菜单整理：服务
 # ------------------------------------------------------------------------
 #  维护提示：访问控制、广告过滤、推送、常驻网络服务放这里。
-# >>> SERVICE-BEGIN
 CONFIG_PACKAGE_luci-app-ddns=y               # 动态域名
 CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y        # DDNS 中文语言包
 CONFIG_PACKAGE_luci-app-ddns-go=n            # DDNS-GO
@@ -67,6 +64,8 @@ CONFIG_PACKAGE_ddns-go=n                     # DDNS-GO 后端
 CONFIG_PACKAGE_luci-app-smartdns=n           # SmartDNS
 CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=n    # SmartDNS 中文语言包
 CONFIG_PACKAGE_smartdns=n                    # SmartDNS 后端
+CONFIG_PACKAGE_luci-app-dockerman=n          # Docker 管理页面
+CONFIG_PACKAGE_luci-app-mosdns=n             # MosDNS 页面
 CONFIG_PACKAGE_luci-app-accesscontrol=y      # 上网时间控制。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y # 上网时间控制中文语言包。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-app-oaf=y                # OpenAppFilter 应用过滤
@@ -79,24 +78,24 @@ CONFIG_PACKAGE_vlmcsd=y                      # KMS 后端
 CONFIG_PACKAGE_luci-app-watchcat=y           # 网络守护
 CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y    # Watchcat 中文语言包
 CONFIG_PACKAGE_watchcat=y                    # Watchcat 后端
-# <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-arpbind=n            # ARP 绑定
-CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=n     # ARP 绑定中文语言包
 
 # ------------------------------------------------------------------------
 #  菜单整理：网络
 # ------------------------------------------------------------------------
 #  维护提示：组网、穿透、VPN、代理和网络协议相关都集中在这里。
-#  流控 / 中继：SQM、NSS SQM、Socat 和 UPnP 放一起，调网络质量或端口转发时优先看这里。
 CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
 CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
-CONFIG_PACKAGE_sqm-scripts-nss=n             # NSS 版 SQM 脚本
 CONFIG_PACKAGE_luci-app-socat=y              # 端口转发 / 中继
 CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
 CONFIG_PACKAGE_socat=y                       # Socat 后端
 CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
 CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
-# >>> SERVICE-BEGIN
+CONFIG_PACKAGE_luci-app-wifischedule=n       # Wi-Fi 定时开关
+
+# ------------------------------------------------------------------------
+#  菜单整理：VPN
+# ------------------------------------------------------------------------
+#  维护提示：组网、穿透、VPN、代理相关都集中在这里。
 CONFIG_PACKAGE_luci-app-easytier=y           # EasyTier 组网
 CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y    # EasyTier 中文语言包
 CONFIG_PACKAGE_easytier=y                    # EasyTier 后端
@@ -108,15 +107,11 @@ CONFIG_PACKAGE_frpc=y                        # FRP 客户端后端
 CONFIG_PACKAGE_luci-app-frps=m               # FRP 服务端页面
 CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m        # FRP 服务端中文语言包
 CONFIG_PACKAGE_frps=m                        # FRP 服务端后端
-# <<< SERVICE-END
 CONFIG_PACKAGE_luci-app-openvpn=n            # OpenVPN 客户端页面
 CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=n     # OpenVPN 中文语言包
 CONFIG_PACKAGE_luci-app-openvpn-server=n     # OpenVPN 服务端页面
 CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=n # OpenVPN 服务端中文语言包
-CONFIG_PACKAGE_luci-proto-wireguard=n        # WireGuard 协议页面
-CONFIG_PACKAGE_wireguard-tools=n             # WireGuard 工具
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
-
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
 CONFIG_PACKAGE_luci-app-ssr-plus=n           # FW3 默认提供 SSR Plus 主包
 CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=n    # SSR Plus 中文语言包
@@ -131,9 +126,10 @@ CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n # SSR Libev
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
 # ------------------------------------------------------------------------
-#  维护提示：共享、同步、FTP、打印和文件索引都归到这组。
+#  维护提示：文件索引、共享、同步、FTP、打印和存储休眠都归到这组。
 CONFIG_PACKAGE_luci-app-hd-idle=n            # 硬盘休眠
 CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=n     # 硬盘休眠中文语言包
+CONFIG_PACKAGE_hd-idle=n                     # 硬盘休眠后端
 CONFIG_PACKAGE_luci-app-openlist=n           # OpenList 文件索引
 CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=n    # OpenList 中文语言包
 CONFIG_PACKAGE_luci-app-samba4=n             # Samba 共享
@@ -142,14 +138,15 @@ CONFIG_PACKAGE_luci-app-usb-printer=n        # USB 打印服务
 CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=n # USB 打印中文语言包
 CONFIG_PACKAGE_luci-app-verysync=n           # 微力同步
 CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=n    # 微力同步中文语言包
+CONFIG_PACKAGE_verysync=n                    # 微力同步后端
 CONFIG_PACKAGE_luci-app-vsftpd=n             # FTP 服务
 CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=n      # FTP 中文语言包
+# <<< SERVICE-END
 
 # ------------------------------------------------------------------------
 #  防火墙相关插件
 # ------------------------------------------------------------------------
-#  维护提示：FW3 / FW4 切换、代理前后端替换，只看这一块。
-#  当前 lean 主走 FW3；下面一段为 FW3 实际生效配置。
+#  维护提示：FW3 / FW4 切换和仅在某套防火墙栈下变化的插件，都看这里。
 # >>> FW3-BEGIN
 CONFIG_PACKAGE_firewall4=n                   # 禁用 FW4
 CONFIG_PACKAGE_firewall=y                    # 启用 FW3
@@ -160,13 +157,12 @@ CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
 
-#  加速相关：Turbo ACC 放在代理组件后面，便于一起排查 FW3 侧网络加速。
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
 CONFIG_PACKAGE_luci-app-adguardhome=n        # AdGuard Home
 CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=n # AdGuard Home 中文语言包
 CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
-#  代理相关：homeproxy
+#  代理相关：HomeProxy
 CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 
 # <<< FW3-END
@@ -174,8 +170,7 @@ CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 # ------------------------------------------------------------------------
 #  FW4 替换说明（当前仅保留说明，不默认生效）
 # ------------------------------------------------------------------------
-#  维护提示：相关替换先写这里；确认要切换时再取消注释或继续收口。
-#  下面保留 FW4 实际替换项，并继续以注释形式维护：
+#  维护提示：VIKINGYFY 相关替换先写这里；确认要切换时再取消注释或继续收口。
 # >>> FW4-BEGIN
 # CONFIG_PACKAGE_firewall4=y                 # 启用 FW4
 # CONFIG_PACKAGE_firewall=n                  # 关闭 FW3
@@ -185,8 +180,8 @@ CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 # CONFIG_PACKAGE_ip6tables-mod-nat=n         # 关闭 IPv6 NAT 模块
 # CONFIG_PACKAGE_iptables-mod-fullconenat=n  # 关闭 iptables FullCone
 # CONFIG_PACKAGE_kmod-ipt-fullconenat=n      # 关闭 iptables FullCone 内核模块
-
-#  FW4 / nftables 核心：真正切到 FW4 时，需要启用下面这组 nftables 组件。
+#
+#  代理相关
 # CONFIG_PACKAGE_kmod-nf-conntrack=y         # 连接跟踪核心
 # CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y # 连接跟踪 Netlink 接口
 # CONFIG_PACKAGE_kmod-nf-conntrack6=y        # IPv6 连接跟踪
@@ -195,16 +190,11 @@ CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 # CONFIG_PACKAGE_kmod-nft-nat=y              # nft NAT 核心
 # CONFIG_PACKAGE_kmod-nft-offload=y          # nft flow offload
 # CONFIG_PACKAGE_kmod-nft-fullcone=y         # nft FullCone NAT
-
-#  加速相关：FW4 下关闭 Turbo ACC，避免和当前栈能力混淆。
 # CONFIG_PACKAGE_luci-app-turboacc=n         # FW4 下关闭 Turbo ACC
 # CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=n  # FW4 下关闭 Turbo ACC 中文语言包
-
 # CONFIG_PACKAGE_luci-app-adguardhome=n        # AdGuard Home，FW4下关闭，也有FW4下可用的，得替换，这里先关闭
 # CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=n # AdGuard Home 中文语言包
 # CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
-
-#  代理相关：FW4 默认切到 HomeProxy
 # CONFIG_PACKAGE_luci-app-homeproxy=y        # FW4 默认启用 HomeProxy
 # [最新包已支持FW4，但如果有homeproxy，就不用ssr-plus，但可以编译着]SSR Plus 主包、中文包和附加组件集中维护。
 #CONFIG_PACKAGE_luci-app-ssr-plus=n           # FW3 默认提供 SSR Plus 主包
@@ -222,30 +212,8 @@ CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 # ------------------------------------------------------------------------
 #  目标平台 / 机型
 # ------------------------------------------------------------------------
-#  维护提示：这里只改机型目标、编译 profile；日常插件维护一般不用碰这里。
-CONFIG_TARGET_qualcommax=y
-CONFIG_TARGET_qualcommax_ipq60xx=y	# ipq60xx
-CONFIG_TARGET_MULTI_PROFILE=y		# 一次编译多个机型
-
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-axt1800=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_linksys_mr7350=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_qihoo_360v6=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_redmi_ax5-jdcloud=n
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=n
-
-# ------------------------------------------------------------------------
-#  无线能力关闭
-# ------------------------------------------------------------------------
-#  维护提示：这块专门保持 NOWIFI 语义，除非要恢复无线能力，否则尽量不动。
-CONFIG_PACKAGE_kmod-ath11k=n                 # 关闭 Wi-Fi 驱动
-CONFIG_PACKAGE_kmod-ath11k-ahb=n             # 关闭 AHB 版 ath11k
-CONFIG_PACKAGE_kmod-ath11k-pci=n             # 关闭 PCI 版 ath11k
-CONFIG_PACKAGE_ath11k-firmware-ipq6018=n     # 关闭 IPQ6018 固件
-CONFIG_PACKAGE_ath11k-firmware-qcn9074=n     # 关闭 QCN9074 固件
-CONFIG_PACKAGE_wpad-openssl=n                # 关闭 AP 认证组件
-CONFIG_PACKAGE_hostapd-common=n              # 关闭 hostapd 公共库
+#  维护提示：这里只改机型目标和编译 profile；日常插件维护一般不用碰这里。
+CONFIG_TARGET_mediatek=y
+CONFIG_TARGET_mediatek_filogic=y
+CONFIG_TARGET_MULTI_PROFILE=y                # 多机型并行输出
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y
