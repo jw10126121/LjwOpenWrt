@@ -130,19 +130,58 @@ jobs:
       - measure_only
     if: always()
     steps:
+      - name: Download Build Metrics
+        uses: actions/download-artifact@v5
+        with:
+          pattern: bench-metrics-*
+          path: ${{ runner.temp }}/bench-metrics
+          merge-multiple: true
+
       - name: Write Summary
         run: |
+          metrics_dir="${RUNNER_TEMP}/bench-metrics"
+
+          format_metric() {
+            local value="${1:-}"
+            if [ -z "$value" ]; then
+              printf 'n/a'
+            else
+              printf '%s' "$value"
+            fi
+          }
+
+          format_cache_state() {
+            local value="${1:-}"
+            if [ "$value" = 'true' ]; then
+              printf 'hit'
+            elif [ "$value" = 'false' ]; then
+              printf 'miss'
+            else
+              printf 'n/a'
+            fi
+          }
+
           {
             echo "## Cache Benchmark"
             echo ""
             echo "固定源码 HASH：\`ecec1ef93a8920f30ef927d989b13b674d614ca6\`"
             echo "当前模式：\`${{ inputs.BENCH_MODE }}\`"
             echo ""
-            echo "对比 warm 和 measure 两个 job 的这些日志："
-            echo "- Restore Toolchain Cache"
-            echo "- Restore ccache Cache"
-            echo "- Download tools 中的 prep/download 耗时"
-            echo "- Report ccache Stats Before Build"
-            echo "- 编译固件 Build firmware 中的 compile 耗时"
-            echo "- Report ccache Stats After Build"
+            echo "| Phase | Toolchain | ccache | Prep(s) | Download(s) | Compile(s) | Hit rate before | Hit rate after | Status |"
+            echo "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |"
+
+            shopt -s nullglob
+            metric_files=( "$metrics_dir"/*.env )
+            if [ ${#metric_files[@]} -eq 0 ]; then
+              echo "| n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | no metrics |"
+            else
+              for phase in warm measure build; do
+                for metrics_file in "$metrics_dir"/"${phase}"-*.env; do
+                  [ -f "$metrics_file" ] || continue
+                  unset phase device firewall overlays toolchain_cache_hit ccache_cache_hit prep_stage_duration_sec download_stage_duration_sec compile_stage_duration_sec ccache_hit_rate_before ccache_hit_rate_after ccache_size_gib_before ccache_size_gib_after compile_status
+                  . "$metrics_file"
+                  echo "| ${phase} | $(format_cache_state "${toolchain_cache_hit:-}") | $(format_cache_state "${ccache_cache_hit:-}") | $(format_metric "${prep_stage_duration_sec:-}") | $(format_metric "${download_stage_duration_sec:-}") | $(format_metric "${compile_stage_duration_sec:-}") | $(format_metric "${ccache_hit_rate_before:-}") | $(format_metric "${ccache_hit_rate_after:-}") | $(format_metric "${compile_status:-}") |"
+                done
+              done
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

@@ -45,5 +45,9 @@ assert_contains "WRT_RELEASE_FIRMWARE:" "CACHE-BENCH should allow disabling rele
 assert_contains "default: false" "CACHE-BENCH should default firmware release off for benchmarks"
 assert_contains "benchmark_summary:" "CACHE-BENCH should include a summary job"
 assert_contains 'echo "## Cache Benchmark"' "summary job should explain which logs to compare"
+assert_contains "uses: actions/download-artifact@v5" "CACHE-BENCH summary should download build metrics artifacts"
+assert_contains "pattern: bench-metrics-*" "CACHE-BENCH summary should filter benchmark metric artifacts"
+assert_contains "merge-multiple: true" "CACHE-BENCH summary should merge metric artifacts into one directory"
+assert_contains 'echo "| Phase | Toolchain | ccache | Prep(s) | Download(s) | Compile(s) | Hit rate before | Hit rate after | Status |"' "summary job should render a metrics table"
 
 echo "test_workflow_cache_bench: ok"

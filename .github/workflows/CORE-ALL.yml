@@ -636,15 +636,20 @@ jobs:
       run: |
         prep_end_ts=$(date +%s)
         if [ -n "${PREP_STAGE_START_TS:-}" ]; then
-          echo "【Lin】prep stage duration: $((prep_end_ts - PREP_STAGE_START_TS))s"
+          prep_stage_duration_sec=$((prep_end_ts - PREP_STAGE_START_TS))
+          echo "PREP_STAGE_DURATION_SEC=${prep_stage_duration_sec}" >> "$GITHUB_ENV"
+          echo "【Lin】prep stage duration: ${prep_stage_duration_sec}s"
         else
+          echo "PREP_STAGE_DURATION_SEC=" >> "$GITHUB_ENV"
           echo "【Lin】prep stage duration: unavailable"
         fi
         download_start_ts=$(date +%s)
         echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
         make download -j$(nproc)
         download_end_ts=$(date +%s)
-        echo "【Lin】download stage duration: $((download_end_ts - download_start_ts))s"
+        download_stage_duration_sec=$((download_end_ts - download_start_ts))
+        echo "DOWNLOAD_STAGE_DURATION_SEC=${download_stage_duration_sec}" >> "$GITHUB_ENV"
+        echo "【Lin】download stage duration: ${download_stage_duration_sec}s"
         # find dl -size -1024c -exec ls -l {} \;
         # find dl -size -1024c -exec rm -f {} \;
     
@@ -658,7 +663,7 @@ jobs:
       run: |
         if command -v ccache >/dev/null 2>&1; then
           echo "【Lin】ccache stats before build"
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s | tee "$RUNNER_TEMP/ccache-before.txt" || true
         else
           echo "【Lin】ccache command not found before build"
         fi
@@ -673,7 +678,9 @@ jobs:
         # make -j$(nproc) V=s || make -j1 V=s
         make -j"$(nproc)" || make -j1 V=s
         compile_end_ts=$(date +%s)
-        echo "【Lin】compile stage duration: $((compile_end_ts - compile_start_ts))s"
+        compile_stage_duration_sec=$((compile_end_ts - compile_start_ts))
+        echo "COMPILE_STAGE_DURATION_SEC=${compile_stage_duration_sec}" >> "$GITHUB_ENV"
+        echo "【Lin】compile stage duration: ${compile_stage_duration_sec}s"
 
     - name: Finalize Compile Status
       id: finalize_compile
@@ -694,10 +701,71 @@ jobs:
       run: |
         if command -v ccache >/dev/null 2>&1; then
           echo "【Lin】ccache stats after build"
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s | tee "$RUNNER_TEMP/ccache-after.txt" || true
         else
           echo "【Lin】ccache command not found after build"
         fi
+
+    - name: Write Build Metrics
+      if: always()
+      run: |
+        metrics_dir="$RUNNER_TEMP/bench-metrics"
+        mkdir -p "$metrics_dir"
+
+        phase='build'
+        case "${WRT_MINE_SAY:-}" in
+          "[cache-bench warm]"*)
+            phase='warm'
+            ;;
+          "[cache-bench measure]"*)
+            phase='measure'
+            ;;
+        esac
+
+        extract_first_match() {
+          local pattern="$1"
+          local file_path="$2"
+
+          if [ ! -f "$file_path" ]; then
+            return 0
+          fi
+
+          sed -nE "s/${pattern}/\\1/p" "$file_path" | head -n1
+        }
+
+        ccache_before_file="$RUNNER_TEMP/ccache-before.txt"
+        ccache_after_file="$RUNNER_TEMP/ccache-after.txt"
+
+        ccache_hit_rate_before=$(extract_first_match '.*Hits:[[:space:]]+[0-9]+[[:space:]]*/[[:space:]]*[0-9]+[[:space:]]*\\(([0-9.]+)%\\).*' "$ccache_before_file")
+        ccache_hit_rate_after=$(extract_first_match '.*Hits:[[:space:]]+[0-9]+[[:space:]]*/[[:space:]]*[0-9]+[[:space:]]*\\(([0-9.]+)%\\).*' "$ccache_after_file")
+        ccache_size_gib_before=$(extract_first_match '.*Cache size \\(GiB\\):[[:space:]]*([0-9.]+)[[:space:]]*/.*' "$ccache_before_file")
+        ccache_size_gib_after=$(extract_first_match '.*Cache size \\(GiB\\):[[:space:]]*([0-9.]+)[[:space:]]*/.*' "$ccache_after_file")
+
+        metrics_path="$metrics_dir/${phase}-${START_TIME}.env"
+        cat > "$metrics_path" <<EOF
+phase=${phase}
+device=${WRT_DEVICE}
+firewall=${WRT_FIREWALL}
+overlays=${WRT_OVERLAYS:-base}
+toolchain_cache_hit=${{ steps.restore_toolchain_cache.outputs.cache-hit || 'false' }}
+ccache_cache_hit=${{ steps.restore_ccache_cache.outputs.cache-hit || 'false' }}
+prep_stage_duration_sec=${PREP_STAGE_DURATION_SEC:-}
+download_stage_duration_sec=${DOWNLOAD_STAGE_DURATION_SEC:-}
+compile_stage_duration_sec=${COMPILE_STAGE_DURATION_SEC:-}
+ccache_hit_rate_before=${ccache_hit_rate_before:-}
+ccache_hit_rate_after=${ccache_hit_rate_after:-}
+ccache_size_gib_before=${ccache_size_gib_before:-}
+ccache_size_gib_after=${ccache_size_gib_after:-}
+compile_status=${COMPILE_STATUS:-unknown}
+EOF
+
+    - name: Upload Build Metrics
+      if: always()
+      uses: actions/upload-artifact@v6.0.0
+      with:
+        name: bench-metrics-${{ env.START_TIME }}-${{ env.DEVICE_SUBTARGET }}
+        path: ${{ runner.temp }}/bench-metrics/*.env
+        if-no-files-found: error
 
     - name: Machine Information
       continue-on-error: true
