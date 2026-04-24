@@ -61,12 +61,12 @@ CONFIG_PACKAGE_wrtbwmon=y                    # wrtbwmon 后端
 # >>> SERVICE-BEGIN
 CONFIG_PACKAGE_luci-app-ddns=y               # 动态域名
 CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y        # DDNS 中文语言包
-CONFIG_PACKAGE_luci-app-ddns-go=m            # DDNS-GO
-CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m     # DDNS-GO 中文语言包
-CONFIG_PACKAGE_ddns-go=m                     # DDNS-GO 后端
-CONFIG_PACKAGE_luci-app-smartdns=m           # SmartDNS
-CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m    # SmartDNS 中文语言包
-CONFIG_PACKAGE_smartdns=m                    # SmartDNS 后端
+CONFIG_PACKAGE_luci-app-ddns-go=n            # DDNS-GO
+CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=n     # DDNS-GO 中文语言包
+CONFIG_PACKAGE_ddns-go=n                     # DDNS-GO 后端
+CONFIG_PACKAGE_luci-app-smartdns=n           # SmartDNS
+CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=n    # SmartDNS 中文语言包
+CONFIG_PACKAGE_smartdns=n                    # SmartDNS 后端
 CONFIG_PACKAGE_luci-app-accesscontrol=y      # 上网时间控制。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y # 上网时间控制中文语言包。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-app-oaf=y                # OpenAppFilter 应用过滤
@@ -80,8 +80,8 @@ CONFIG_PACKAGE_luci-app-watchcat=y           # 网络守护
 CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y    # Watchcat 中文语言包
 CONFIG_PACKAGE_watchcat=y                    # Watchcat 后端
 # <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-arpbind=m            # ARP 绑定
-CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
+CONFIG_PACKAGE_luci-app-arpbind=n            # ARP 绑定
+CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=n     # ARP 绑定中文语言包
 
 # ------------------------------------------------------------------------
 #  菜单整理：网络
@@ -90,7 +90,7 @@ CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
 #  流控 / 中继：SQM、NSS SQM、Socat 和 UPnP 放一起，调网络质量或端口转发时优先看这里。
 CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
 CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
-CONFIG_PACKAGE_sqm-scripts-nss=m             # NSS 版 SQM 脚本
+CONFIG_PACKAGE_sqm-scripts-nss=n             # NSS 版 SQM 脚本
 CONFIG_PACKAGE_luci-app-socat=y              # 端口转发 / 中继
 CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
 CONFIG_PACKAGE_socat=y                       # Socat 后端
@@ -109,41 +109,41 @@ CONFIG_PACKAGE_luci-app-frps=m               # FRP 服务端页面
 CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m        # FRP 服务端中文语言包
 CONFIG_PACKAGE_frps=m                        # FRP 服务端后端
 # <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-openvpn=m            # OpenVPN 客户端页面
-CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m     # OpenVPN 中文语言包
-CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
-CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
-CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
-CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
+CONFIG_PACKAGE_luci-app-openvpn=n            # OpenVPN 客户端页面
+CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=n     # OpenVPN 中文语言包
+CONFIG_PACKAGE_luci-app-openvpn-server=n     # OpenVPN 服务端页面
+CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=n # OpenVPN 服务端中文语言包
+CONFIG_PACKAGE_luci-proto-wireguard=n        # WireGuard 协议页面
+CONFIG_PACKAGE_wireguard-tools=n             # WireGuard 工具
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
 
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
-CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
-CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=m # HTTPS 流支持
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=m # Rust 客户端
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=m # Rust 服务端
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=m # Xray 核心
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=m # MosDNS 组件
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=m # simple-obfs
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=m # SSR Libev 客户端
+CONFIG_PACKAGE_luci-app-ssr-plus=n           # FW3 默认提供 SSR Plus 主包
+CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=n    # SSR Plus 中文语言包
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_libustream-openssl=n # HTTPS 流支持
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client=n # Rust 客户端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=n # Rust 服务端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=n # Xray 核心
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=n # MosDNS 组件
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # simple-obfs
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n # SSR Libev 客户端
 
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
 # ------------------------------------------------------------------------
 #  维护提示：共享、同步、FTP、打印和文件索引都归到这组。
-CONFIG_PACKAGE_luci-app-hd-idle=m            # 硬盘休眠
-CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m     # 硬盘休眠中文语言包
-CONFIG_PACKAGE_luci-app-openlist=m           # OpenList 文件索引
-CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m    # OpenList 中文语言包
-CONFIG_PACKAGE_luci-app-samba4=m             # Samba 共享
-CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m      # Samba 中文语言包
-CONFIG_PACKAGE_luci-app-usb-printer=m        # USB 打印服务
-CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m # USB 打印中文语言包
-CONFIG_PACKAGE_luci-app-verysync=m           # 微力同步
-CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m    # 微力同步中文语言包
-CONFIG_PACKAGE_luci-app-vsftpd=m             # FTP 服务
-CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m      # FTP 中文语言包
+CONFIG_PACKAGE_luci-app-hd-idle=n            # 硬盘休眠
+CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=n     # 硬盘休眠中文语言包
+CONFIG_PACKAGE_luci-app-openlist=n           # OpenList 文件索引
+CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=n    # OpenList 中文语言包
+CONFIG_PACKAGE_luci-app-samba4=n             # Samba 共享
+CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=n      # Samba 中文语言包
+CONFIG_PACKAGE_luci-app-usb-printer=n        # USB 打印服务
+CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=n # USB 打印中文语言包
+CONFIG_PACKAGE_luci-app-verysync=n           # 微力同步
+CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=n    # 微力同步中文语言包
+CONFIG_PACKAGE_luci-app-vsftpd=n             # FTP 服务
+CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=n      # FTP 中文语言包
 
 # ------------------------------------------------------------------------
 #  防火墙相关插件
@@ -163,8 +163,8 @@ CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
 #  加速相关：Turbo ACC 放在代理组件后面，便于一起排查 FW3 侧网络加速。
 CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC
 CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包
-CONFIG_PACKAGE_luci-app-adguardhome=m        # AdGuard Home
-CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m # AdGuard Home 中文语言包
+CONFIG_PACKAGE_luci-app-adguardhome=n        # AdGuard Home
+CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=n # AdGuard Home 中文语言包
 CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
 #  代理相关：homeproxy
 CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
