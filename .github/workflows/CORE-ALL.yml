@@ -743,21 +743,21 @@ jobs:
 
         metrics_path="$metrics_dir/${phase}-${START_TIME}.env"
         cat > "$metrics_path" <<EOF
-phase=${phase}
-device=${WRT_DEVICE}
-firewall=${WRT_FIREWALL}
-overlays=${WRT_OVERLAYS:-base}
-toolchain_cache_hit=${{ steps.restore_toolchain_cache.outputs.cache-hit || 'false' }}
-ccache_cache_hit=${{ steps.restore_ccache_cache.outputs.cache-hit || 'false' }}
-prep_stage_duration_sec=${PREP_STAGE_DURATION_SEC:-}
-download_stage_duration_sec=${DOWNLOAD_STAGE_DURATION_SEC:-}
-compile_stage_duration_sec=${COMPILE_STAGE_DURATION_SEC:-}
-ccache_hit_rate_before=${ccache_hit_rate_before:-}
-ccache_hit_rate_after=${ccache_hit_rate_after:-}
-ccache_size_gib_before=${ccache_size_gib_before:-}
-ccache_size_gib_after=${ccache_size_gib_after:-}
-compile_status=${COMPILE_STATUS:-unknown}
-EOF
+        phase=${phase}
+        device=${WRT_DEVICE}
+        firewall=${WRT_FIREWALL}
+        overlays=${WRT_OVERLAYS:-base}
+        toolchain_cache_hit=${{ steps.restore_toolchain_cache.outputs.cache-hit || 'false' }}
+        ccache_cache_hit=${{ steps.restore_ccache_cache.outputs.cache-hit || 'false' }}
+        prep_stage_duration_sec=${PREP_STAGE_DURATION_SEC:-}
+        download_stage_duration_sec=${DOWNLOAD_STAGE_DURATION_SEC:-}
+        compile_stage_duration_sec=${COMPILE_STAGE_DURATION_SEC:-}
+        ccache_hit_rate_before=${ccache_hit_rate_before:-}
+        ccache_hit_rate_after=${ccache_hit_rate_after:-}
+        ccache_size_gib_before=${ccache_size_gib_before:-}
+        ccache_size_gib_after=${ccache_size_gib_after:-}
+        compile_status=${COMPILE_STATUS:-unknown}
+        EOF
 
     - name: Upload Build Metrics
       if: always()
