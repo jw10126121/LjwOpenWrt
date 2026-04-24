@@ -2,13 +2,12 @@
 
 # 说明：
 # 1. 导出一份可直接分享的参数化合并配置文件。
-# 2. 固定加载 GENERAL.txt + GENERAL-SERVICE.txt + GENERAL-FW3|FW4，再按需要叠加变体层、device / overlays。
+# 2. 固定加载 GENERAL.txt，再按需要叠加设备主配置、device-overlay 与 overlays。
 # 3. overlay 支持多个同时叠加，按传入顺序覆盖。
 
 set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-RESOLVE_SCRIPT="$SCRIPT_DIR/resolve_general_configs.sh"
 MERGE_SCRIPT="$SCRIPT_DIR/merge_configs.sh"
 
 config_dir='Config'
@@ -16,7 +15,6 @@ device=''
 fw=''
 overlay_list=''
 output_config=''
-variant_configs=''
 cleanup_files=''
 
 resolve_device_config() {
@@ -46,19 +44,6 @@ cleanup() {
 	if [ -n "$cleanup_files" ]; then
 		rm -f $cleanup_files
 	fi
-}
-
-remove_variant_config() {
-	local target=$1
-	local kept=''
-	local item
-
-	for item in $variant_configs; do
-		[ "$item" = "$target" ] && continue
-		kept="${kept}${kept:+ }$item"
-	done
-
-	variant_configs=$kept
 }
 
 device_config_embeds_fw_stack() {
@@ -242,24 +227,13 @@ if [ "$has_apk" = true ] && [ "$has_ipk" = true ]; then
 	exit 1
 fi
 
-case "$device" in
-	*-MINI)
-		variant_configs="variants/MINI-SERVICE.txt"
-		case "$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]')" in
-			FW4)
-				variant_configs="${variant_configs} variants/MINI-FW4.txt"
-				;;
-		esac
-		;;
-esac
-
 device_config=$(resolve_device_config "$config_dir" "$device" "$fw" || true)
 if [ -z "$device_config" ]; then
 	echo "缺少设备配置：$config_dir/${device}-$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]').txt 或 $config_dir/${device}.txt" >&2
 	exit 1
 fi
 
-resolved_general_configs=$(bash "$RESOLVE_SCRIPT" "$fw")
+resolved_general_configs='GENERAL.txt'
 device_config_path="$config_dir/$device_config"
 processed_device_config="$device_config_path"
 embeds_fw_stack=false
@@ -274,35 +248,16 @@ if device_config_embeds_service_layer "$device_config_path"; then
 fi
 
 if [ "$embeds_fw_stack" = true ] || [ "$embeds_service_layer" = true ]; then
-	case "${embeds_service_layer}:${embeds_fw_stack}" in
-		true:true)
-			resolved_general_configs='GENERAL.txt'
-			;;
-		true:false)
-			resolved_general_configs="GENERAL.txt $(bash "$RESOLVE_SCRIPT" "$fw" | sed 's/^GENERAL.txt GENERAL-SERVICE.txt //')"
-			;;
-		false:true)
-			resolved_general_configs='GENERAL.txt GENERAL-SERVICE.txt'
-			;;
-	esac
 	processed_device_config=$(mktemp)
 	cleanup_files="$processed_device_config"
 	preprocess_device_config "$device_config_path" "$fw" "$processed_device_config"
-fi
-
-if [ "$embeds_service_layer" = true ]; then
-	remove_variant_config "variants/MINI-SERVICE.txt"
-fi
-
-if [ "$embeds_fw_stack" = true ]; then
-	remove_variant_config "variants/MINI-FW4.txt"
 fi
 
 device_overlay_config="device-overlays/${device}-$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]').txt"
 
 bash "$MERGE_SCRIPT" \
 	"$config_dir" \
-	"${resolved_general_configs}${variant_configs:+ $variant_configs}" \
+	"$resolved_general_configs" \
 	"$processed_device_config" \
 	"$output_config"
 

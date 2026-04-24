@@ -4,7 +4,7 @@
 
 set -eu
 
-if rtk rg -n "WRT_GENERAL_CONFIG" .github/workflows README.md Scripts/export_config.sh Scripts/resolve_general_configs.sh >/dev/null; then
+if rtk rg -n "WRT_GENERAL_CONFIG" .github/workflows README.md Scripts/export_config.sh >/dev/null; then
 	echo "WRT_GENERAL_CONFIG references should be removed from public entrypoints" >&2
 	exit 1
 fi

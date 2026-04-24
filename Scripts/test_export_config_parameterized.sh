@@ -12,7 +12,7 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$TMPDIR/overlays"
-mkdir -p "$TMPDIR/device-overlays" "$TMPDIR/variants"
+mkdir -p "$TMPDIR/device-overlays"
 
 cat > "$TMPDIR/GENERAL.txt" <<'EOF'
 CONFIG_COMMON=y
@@ -20,29 +20,9 @@ CONFIG_FRP_ROLE=client
 CONFIG_PKG_FORMAT=ipk
 EOF
 
-cat > "$TMPDIR/GENERAL-SERVICE.txt" <<'EOF'
-CONFIG_SERVICE=y
-EOF
-
-cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
-CONFIG_FW=fw3
-EOF
-
-cat > "$TMPDIR/GENERAL-FW4.txt" <<'EOF'
-CONFIG_FW=fw4
-EOF
-
-cat > "$TMPDIR/variants/MINI-SERVICE.txt" <<'EOF'
-CONFIG_VARIANT=mini
-CONFIG_FEATURE=module
-EOF
-
-cat > "$TMPDIR/variants/MINI-FW4.txt" <<'EOF'
-CONFIG_VARIANT_FW=mini-fw4
-EOF
-
 cat > "$TMPDIR/DEVICE-A.txt" <<'EOF'
 CONFIG_DEVICE=device-a
+CONFIG_FW=fw3
 EOF
 
 cat > "$TMPDIR/DEVICE-A-MINI-FW3.txt" <<'EOF'
@@ -82,7 +62,6 @@ bash "$EXPORT_SCRIPT" \
 	--output "$OUT"
 
 grep -q '^CONFIG_COMMON=y$' "$OUT"
-grep -q '^CONFIG_SERVICE=y$' "$OUT"
 grep -q '^CONFIG_FW=fw3$' "$OUT"
 grep -q '^CONFIG_DEVICE=device-a$' "$OUT"
 grep -q '^CONFIG_DEVICE_FW=device-a-fw3$' "$OUT"
@@ -102,11 +81,11 @@ grep -q '^CONFIG_VARIANT=device-mini$' "$OUT_MINI"
 grep -q '^CONFIG_VARIANT_FW=device-mini-fw4$' "$OUT_MINI"
 grep -n '^CONFIG_FEATURE=' "$OUT_MINI" | tail -n 1 | grep -q 'CONFIG_FEATURE=device-fw4-override'
 if grep -q '^CONFIG_VARIANT=mini$' "$OUT_MINI"; then
-	echo "mini export should skip MINI-SERVICE variant when device file embeds service config" >&2
+	echo "mini export should not depend on MINI-SERVICE variant files anymore" >&2
 	exit 1
 fi
 if grep -q '^CONFIG_VARIANT_FW=mini-fw4$' "$OUT_MINI"; then
-	echo "mini export should skip MINI-FW4 variant when device file embeds fw config" >&2
+	echo "mini export should not depend on MINI-FW4 variant files anymore" >&2
 	exit 1
 fi
 

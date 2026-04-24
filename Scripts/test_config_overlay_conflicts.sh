@@ -17,14 +17,6 @@ cat > "$TMPDIR/GENERAL.txt" <<'EOF'
 CONFIG_COMMON=y
 EOF
 
-cat > "$TMPDIR/GENERAL-SERVICE.txt" <<'EOF'
-CONFIG_SERVICE=y
-EOF
-
-cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
-CONFIG_FW=fw3
-EOF
-
 cat > "$TMPDIR/DEVICE-A.txt" <<'EOF'
 CONFIG_DEVICE=device-a
 EOF

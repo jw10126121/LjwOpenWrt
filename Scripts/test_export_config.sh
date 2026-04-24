@@ -17,21 +17,6 @@ cat > "$TMPDIR/GENERAL.txt" <<'EOF'
 CONFIG_ALPHA=y
 EOF
 
-cat > "$TMPDIR/GENERAL-SERVICE.txt" <<'EOF'
-CONFIG_SERVICE_ONLY=general-service
-CONFIG_GENERAL_SERVICE_LAYER=y
-EOF
-
-cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
-CONFIG_STACK=fw3
-CONFIG_GENERAL_FW_LAYER=y
-EOF
-
-cat > "$TMPDIR/GENERAL-FW4.txt" <<'EOF'
-CONFIG_STACK=fw4
-CONFIG_GENERAL_FW_LAYER=y
-EOF
-
 mkdir -p "$TMPDIR/overlays" "$TMPDIR/device-overlays"
 
 cat > "$TMPDIR/DEVICE-A-FW3.txt" <<'EOF'
@@ -73,14 +58,14 @@ bash "$EXPORT_SCRIPT" \
 grep -q '^CONFIG_ALPHA=y$' "$FW3_OUTPUT"
 grep -q '^CONFIG_SERVICE_ONLY=device-service$' "$FW3_OUTPUT"
 if grep -q '^CONFIG_GENERAL_SERVICE_LAYER=y$' "$FW3_OUTPUT"; then
-	echo "fw3 export should skip GENERAL-SERVICE when device file embeds service config" >&2
+	echo "fw3 export should not depend on GENERAL-SERVICE anymore" >&2
 	exit 1
 fi
 grep -q '^CONFIG_STACK=fw3$' "$FW3_OUTPUT"
 grep -q '^CONFIG_DEVICE_ONLY=y$' "$FW3_OUTPUT"
 grep -q '^CONFIG_DEVICE_STACK=fw3-device$' "$FW3_OUTPUT"
 if grep -q '^CONFIG_GENERAL_FW_LAYER=y$' "$FW3_OUTPUT"; then
-	echo "fw3 export should skip GENERAL-FW3 when device file embeds stack config" >&2
+	echo "fw3 export should not depend on GENERAL-FW3 anymore" >&2
 	exit 1
 fi
 grep -q '^CONFIG_OVERLAY_ONLY=y$' "$FW3_OUTPUT"
@@ -95,14 +80,14 @@ bash "$EXPORT_SCRIPT" \
 grep -q '^CONFIG_ALPHA=y$' "$FW4_OUTPUT"
 grep -q '^CONFIG_SERVICE_ONLY=device-service$' "$FW4_OUTPUT"
 if grep -q '^CONFIG_GENERAL_SERVICE_LAYER=y$' "$FW4_OUTPUT"; then
-	echo "fw4 export should skip GENERAL-SERVICE when device file embeds service config" >&2
+	echo "fw4 export should not depend on GENERAL-SERVICE anymore" >&2
 	exit 1
 fi
 grep -q '^CONFIG_STACK=fw4$' "$FW4_OUTPUT"
 grep -q '^CONFIG_DEVICE_ONLY=y$' "$FW4_OUTPUT"
 grep -q '^CONFIG_DEVICE_STACK=fw4-device$' "$FW4_OUTPUT"
 if grep -q '^CONFIG_GENERAL_FW_LAYER=y$' "$FW4_OUTPUT"; then
-	echo "fw4 export should skip GENERAL-FW4 when device file embeds stack config" >&2
+	echo "fw4 export should not depend on GENERAL-FW4 anymore" >&2
 	exit 1
 fi
 if grep -q '^CONFIG_DEVICE_STACK=fw3-device$' "$FW4_OUTPUT"; then

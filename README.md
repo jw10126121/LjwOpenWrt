@@ -49,8 +49,6 @@
 当前配置目录按以下层级组合：
 
 - `Config/GENERAL.txt`
-- `Config/GENERAL-SERVICE.txt`
-- `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt`
 - `Config/<设备名>-FW3.txt` 或 `Config/<设备名>.txt`
 - `Config/device-overlays/<设备名>-<FW>.txt`（如果存在则自动叠加）
 - `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加；输入时不区分大小写，内部会映射到大写文件名）
@@ -58,17 +56,16 @@
 当前 `IPQ60XX-NOWIFI` 与 `IPQ60XX-NOWIFI-MINI` 已先收口为单主文件模式：
 
 - 主文件分别使用 `Config/IPQ60XX-NOWIFI-FW3.txt`、`Config/IPQ60XX-NOWIFI-MINI-FW3.txt`
-- `GENERAL-SERVICE` 的服务插件也已抽入这个主文件，方便在一个文件内查看自定义插件
+- 原先 `GENERAL-SERVICE` 与 `GENERAL-FW3/FW4` 的内容已抽入主文件，方便在一个文件内查看自定义插件
 - `lean` 现阶段主走 FW3，文件中的 FW3 段落默认生效
 - 同一文件中的 FW4 注释段会在导出 `fw4` 时被激活
-- 这两个设备导出时都会跳过 `GENERAL-SERVICE.txt` / `GENERAL-FW3.txt` / `GENERAL-FW4.txt`，由主文件自己承接服务层与防火墙栈配置
 - `IPQ60XX-NOWIFI-MINI` 的 FW3 不再额外叠加 `device-overlays/IPQ60XX-NOWIFI-MINI-FW3.txt`
 
 当前 `MT6000-WIFI` 与 `MT6000-WIFI-MINI` 也已收口为单主文件模式：
 
 - 主文件分别使用 `Config/MT6000-WIFI-FW3.txt`、`Config/MT6000-WIFI-MINI-FW3.txt`
 - 同一文件中的 FW4 注释段会在导出 `fw4` 时被激活
-- `MT6000-WIFI-MINI` 还会在主文件内直接承接原先的 `MINI-SERVICE` 与 `MINI-FW4` 差异，不再额外叠加对应 variants 文件
+- `MT6000-WIFI-MINI` 也已把原先的 `MINI-SERVICE` 与 `MINI-FW4` 差异直接收进主文件
 
 自定义 overlay 的约定：
 
@@ -83,7 +80,7 @@
 配置维护约定：
 
 - `CONFIG_PACKAGE_luci-app-*`、`CONFIG_PACKAGE_luci-theme-*` 与对应的 `CONFIG_PACKAGE_luci-i18n-*-zh-cn` 应写在同一份配置文件里，避免主包和语言包分散到不同层级
-- 只适用于特定防火墙栈的包，应写在 `Config/GENERAL-FW3.txt` 或 `Config/GENERAL-FW4.txt` 中统一控制；不要写在设备层里覆盖，例如 `luci-app-turboacc` 仅允许在 FW3 层启用
+- 只适用于特定防火墙栈的包，应写在设备主文件的 `FW3` / `FW4` 段中统一控制；不要把同一包同时写到段外和段内，例如 `luci-app-turboacc` 仅允许在 `FW3` 段启用
 
 ## 编译时间
 手动编译

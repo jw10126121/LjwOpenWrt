@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 说明：验证多基础配置文件会按顺序合并，且机型配置最后覆盖前面的共享层。
+# 说明：验证多个基础配置文件会按顺序合并，且机型配置最后覆盖前面的共享层。
 
 set -eu
 
@@ -18,13 +18,13 @@ CONFIG_ALPHA=y
 CONFIG_SHARED=general
 EOF
 
-cat > "$TMPDIR/GENERAL-SERVICE.txt" <<'EOF'
-CONFIG_SHARED=fw3
+cat > "$TMPDIR/BASE-EXTRA.txt" <<'EOF'
+CONFIG_SHARED=base-extra
 CONFIG_SERVICE_ONLY=y
 EOF
 
-cat > "$TMPDIR/GENERAL-FW3.txt" <<'EOF'
-CONFIG_SHARED=fw3-stack
+cat > "$TMPDIR/BASE-STACK.txt" <<'EOF'
+CONFIG_SHARED=base-stack
 CONFIG_FW3_ONLY=y
 EOF
 
@@ -41,7 +41,7 @@ EOF
 
 OUTPUT_CONFIG="$TMPDIR/output.config"
 
-bash "$MERGE_SCRIPT" "$TMPDIR" "GENERAL.txt GENERAL-SERVICE.txt GENERAL-FW3.txt" "DEVICE.txt" "OVERLAY.txt" "$OUTPUT_CONFIG"
+bash "$MERGE_SCRIPT" "$TMPDIR" "GENERAL.txt BASE-EXTRA.txt BASE-STACK.txt" "DEVICE.txt" "OVERLAY.txt" "$OUTPUT_CONFIG"
 
 grep -q '^CONFIG_ALPHA=y$' "$OUTPUT_CONFIG"
 grep -q '^CONFIG_SERVICE_ONLY=y$' "$OUTPUT_CONFIG"
@@ -56,11 +56,11 @@ bash "$MERGE_SCRIPT" "$TMPDIR" "GENERAL.txt" "DEVICE.txt" "$SINGLE_OUTPUT_CONFIG
 grep -q '^CONFIG_ALPHA=y$' "$SINGLE_OUTPUT_CONFIG"
 grep -q '^CONFIG_DEVICE_ONLY=y$' "$SINGLE_OUTPUT_CONFIG"
 if grep -q '^CONFIG_FW3_ONLY=y$' "$SINGLE_OUTPUT_CONFIG"; then
-	echo "single general config should not include GENERAL-FW3 content" >&2
+	echo "single general config should not include additional base stack content" >&2
 	exit 1
 fi
 if grep -q '^CONFIG_SERVICE_ONLY=y$' "$SINGLE_OUTPUT_CONFIG"; then
-	echo "single general config should not include GENERAL-SERVICE content" >&2
+	echo "single general config should not include additional base extra content" >&2
 	exit 1
 fi
 
