@@ -53,7 +53,7 @@ assert_contains '- name: Initialize Build Observability' "workflow should initia
 assert_contains 'echo "PREP_STAGE_START_TS=$(date +%s)" >> "$GITHUB_ENV"' "workflow should record the prep stage start timestamp"
 assert_contains '- name: Report ccache Stats Before Build' "workflow should print ccache stats before compilation"
 assert_contains '- name: Report ccache Stats After Build' "workflow should print ccache stats after compilation"
-assert_contains 'ccache -s || true' "workflow should tolerate ccache stats collection failures"
+assert_contains 'CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s || true' "workflow should point ccache stats at the restored cache directory"
 assert_contains '【Lin】prep stage duration:' "workflow should log prep stage duration"
 assert_contains '【Lin】download stage duration:' "workflow should log download stage duration"
 assert_contains '【Lin】compile stage duration:' "workflow should log compile stage duration"

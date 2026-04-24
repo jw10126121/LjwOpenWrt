@@ -658,7 +658,7 @@ jobs:
       run: |
         if command -v ccache >/dev/null 2>&1; then
           echo "【Lin】ccache stats before build"
-          ccache -s || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s || true
         else
           echo "【Lin】ccache command not found before build"
         fi
@@ -694,7 +694,7 @@ jobs:
       run: |
         if command -v ccache >/dev/null 2>&1; then
           echo "【Lin】ccache stats after build"
-          ccache -s || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s || true
         else
           echo "【Lin】ccache command not found after build"
         fi
