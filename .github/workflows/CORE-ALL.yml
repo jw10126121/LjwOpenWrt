@@ -919,10 +919,10 @@ jobs:
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
 
     - name: Save ccache Cache
-      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.restore_ccache_cache.outputs.cache-hit != 'true' && steps.cache_diagnostics_before_save.outputs.ccache_present == 'true'
+      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.cache_diagnostics_before_save.outputs.ccache_present == 'true'
       uses: actions/cache/save@v5
       with:
-        key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
+        key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}
         path: |
           ${{ env.OPENWRT_PATH }}/.ccache
 

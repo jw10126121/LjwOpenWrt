@@ -44,8 +44,10 @@ assert_toolchain_has_no_restore_keys
 assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
 assert_contains '- name: Save ccache Cache' "workflow should save ccache explicitly"
 assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}' "ccache key should no longer include commit hash"
+assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}' "ccache save key should roll forward with the build start time"
 assert_contains 'restore-keys: |' "ccache restore step should still keep restore-keys"
 assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-' "ccache restore prefix should remain unchanged"
+assert_not_contains "steps.restore_ccache_cache.outputs.cache-hit != 'true'" "ccache save should no longer be blocked on an exact cache hit"
 
 assert_contains '- name: Cache Diagnostics After Restore' "workflow should log cache state after restore"
 assert_contains '- name: Cache Diagnostics Before Save' "workflow should log cache state before save"
