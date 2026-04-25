@@ -722,24 +722,23 @@ jobs:
             ;;
         esac
 
-        extract_first_match() {
-          local pattern="$1"
-          local file_path="$2"
-
-          if [ ! -f "$file_path" ]; then
-            return 0
-          fi
-
-          sed -nE "s/${pattern}/\\1/p" "$file_path" | head -n1
-        }
-
         ccache_before_file="$RUNNER_TEMP/ccache-before.txt"
         ccache_after_file="$RUNNER_TEMP/ccache-after.txt"
 
-        ccache_hit_rate_before=$(extract_first_match '.*Hits:[[:space:]]+[0-9]+[[:space:]]*/[[:space:]]*[0-9]+[[:space:]]*\\(([0-9.]+)%\\).*' "$ccache_before_file")
-        ccache_hit_rate_after=$(extract_first_match '.*Hits:[[:space:]]+[0-9]+[[:space:]]*/[[:space:]]*[0-9]+[[:space:]]*\\(([0-9.]+)%\\).*' "$ccache_after_file")
-        ccache_size_gib_before=$(extract_first_match '.*Cache size \\(GiB\\):[[:space:]]*([0-9.]+)[[:space:]]*/.*' "$ccache_before_file")
-        ccache_size_gib_after=$(extract_first_match '.*Cache size \\(GiB\\):[[:space:]]*([0-9.]+)[[:space:]]*/.*' "$ccache_after_file")
+        ccache_hit_rate_before=''
+        ccache_hit_rate_after=''
+        ccache_size_gib_before=''
+        ccache_size_gib_after=''
+
+        if [ -f "$ccache_before_file" ]; then
+          ccache_hit_rate_before=$(awk -F '[()%]' '/^[[:space:]]+Hits:/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_before_file")
+          ccache_size_gib_before=$(awk -F '[:/()]' '/Cache size \(GiB\)/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_before_file")
+        fi
+
+        if [ -f "$ccache_after_file" ]; then
+          ccache_hit_rate_after=$(awk -F '[()%]' '/^[[:space:]]+Hits:/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_after_file")
+          ccache_size_gib_after=$(awk -F '[:/()]' '/Cache size \(GiB\)/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_after_file")
+        fi
 
         metrics_path="$metrics_dir/${phase}-${START_TIME}.env"
         cat > "$metrics_path" <<EOF
