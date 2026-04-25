@@ -16,6 +16,26 @@ GENERATED_OVERRIDES_PATH=${3:-}
 
 ### --- 方法 --- ###
 
+resolve_config_anchor() {
+
+	local package_list=$1
+
+	printf '%s\n' "$package_list" | tr ' ' '\n' | sed 's/_$//' | grep -E '^(luci-app|luci-theme)-' | head -n1
+}
+
+package_group_enabled() {
+
+	local package_list=$1
+	local anchor_package
+
+	[ -f "$CONFIG_PATH" ] || return 0
+
+	anchor_package=$(resolve_config_anchor "$package_list")
+	[ -n "$anchor_package" ] || return 0
+
+	grep -Eq "^CONFIG_PACKAGE_${anchor_package}=(y|m)$" "$CONFIG_PATH"
+}
+
 # 整理依赖包列表
 UPDATE_PACKAGE_LIST() {
 
@@ -85,6 +105,7 @@ filebrowser|luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_
 socat|luci-app-socat_ luci-i18n-socat-zh-cn_ socat_
 diskman|luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_ blkid_ e2fsprogs_
 nlbwmon|luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_
+arpbind|luci-app-arpbind_ luci-i18n-arpbind-zh-cn_
 wifischedule|luci-app-wifischedule_ wifischedule_ luci-i18n-wifischedule-zh-cn_
 usbprinter|luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer-zh-cn_
 pushbot|luci-app-pushbot_ iputils-arping_ jq_ curl_
@@ -102,6 +123,7 @@ tailscale|luci-app-tailscale_ luci-i18n-tailscale-zh-cn_ tailscale_
 nftqos|luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_
 hdidle|luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_
 airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_
+vsftpd|luci-app-vsftpd_ luci-i18n-vsftpd-zh-cn_ vsftpd_ vsftpd-alt_
 EOF
 )
 
@@ -112,7 +134,9 @@ PACKAGES="$PACKAGE_OVERRIDES"
 # 先更新所有包
 while IFS='|' read -r pkg_name package_list; do
 	[ -z "$pkg_name" ] && continue
-	UPDATE_PACKAGE_LIST "$ACTION_DIR" "$package_list"
+	if package_group_enabled "$package_list"; then
+		UPDATE_PACKAGE_LIST "$ACTION_DIR" "$package_list"
+	fi
 done <<EOF
 $PACKAGES
 EOF

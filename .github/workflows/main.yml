@@ -171,8 +171,28 @@ jobs:
     - name: 检查变量
       id: read_readme
       run: |
-        readme_desc_file="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.txt"
-        readme_file_note=$(cat $readme_desc_file)
+        export_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/export_config.sh"
+        readme_script="$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/readme.sh"
+        exported_config="$(mktemp)"
+        readme_desc_file="$(mktemp)"
+        overlay_args=()
+
+        [ -f "$export_script" ] && chmod +x "$export_script"
+        [ -f "$readme_script" ] && chmod +x "$readme_script"
+
+        if [ -n "${WRT_OVERLAYS}" ]; then
+          overlay_args+=(--overlay "${WRT_OVERLAYS}")
+        fi
+
+        bash "$export_script" \
+          --config-dir "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" \
+          --device "${WRT_DEVICE}" \
+          --fw "${WRT_FIREWALL}" \
+          "${overlay_args[@]}" \
+          --output "$exported_config"
+
+        bash "$readme_script" -c "$exported_config" -o "$readme_desc_file" -a "${WRT_MINE_SAY}" -r 'false'
+        readme_file_note=$(cat "$readme_desc_file")
         echo 'readme_file_note<<EOF' >> $GITHUB_ENV
         cat "${readme_desc_file}" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV

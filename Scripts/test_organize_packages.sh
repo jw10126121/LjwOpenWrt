@@ -68,6 +68,17 @@ touch "$TMPDIR/luci-app-openvpn_1_all.ipk"
 touch "$TMPDIR/luci-i18n-openvpn-zh-cn_1_all.ipk"
 touch "$TMPDIR/luci-app-basic_1_all.ipk"
 touch "$TMPDIR/luci-i18n-basic-zh-cn_1_all.ipk"
+touch "$TMPDIR/luci-app-frps_1_all.ipk"
+touch "$TMPDIR/luci-i18n-frps-zh-cn_1_all.ipk"
+touch "$TMPDIR/frps_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-nlbwmon_1_all.ipk"
+touch "$TMPDIR/luci-i18n-nlbwmon-zh-cn_1_all.ipk"
+touch "$TMPDIR/nlbwmon_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-arpbind_1_all.ipk"
+touch "$TMPDIR/luci-i18n-arpbind-zh-cn_1_all.ipk"
+touch "$TMPDIR/luci-app-vsftpd_1_all.ipk"
+touch "$TMPDIR/luci-i18n-vsftpd-zh-cn_1_all.ipk"
+touch "$TMPDIR/vsftpd-alt_1_aarch64.ipk"
 
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-ssr-plus=m
@@ -146,6 +157,44 @@ done
 
 [ ! -d "$TMPDIR/luci-app-rclone_INCLUDE_rclone-webui" ] || {
 	echo "Unexpected include-feature directory created" >&2
+	exit 1
+}
+
+stale_disabled_files="
+luci-app-frps_1_all.ipk
+luci-i18n-frps-zh-cn_1_all.ipk
+frps_1_aarch64.ipk
+luci-app-nlbwmon_1_all.ipk
+luci-i18n-nlbwmon-zh-cn_1_all.ipk
+nlbwmon_1_aarch64.ipk
+luci-app-arpbind_1_all.ipk
+luci-i18n-arpbind-zh-cn_1_all.ipk
+luci-app-vsftpd_1_all.ipk
+luci-i18n-vsftpd-zh-cn_1_all.ipk
+vsftpd-alt_1_aarch64.ipk
+"
+
+for filename in $stale_disabled_files; do
+	if [ -e "$TMPDIR/$filename" ]; then
+		echo "Stale disabled package should have been removed: $filename" >&2
+		exit 1
+	fi
+done
+
+[ ! -d "$TMPDIR/luci-app-frps" ] || {
+	echo "Unexpected disabled directory created: luci-app-frps" >&2
+	exit 1
+}
+[ ! -d "$TMPDIR/luci-app-nlbwmon" ] || {
+	echo "Unexpected disabled directory created: luci-app-nlbwmon" >&2
+	exit 1
+}
+[ ! -d "$TMPDIR/luci-app-arpbind" ] || {
+	echo "Unexpected disabled directory created: luci-app-arpbind" >&2
+	exit 1
+}
+[ ! -d "$TMPDIR/luci-app-vsftpd" ] || {
+	echo "Unexpected disabled directory created: luci-app-vsftpd" >&2
 	exit 1
 }
 
