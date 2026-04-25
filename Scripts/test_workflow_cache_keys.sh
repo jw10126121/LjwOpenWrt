@@ -34,6 +34,21 @@ assert_toolchain_has_no_restore_keys() {
 	fi
 }
 
+assert_restore_ccache_uses_rolling_key() {
+	local restore_block
+	restore_block="$(awk '/Restore ccache Cache/,/Cache Diagnostics After Restore/' "$workflow_file")"
+
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}'; then
+		echo "ASSERT FAILED: restore ccache should use the rolling START_TIME key" >&2
+		exit 1
+	fi
+
+	if printf '%s\n' "$restore_block" | grep -Eq -- '^[[:space:]]+key: ccache-\$\{\{ runner\.os \}\}-\$\{\{ env\.DEVICE_SUBTARGET \}\}-\$\{\{ env\.WRT_VER \}\}[[:space:]]*$'; then
+		echo "ASSERT FAILED: restore ccache should no longer use the frozen stable key" >&2
+		exit 1
+	fi
+}
+
 assert_contains '- name: Restore Toolchain Cache' "workflow should restore toolchain cache explicitly"
 assert_contains 'uses: actions/cache/restore@v5' "workflow should use cache restore actions"
 assert_contains '- name: Save Toolchain Cache' "workflow should save toolchain cache explicitly"
@@ -43,8 +58,8 @@ assert_toolchain_has_no_restore_keys
 
 assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
 assert_contains '- name: Save ccache Cache' "workflow should save ccache explicitly"
-assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}' "ccache key should no longer include commit hash"
-assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}' "ccache save key should roll forward with the build start time"
+assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}' "ccache restore and save keys should roll forward with the build start time"
+assert_restore_ccache_uses_rolling_key
 assert_contains 'restore-keys: |' "ccache restore step should still keep restore-keys"
 assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-' "ccache restore prefix should remain unchanged"
 assert_not_contains "steps.restore_ccache_cache.outputs.cache-hit != 'true'" "ccache save should no longer be blocked on an exact cache hit"

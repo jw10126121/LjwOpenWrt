@@ -467,7 +467,7 @@ jobs:
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: actions/cache/restore@v5
       with:
-        key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}
+        key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}
         restore-keys: |
           ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-
         path: |
