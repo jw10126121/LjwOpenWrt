@@ -7,10 +7,7 @@ TARGET_SCRIPT="$SCRIPT_DIR/Packages.sh"
 
 for fn in \
 	UPDATE_PACKAGE \
-	resolve_packages_source_flavor \
 	apply_lean_package_overrides \
-	apply_VIKINGYFY_package_overrides \
-	apply_generic_package_overrides \
 	apply_luci_feed_25_12_package_overrides \
 	find_adguardhome_package_dir \
 	package_has_adguardhome_translation_zh \
@@ -28,14 +25,9 @@ extract_function_body() {
 	' "$TARGET_SCRIPT"
 }
 
-extract_function_body "apply_VIKINGYFY_package_overrides" | grep -q 'update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"'
-extract_function_body "apply_generic_package_overrides" | grep -q 'update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"'
 extract_function_body "apply_common_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"'
-extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"'
-extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"'
-extract_function_body "apply_lean_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"'
-extract_function_body "apply_lean_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"'
-extract_function_body "apply_generic_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"'
+extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd luci-app-socat" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "apply_lean_package_overrides" | grep -q 'luci-theme-argon'
 extract_function_body "UPDATE_PACKAGE" | grep -q '成功clone插件：${package_name} \[库：${repo_name} | 分支：${package_branch}\]'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'is_luci_feed_25_12'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"'
@@ -46,6 +38,11 @@ extract_function_body "fallback_adguardhome_package_25_12" | grep -q 'update_pac
 grep -q 'find "./${list_repo}" -mindepth 1 -maxdepth 2 -type d -iname "${package_name}" -print | head -n 1' "$TARGET_SCRIPT"
 if grep -q '^ensure_vlmcsd_ini() {' "$TARGET_SCRIPT"; then
 	echo "Packages.sh should no longer carry the legacy ensure_vlmcsd_ini hook" >&2
+	exit 1
+fi
+
+if grep -q '^apply_generic_package_overrides() {' "$TARGET_SCRIPT"; then
+	echo "Packages.sh should no longer keep generic source overrides" >&2
 	exit 1
 fi
 

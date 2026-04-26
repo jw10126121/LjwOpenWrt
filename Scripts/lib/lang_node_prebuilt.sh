@@ -82,7 +82,7 @@ resolve_openwrt_versions() {
     OPENWRT_VERSION_MINOR="${CONFIG_VERSION_MINOR:-${INCLUDE_VERSION_MINOR:-${LUCI_FEED_VERSION_MINOR:-}}}"
 
     if [ -z "${OPENWRT_VERSION_MINOR}" ] && \
-       grep -Eq '^[^#]*luci[[:space:]]+https://github.com/immortalwrt/luci(\.git)?([[:space:]]|$)' "${version_workdir}/feeds.conf.default" 2>/dev/null; then
+       grep -Eq '^[^#]*src-[^[:space:]]+[[:space:]]+luci([[:space:]]|$)' "${version_workdir}/feeds.conf.default" 2>/dev/null; then
         OPENWRT_VERSION_MINOR="${LANG_NODE_DEFAULT_FALLBACK_VERSION:-24.10}"
     fi
 }

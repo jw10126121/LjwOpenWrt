@@ -31,7 +31,6 @@ assert_not_contains() {
 
 for workflow in \
 	"${repo_root}/.github/workflows/CORE-ALL.yml" \
-	"${repo_root}/.github/workflows/main.yml" \
 	"${repo_root}/.github/workflows/TEST-METADATA.yml" \
 	"${repo_root}/.github/workflows/TEST-ORGANIZE.yml" \
 	"${repo_root}/.github/workflows/TEST-NOTIFY.yml"

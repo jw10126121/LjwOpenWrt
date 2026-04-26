@@ -2,18 +2,14 @@
 
 # 说明：
 # 1. 该脚本在 OpenWrt 的 package 目录下执行，用于删除、替换和修补第三方插件包。
-# 2. 入口职责保持不变：先按源码风味应用包清单，再执行一组编译兼容性修补。
-# 3. 结构上拆成三层：通用包操作函数、源码风味包清单、后置修补函数。
+# 2. 入口职责保持不变：先应用通用包清单和 lean 专属覆盖，再执行一组编译兼容性修补。
+# 3. 结构上拆成三层：通用包操作函数、lean 专属包清单、后置修补函数。
 # 4. 这个脚本不负责 menuconfig 选包，只负责把 package/ 与部分 feeds 中的包替换成指定来源版本。
 # 5. 整体策略是“先清理同名包，再拉取目标仓库，再做兼容性修补”，避免不同来源的重复包互相污染。
 
 current_script_dir=$(cd "$(dirname "$0")" && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 
-# source_flavor 只决定“额外覆盖哪些包”。
-# 通用包清单所有源码风味都会执行；源码风味清单只补各自差异。
-source_flavor_helper="${current_script_dir}/lib/source_flavor.sh"
-[ -f "${source_flavor_helper}" ] && . "${source_flavor_helper}"
 luci_feed_helper="${current_script_dir}/lib/luci_feed_compat.sh"
 [ -f "${luci_feed_helper}" ] && . "${luci_feed_helper}"
 
@@ -30,8 +26,6 @@ fi
 
 package_workdir=$(pwd)
 openwrt_workdir="$(readlink -f ..)"
-source_repo_url="${WRT_REPO_URL:-}"
-source_flavor='lean'
 luci_feed_branch='unknown'
 
 echo "【Lin】工作目录：${package_workdir}"
@@ -273,18 +267,6 @@ UPDATE_VERSION() {
     done
 }
 
-# 根据 WRT_REPO_URL 推断当前源码风味。
-# 这里故意给 lean 兜底，保证在没有 helper 的环境下脚本仍然可执行。
-resolve_packages_source_flavor() {
-    if command -v resolve_source_flavor >/dev/null 2>&1; then
-        source_flavor=$(resolve_source_flavor "${source_repo_url}")
-    else
-        source_flavor='lean'
-    fi
-
-    echo "【Lin】Packages 源码风味：${source_flavor}"
-}
-
 resolve_packages_luci_feed_branch() {
     if command -v resolve_luci_feed_branch >/dev/null 2>&1; then
         luci_feed_branch=$(resolve_luci_feed_branch "${openwrt_workdir}/feeds.conf.default")
@@ -295,8 +277,8 @@ resolve_packages_luci_feed_branch() {
     echo "【Lin】LuCI feed 分支：${luci_feed_branch}"
 }
 
-# 通用包清单：无论 lean / VIKINGYFY / 其它源码风味，都会执行。
-# 这里应该只放“对所有风味都通用”的替换，不要放只在特定源码树中才成立的覆盖。
+# 通用包清单：所有构建都会执行。
+# 这里应该只放“对当前 lean 源码树始终通用”的替换，不要放只在特定场景才成立的覆盖。
 apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
@@ -340,43 +322,6 @@ apply_lean_package_overrides() {
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
-}
-
-# VIKINGYFY 风味额外覆盖。
-# 这里保留该源码系特有的包来源与替换关系。
-apply_VIKINGYFY_package_overrides() {
-    update_package_list "luci-app-timewol" "VIKINGYFY/packages" "main"
-    UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
-    update_package_list "luci-app-momo momo" "nikkinikki-org/OpenWrt-momo" "main"
-    update_package_list "luci-app-nikki nikki mihomo-meta mihomo-alpha" "nikkinikki-org/OpenWrt-nikki" "main"
-    update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
-    UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
-    # update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
-    update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
-}
-
-# generic 兜底风味：
-# 当源码地址无法识别时，仍然给出一套最保守的覆盖，不让脚本直接失效。
-apply_generic_package_overrides() {
-    UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
-    UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
-    UPDATE_PACKAGE "luci-app-filetransfer" "DustReliant/luci-app-filetransfer" "master"
-    #update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"
-    update_package_list "luci-app-netspeedtest netspeedtest homebox speedtest-cli" "sirpdboy/luci-app-netspeedtest" "master"
-}
-
-apply_source_flavor_package_overrides() {
-    case "${source_flavor}" in
-        lean)
-            apply_lean_package_overrides
-            ;;
-        VIKINGYFY)
-            apply_VIKINGYFY_package_overrides
-            ;;
-        *)
-            apply_generic_package_overrides
-            ;;
-    esac
 }
 
 ensure_accesscontrol_menu_compat() {
@@ -701,16 +646,14 @@ apply_post_update_fixes() {
     preload_homeproxy_resources
 }
 
-# 主入口保持极简，只负责串联四个阶段：
-# 1. 识别源码风味
-# 2. 应用通用包覆盖
-# 3. 应用源码风味差异覆盖
-# 4. 执行后置修补链
+# 主入口保持极简，只负责串联三个阶段：
+# 1. 应用通用包覆盖
+# 2. 应用 lean 专属覆盖
+# 3. 执行后置修补链
 main() {
-    resolve_packages_source_flavor
     resolve_packages_luci_feed_branch
     apply_common_package_overrides
-    apply_source_flavor_package_overrides
+    apply_lean_package_overrides
     apply_luci_feed_25_12_package_overrides
     apply_post_update_fixes
 }

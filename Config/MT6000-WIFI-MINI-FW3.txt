@@ -170,7 +170,7 @@ CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 # ------------------------------------------------------------------------
 #  FW4 替换说明（当前仅保留说明，不默认生效）
 # ------------------------------------------------------------------------
-#  维护提示：VIKINGYFY 相关替换先写这里；确认要切换时再取消注释或继续收口。
+#  维护提示：仅维护当前 lean-only 仓库下的 FW4 差异。
 # >>> FW4-BEGIN
 # CONFIG_PACKAGE_firewall4=y                 # 启用 FW4
 # CONFIG_PACKAGE_firewall=n                  # 关闭 FW3

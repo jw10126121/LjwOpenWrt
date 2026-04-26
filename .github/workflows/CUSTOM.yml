@@ -28,7 +28,6 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
     secrets: inherit
 
   ipq60xx_nowifi_fw3_frps:
@@ -43,7 +42,6 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
     secrets: inherit
 
   mt6000_wifi_fw3:
@@ -58,5 +56,4 @@ jobs:
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: true
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-      WRT_SOURCE_FLAVOR: lean
     secrets: inherit

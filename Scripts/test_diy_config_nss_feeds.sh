@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# 说明：验证 NSS 相关 feed 开关按“设备能力 + 源码风味”共同控制。
-# 当前 lean 风味下即使是 IPQ 目标也应关闭；VIKINGYFY 的 IPQ 目标允许打开。
+# 说明：lean 成为唯一源码后，NSS 相关 feed 开关应始终关闭。
 
 set -eu
 
@@ -73,12 +72,7 @@ EOF
 }
 
 run_case IPQ60XX-NOWIFI-FW3 lean
-run_case IPQ60XX-NOWIFI-FW3 VIKINGYFY
 run_case MT6000-WIFI-FW4 lean
-
-grep -q '^CONFIG_FEED_helloworld=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_VIKINGYFY/.config"
-grep -q '^CONFIG_FEED_sqm_scripts_nss=y$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_VIKINGYFY/.config"
-grep -q '^CONFIG_FEED_nss_packages=y$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_VIKINGYFY/.config"
 
 grep -q '^CONFIG_FEED_helloworld=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_lean/.config"
 grep -q '^CONFIG_FEED_sqm_scripts_nss=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_lean/.config"

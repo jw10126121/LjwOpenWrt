@@ -47,17 +47,6 @@ openwrt_path="${OPENWRT_PATH:?OPENWRT_PATH is required}"
 config_path="${openwrt_path}/.config"
 wrt_repo_url="${WRT_REPO_URL:?WRT_REPO_URL is required}"
 wrt_repo_branch="${WRT_REPO_BRANCH:?WRT_REPO_BRANCH is required}"
-wrt_is_lean="${WRT_IS_LEAN:-true}"
-source_flavor="${SOURCE_FLAVOR:-lean}"
-
-if [ -n "${source_flavor}" ]; then
-    if [ "${source_flavor}" = "lean" ]; then
-        wrt_is_lean="true"
-    else
-        wrt_is_lean="false"
-    fi
-fi
-
 the_repo="${wrt_repo_url%/}"
 wrt_ver="${the_repo##*/}-${wrt_repo_branch}"
 source_repo="$(echo "${wrt_repo_url}" | awk -F '/' '{print $(NF)}')"
@@ -93,7 +82,6 @@ version_kernel="$(extract_kernel_version "${openwrt_path}" "${kernel_patchver}")
 cat <<EOF
 WRT_VER=${wrt_ver}
 SOURCE_REPO=${source_repo}
-SOURCE_FLAVOR=${source_flavor:-lean}
 DEVICE_TARGET=${device_target}
 DEVICE_SUBTARGET=${device_subtarget}
 DEVICE_PROFILE=${device_profile}

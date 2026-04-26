@@ -75,7 +75,7 @@ make_openwrt_tree \
     "$CASE_DIR" \
     "SNAPSHOT" \
     "VERSION_NUMBER:= OpenWrt, 24.10.5" \
-    "src-git luci https://github.com/immortalwrt/luci.git"
+    "src-git luci https://github.com/coolsnowwolf/luci.git"
 
 mv "$CASE_DIR/include.version.mk" "$CASE_DIR/version.mk.tmp"
 mkdir -p "$CASE_DIR/include"

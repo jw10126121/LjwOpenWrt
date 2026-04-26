@@ -43,7 +43,6 @@ EOF
 		cd "$case_dir"
 		PATH="$TEST_BIN:$PATH" \
 		WRT_DEVICE="IPQ60XX-NOWIFI" \
-		WRT_SOURCE_FLAVOR="lean" \
 		WRT_LUCI_BRANCH="$luci_branch" \
 		bash "$TARGET_SCRIPT"
 	)

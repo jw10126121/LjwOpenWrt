@@ -64,13 +64,4 @@ assert_contains "$custom_apk_workflow" "name: lean-MT6000-WIFI-fw3-apk" "MT6000 
 assert_contains "$custom_apk_workflow" "mt6000_wifi_mini_fw3_apk:" "CUSTOM-APK should include MT6000 MINI fw3 apk preset"
 assert_contains "$custom_apk_workflow" "name: lean-MT6000-WIFI-MINI-fw3-apk" "MT6000 MINI fw3 apk preset should have a stable display name"
 
-assert_contains "$custom_apk_workflow" "mt6000_wifi_fw4_vikingyfy_apk:" "CUSTOM-APK should include MT6000 fw4 VIKINGYFY apk preset"
-assert_contains "$custom_apk_workflow" "name: VIKINGYFY-MT6000-WIFI-fw4-apk" "MT6000 fw4 VIKINGYFY apk preset should have a stable display name"
-assert_contains "$custom_apk_workflow" "WRT_FIREWALL: fw4" "fw4 apk preset should be present"
-assert_contains "$custom_apk_workflow" "WRT_RELEASE_FIRMWARE: false" "MT6000 fw4 apk preset should disable release"
-assert_contains "$custom_apk_workflow" "WRT_SOURCE_FLAVOR: VIKINGYFY" "VIKINGYFY apk preset should be present"
-
-assert_contains "$custom_apk_workflow" "mt6000_wifi_mini_fw4_vikingyfy_apk:" "CUSTOM-APK should include MT6000 MINI fw4 VIKINGYFY apk preset"
-assert_contains "$custom_apk_workflow" "name: VIKINGYFY-MT6000-WIFI-MINI-fw4-apk" "MT6000 MINI fw4 VIKINGYFY apk preset should have a stable display name"
-
 echo "test_workflow_custom_apk_presets: ok"

@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# 说明：验证 WRT_LUCI_BRANCH 已贯通到 DEFAULT / CORE-ALL / main，
+# 说明：验证 WRT_LUCI_BRANCH 已贯通到 DEFAULT / CORE-ALL，
 # 并且 CUSTOM-LUCI2305 预设显式使用 openwrt-23.05。
 
 set -euo pipefail
 
 default_workflow=".github/workflows/DEFAULT.yml"
 core_workflow=".github/workflows/CORE-ALL.yml"
-main_workflow=".github/workflows/main.yml"
 custom_luci_workflow=".github/workflows/CUSTOM-LUCI2305.yml"
 
 assert_contains() {
@@ -27,8 +26,6 @@ assert_contains "$default_workflow" 'WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH
 
 assert_contains "$core_workflow" "WRT_LUCI_BRANCH:" "CORE-ALL should accept WRT_LUCI_BRANCH"
 assert_contains "$core_workflow" 'WRT_LUCI_BRANCH: ${{inputs.WRT_LUCI_BRANCH || ' "CORE-ALL should export WRT_LUCI_BRANCH into env"
-
-assert_contains "$main_workflow" "WRT_LUCI_BRANCH:" "main workflow should expose WRT_LUCI_BRANCH"
 
 assert_contains "$custom_luci_workflow" "WRT_LUCI_BRANCH: openwrt-23.05" "CUSTOM-LUCI2305 should pin LuCI branch to openwrt-23.05"
 assert_contains "$custom_luci_workflow" "# WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6" "CUSTOM-LUCI2305 should keep the old hash as a comment for later reuse"
