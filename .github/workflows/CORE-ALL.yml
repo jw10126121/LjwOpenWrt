@@ -473,22 +473,6 @@ jobs:
         path: |
           ${{ env.OPENWRT_PATH }}/.ccache
 
-    - name: Cache Diagnostics After Restore
-      if: env.CACHE_TOOLCHAIN == 'true'
-      run: |
-        if [ -d "${{ env.OPENWRT_PATH }}/staging_dir" ]; then
-          echo "【Lin】staging_dir restored"
-        else
-          echo "【Lin】staging_dir missing after restore"
-        fi
-
-        if [ -d "${{ env.OPENWRT_PATH }}/.ccache" ]; then
-          echo "【Lin】.ccache restored"
-          du -sh "${{ env.OPENWRT_PATH }}/.ccache"
-        else
-          echo "【Lin】.ccache missing after restore"
-        fi
-
     - name: Evaluate Cache Restore State
       id: evaluate_cache_restore_state
       if: env.CACHE_TOOLCHAIN == 'true'
@@ -650,10 +634,8 @@ jobs:
         if [ -n "${PREP_STAGE_START_TS:-}" ]; then
           prep_stage_duration_sec=$((prep_end_ts - PREP_STAGE_START_TS))
           echo "PREP_STAGE_DURATION_SEC=${prep_stage_duration_sec}" >> "$GITHUB_ENV"
-          echo "【Lin】prep stage duration: ${prep_stage_duration_sec}s"
         else
           echo "PREP_STAGE_DURATION_SEC=" >> "$GITHUB_ENV"
-          echo "【Lin】prep stage duration: unavailable"
         fi
         download_start_ts=$(date +%s)
         echo "【Lin】下载工具，DEVICE：${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}"
@@ -661,7 +643,6 @@ jobs:
         download_end_ts=$(date +%s)
         download_stage_duration_sec=$((download_end_ts - download_start_ts))
         echo "DOWNLOAD_STAGE_DURATION_SEC=${download_stage_duration_sec}" >> "$GITHUB_ENV"
-        echo "【Lin】download stage duration: ${download_stage_duration_sec}s"
         # find dl -size -1024c -exec ls -l {} \;
         # find dl -size -1024c -exec rm -f {} \;
     
@@ -674,8 +655,7 @@ jobs:
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         if command -v ccache >/dev/null 2>&1; then
-          echo "【Lin】ccache stats before build"
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s | tee "$RUNNER_TEMP/ccache-before.txt" || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s > "$RUNNER_TEMP/ccache-before.txt" || true
         else
           echo "【Lin】ccache command not found before build"
         fi
@@ -692,7 +672,6 @@ jobs:
         compile_end_ts=$(date +%s)
         compile_stage_duration_sec=$((compile_end_ts - compile_start_ts))
         echo "COMPILE_STAGE_DURATION_SEC=${compile_stage_duration_sec}" >> "$GITHUB_ENV"
-        echo "【Lin】compile stage duration: ${compile_stage_duration_sec}s"
 
     - name: Finalize Compile Status
       id: finalize_compile
@@ -712,8 +691,7 @@ jobs:
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         if command -v ccache >/dev/null 2>&1; then
-          echo "【Lin】ccache stats after build"
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s | tee "$RUNNER_TEMP/ccache-after.txt" || true
+          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s > "$RUNNER_TEMP/ccache-after.txt" || true
         else
           echo "【Lin】ccache command not found after build"
         fi
@@ -889,40 +867,22 @@ jobs:
         fi
         df -hT "$GITHUB_WORKSPACE" /builder
 
-    - name: Cache Diagnostics Before Save
-      id: cache_diagnostics_before_save
+    - name: Evaluate Cache Save Inputs
+      id: evaluate_cache_save_inputs
       if: always() && env.CACHE_TOOLCHAIN == 'true'
       run: |
         toolchain_present=false
         ccache_present=false
 
-        if [ -d "${{ env.OPENWRT_PATH }}/.ccache" ]; then
-          ccache_present=true
-          echo "【Lin】.ccache before save"
-          du -sh "${{ env.OPENWRT_PATH }}/.ccache"
-        else
-          echo "【Lin】.ccache missing before save"
-        fi
-
-        if compgen -G "${{ env.OPENWRT_PATH }}/staging_dir/host*" > /dev/null; then
-          toolchain_present=true
-          echo "【Lin】toolchain host cache present"
-        else
-          echo "【Lin】toolchain host cache missing before save"
-        fi
-
-        if compgen -G "${{ env.OPENWRT_PATH }}/staging_dir/tool*" > /dev/null; then
-          toolchain_present=true
-          echo "【Lin】toolchain tool cache present"
-        else
-          echo "【Lin】toolchain tool cache missing before save"
-        fi
+        [ -d "${{ env.OPENWRT_PATH }}/.ccache" ] && ccache_present=true
+        compgen -G "${{ env.OPENWRT_PATH }}/staging_dir/host*" > /dev/null && toolchain_present=true
+        compgen -G "${{ env.OPENWRT_PATH }}/staging_dir/tool*" > /dev/null && toolchain_present=true
 
         echo "toolchain_present=${toolchain_present}" >> "$GITHUB_OUTPUT"
         echo "ccache_present=${ccache_present}" >> "$GITHUB_OUTPUT"
 
     - name: Save Toolchain Cache
-      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.restore_toolchain_cache.outputs.cache-hit != 'true' && steps.cache_diagnostics_before_save.outputs.toolchain_present == 'true'
+      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.restore_toolchain_cache.outputs.cache-hit != 'true' && steps.evaluate_cache_save_inputs.outputs.toolchain_present == 'true'
       uses: actions/cache/save@v5
       with:
         key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
@@ -931,7 +891,7 @@ jobs:
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
 
     - name: Save ccache Cache
-      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.cache_diagnostics_before_save.outputs.ccache_present == 'true'
+      if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.evaluate_cache_save_inputs.outputs.ccache_present == 'true'
       uses: actions/cache/save@v5
       with:
         key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}
