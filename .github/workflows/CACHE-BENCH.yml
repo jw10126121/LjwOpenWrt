@@ -161,6 +161,19 @@ jobs:
             fi
           }
 
+          format_ccache_restore_state() {
+            local value="${1:-}"
+            if [ "$value" = 'exact-hit' ]; then
+              printf "exact-hit"
+            elif [ "$value" = 'fallback-hit' ]; then
+              printf "fallback-hit"
+            elif [ "$value" = 'no-cache' ]; then
+              printf "no-cache"
+            else
+              printf 'n/a'
+            fi
+          }
+
           {
             echo "## Cache Benchmark"
             echo ""
@@ -178,9 +191,9 @@ jobs:
               for phase in warm measure build; do
                 for metrics_file in "$metrics_dir"/"${phase}"-*.env; do
                   [ -f "$metrics_file" ] || continue
-                  unset phase device firewall overlays toolchain_cache_hit ccache_cache_hit prep_stage_duration_sec download_stage_duration_sec compile_stage_duration_sec ccache_hit_rate_before ccache_hit_rate_after ccache_size_gib_before ccache_size_gib_after compile_status
+                  unset phase device firewall overlays toolchain_cache_hit ccache_restore_state prep_stage_duration_sec download_stage_duration_sec compile_stage_duration_sec ccache_hit_rate_before ccache_hit_rate_after ccache_size_gib_before ccache_size_gib_after compile_status
                   . "$metrics_file"
-                  echo "| ${phase} | $(format_cache_state "${toolchain_cache_hit:-}") | $(format_cache_state "${ccache_cache_hit:-}") | $(format_metric "${prep_stage_duration_sec:-}") | $(format_metric "${download_stage_duration_sec:-}") | $(format_metric "${compile_stage_duration_sec:-}") | $(format_metric "${ccache_hit_rate_before:-}") | $(format_metric "${ccache_hit_rate_after:-}") | $(format_metric "${compile_status:-}") |"
+                  echo "| ${phase} | $(format_cache_state "${toolchain_cache_hit:-}") | $(format_ccache_restore_state "${ccache_restore_state:-}") | $(format_metric "${prep_stage_duration_sec:-}") | $(format_metric "${download_stage_duration_sec:-}") | $(format_metric "${compile_stage_duration_sec:-}") | $(format_metric "${ccache_hit_rate_before:-}") | $(format_metric "${ccache_hit_rate_after:-}") | $(format_metric "${compile_status:-}") |"
                 done
               done
             fi

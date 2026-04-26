@@ -489,6 +489,18 @@ jobs:
           echo "【Lin】.ccache missing after restore"
         fi
 
+    - name: Evaluate Cache Restore State
+      id: evaluate_cache_restore_state
+      if: env.CACHE_TOOLCHAIN == 'true'
+      run: |
+        ccache_restore_state='no-cache'
+        if [ "${{ steps.restore_ccache_cache.outputs.cache-hit }}" = 'true' ]; then
+          ccache_restore_state='exact-hit'
+        elif [ -d "${{ env.OPENWRT_PATH }}/.ccache" ]; then
+          ccache_restore_state='fallback-hit'
+        fi
+        echo "ccache_restore_state=${ccache_restore_state}" >> "$GITHUB_OUTPUT"
+
     - name: Refresh Cache Metadata
       if: env.CACHE_TOOLCHAIN == 'true'
       run: |
@@ -747,7 +759,7 @@ jobs:
         firewall=${WRT_FIREWALL}
         overlays=${WRT_OVERLAYS:-base}
         toolchain_cache_hit=${{ steps.restore_toolchain_cache.outputs.cache-hit || 'false' }}
-        ccache_cache_hit=${{ steps.restore_ccache_cache.outputs.cache-hit || 'false' }}
+        ccache_restore_state=${{ steps.evaluate_cache_restore_state.outputs.ccache_restore_state || 'no-cache' }}
         prep_stage_duration_sec=${PREP_STAGE_DURATION_SEC:-}
         download_stage_duration_sec=${DOWNLOAD_STAGE_DURATION_SEC:-}
         compile_stage_duration_sec=${COMPILE_STAGE_DURATION_SEC:-}

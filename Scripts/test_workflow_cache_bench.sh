@@ -49,5 +49,8 @@ assert_contains "uses: actions/download-artifact@v5" "CACHE-BENCH summary should
 assert_contains "pattern: bench-metrics-*" "CACHE-BENCH summary should filter benchmark metric artifacts"
 assert_contains "merge-multiple: true" "CACHE-BENCH summary should merge metric artifacts into one directory"
 assert_contains 'echo "| Phase | Toolchain | ccache | Prep(s) | Download(s) | Compile(s) | Hit rate before | Hit rate after | Status |"' "summary job should render a metrics table"
+assert_contains 'printf "exact-hit"' "summary should render exact cache hits explicitly"
+assert_contains 'printf "fallback-hit"' "summary should render restore-key fallback hits explicitly"
+assert_contains 'printf "no-cache"' "summary should render missing cache restores explicitly"
 
 echo "test_workflow_cache_bench: ok"

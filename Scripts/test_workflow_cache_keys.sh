@@ -65,6 +65,7 @@ assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT
 assert_not_contains "steps.restore_ccache_cache.outputs.cache-hit != 'true'" "ccache save should no longer be blocked on an exact cache hit"
 
 assert_contains '- name: Cache Diagnostics After Restore' "workflow should log cache state after restore"
+assert_contains '- name: Evaluate Cache Restore State' "workflow should classify cache restore state for benchmark reporting"
 assert_contains '- name: Cache Diagnostics Before Save' "workflow should log cache state before save"
 assert_contains '- name: Initialize Build Observability' "workflow should initialize build timing observability"
 assert_contains 'echo "PREP_STAGE_START_TS=$(date +%s)" >> "$GITHUB_ENV"' "workflow should record the prep stage start timestamp"
@@ -75,6 +76,7 @@ assert_contains 'CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s | tee "$
 assert_contains '- name: Write Build Metrics' "workflow should write structured build metrics for benchmark summary"
 assert_contains '- name: Upload Build Metrics' "workflow should upload build metrics as an artifact"
 assert_contains 'name: bench-metrics-' "workflow should upload metrics under a dedicated artifact prefix"
+assert_contains "ccache_restore_state=\${{ steps.evaluate_cache_restore_state.outputs.ccache_restore_state || 'no-cache' }}" "workflow metrics should capture the classified ccache restore state"
 assert_contains "awk -F '[()%]'" "workflow should parse ccache hit rates with slash-safe field extraction"
 assert_contains "awk -F '[:/()]'" "workflow should parse ccache cache sizes with slash-safe field extraction"
 assert_not_contains 'sed -nE "s/${pattern}/\\1/p"' "workflow should not use slash-sensitive sed substitutions for metrics extraction"
