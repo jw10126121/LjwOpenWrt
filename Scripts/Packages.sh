@@ -314,7 +314,9 @@ apply_lean_package_overrides() {
     if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
         # UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
         # UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
-        update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+        #update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+        # 使用lean源码自带的argon
+        update_package_list "luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
     else
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
         UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
