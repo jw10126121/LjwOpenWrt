@@ -114,6 +114,16 @@ set_kconfig_value() {
 }
 
 append_file_snippet() {
+    # 通用“安全插入片段”工具：
+    # 1. 先检查目标文件是否存在；
+    # 2. 再用 marker 判断相同内容是否已经插入过，避免重复追加；
+    # 3. 最后把 content 写进临时文件，并在 anchor_pattern 命中的那一行后面插入。
+    #
+    # 参数约定：
+    # $1 target_file：要修改的目标文件
+    # $2 anchor_pattern：sed 用来定位插入点的锚点模式
+    # $3 marker：用于幂等判断的固定字符串
+    # $4 content：要插入的实际文本块
     local target_file=$1
     local anchor_pattern=$2
     local marker=$3
@@ -125,11 +135,13 @@ append_file_snippet() {
 
     temp_file=$(mktemp)
     printf '\n%s\n' "$content" > "$temp_file"
+    # sed 的 r 命令表示“把文件内容读到当前匹配行后面”，不是 replace。
     sed -i "/${anchor_pattern}/r $temp_file" "$target_file"
     rm -f "$temp_file"
 }
 
 append_default_settings_snippet() {
+    # 只是 append_file_snippet 的薄封装，默认作用目标固定为 zzz-default-settings。
     append_file_snippet "$file_default_settings" "$1" "$2" "$3"
 }
 
@@ -178,6 +190,8 @@ configure_source_default_settings_package() {
 }
 
 configure_default_system() {
+    local timezone_snippet
+
     if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
         sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
         echo "【Lin】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
@@ -186,6 +200,8 @@ configure_default_system() {
     if [ -f "$CFG_FILE_OP" ]; then
         sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" "$CFG_FILE_OP"
         sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" "$CFG_FILE_OP"
+        sed -i "s/timezone='[^']*'/timezone='CST-8'/g" "$CFG_FILE_OP"
+        sed -i "s/zonename='[^']*'/zonename='Asia\\/Shanghai'/g" "$CFG_FILE_OP"
         echo "【Lin】OP默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
     fi
 
@@ -201,7 +217,20 @@ configure_default_system() {
     if [ -f "$CFG_FILE_LEDE" ]; then
         sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" "$CFG_FILE_LEDE"
         sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" "$CFG_FILE_LEDE"
+        sed -i "s/timezone='[^']*'/timezone='CST-8'/g" "$CFG_FILE_LEDE"
+        sed -i "s/zonename='[^']*'/zonename='Asia\\/Shanghai'/g" "$CFG_FILE_LEDE"
         echo "【Lin】LEDE默认：IP: ${WRT_IP}，主机名：$WRT_NAME"
+    fi
+
+    timezone_snippet=$(cat <<'EOF'
+uci set system.@system[0].timezone='CST-8'
+uci set system.@system[0].zonename='Asia/Shanghai'
+uci commit system
+EOF
+)
+    append_default_settings_snippet "uci commit system" "uci set system.@system[0].zonename='Asia/Shanghai'" "$timezone_snippet"
+    if [ -f "$file_default_settings" ] && grep -qF "uci set system.@system[0].zonename='Asia/Shanghai'" "$file_default_settings"; then
+        echo "【Lin】默认时区已设置为 Asia/Shanghai"
     fi
 }
 
