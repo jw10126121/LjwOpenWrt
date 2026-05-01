@@ -98,8 +98,8 @@ openlist|luci-app-openlist_ luci-i18n-openlist-zh-cn_ openlist_ libfuse_ fuse-ut
 wrtbwmon|luci-app-wrtbwmon_ luci-i18n-wrtbwmon-zh-cn_ wrtbwmon_
 netdata|luci-app-netdata_ luci-i18n-netdata-zh-cn_ netdata_ coreutils-timeout_
 rclone|luci-app-rclone_ luci-i18n-rclone-zh-cn_ rclone_ rclone-config_ rclone-ng_ rclone-webui-react_ fuse-utils_
-frps|luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_
-frpc|luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_
+frps|luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_ zoneinfo-asia_
+frpc|luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_ zoneinfo-asia_
 filetransfer|luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_
 filebrowser|luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_
 socat|luci-app-socat_ luci-i18n-socat-zh-cn_ socat_

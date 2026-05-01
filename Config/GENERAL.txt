@@ -36,6 +36,7 @@ CONFIG_PACKAGE_dnsmasq_full_ipset=y     # ipset 支持
 CONFIG_PACKAGE_ppp=y                    # PPP 基础组件
 CONFIG_PACKAGE_ppp-mod-pppoe=y          # PPPoE
 CONFIG_PACKAGE_uhttpd-mod-ubus=y        # LuCI / ubus 交互
+CONFIG_PACKAGE_zoneinfo-asia=y          # 亚洲时区数据库
 
 # ------------------------------------------------------------------------
 #  LuCI 基础库
