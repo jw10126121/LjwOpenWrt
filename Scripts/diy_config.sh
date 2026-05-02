@@ -235,20 +235,23 @@ EOF
     fi
 
     noobwrt_snippet=$(cat <<'EOF'
-uci set noobwrt.toolbar_status.enabled='0'
-uci set noobwrt.toolbar_sms.enabled='0'
-uci set noobwrt.toolbar_data.enabled='0'
-uci set noobwrt.toolbar_wireless.enabled='0'
-uci set noobwrt.toolbar_terminal.enabled='0'
-uci set noobwrt.toolbar_vpn.enabled='0'
-uci set noobwrt.toolbar_files.enabled='0'
-uci set noobwrt.toolbar_system.enabled='0'
+[ -f /etc/config/noobwrt ] || touch /etc/config/noobwrt
+
+uci -q show noobwrt | sed -n "s/^noobwrt\.\([^.=]*\)=toolbar_item$/\1/p" | while read -r section; do
+    [ -n "$section" ] || continue
+    if [ "$section" = "toolbar_home" ]; then
+        uci set noobwrt.${section}.enabled='1'
+    else
+        uci set noobwrt.${section}.enabled='0'
+    fi
+done
+
 uci commit noobwrt
 EOF
 )
-    append_default_settings_snippet "uci commit system" "uci set noobwrt.toolbar_status.enabled='0'" "$noobwrt_snippet"
-    if [ -f "$file_default_settings" ] && grep -qF "uci set noobwrt.toolbar_status.enabled='0'" "$file_default_settings"; then
-        echo "【Lin】NoobWrt toolbar 默认已关闭"
+    append_default_settings_snippet "uci commit system" "uci set noobwrt.toolbar_home.enabled='1'" "$noobwrt_snippet"
+    if [ -f "$file_default_settings" ] && grep -qF "uci set noobwrt.toolbar_home.enabled='1'" "$file_default_settings"; then
+        echo "【Lin】NoobWrt toolbar 默认仅保留 Home"
     fi
 }
 
