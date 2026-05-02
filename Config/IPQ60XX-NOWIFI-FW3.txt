@@ -128,7 +128,7 @@ CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server=m # Rust 服务
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Xray=m # Xray 核心
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_MosDNS=m # MosDNS 组件
 CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs=n # simple-obvs，老式，禁用
-CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=m # SSR Libev 客户端
+CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client=n # SSR Libev 客户端，老式，禁用
 
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
