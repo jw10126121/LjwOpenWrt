@@ -281,6 +281,7 @@ resolve_packages_luci_feed_branch() {
 # 这里应该只放“对当前 lean 源码树始终通用”的替换，不要放只在特定场景才成立的覆盖。
 apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
+    UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
 
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
@@ -324,6 +325,8 @@ apply_lean_package_overrides() {
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
+    # 添加luci-theme-noobwrt
+    UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
 }
 
 ensure_accesscontrol_menu_compat() {

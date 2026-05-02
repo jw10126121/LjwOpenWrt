@@ -191,6 +191,7 @@ configure_source_default_settings_package() {
 
 configure_default_system() {
     local timezone_snippet
+    local noobwrt_snippet
 
     if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
         sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
@@ -231,6 +232,23 @@ EOF
     append_default_settings_snippet "uci commit system" "uci set system.@system[0].zonename='Asia/Shanghai'" "$timezone_snippet"
     if [ -f "$file_default_settings" ] && grep -qF "uci set system.@system[0].zonename='Asia/Shanghai'" "$file_default_settings"; then
         echo "【Lin】默认时区已设置为 Asia/Shanghai"
+    fi
+
+    noobwrt_snippet=$(cat <<'EOF'
+uci set noobwrt.toolbar_status.enabled='0'
+uci set noobwrt.toolbar_sms.enabled='0'
+uci set noobwrt.toolbar_data.enabled='0'
+uci set noobwrt.toolbar_wireless.enabled='0'
+uci set noobwrt.toolbar_terminal.enabled='0'
+uci set noobwrt.toolbar_vpn.enabled='0'
+uci set noobwrt.toolbar_files.enabled='0'
+uci set noobwrt.toolbar_system.enabled='0'
+uci commit noobwrt
+EOF
+)
+    append_default_settings_snippet "uci commit system" "uci set noobwrt.toolbar_status.enabled='0'" "$noobwrt_snippet"
+    if [ -f "$file_default_settings" ] && grep -qF "uci set noobwrt.toolbar_status.enabled='0'" "$file_default_settings"; then
+        echo "【Lin】NoobWrt toolbar 默认已关闭"
     fi
 }
 
