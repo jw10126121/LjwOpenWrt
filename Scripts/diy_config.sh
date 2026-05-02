@@ -194,8 +194,8 @@ configure_default_system() {
     local noobwrt_snippet
 
     if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
-        sed -i 's/os.date()/os.date("%a %Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
-        echo "【Lin】修改默认时间格式如：$(date "+%a %Y-%m-%d %H:%M:%S")"
+        sed -i 's/os.date()/os.date("%Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
+        echo "【Lin】修改默认时间格式如：$(date "+%Y-%m-%d %H:%M:%S")"
     fi
 
     if [ -f "$CFG_FILE_OP" ]; then
