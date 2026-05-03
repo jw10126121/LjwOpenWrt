@@ -58,6 +58,36 @@ endef
 EOF
 }
 
+create_real_shape_makefile() {
+	local target_file=$1
+	cat > "$target_file" <<'EOF'
+$(curdir)/merge-index: $(curdir)/merge
+	(cd $(PACKAGE_DIR_ALL) && $(STAGING_DIR_HOST)/bin/apk mkndx \
+			--root $(TOPDIR) \
+			--keys-dir $(TOPDIR) \
+			--allow-untrusted \
+			--sign $(BUILD_KEY_APK_SEC) \
+			--output packages.adb \
+			*.apk; \
+	)
+
+$(curdir)/index: FORCE
+	@echo Generating package index...
+	@for d in $(PACKAGE_SUBDIRS); do \
+		mkdir -p $$d; \
+		cd $$d || continue; \
+		ls *.apk >/dev/null 2>&1 || continue; \
+		$(STAGING_DIR_HOST)/bin/apk mkndx \
+			--root $(TOPDIR) \
+			--keys-dir $(TOPDIR) \
+			--allow-untrusted \
+			--sign $(BUILD_KEY_APK_SEC) \
+			--output packages.adb \
+			*.apk; \
+	done
+EOF
+}
+
 APK_MAKEFILE="$TMPDIR/apk-package.mk"
 create_makefile "$APK_MAKEFILE"
 
@@ -127,5 +157,21 @@ grep -q 'set -- \*\.apk; \\' "$VARIANT_MAKEFILE"
 grep -q 'if \[ "\$\$1" = '\''\*\.apk'\'' \]; then \\' "$VARIANT_MAKEFILE"
 grep -q '\$\$@; \\' "$VARIANT_MAKEFILE"
 grep -q '^[[:space:]]*fi$' "$VARIANT_MAKEFILE"
+
+REAL_SHAPE_MAKEFILE="$TMPDIR/real-shape-package.mk"
+create_real_shape_makefile "$REAL_SHAPE_MAKEFILE"
+
+(
+	package_manager='apk'
+	# shellcheck disable=SC1090
+	. "$FUNCTIONS_FILE"
+	patch_apk_empty_feed_indexing "$REAL_SHAPE_MAKEFILE"
+)
+
+grep -q 'set -- \*\.apk; \\' "$REAL_SHAPE_MAKEFILE"
+grep -q 'if \[ "\$\$1" = '\''\*\.apk'\'' \]; then \\' "$REAL_SHAPE_MAKEFILE"
+grep -q '\$\$@; \\' "$REAL_SHAPE_MAKEFILE"
+grep -q 'ls \*\.apk >/dev/null 2>&1 || continue; \\' "$REAL_SHAPE_MAKEFILE"
+grep -q '^[[:space:]]*done$' "$REAL_SHAPE_MAKEFILE"
 
 echo "test_diy_config_apk_index_patch: ok"

@@ -355,7 +355,7 @@ patch_apk_empty_feed_indexing() {
     if ! awk '
         BEGIN { in_block=0; patched=0 }
         {
-            if (!in_block && $0 ~ /mkndx[[:space:]]*\\$/) {
+            if (!in_block && !patched && $0 ~ /mkndx[[:space:]]*\\$/) {
                 match($0, /^[[:space:]]*/)
                 indent = substr($0, RSTART, RLENGTH)
                 print indent "set -- *.apk; \\"
