@@ -263,7 +263,7 @@ configure_common_system_defaults() {
     configure_openvpn_defaults
     configure_base_package_options
     configure_source_default_settings_package
-    patch_apk_empty_feed_indexing
+    # patch_apk_empty_feed_indexing
 }
 
 configure_theme() {
