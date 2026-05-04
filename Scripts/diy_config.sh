@@ -191,7 +191,6 @@ configure_source_default_settings_package() {
 
 configure_default_system() {
     local timezone_snippet
-    local noobwrt_snippet
 
     if find ./package/lean/autocore/files -type f -name 'index.htm' 2>/dev/null | grep -q .; then
         sed -i 's/os.date()/os.date("%Y-%m-%d %H:%M:%S")/g' ./package/lean/autocore/files/*/index.htm
@@ -232,26 +231,6 @@ EOF
     append_default_settings_snippet "uci commit system" "uci set system.@system[0].zonename='Asia/Shanghai'" "$timezone_snippet"
     if [ -f "$file_default_settings" ] && grep -qF "uci set system.@system[0].zonename='Asia/Shanghai'" "$file_default_settings"; then
         echo "【Lin】默认时区已设置为 Asia/Shanghai"
-    fi
-
-    noobwrt_snippet=$(cat <<'EOF'
-[ -f /etc/config/noobwrt ] || touch /etc/config/noobwrt
-
-uci -q show noobwrt | sed -n "s/^noobwrt\.\([^.=]*\)=toolbar_item$/\1/p" | while read -r section; do
-    [ -n "$section" ] || continue
-    if [ "$section" = "toolbar_home" ]; then
-        uci set noobwrt.${section}.enabled='1'
-    else
-        uci set noobwrt.${section}.enabled='0'
-    fi
-done
-
-uci commit noobwrt
-EOF
-)
-    append_default_settings_snippet "uci commit system" "uci set noobwrt.toolbar_home.enabled='1'" "$noobwrt_snippet"
-    if [ -f "$file_default_settings" ] && grep -qF "uci set noobwrt.toolbar_home.enabled='1'" "$file_default_settings"; then
-        echo "【Lin】NoobWrt toolbar 默认仅保留 Home"
     fi
 }
 
