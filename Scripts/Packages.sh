@@ -300,7 +300,9 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
-    update_package_list "luci-app-vlmcsd vlmcsd luci-app-socat" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main" # 兼容fw3和fw4
+
     # update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
     # update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
 
