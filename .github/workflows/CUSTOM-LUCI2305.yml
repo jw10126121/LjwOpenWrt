@@ -10,6 +10,11 @@ on:
         required: false
         type: string
         default: ''
+      WRT_RELEASE_FIRMWARE:
+        description: '是否发布'
+        required: false
+        type: boolean
+        default: true
 
 #CI权限
 permissions: write-all
