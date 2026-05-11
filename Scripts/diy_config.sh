@@ -100,6 +100,9 @@ CFG_FILE_OP="./package/base-files/files/bin/config_generate"
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # lean.默认配置文件，固件首次刷入后运行
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
+# 通用首次开机脚本，落到 /etc/uci-defaults/99-setup_config
+file_setup_config="./package/base-files/files/etc/uci-defaults/99-setup_config"
+setup_config_template="${current_script_dir}/patch/99-setup_config.txt"
 
 set_kconfig_value() {
     # 统一维护 .config 里的开关，避免多次追加出互相冲突的同名配置。
@@ -140,9 +143,25 @@ append_file_snippet() {
     rm -f "$temp_file"
 }
 
+ensure_setup_config_script() {
+    local setup_dir
+
+    setup_dir=$(dirname "$file_setup_config")
+    mkdir -p "$setup_dir"
+    [ -f "$setup_config_template" ] || return 0
+
+    if [ ! -f "$file_setup_config" ]; then
+        cp "$setup_config_template" "$file_setup_config"
+    fi
+
+    chmod +x "$file_setup_config"
+}
+
 append_default_settings_snippet() {
-    # 只是 append_file_snippet 的薄封装，默认作用目标固定为 zzz-default-settings。
-    append_file_snippet "$file_default_settings" "$1" "$2" "$3"
+    # 首次开机自定义逻辑统一写入 /etc/uci-defaults/99-setup_config，
+    # 避免继续把运行时初始化片段塞进 lean 的 zzz-default-settings。
+    ensure_setup_config_script
+    append_file_snippet "$file_setup_config" "# setup_config hooks" "$2" "$3"
 }
 
 build_disable_feed_cmd() {
@@ -229,7 +248,7 @@ uci commit system
 EOF
 )
     append_default_settings_snippet "uci commit system" "uci set system.@system[0].zonename='Asia/Shanghai'" "$timezone_snippet"
-    if [ -f "$file_default_settings" ] && grep -qF "uci set system.@system[0].zonename='Asia/Shanghai'" "$file_default_settings"; then
+    if [ -f "$file_setup_config" ] && grep -qF "uci set system.@system[0].zonename='Asia/Shanghai'" "$file_setup_config"; then
         echo "【Lin】默认时区已设置为 Asia/Shanghai"
     fi
 }
@@ -279,7 +298,7 @@ apply_lean_runtime_customizations() {
 EOF
 )
     append_default_settings_snippet "uci commit system" "/etc/init.d/frpc" "$frp_snippet"
-    if grep -qF '/etc/init.d/frpc' "$file_default_settings"; then
+    if grep -qF '/etc/init.d/frpc' "$file_setup_config"; then
         echo "【Lin】修改frpc、frps执行权限成功！"
     fi
 
@@ -289,7 +308,7 @@ uci commit luci
 EOF
 )
     append_default_settings_snippet "uci commit system" "uci set luci.apply.holdoff" "$holdoff_snippet"
-    if grep -qF "uci set luci.apply.holdoff" "$file_default_settings"; then
+    if grep -qF "uci set luci.apply.holdoff" "$file_setup_config"; then
         echo "【Lin】修改luci提交等待时间成功！"
     fi
 
@@ -301,13 +320,13 @@ uci commit dhcp
 EOF
 )
     append_default_settings_snippet "uci commit system" "uci set dhcp.@dnsmasq[0].sequential_ip=" "$dhcp_snippet"
-    if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' "$file_default_settings"; then
+    if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' "$file_setup_config"; then
         echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
     fi
 
     remove_sqm_scripts_nss=$(build_disable_feed_cmd "openwrt_sqm_scripts_nss")
     append_default_settings_snippet "helloworld" "$remove_sqm_scripts_nss" "$remove_sqm_scripts_nss"
-    if grep -qF "$remove_sqm_scripts_nss" "$file_default_settings"; then
+    if grep -qF "$remove_sqm_scripts_nss" "$file_setup_config"; then
         echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
     else
         echo "【Lin】注释feeds中openwrt_sqm_scripts_nss失败"
@@ -315,7 +334,7 @@ EOF
 
     remove_nss_packages=$(build_disable_feed_cmd "openwrt_nss_packages")
     append_default_settings_snippet "helloworld" "$remove_nss_packages" "$remove_nss_packages"
-    if grep -qF "$remove_nss_packages" "$file_default_settings"; then
+    if grep -qF "$remove_nss_packages" "$file_setup_config"; then
         echo "【Lin】注释feeds中openwrt_nss_packages完成"
     else
         echo "【Lin】注释feeds中openwrt_nss_packages失败"

@@ -17,3 +17,5 @@ if [ -d "$NSS_PATH" ]; then
 else
 	echo -n "CPU: ${cpu_usage}"
 fi
+
+exit 0
