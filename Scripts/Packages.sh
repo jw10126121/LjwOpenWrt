@@ -531,18 +531,6 @@ update_openvpn_easy_rsa_version() {
     UPDATE_VERSION "openvpn-easy-rsa"
 }
 
-trim_ssrplus_variants() {
-    local ssrplus_makefile
-
-    ssrplus_makefile=$(find ./ -maxdepth 3 -type f -wholename "*/luci-app-ssr-plus/Makefile")
-    if [ -f "${ssrplus_makefile}" ]; then
-        sed -i '/default PACKAGE_$(PKG_NAME)_INCLUDE_Shadowsocks_Libev/,/libev/d' "${ssrplus_makefile}"
-        sed -i '/config PACKAGE_$(PKG_NAME)_INCLUDE_ShadowsocksR/,/x86_64/d' "${ssrplus_makefile}"
-        sed -i '/Shadowsocks_NONE/d; /Shadowsocks_Libev/d; /ShadowsocksR/d' "${ssrplus_makefile}"
-        echo "【Lin】ssr-plus has been fixed!"
-    fi
-}
-
 # tailscale 的 Makefile 在部分源码树中会带入不兼容 files 路径，这里直接删掉对应引用。
 fix_tailscale_makefile() {
     local tailscale_makefile
@@ -644,7 +632,6 @@ apply_post_update_fixes() {
     apply_lang_node_prebuilt_fix
     fallback_adguardhome_package_25_12
     update_openvpn_easy_rsa_version
-    trim_ssrplus_variants
     fix_tailscale_makefile
     fix_rust_build
     fix_diskman_makefile

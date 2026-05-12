@@ -17,6 +17,10 @@ trap cleanup EXIT
 
 touch "$TMPDIR/luci-app-ssr-plus_190_all.ipk"
 touch "$TMPDIR/luci-i18n-ssr-plus-zh-cn_git-1_all.ipk"
+touch "$TMPDIR/dnsmasq-full_1_aarch64.ipk"
+touch "$TMPDIR/jq_1_aarch64.ipk"
+touch "$TMPDIR/ip-full_1_aarch64.ipk"
+touch "$TMPDIR/curl_1_aarch64.ipk"
 touch "$TMPDIR/libustream-openssl20201210_1_aarch64.ipk"
 touch "$TMPDIR/libpcap1_1_aarch64.ipk"
 touch "$TMPDIR/libudns_1_aarch64.ipk"
@@ -31,11 +35,15 @@ touch "$TMPDIR/dns2socks_1_aarch64.ipk"
 touch "$TMPDIR/dns2tcp_1_aarch64.ipk"
 touch "$TMPDIR/mosdns_1_aarch64.ipk"
 touch "$TMPDIR/microsocks_1_aarch64.ipk"
+touch "$TMPDIR/shadowsocks-libev-ss-local_1_aarch64.ipk"
+touch "$TMPDIR/shadowsocks-libev-ss-redir_1_aarch64.ipk"
+touch "$TMPDIR/shadowsocks-libev-ss-server_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocks-rust-sslocal_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocks-rust-ssserver_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocksr-libev-ssr-check_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocksr-libev-ssr-local_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocksr-libev-ssr-redir_1_aarch64.ipk"
+touch "$TMPDIR/shadowsocksr-libev-ssr-server_1_aarch64.ipk"
 touch "$TMPDIR/simple-obfs-client_1_aarch64.ipk"
 touch "$TMPDIR/tcping_1_aarch64.ipk"
 touch "$TMPDIR/xray-core_1_aarch64.ipk"
@@ -44,6 +52,8 @@ touch "$TMPDIR/coreutils-base64_1_aarch64.ipk"
 touch "$TMPDIR/ca-bundle_1_all.ipk"
 touch "$TMPDIR/libopenssl3_1_aarch64.ipk"
 touch "$TMPDIR/libubox20240329_1_aarch64.ipk"
+touch "$TMPDIR/lyaml_1_aarch64.ipk"
+touch "$TMPDIR/xz-utils_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-openclash_1_all.ipk"
 touch "$TMPDIR/kmod-inet-diag_1_aarch64.ipk"
 touch "$TMPDIR/coreutils-nohup_1_aarch64.ipk"
@@ -79,6 +89,10 @@ touch "$TMPDIR/luci-i18n-arpbind-zh-cn_1_all.ipk"
 touch "$TMPDIR/luci-app-vsftpd_1_all.ipk"
 touch "$TMPDIR/luci-i18n-vsftpd-zh-cn_1_all.ipk"
 touch "$TMPDIR/vsftpd-alt_1_aarch64.ipk"
+touch "$TMPDIR/kmod-usb-core_6.6.1-r1_aarch64.ipk"
+touch "$TMPDIR/kmod-usb2_6.6.1-r1_aarch64.apk"
+touch "$TMPDIR/usbutils_017-r1_aarch64.ipk"
+touch "$TMPDIR/kmod-usb2aaaa_1_aarch64.ipk"
 
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-ssr-plus=m
@@ -100,12 +114,24 @@ SSRPLUS_DIR="$TMPDIR/luci-app-ssr-plus"
 required_files="
 luci-app-ssr-plus_190_all.ipk
 luci-i18n-ssr-plus-zh-cn_git-1_all.ipk
+dnsmasq-full_1_aarch64.ipk
+jq_1_aarch64.ipk
+ip-full_1_aarch64.ipk
+curl_1_aarch64.ipk
 libustream-openssl20201210_1_aarch64.ipk
+shadowsocks-libev-ss-local_1_aarch64.ipk
+shadowsocks-libev-ss-redir_1_aarch64.ipk
+shadowsocks-libev-ss-server_1_aarch64.ipk
+shadowsocksr-libev-ssr-local_1_aarch64.ipk
+shadowsocksr-libev-ssr-redir_1_aarch64.ipk
+shadowsocksr-libev-ssr-server_1_aarch64.ipk
 coreutils_1_aarch64.ipk
 coreutils-base64_1_aarch64.ipk
 ca-bundle_1_all.ipk
 libopenssl3_1_aarch64.ipk
 libubox20240329_1_aarch64.ipk
+lyaml_1_aarch64.ipk
+xz-utils_1_aarch64.ipk
 "
 
 for filename in $required_files; do
@@ -195,6 +221,37 @@ done
 }
 [ ! -d "$TMPDIR/luci-app-vsftpd" ] || {
 	echo "Unexpected disabled directory created: luci-app-vsftpd" >&2
+	exit 1
+}
+
+USB_DIR="$TMPDIR/usb"
+usb_required_files="
+kmod-usb-core_6.6.1-r1_aarch64.ipk
+kmod-usb2_6.6.1-r1_aarch64.apk
+usbutils_017-r1_aarch64.ipk
+"
+
+for filename in $usb_required_files; do
+	if [ ! -f "$USB_DIR/$filename" ]; then
+		echo "Missing expected USB file: $filename" >&2
+		exit 1
+	fi
+done
+
+for filename in $usb_required_files; do
+	if [ -e "$TMPDIR/$filename" ]; then
+		echo "USB package should have been moved into usb directory: $filename" >&2
+		exit 1
+	fi
+done
+
+[ ! -e "$USB_DIR/kmod-usb2aaaa_1_aarch64.ipk" ] || {
+	echo "Unexpected loosely matched USB file moved into usb directory" >&2
+	exit 1
+}
+
+[ -f "$TMPDIR/kmod-usb2aaaa_1_aarch64.ipk" ] || {
+	echo "Non-USB-prefixed lookalike package should stay in root directory" >&2
 	exit 1
 }
 

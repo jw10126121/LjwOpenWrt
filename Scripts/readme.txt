@@ -31,13 +31,6 @@ luci-app-rclone_INCLUDE_rclone-ng
 luci-app-socat
 luci-app-sqm
 luci-app-ssr-plus
-luci-app-ssr-plus_INCLUDE_libustream-openssl
-luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Client
-luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server
-luci-app-ssr-plus_INCLUDE_Xray
-luci-app-ssr-plus_INCLUDE_MosDNS
-luci-app-ssr-plus_INCLUDE_Shadowsocks_Simple_Obfs
-luci-app-ssr-plus_INCLUDE_ShadowsocksR_Libev_Client
 luci-app-ttyd
 luci-app-turboacc
 luci-app-upnp
@@ -69,4 +62,3 @@ luci-app-wrtbwmon
 
 ### --- 集成的主题 --- ###
 luci-theme-argon
-

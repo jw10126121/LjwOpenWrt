@@ -6,25 +6,25 @@
 #  1. 这一组默认覆盖 U 盘、移动硬盘、USB 网卡、手机共享、4G/5G 模块等常见外设场景。
 #  2. 如果不需要USB能力，可以启用此overlay。
 #
-CONFIG_PACKAGE_kmod-usb-core=n          # USB 核心
-CONFIG_PACKAGE_kmod-usb2=n              # USB 2.0 EHCI
-CONFIG_PACKAGE_kmod-usb3=n              # USB 3.0 xHCI
-CONFIG_PACKAGE_kmod-usb-dwc3=n          # DWC3 控制器
-CONFIG_PACKAGE_kmod-usb-ehci=n          # EHCI 兼容驱动
-CONFIG_PACKAGE_kmod-usb-ohci=n          # OHCI 兼容驱动
-CONFIG_PACKAGE_kmod-usb-uhci=n          # UHCI 兼容驱动
-CONFIG_PACKAGE_kmod-usb-storage=n       # USB 大容量存储
-CONFIG_PACKAGE_kmod-usb-storage-extras=n # 兼容部分特殊 U 盘 / 读卡器
-CONFIG_PACKAGE_kmod-usb-storage-uas=n   # UAS 高速存储协议
-CONFIG_PACKAGE_kmod-usb-net=n           # USB 网卡核心
-CONFIG_PACKAGE_kmod-usb-net-cdc-ether=n # CDC ECM 网卡
-CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=n  # MBIM 4G/5G 模块
-CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=n   # NCM 4G/5G 模块
-CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=n  # QMI WWAN 框架
-CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n # 广和通 QMI
-CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n # 移远 QMI
-CONFIG_PACKAGE_kmod-usb-net-rndis=n     # 手机 RNDIS 共享
-CONFIG_PACKAGE_kmod-usb-net-rtl8152=n   # RTL8152/8153 USB 网卡
-CONFIG_PACKAGE_kmod-usb-acm=n           # USB ACM 串口
-CONFIG_PACKAGE_kmod-usb-serial-option=n # 常见 4G/5G 模块串口
-CONFIG_PACKAGE_usbutils=n               # lsusb 等工具
+CONFIG_PACKAGE_kmod-usb-core=m          # USB 核心
+CONFIG_PACKAGE_kmod-usb2=m              # USB 2.0 EHCI
+CONFIG_PACKAGE_kmod-usb3=m              # USB 3.0 xHCI
+CONFIG_PACKAGE_kmod-usb-dwc3=m          # DWC3 控制器
+CONFIG_PACKAGE_kmod-usb-ehci=m          # EHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-ohci=m          # OHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-uhci=m          # UHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-storage=m       # USB 大容量存储
+CONFIG_PACKAGE_kmod-usb-storage-extras=m # 兼容部分特殊 U 盘 / 读卡器
+CONFIG_PACKAGE_kmod-usb-storage-uas=m   # UAS 高速存储协议
+CONFIG_PACKAGE_kmod-usb-net=m           # USB 网卡核心
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=m # CDC ECM 网卡
+CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=m  # MBIM 4G/5G 模块
+CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=m   # NCM 4G/5G 模块
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=m  # QMI WWAN 框架
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=m # 广和通 QMI
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=m # 移远 QMI
+CONFIG_PACKAGE_kmod-usb-net-rndis=m     # 手机 RNDIS 共享
+CONFIG_PACKAGE_kmod-usb-net-rtl8152=m   # RTL8152/8153 USB 网卡
+CONFIG_PACKAGE_kmod-usb-acm=m           # USB ACM 串口
+CONFIG_PACKAGE_kmod-usb-serial-option=m # 常见 4G/5G 模块串口
+CONFIG_PACKAGE_usbutils=m               # lsusb 等工具
