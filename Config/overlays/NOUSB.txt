@@ -1,0 +1,30 @@
+# ------------------------------------------------------------------------
+#  可选覆盖层：去除USB外设支持
+# ------------------------------------------------------------------------
+# OVERLAY_GROUP=usb
+#  说明：
+#  1. 这一组默认覆盖 U 盘、移动硬盘、USB 网卡、手机共享、4G/5G 模块等常见外设场景。
+#  2. 如果不需要USB能力，可以启用此overlay。
+#
+CONFIG_PACKAGE_kmod-usb-core=n          # USB 核心
+CONFIG_PACKAGE_kmod-usb2=n              # USB 2.0 EHCI
+CONFIG_PACKAGE_kmod-usb3=n              # USB 3.0 xHCI
+CONFIG_PACKAGE_kmod-usb-dwc3=n          # DWC3 控制器
+CONFIG_PACKAGE_kmod-usb-ehci=n          # EHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-ohci=n          # OHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-uhci=n          # UHCI 兼容驱动
+CONFIG_PACKAGE_kmod-usb-storage=n       # USB 大容量存储
+CONFIG_PACKAGE_kmod-usb-storage-extras=n # 兼容部分特殊 U 盘 / 读卡器
+CONFIG_PACKAGE_kmod-usb-storage-uas=n   # UAS 高速存储协议
+CONFIG_PACKAGE_kmod-usb-net=n           # USB 网卡核心
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=n # CDC ECM 网卡
+CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=n  # MBIM 4G/5G 模块
+CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=n   # NCM 4G/5G 模块
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=n  # QMI WWAN 框架
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-fibocom=n # 广和通 QMI
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan-quectel=n # 移远 QMI
+CONFIG_PACKAGE_kmod-usb-net-rndis=n     # 手机 RNDIS 共享
+CONFIG_PACKAGE_kmod-usb-net-rtl8152=n   # RTL8152/8153 USB 网卡
+CONFIG_PACKAGE_kmod-usb-acm=n           # USB ACM 串口
+CONFIG_PACKAGE_kmod-usb-serial-option=n # 常见 4G/5G 模块串口
+CONFIG_PACKAGE_usbutils=n               # lsusb 等工具

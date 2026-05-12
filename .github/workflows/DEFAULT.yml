@@ -73,7 +73,7 @@ on:
         type: string
         default: ''
       WRT_LUCI_BRANCH:
-        description: '可选 LuCI feed 分支，例如 openwrt-23.05、23.05 或 2305；留空则使用源码默认值'
+        description: '可选 LuCI feed 分支，例如 openwrt-23.05、23.05 或 2305；'
         required: false
         type: string
         default: ''

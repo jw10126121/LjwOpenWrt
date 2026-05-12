@@ -31,7 +31,7 @@ jobs:
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: true
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
@@ -45,7 +45,7 @@ jobs:
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: true
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
@@ -59,6 +59,6 @@ jobs:
       WRT_DIY_SETTING: diy_config.sh
       WRT_DIYPackages: Packages.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: true
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit

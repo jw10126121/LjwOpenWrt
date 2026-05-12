@@ -6,6 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO_ROOT=$(cd "${SCRIPT_DIR}/.." && pwd)
 SCRIPT_ROOT="${REPO_ROOT}/Scripts"
 CONFIG_ROOT="${REPO_ROOT}/Config"
+OVERLAY_UTILS="${SCRIPT_ROOT}/lib/overlay_utils.sh"
 LOCAL_COMPAT_DIR=''
 
 show_help() {
@@ -23,6 +24,7 @@ show_help() {
   WRT_DEVICE             设备名，必填，例如 MT6000-WIFI
   WRT_FIREWALL           防火墙栈，必填，fw3 或 fw4
   WRT_OVERLAYS           可选 overlays，逗号分隔，例如 frps,apk
+                         同一 OVERLAY_GROUP 内按传入顺序以最后一个为准
   WRT_LUCI_BRANCH        可选 LuCI 分支，例如 openwrt-23.05
   WRT_DIY_SETTING        自定义设置脚本，默认 diy_config.sh
   WRT_DIYPackages        自定义包脚本，默认 Packages.sh
@@ -126,11 +128,6 @@ case "$WRT_FIREWALL" in
 		;;
 esac
 
-if has_overlay apk && has_overlay ipk; then
-	echo "WRT_OVERLAYS 中 apk 与 ipk 不能同时启用" >&2
-	exit 1
-fi
-
 require_dir "$OPENWRT_PATH"
 require_dir "$CONFIG_ROOT"
 require_file "$SCRIPT_ROOT/$WRT_DIY_FEEDS"
@@ -138,6 +135,13 @@ require_file "$SCRIPT_ROOT/$WRT_DIYPackages"
 require_file "$SCRIPT_ROOT/$WRT_DIY_SETTING"
 require_file "$SCRIPT_ROOT/export_config.sh"
 require_file "$SCRIPT_ROOT/diy_after_defconfig.sh"
+require_file "$OVERLAY_UTILS"
+
+. "$OVERLAY_UTILS"
+
+if [ -n "$WRT_OVERLAYS" ]; then
+	WRT_OVERLAYS=$(normalize_overlay_list "$CONFIG_ROOT" "$WRT_OVERLAYS")
+fi
 
 if has_overlay apk; then
 	WRT_USE_APK=true

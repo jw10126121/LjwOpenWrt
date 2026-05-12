@@ -1,6 +1,7 @@
 # ------------------------------------------------------------------------
 #  可选覆盖层：APK
 # ------------------------------------------------------------------------
+# OVERLAY_GROUP=package-manager
 CONFIG_PKG_FORMAT=apk
 CONFIG_USE_APK=y
 CONFIG_PACKAGE_opkg=n

@@ -9,6 +9,9 @@ set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 MERGE_SCRIPT="$SCRIPT_DIR/merge_configs.sh"
+OVERLAY_UTILS="$SCRIPT_DIR/lib/overlay_utils.sh"
+
+. "$OVERLAY_UTILS"
 
 config_dir='Config'
 device=''
@@ -140,6 +143,7 @@ show_help() {
   --device      设备名，例如 IPQ60XX-NOWIFI
   --fw          防火墙栈，fw3 或 fw4
   --overlay     可选 overlay 列表，逗号分隔，例如 frps,apk
+                同一 OVERLAY_GROUP 内按传入顺序以最后一个为准
   --output      输出文件路径
   --config-dir  配置目录，默认 Config
   -h, --help    显示帮助
@@ -206,25 +210,8 @@ case "${fw}" in
 		;;
 esac
 
-has_apk=false
-has_ipk=false
-
 if [ -n "$overlay_list" ]; then
-	OLD_IFS=$IFS
-	IFS=','
-	set -- $overlay_list
-	IFS=$OLD_IFS
-	for overlay_name in "$@"; do
-		overlay_name=$(printf '%s' "$overlay_name" | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-		[ -n "$overlay_name" ] || continue
-		[ "$overlay_name" = 'apk' ] && has_apk=true
-		[ "$overlay_name" = 'ipk' ] && has_ipk=true
-	done
-fi
-
-if [ "$has_apk" = true ] && [ "$has_ipk" = true ]; then
-	echo "overlay apk 与 ipk 不能同时启用" >&2
-	exit 1
+	overlay_list=$(normalize_overlay_list "$config_dir" "$overlay_list")
 fi
 
 device_config=$(resolve_device_config "$config_dir" "$device" "$fw" || true)
@@ -270,16 +257,11 @@ if [ -n "$overlay_list" ]; then
 	IFS=','
 	set -- $overlay_list
 	IFS=$OLD_IFS
-		for overlay_name in "$@"; do
-			overlay_name=$(printf '%s' "$overlay_name" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-			[ -n "$overlay_name" ] || continue
-			overlay_file="overlays/$(printf '%s' "$overlay_name" | tr '[:lower:]' '[:upper:]').txt"
-			if [ ! -f "$config_dir/$overlay_file" ]; then
-				echo "缺少 overlay 配置：$config_dir/$overlay_file" >&2
-				exit 1
-			fi
-			cat "$config_dir/$overlay_file" >> "$output_config"
-		done
+	for overlay_name in "$@"; do
+		overlay_name=$(normalize_overlay_name "$overlay_name")
+		[ -n "$overlay_name" ] || continue
+		cat "$(resolve_overlay_file "$config_dir" "$overlay_name")" >> "$output_config"
+	done
 fi
 
 echo "导出完成：$output_config"

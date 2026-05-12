@@ -29,7 +29,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - 源码仓库固定为 `https://github.com/coolsnowwolf/lede`
 - 源码分支固定为 `master`
 - `WRT_LUCI_BRANCH` 留空时使用源码默认 LuCI feed
-- `apk` 与 `ipk` overlay 互斥
+- overlay 文件可用 `# OVERLAY_GROUP=<组名>` 声明互斥组；同组内按 `WRT_OVERLAYS` 顺序以最后一个为准
 
 ## 配置组织
 
@@ -52,6 +52,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - 自定义 overlay 放到 `Config/overlays/`，例如 `Config/overlays/MYVPN.txt`
 - `WRT_OVERLAYS=myvpn` 会映射到 `Config/overlays/MYVPN.txt`
 - 后面的 overlay 会覆盖前面的同名配置
+- 若 overlay 文件里声明了 `# OVERLAY_GROUP=<组名>`，则同组只保留最后出现的那个 overlay
 
 ## 固件默认值
 
