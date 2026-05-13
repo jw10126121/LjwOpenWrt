@@ -295,8 +295,8 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
-    # update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "releases/v2.6.4"
+    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
+    # update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "releases/v2.6.4"
     
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
