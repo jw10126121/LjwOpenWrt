@@ -31,6 +31,11 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - `WRT_LUCI_BRANCH` 留空时使用源码默认 LuCI feed
 - overlay 文件可用 `# OVERLAY_GROUP=<组名>` 声明互斥组；同组内按 `WRT_OVERLAYS` 顺序以最后一个为准
 
+常用预设示例：
+
+- `AX18 无 Wi-Fi`：`WRT_DEVICE=IPQ60XX-NOWIFI`
+- `京东云亚瑟 AX1800 Pro 带 Wi-Fi`：`WRT_DEVICE=IPQ60XX-NOWIFI WRT_OVERLAYS=ax1800pro-wifi`
+
 ## 配置组织
 
 当前配置按以下顺序叠加：
@@ -53,6 +58,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - `WRT_OVERLAYS=myvpn` 会映射到 `Config/overlays/MYVPN.txt`
 - 后面的 overlay 会覆盖前面的同名配置
 - 若 overlay 文件里声明了 `# OVERLAY_GROUP=<组名>`，则同组只保留最后出现的那个 overlay
+- `AX1800PRO-WIFI` overlay 用于在 `IPQ60XX-NOWIFI` 基线上切换到 `JDCloud RE-SS-01` 并恢复无线能力
 
 ## 固件默认值
 

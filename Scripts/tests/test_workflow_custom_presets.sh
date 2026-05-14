@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 说明：CUSTOM 应作为固定预设入口，并行调用 4 个 DEFAULT 工作流。
+# 说明：CUSTOM 应作为固定预设入口，并行调用既有的 DEFAULT 工作流。
 
 set -euo pipefail
 
@@ -60,7 +60,7 @@ assert_contains "$custom_workflow" "secrets: inherit" "CUSTOM should inherit sec
 assert_contains "$custom_workflow" "ipq60xx_nowifi_fw3:" "CUSTOM should include IPQ60XX fw3 preset"
 assert_contains "$custom_workflow" "WRT_DEVICE: IPQ60XX-NOWIFI" "IPQ60XX preset should pass the correct device"
 assert_contains "$custom_workflow" "WRT_FIREWALL: fw3" "fw3 preset should be present"
-assert_contains "$custom_workflow" "WRT_RELEASE_FIRMWARE: true" "firmware release preset should be enabled where requested"
+assert_contains "$custom_workflow" 'WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}' "CUSTOM should pass release toggle through to DEFAULT"
 
 assert_contains "$custom_workflow" "ipq60xx_nowifi_fw3_frps:" "CUSTOM should include IPQ60XX frps preset"
 assert_contains "$custom_workflow" "WRT_OVERLAYS: frps" "frps preset should pass overlays"
