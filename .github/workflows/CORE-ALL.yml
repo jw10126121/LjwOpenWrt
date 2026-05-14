@@ -328,18 +328,6 @@ jobs:
         path: |
           ${{ env.OPENWRT_PATH }}/.ccache
 
-    - name: Evaluate Cache Restore State
-      id: evaluate_cache_restore_state
-      if: env.CACHE_TOOLCHAIN == 'true'
-      run: |
-        ccache_restore_state='no-cache'
-        if [ "${{ steps.restore_ccache_cache.outputs.cache-hit }}" = 'true' ]; then
-          ccache_restore_state='exact-hit'
-        elif [ -d "${{ env.OPENWRT_PATH }}/.ccache" ]; then
-          ccache_restore_state='fallback-hit'
-        fi
-        echo "ccache_restore_state=${ccache_restore_state}" >> "$GITHUB_OUTPUT"
-
     - name: Refresh Cache Metadata
       if: env.CACHE_TOOLCHAIN == 'true'
       run: |
@@ -505,16 +493,6 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE /builder
 
-    - name: Report ccache Stats Before Build
-      continue-on-error: true
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
-        if command -v ccache >/dev/null 2>&1; then
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s > "$RUNNER_TEMP/ccache-before.txt" || true
-        else
-          echo "【Lin】ccache command not found before build"
-        fi
-
     - name: 编译固件 Build firmware
       id: compile
       continue-on-error: true
@@ -539,77 +517,6 @@ jobs:
         echo "status=${{ steps.compile.outcome }}" >> $GITHUB_OUTPUT
         echo "COMPILE_STATUS=${{ steps.compile.outcome }}" >> $GITHUB_ENV
         echo "【Lin】${{ env.DEVICE_SUBTARGET }}-${{ env.DEVICE_PROFILE }}编译状态：${{ steps.compile.outcome }}，结束时间：$END_TIME"
-
-    - name: Report ccache Stats After Build
-      if: always()
-      continue-on-error: true
-      working-directory: ${{ env.OPENWRT_PATH }}
-      run: |
-        if command -v ccache >/dev/null 2>&1; then
-          CCACHE_DIR="${{ env.OPENWRT_PATH }}/.ccache" ccache -s > "$RUNNER_TEMP/ccache-after.txt" || true
-        else
-          echo "【Lin】ccache command not found after build"
-        fi
-
-    - name: Write Build Metrics
-      if: always()
-      run: |
-        metrics_dir="$RUNNER_TEMP/bench-metrics"
-        mkdir -p "$metrics_dir"
-
-        phase='build'
-        case "${WRT_MINE_SAY:-}" in
-          "[cache-bench warm]"*)
-            phase='warm'
-            ;;
-          "[cache-bench measure]"*)
-            phase='measure'
-            ;;
-        esac
-
-        ccache_before_file="$RUNNER_TEMP/ccache-before.txt"
-        ccache_after_file="$RUNNER_TEMP/ccache-after.txt"
-
-        ccache_hit_rate_before=''
-        ccache_hit_rate_after=''
-        ccache_size_gib_before=''
-        ccache_size_gib_after=''
-
-        if [ -f "$ccache_before_file" ]; then
-          ccache_hit_rate_before=$(awk -F '[()%]' '/^[[:space:]]+Hits:/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_before_file")
-          ccache_size_gib_before=$(awk -F '[:/()]' '/Cache size \(GiB\)/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_before_file")
-        fi
-
-        if [ -f "$ccache_after_file" ]; then
-          ccache_hit_rate_after=$(awk -F '[()%]' '/^[[:space:]]+Hits:/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_after_file")
-          ccache_size_gib_after=$(awk -F '[:/()]' '/Cache size \(GiB\)/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' "$ccache_after_file")
-        fi
-
-        metrics_path="$metrics_dir/${phase}-${START_TIME}.env"
-        cat > "$metrics_path" <<EOF
-        phase=${phase}
-        device=${WRT_DEVICE}
-        firewall=${WRT_FIREWALL}
-        overlays=${WRT_OVERLAYS:-base}
-        toolchain_cache_hit=${{ steps.restore_toolchain_cache.outputs.cache-hit || 'false' }}
-        ccache_restore_state=${{ steps.evaluate_cache_restore_state.outputs.ccache_restore_state || 'no-cache' }}
-        prep_stage_duration_sec=${PREP_STAGE_DURATION_SEC:-}
-        download_stage_duration_sec=${DOWNLOAD_STAGE_DURATION_SEC:-}
-        compile_stage_duration_sec=${COMPILE_STAGE_DURATION_SEC:-}
-        ccache_hit_rate_before=${ccache_hit_rate_before:-}
-        ccache_hit_rate_after=${ccache_hit_rate_after:-}
-        ccache_size_gib_before=${ccache_size_gib_before:-}
-        ccache_size_gib_after=${ccache_size_gib_after:-}
-        compile_status=${COMPILE_STATUS:-unknown}
-        EOF
-
-    - name: Upload Build Metrics
-      if: always()
-      uses: actions/upload-artifact@v6.0.0
-      with:
-        name: bench-metrics-${{ env.START_TIME }}-${{ env.DEVICE_SUBTARGET }}
-        path: ${{ runner.temp }}/bench-metrics/*.env
-        if-no-files-found: error
 
     - name: Machine Information
       continue-on-error: true
