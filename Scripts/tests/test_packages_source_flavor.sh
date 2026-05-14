@@ -26,8 +26,15 @@ extract_function_body() {
 }
 
 extract_function_body "apply_common_package_overrides" | grep -q 'UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"'
-extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd luci-app-socat" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"'
+extract_function_body "apply_common_package_overrides" | grep -q 'update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"'
+if extract_function_body "apply_common_package_overrides" | grep -q 'luci-app-3cat'; then
+	echo "apply_common_package_overrides should not carry 3cat feed-specific logic" >&2
+	exit 1
+fi
 extract_function_body "apply_lean_package_overrides" | grep -q 'luci-theme-argon'
+extract_function_body "apply_lean_package_overrides" | grep -q 'if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then'
+extract_function_body "apply_lean_package_overrides" | grep -q 'update_package_list "luci-app-3cat" "coolsnowwolf/luci" "openwrt-25.12"'
 extract_function_body "UPDATE_PACKAGE" | grep -q '成功clone插件：${package_name} \[库：${repo_name} | 分支：${package_branch}\]'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'is_luci_feed_25_12'
 extract_function_body "apply_luci_feed_25_12_package_overrides" | grep -q 'update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05"'

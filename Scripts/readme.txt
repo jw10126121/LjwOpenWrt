@@ -28,7 +28,7 @@ luci-app-pushbot
 luci-app-ramfree
 luci-app-rclone_INCLUDE_rclone-webui
 luci-app-rclone_INCLUDE_rclone-ng
-luci-app-socat
+luci-app-3cat
 luci-app-sqm
 luci-app-ssr-plus
 luci-app-ttyd

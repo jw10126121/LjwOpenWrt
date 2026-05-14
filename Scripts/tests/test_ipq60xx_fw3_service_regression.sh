@@ -23,9 +23,12 @@ bash "$EXPORT_SCRIPT" \
 
 grep -n '^CONFIG_PACKAGE_luci-app-accesscontrol=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-accesscontrol=y'
 grep -n '^CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y'
-grep -n '^CONFIG_PACKAGE_luci-app-adguardhome=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-adguardhome=y'
-grep -n '^CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=y'
-grep -n '^CONFIG_PACKAGE_luci-app-socat=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-socat=y'
+grep -n '^CONFIG_PACKAGE_luci-app-adguardhome=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-adguardhome=m'
+grep -n '^CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m'
+grep -n '^CONFIG_PACKAGE_luci-app-3cat=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-3cat=y'
+grep -n '^CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=y'
+grep -n '^CONFIG_PACKAGE_luci-app-socat=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-socat=m'
+grep -n '^CONFIG_PACKAGE_luci-i18n-socat-zh-cn=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-socat-zh-cn=m'
 grep -n '^CONFIG_PACKAGE_luci-app-vlmcsd=' "$OUTPUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-vlmcsd=y'
 
 echo "test_ipq60xx_fw3_service_regression: ok"

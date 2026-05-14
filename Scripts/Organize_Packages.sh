@@ -129,6 +129,7 @@ frps|luci-app-frps_ luci-i18n-frps-zh-cn_ frps_ libc_ zoneinfo-asia_
 frpc|luci-app-frpc_ luci-i18n-frpc-zh-cn_ frpc_ libc_ zoneinfo-asia_
 filetransfer|luci-app-filetransfer_ luci-i18n-filetransfer-zh-cn_ luci-lib-fs_
 filebrowser|luci-app-filebrowser_ luci-i18n-filebrowser-zh-cn_ filebrowser_
+3cat|luci-app-3cat_ luci-i18n-3cat-zh-cn_ 3proxy_ 3proxy-mod-tcppm_ 3proxy-mod-udppm_
 socat|luci-app-socat_ luci-i18n-socat-zh-cn_ socat_
 diskman|luci-app-diskman_ luci-i18n-diskman-zh-cn_ libparted_ parted_ smartmontools_ blkid_ e2fsprogs_
 nlbwmon|luci-app-nlbwmon_ nlbwmon_ luci-i18n-nlbwmon-zh-cn_ kmod-nf-conntrack-netlink_

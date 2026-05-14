@@ -55,6 +55,14 @@ touch "$TMPDIR/libubox20240329_1_aarch64.ipk"
 touch "$TMPDIR/lyaml_1_aarch64.ipk"
 touch "$TMPDIR/xz-utils_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-openclash_1_all.ipk"
+touch "$TMPDIR/luci-app-3cat_1_all.ipk"
+touch "$TMPDIR/luci-i18n-3cat-zh-cn_1_all.ipk"
+touch "$TMPDIR/3proxy_1_aarch64.ipk"
+touch "$TMPDIR/3proxy-mod-tcppm_1_aarch64.ipk"
+touch "$TMPDIR/3proxy-mod-udppm_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-socat_1_all.ipk"
+touch "$TMPDIR/luci-i18n-socat-zh-cn_1_all.ipk"
+touch "$TMPDIR/socat_1_aarch64.ipk"
 touch "$TMPDIR/kmod-inet-diag_1_aarch64.ipk"
 touch "$TMPDIR/coreutils-nohup_1_aarch64.ipk"
 touch "$TMPDIR/libcap-bin_1_aarch64.ipk"
@@ -97,6 +105,8 @@ touch "$TMPDIR/kmod-usb2aaaa_1_aarch64.ipk"
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-ssr-plus=m
 CONFIG_PACKAGE_luci-app-openclash=y
+CONFIG_PACKAGE_luci-app-3cat=y
+CONFIG_PACKAGE_luci-app-socat=m
 CONFIG_PACKAGE_luci-app-openvpn=m
 CONFIG_PACKAGE_luci-app-basic=m
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
@@ -137,6 +147,36 @@ xz-utils_1_aarch64.ipk
 for filename in $required_files; do
 	if [ ! -f "$SSRPLUS_DIR/$filename" ]; then
 		echo "Missing expected file: $filename" >&2
+		exit 1
+	fi
+done
+
+THREECAT_DIR="$TMPDIR/luci-app-3cat"
+threecat_required_files="
+luci-app-3cat_1_all.ipk
+luci-i18n-3cat-zh-cn_1_all.ipk
+3proxy_1_aarch64.ipk
+3proxy-mod-tcppm_1_aarch64.ipk
+3proxy-mod-udppm_1_aarch64.ipk
+"
+
+for filename in $threecat_required_files; do
+	if [ ! -f "$THREECAT_DIR/$filename" ]; then
+		echo "Missing expected 3cat file: $filename" >&2
+		exit 1
+	fi
+done
+
+SOCAT_DIR="$TMPDIR/luci-app-socat"
+socat_required_files="
+luci-app-socat_1_all.ipk
+luci-i18n-socat-zh-cn_1_all.ipk
+socat_1_aarch64.ipk
+"
+
+for filename in $socat_required_files; do
+	if [ ! -f "$SOCAT_DIR/$filename" ]; then
+		echo "Missing expected socat file: $filename" >&2
 		exit 1
 	fi
 done

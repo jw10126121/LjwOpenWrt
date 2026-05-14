@@ -303,10 +303,7 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
     update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
-    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main" # 兼容fw3和fw4
-
-    # update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
-    # update_package_list "luci-app-socat" "sbwml/openwrt_pkgs" "main"
+    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"    # 保留可选 Socat 页面，依赖会自动带出 socat
 
     # quickfile 当前按需保留，默认不导入。
     # 如果后续重新启用，需要同时确认设备侧是否改成 luci-nginx 路线。
@@ -323,6 +320,10 @@ apply_lean_package_overrides() {
     else
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
         UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
+    fi
+
+    if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
+        update_package_list "luci-app-3cat" "coolsnowwolf/luci" "openwrt-25.12" # 非 25.12 feed 时补入 lean 上游 3cat
     fi
     
     update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
@@ -369,7 +370,7 @@ EOF
 }
 
 # OpenWrt 25.12 的 LuCI 菜单机制与语言包状态和旧分支不同，这里统一补一层兼容：
-# 1. vlmcsd / socat 强制切到带 menu.d 与 ACL 的新版包源，避免旧控制器在 25.12 下不显示。
+# 1. vlmcsd / 3cat 使用带 menu.d 与 ACL 的包源，避免控制器在新 LuCI 下不显示。
 # 2. accesscontrol / adguardhome 暂时从 coolsnowwolf/luci 的 openwrt-23.05 分支补回。
 apply_luci_feed_25_12_package_overrides() {
     if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
