@@ -14,14 +14,14 @@ show_help() {
 用法：
   直接通过环境变量传参后执行脚本，例如：
 
-  WRT_DEVICE=MT6000-WIFI \
+  WRT_DEVICE=CMIOT-AX18-NOWIFI \
   WRT_FIREWALL=fw3 \
   WRT_OVERLAYS=frps,apk \
   bash Scripts/local_menuconfig.sh
 
 主要参数（尽量对齐 DEFAULT.yml）：
   OPENWRT_PATH           本地 OpenWrt 源码目录，默认 /Volumes/OpenWrt/lede
-  WRT_DEVICE             设备名，必填，例如 MT6000-WIFI
+  WRT_DEVICE             设备名，必填，例如 CMIOT-AX18-NOWIFI、JD-AX1800PRO-WIFI
   WRT_FIREWALL           防火墙栈，必填，fw3 或 fw4
   WRT_OVERLAYS           可选 overlays，逗号分隔，例如 frps,apk
                          同一 OVERLAY_GROUP 内按传入顺序以最后一个为准
@@ -110,7 +110,7 @@ LOCAL_SKIP_MENUCONFIG=${LOCAL_SKIP_MENUCONFIG:-false}
 LOCAL_CLEAN_GENERATED=${LOCAL_CLEAN_GENERATED:-true}
 
 [ -n "$WRT_DEVICE" ] || {
-	echo "缺少 WRT_DEVICE，例如 MT6000-WIFI" >&2
+	echo "缺少 WRT_DEVICE，例如 CMIOT-AX18-NOWIFI" >&2
 	exit 1
 }
 

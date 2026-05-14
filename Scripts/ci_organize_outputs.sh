@@ -38,14 +38,14 @@ release_desc_file="${openwrt_path}/readme_release.txt"
 echo "readme_desc_file=${readme_desc_file}" >> "${GITHUB_ENV}"
 echo "release_desc_file=${release_desc_file}" >> "${GITHUB_ENV}"
 
-# build_name_prefix 是所有导出文件共享的命名前缀。
-# 调整为“平台 / 设备 / 源码风味+FW+FRP / 版本 / 编译开始时间”，
-# 让同平台同设备的产物在目录和发布页里更容易聚在一起。
-build_name_prefix="${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${DEVICE_NAME_LIST_LIAN:?DEVICE_NAME_LIST_LIAN is required}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}"
+# output_name_prefix 是所有导出文件共享的命名前缀。
+# 命名格式统一为“源码风味 / 设备别名 / 可选 nowifi / FW / FRP / 包管理器 / 编译开始时间”，
+# 避免文件名里继续混入 target 子平台和源码版本等冗余字段。
+output_name_prefix="${OUTPUT_NAME_PREFIX:-${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${DEVICE_NAME_LIST_LIAN:?DEVICE_NAME_LIST_LIAN is required}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}}"
 
 # 导出配置说明与 README 到 upload/ 根目录。
-cp -f ./my_config.txt "./upload/config_${build_name_prefix}.txt"
-cp -f "${readme_desc_file}" "./upload/readme_${build_name_prefix}.txt"
+cp -f ./my_config.txt "./upload/config_${output_name_prefix}.txt"
+cp -f "${readme_desc_file}" "./upload/readme_${output_name_prefix}.txt"
 
 tmp_dir="$(mktemp -d)"
 # 先把分散在 bin/ 下的所有 ipk/apk 收拢到临时目录，再统一重组和压缩。
@@ -58,7 +58,7 @@ find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
 # 按手工维护的包分组规则整理安装包目录，再打成一个压缩包给用户下载。
 # 这里保留压缩包而不是原始目录，是为了减少 artifact / release 中文件数量。
 bash "${scripts_dir}/Organize_Packages.sh" "${tmp_dir}" "./.config"
-tar -zcf "./upload/Packages_${build_name_prefix}.tar.gz" -C "${tmp_dir}" --transform 's,^./,,' .
+tar -zcf "./upload/Packages_${output_name_prefix}.tar.gz" -C "${tmp_dir}" --transform 's,^./,,' .
 rm -rf "${tmp_dir}"
 rm -rf ./upload/packages
 
@@ -74,7 +74,8 @@ for type in ${DEVICE_NAME_LIST:-}; do
         # 从原始文件名中提取“设备名起始后的剩余主体”，
         # 例如 cmiot_ax18-squashfs-sysupgrade，用于保留镜像种类信息。
         name="$(basename "${file}" | cut -d '.' -f 1 | grep -io "\(${type}\).*")"
-        new_file="${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${name}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}.${ext}"
+        image_kind="${name#${type}-}"
+        new_file="${output_name_prefix}_${image_kind}.${ext}"
         mv -f "${file}" "./upload/${new_file}"
     done < <(find ./bin/targets/ -type f -iname "*${type}*.*")
 done

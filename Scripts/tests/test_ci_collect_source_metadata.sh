@@ -37,4 +37,6 @@ if grep -q '^SOURCE_FLAVOR=' "$TMPDIR/meta.env"; then
     exit 1
 fi
 
+grep -q '^DEVICE_NAME_LIST_LIAN=cmiot_ax18$' "$TMPDIR/meta.env"
+
 echo "test_ci_collect_source_metadata: ok"

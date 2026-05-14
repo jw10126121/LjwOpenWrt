@@ -21,11 +21,11 @@ permissions: write-all
 
 #CI任务
 jobs:
-  ipq60xx_nowifi_fw3:
-    name: lean-IPQ60XX-NOWIFI-fw3-base
+  cmiot_ax18_nowifi_fw3:
+    name: lean-CMIOT-AX18-NOWIFI-fw3-base
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -35,11 +35,11 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  ipq60xx_nowifi_fw3_frps:
-    name: lean-IPQ60XX-NOWIFI-fw3-frps
+  cmiot_ax18_nowifi_fw3_frps:
+    name: lean-CMIOT-AX18-NOWIFI-fw3-frps
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: frps
       WRT_DIY_SETTING: diy_config.sh

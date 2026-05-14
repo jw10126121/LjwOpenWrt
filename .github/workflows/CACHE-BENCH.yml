@@ -17,11 +17,12 @@ on:
         required: true
         type: choice
         options:
-          - IPQ60XX-NOWIFI
-          - IPQ60XX-NOWIFI-MINI
+          - CMIOT-AX18-NOWIFI
+          - CMIOT-AX18-NOWIFI-MINI
+          - JD-AX1800PRO-WIFI
           - MT6000-WIFI
           - MT6000-WIFI-MINI
-        default: 'IPQ60XX-NOWIFI-MINI'
+        default: 'CMIOT-AX18-NOWIFI'
       WRT_FIREWALL:
         description: '防火墙栈'
         required: true

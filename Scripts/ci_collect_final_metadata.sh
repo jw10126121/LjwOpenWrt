@@ -49,6 +49,42 @@ choose_preferred_version() {
     printf '%s\n' "${primary:-${secondary}}"
 }
 
+map_device_name_alias() {
+    local raw_name=$1
+
+    case "${raw_name}" in
+        jdcloud_re-ss-01|jdcloud_ax1800pro)
+            printf '%s\n' 'jd_ax1800pro'
+            ;;
+        *)
+            printf '%s\n' "${raw_name}"
+            ;;
+    esac
+}
+
+build_device_name_alias() {
+    local raw_list=$1
+    local old_ifs raw_name alias joined
+
+    old_ifs=$IFS
+    IFS='、'
+    set -- $raw_list
+    IFS=$old_ifs
+
+    joined=''
+    for raw_name in "$@"; do
+        [ -n "${raw_name}" ] || continue
+        alias="$(map_device_name_alias "${raw_name}")"
+        if [ -n "${joined}" ]; then
+            joined="${joined}_and_${alias}"
+        else
+            joined="${alias}"
+        fi
+    done
+
+    printf '%s\n' "${joined}"
+}
+
 extract_config_version() {
     local config_path=$1
     sed -n 's/^CONFIG_VERSION_NUMBER="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "${config_path}" | head -n1 | while IFS= read -r line; do
@@ -106,6 +142,7 @@ repo_git_hash="${REPO_GIT_HASH:-}"
 source_flavor='lean'
 device_target="${DEVICE_TARGET:-}"
 device_subtarget="${DEVICE_SUBTARGET:-}"
+device_profile="${DEVICE_PROFILE:-}"
 device_arch="$(sed -n 's/^CONFIG_TARGET_ARCH_PACKAGES="\([^"]*\)"/\1/p' "${openwrt_path}/.config" | head -n1 || true)"
 config_version="$(extract_config_version "${openwrt_path}/.config")"
 include_version="$(extract_include_version "${openwrt_path}/include/version.mk")"
@@ -120,6 +157,8 @@ fw_stack_tag='unknown'
 frp_role='未集成'
 frp_role_tag='none'
 source_flavor_tag="$(printf '%s' "${source_flavor}" | tr '[:upper:]' '[:lower:]')"
+device_name_alias="$(build_device_name_alias "${device_profile}")"
+start_time_tag="${START_TIME:-D000000_T000000}"
 
 if [ "${wrt_has_lite}" = "true" ]; then
     wrt_has_lite_text='[精简版]'
@@ -166,6 +205,12 @@ fi
 
 build_variant_tag="${source_flavor_tag}_${fw_stack_tag}_${frp_role_tag}_${package_manager_tag}"
 
+if [ "${wrt_has_wifi}" != "true" ]; then
+    output_name_prefix="${source_flavor_tag}_${device_name_alias}_nowifi_${fw_stack_tag}_${frp_role_tag}_${package_manager_tag}_${start_time_tag}"
+else
+    output_name_prefix="${source_flavor_tag}_${device_name_alias}_${fw_stack_tag}_${frp_role_tag}_${package_manager_tag}_${start_time_tag}"
+fi
+
 # 统一拼接给 README / 通知消息使用的固件说明正文。
 # 文案仍保持“内核版本 / LUCI版本 / OP版本”，以兼容现有通知与 README，
 # 但代码层已经把三者的来源和用途拆开，避免把 LuCI feed 版本与主源码版本混为一谈。
@@ -196,6 +241,8 @@ PACKAGE_MANAGER_TAG=${package_manager_tag}
 FW_STACK_TAG=${fw_stack_tag}
 FRP_ROLE_TAG=${frp_role_tag}
 BUILD_VARIANT_TAG=${build_variant_tag}
+DEVICE_NAME_ALIAS=${device_name_alias}
+OUTPUT_NAME_PREFIX=${output_name_prefix}
 system_content<<EOF_SYSTEM
 ${system_content}
 EOF_SYSTEM

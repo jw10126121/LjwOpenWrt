@@ -134,13 +134,13 @@ show_help() {
 
 示例：
   bash Scripts/export_config.sh \
-    --device IPQ60XX-NOWIFI \
+    --device CMIOT-AX18-NOWIFI \
     --fw fw3 \
     --overlay frps,apk \
-    --output /tmp/IPQ60XX-NOWIFI-fw3-frps-apk.txt
+    --output /tmp/CMIOT-AX18-NOWIFI-fw3-frps-apk.txt
 
 参数：
-  --device      设备名，例如 IPQ60XX-NOWIFI
+  --device      设备名，例如 CMIOT-AX18-NOWIFI、JD-AX1800PRO-WIFI
   --fw          防火墙栈，fw3 或 fw4
   --overlay     可选 overlay 列表，逗号分隔，例如 frps,apk
                 同一 OVERLAY_GROUP 内按传入顺序以最后一个为准

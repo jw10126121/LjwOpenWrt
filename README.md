@@ -4,8 +4,9 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 ## 支持目标
 
-- `IPQ60XX-NOWIFI`
-- `IPQ60XX-NOWIFI-MINI`
+- `CMIOT-AX18-NOWIFI`
+- `CMIOT-AX18-NOWIFI-MINI`
+- `JD-AX1800PRO-WIFI`
 - `MT6000-WIFI`
 - `MT6000-WIFI-MINI`
 
@@ -33,8 +34,8 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 常用预设示例：
 
-- `AX18 无 Wi-Fi`：`WRT_DEVICE=IPQ60XX-NOWIFI`
-- `京东云亚瑟 AX1800 Pro 带 Wi-Fi`：`WRT_DEVICE=IPQ60XX-NOWIFI WRT_OVERLAYS=ax1800pro-wifi`
+- `AX18 无 Wi-Fi`：`WRT_DEVICE=CMIOT-AX18-NOWIFI`
+- `京东云亚瑟 AX1800 Pro 带 Wi-Fi`：`WRT_DEVICE=JD-AX1800PRO-WIFI`
 
 ## 配置组织
 
@@ -47,8 +48,9 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 主维护文件：
 
-- `IPQ60XX-NOWIFI`：`Config/IPQ60XX-NOWIFI-FW3.txt`
-- `IPQ60XX-NOWIFI-MINI`：`Config/IPQ60XX-NOWIFI-MINI-FW3.txt`
+- `CMIOT-AX18-NOWIFI`：`Config/CMIOT-AX18-NOWIFI-FW3.txt`
+- `CMIOT-AX18-NOWIFI-MINI`：`Config/CMIOT-AX18-NOWIFI-MINI-FW3.txt`
+- `JD-AX1800PRO-WIFI`：`Config/JD-AX1800PRO-WIFI-FW3.txt`
 - `MT6000-WIFI`：`Config/MT6000-WIFI-FW3.txt`
 - `MT6000-WIFI-MINI`：`Config/MT6000-WIFI-MINI-FW3.txt`
 
@@ -58,7 +60,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - `WRT_OVERLAYS=myvpn` 会映射到 `Config/overlays/MYVPN.txt`
 - 后面的 overlay 会覆盖前面的同名配置
 - 若 overlay 文件里声明了 `# OVERLAY_GROUP=<组名>`，则同组只保留最后出现的那个 overlay
-- `AX1800PRO-WIFI` overlay 用于在 `IPQ60XX-NOWIFI` 基线上切换到 `JDCloud RE-SS-01` 并恢复无线能力
+- 当前不再使用设备 alias 做隐式基线切换；`CMIOT-AX18-*` 与 `JD-AX1800PRO-WIFI` 都是显式配置入口
 
 ## 固件默认值
 

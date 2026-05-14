@@ -12,19 +12,18 @@ cleanup() {
 trap cleanup EXIT
 
 BASE_OUT="$TMPDIR/ipq60xx-base.txt"
-AX1800_OUT="$TMPDIR/ipq60xx-ax1800pro-wifi.txt"
+AX1800_OUT="$TMPDIR/jd-ax1800pro-wifi.txt"
 
 bash "$EXPORT_SCRIPT" \
 	--config-dir "$SCRIPT_DIR/../Config" \
-	--device "IPQ60XX-NOWIFI" \
+	--device "CMIOT-AX18-NOWIFI" \
 	--fw "fw3" \
 	--output "$BASE_OUT" >/dev/null
 
 bash "$EXPORT_SCRIPT" \
 	--config-dir "$SCRIPT_DIR/../Config" \
-	--device "IPQ60XX-NOWIFI" \
+	--device "JD-AX1800PRO-WIFI" \
 	--fw "fw3" \
-	--overlay "ax1800pro-wifi" \
 	--output "$AX1800_OUT" >/dev/null
 
 grep -n '^CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=' "$BASE_OUT" | tail -n 1 | grep -q 'CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y'
@@ -42,13 +41,13 @@ grep -n '^CONFIG_PACKAGE_ath11k-firmware-ipq6018=' "$AX1800_OUT" | tail -n 1 | g
 grep -n '^CONFIG_PACKAGE_wpad-openssl=' "$AX1800_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_wpad-openssl=y'
 grep -n '^CONFIG_PACKAGE_hostapd-common=' "$AX1800_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_hostapd-common=y'
 
-if grep -q '^CONFIG_PACKAGE_ipq-wifi-jdcloud_re-ss-01=y$' "$AX1800_OUT"; then
+if grep -n '^CONFIG_PACKAGE_ipq-wifi-jdcloud_re-ss-01=' "$AX1800_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_ipq-wifi-jdcloud_re-ss-01=y'; then
 	:
-elif grep -q '^CONFIG_PACKAGE_ipq-wifi-jdcloud_ax1800pro=y$' "$AX1800_OUT"; then
+elif grep -n '^CONFIG_PACKAGE_ipq-wifi-jdcloud_ax1800pro=' "$AX1800_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_ipq-wifi-jdcloud_ax1800pro=y'; then
 	:
 else
-	echo "AX1800PRO-WIFI overlay should enable a JDCloud AX1800 Pro board data package" >&2
+	echo "JD-AX1800PRO-WIFI should enable a JDCloud AX1800 Pro board data package" >&2
 	exit 1
 fi
 
-echo "test_ipq60xx_ax1800pro_wifi_overlay: ok"
+echo "test_jd_ax1800pro_wifi_export: ok"

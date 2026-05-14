@@ -54,19 +54,22 @@ EOF
 run_case() {
     local root_dir=$1
     local output_file=$2
+    local has_wifi=${3:-true}
+    local device_profile=${4:-cmiot_ax18}
 
     OPENWRT_PATH="$root_dir" \
     WRT_DEFAULT_LANIP="192.168.0.1" \
     WRT_HAS_LITE=false \
-    WRT_HAS_WIFI=true \
+    WRT_HAS_WIFI="$has_wifi" \
     WRT_REPO_URL="https://github.com/example/openwrt" \
     WRT_REPO_BRANCH="main" \
     SOURCE_FLAVOR="lean" \
     DEVICE_TARGET="qualcommax" \
     DEVICE_SUBTARGET="ipq60xx" \
-    DEVICE_PROFILE="cmiot_ax18" \
+    DEVICE_PROFILE="$device_profile" \
     VERSION_KERNEL="6.12.80" \
     REPO_GIT_HASH="test-hash" \
+    START_TIME="D260514_T003050" \
     bash "$FINAL_SCRIPT" > "$output_file"
 }
 
@@ -87,6 +90,11 @@ grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case1.env"
 grep -q '^LUCI_VERSION=24.10.5$' "$TMPDIR/case1.env"
 grep -q '^PACKAGE_MANAGER_TAG=ipk$' "$TMPDIR/case1.env"
 grep -q '^BUILD_VARIANT_TAG=lean_fw4_frpc_ipk$' "$TMPDIR/case1.env"
+grep -q '^DEVICE_NAME_ALIAS=cmiot_ax18$' "$TMPDIR/case1.env"
+grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_fw4_frpc_ipk_D260514_T003050$' "$TMPDIR/case1.env" || {
+    echo "case1 should emit the lean_cmiot_ax18 fw4 output prefix" >&2
+    exit 1
+}
 
 CASE_DIR2="$TMPDIR/explicit-luci-branch"
 make_openwrt_tree \
@@ -122,5 +130,45 @@ run_case "$CASE_DIR3" "$TMPDIR/case3.env"
 grep -q '^FW_STACK_TAG=mixed$' "$TMPDIR/case3.env"
 grep -q 'FW环境：FW3+FW4(冲突)' "$TMPDIR/case3.env"
 grep -q '^BUILD_VARIANT_TAG=lean_mixed_frpc_ipk$' "$TMPDIR/case3.env"
+
+CASE_DIR4="$TMPDIR/nowifi-ax18"
+make_openwrt_tree \
+    "$CASE_DIR4" \
+    "OpenWrt 24.10.5" \
+    "VERSION_NUMBER:= OpenWrt, 24.10.5" \
+    "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" \
+    "fw3"
+
+mv "$CASE_DIR4/include.version.mk" "$CASE_DIR4/version.mk.tmp"
+mkdir -p "$CASE_DIR4/include"
+mv "$CASE_DIR4/version.mk.tmp" "$CASE_DIR4/include/version.mk"
+
+run_case "$CASE_DIR4" "$TMPDIR/case4.env" "false" "cmiot_ax18"
+
+grep -q '^DEVICE_NAME_ALIAS=cmiot_ax18$' "$TMPDIR/case4.env"
+grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260514_T003050$' "$TMPDIR/case4.env" || {
+    echo "case4 should emit the lean_cmiot_ax18_nowifi fw3 output prefix" >&2
+    exit 1
+}
+
+CASE_DIR5="$TMPDIR/jd-ax1800pro-wifi"
+make_openwrt_tree \
+    "$CASE_DIR5" \
+    "OpenWrt 24.10.5" \
+    "VERSION_NUMBER:= OpenWrt, 24.10.5" \
+    "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" \
+    "fw3"
+
+mv "$CASE_DIR5/include.version.mk" "$CASE_DIR5/version.mk.tmp"
+mkdir -p "$CASE_DIR5/include"
+mv "$CASE_DIR5/version.mk.tmp" "$CASE_DIR5/include/version.mk"
+
+run_case "$CASE_DIR5" "$TMPDIR/case5.env" "true" "jdcloud_re-ss-01"
+
+grep -q '^DEVICE_NAME_ALIAS=jd_ax1800pro$' "$TMPDIR/case5.env"
+grep -q '^OUTPUT_NAME_PREFIX=lean_jd_ax1800pro_fw3_frpc_ipk_D260514_T003050$' "$TMPDIR/case5.env" || {
+    echo "case5 should emit the lean_jd_ax1800pro fw3 output prefix" >&2
+    exit 1
+}
 
 echo "test_ci_collect_metadata_version_priority: ok"

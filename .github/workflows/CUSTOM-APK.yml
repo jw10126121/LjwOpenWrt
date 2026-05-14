@@ -16,11 +16,11 @@ permissions: write-all
 
 #CI任务
 jobs:
-  ipq60xx_nowifi_fw3_apk:
-    name: lean-IPQ60XX-NOWIFI-fw3-apk
+  cmiot_ax18_nowifi_fw3_apk:
+    name: lean-CMIOT-AX18-NOWIFI-fw3-apk
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: apk
       WRT_DIY_SETTING: diy_config.sh
@@ -30,11 +30,11 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  ipq60xx_nowifi_mini_fw3_apk:
-    name: lean-IPQ60XX-NOWIFI-MINI-fw3-apk
+  cmiot_ax18_nowifi_mini_fw3_apk:
+    name: lean-CMIOT-AX18-NOWIFI-MINI-fw3-apk
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI-MINI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI-MINI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: apk
       WRT_DIY_SETTING: diy_config.sh
@@ -44,11 +44,11 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  ipq60xx_nowifi_fw3_frps_apk:
-    name: lean-IPQ60XX-NOWIFI-fw3-frps-apk
+  cmiot_ax18_nowifi_fw3_frps_apk:
+    name: lean-CMIOT-AX18-NOWIFI-fw3-frps-apk
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: frps,apk
       WRT_DIY_SETTING: diy_config.sh
@@ -58,11 +58,11 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  ipq60xx_nowifi_mini_fw3_frps_apk:
-    name: lean-IPQ60XX-NOWIFI-MINI-fw3-frps-apk
+  cmiot_ax18_nowifi_mini_fw3_frps_apk:
+    name: lean-CMIOT-AX18-NOWIFI-MINI-fw3-frps-apk
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: IPQ60XX-NOWIFI-MINI
+      WRT_DEVICE: CMIOT-AX18-NOWIFI-MINI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: frps,apk
       WRT_DIY_SETTING: diy_config.sh

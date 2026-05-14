@@ -48,7 +48,8 @@ assert_contains "$default_workflow" "workflow_call:" "DEFAULT should be reusable
 assert_contains "$default_workflow" "WRT_OVERLAYS:" "DEFAULT reusable workflow should expose overlays input"
 assert_contains "$default_workflow" "WRT_LUCI_BRANCH:" "DEFAULT reusable workflow should expose LuCI branch input"
 assert_contains "$default_workflow" 'WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}' "DEFAULT should pass LuCI branch through to CORE-ALL"
-assert_contains "$default_workflow" "IPQ60XX-NOWIFI-MINI" "DEFAULT should expose IPQ MINI in manual choices"
+assert_contains "$default_workflow" "CMIOT-AX18-NOWIFI" "DEFAULT should expose AX18 entry in manual choices"
+assert_contains "$default_workflow" "JD-AX1800PRO-WIFI" "DEFAULT should expose JD AX1800 Pro entry in manual choices"
 assert_contains "$default_workflow" "MT6000-WIFI-MINI" "DEFAULT should expose MT6000 MINI in manual choices"
 
 assert_not_contains_before_jobs "$custom_workflow" "WRT_DEVICE:" "CUSTOM should no longer expose per-run device input"
@@ -57,12 +58,12 @@ assert_not_contains_before_jobs "$custom_workflow" "WRT_SOURCE_FLAVOR:" "CUSTOM 
 assert_contains "$custom_workflow" "uses: ./.github/workflows/DEFAULT.yml" "CUSTOM should call DEFAULT reusable workflow"
 assert_contains "$custom_workflow" "secrets: inherit" "CUSTOM should inherit secrets when calling DEFAULT"
 
-assert_contains "$custom_workflow" "ipq60xx_nowifi_fw3:" "CUSTOM should include IPQ60XX fw3 preset"
-assert_contains "$custom_workflow" "WRT_DEVICE: IPQ60XX-NOWIFI" "IPQ60XX preset should pass the correct device"
+assert_contains "$custom_workflow" "cmiot_ax18_nowifi_fw3:" "CUSTOM should include AX18 fw3 preset"
+assert_contains "$custom_workflow" "WRT_DEVICE: CMIOT-AX18-NOWIFI" "AX18 preset should pass the correct device"
 assert_contains "$custom_workflow" "WRT_FIREWALL: fw3" "fw3 preset should be present"
 assert_contains "$custom_workflow" 'WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}' "CUSTOM should pass release toggle through to DEFAULT"
 
-assert_contains "$custom_workflow" "ipq60xx_nowifi_fw3_frps:" "CUSTOM should include IPQ60XX frps preset"
+assert_contains "$custom_workflow" "cmiot_ax18_nowifi_fw3_frps:" "CUSTOM should include AX18 frps preset"
 assert_contains "$custom_workflow" "WRT_OVERLAYS: frps" "frps preset should pass overlays"
 
 assert_contains "$custom_workflow" "mt6000_wifi_fw3:" "CUSTOM should include MT6000 fw3 preset"

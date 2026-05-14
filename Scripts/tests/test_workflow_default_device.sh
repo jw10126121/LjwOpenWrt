@@ -14,7 +14,7 @@ assert_contains() {
 	fi
 }
 
-assert_contains ".github/workflows/DEFAULT.yml" "default: 'IPQ60XX-NOWIFI-MINI'" "DEFAULT manual run should default to IPQ60XX-NOWIFI-MINI"
-assert_contains ".github/workflows/CACHE-BENCH.yml" "default: 'IPQ60XX-NOWIFI-MINI'" "CACHE-BENCH manual run should default to IPQ60XX-NOWIFI-MINI"
+assert_contains ".github/workflows/DEFAULT.yml" "default: 'CMIOT-AX18-NOWIFI'" "DEFAULT manual run should default to CMIOT-AX18-NOWIFI"
+assert_contains ".github/workflows/CACHE-BENCH.yml" "default: 'CMIOT-AX18-NOWIFI'" "CACHE-BENCH manual run should default to CMIOT-AX18-NOWIFI"
 
 echo "test_workflow_default_device: ok"
