@@ -583,6 +583,19 @@ fallback_adguardhome_package_25_12() {
 # 下列函数都属于“后置修补链”：
 # 前提是包已经通过前面的覆盖流程存在于 package/ 或 feeds 中，
 # 然后再对 Makefile、脚本、资源文件做最小修补，使其更适配当前源码与设备配置。
+ensure_luci_app_frp_init_permissions() {
+    local init_file
+
+    for init_file in \
+        "./luci-app-frpc/root/etc/init.d/frpc" \
+        "./luci-app-frps/root/etc/init.d/frps"; do
+        if [ -f "${init_file}" ]; then
+            chmod 0755 "${init_file}"
+            echo "【Lin】已补齐执行权限：${init_file}"
+        fi
+    done
+}
+
 update_openvpn_easy_rsa_version() {
     UPDATE_VERSION "openvpn-easy-rsa"
 }
@@ -686,6 +699,7 @@ preload_homeproxy_resources() {
 apply_post_update_fixes() {
     fix_quickfile_makefile
     apply_lang_node_prebuilt_fix
+    ensure_luci_app_frp_init_permissions
     fallback_adguardhome_package_25_12
     update_openvpn_easy_rsa_version
     fix_tailscale_makefile
