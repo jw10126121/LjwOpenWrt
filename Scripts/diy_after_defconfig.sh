@@ -5,7 +5,7 @@
 # Author: Linjw
 # 通用的diy配置脚本
 # 该脚本在config确认后于openwrt目录下执行
-# 主要职责：根据最终 .config 补充架构相关资源，例如 OpenClash Meta 内核、HomeProxy 规则集。
+# 主要职责：根据最终 .config 补充架构相关资源，例如 HomeProxy 规则集。
 #=================================================
 
 # 运行在openwrt目录下
@@ -83,73 +83,7 @@ trim_passwall_variants_after_defconfig() {
     return 0
 }
 
-prepare_openclash_meta_core() {
-    # 仅在启用了 luci-app-openclash 且架构受支持时，预置 clash_meta 二进制到插件目录。
-    local choose_type_openclash openclash_dir openclash_core_arch openclash_core_url
-    local openclash_root_dir openclash_core_dir temp_dir temp_tar
-
-    choose_type_openclash=$(get_config_value "CONFIG_PACKAGE_luci-app-openclash")
-    if [ -z "${choose_type_openclash}" ] || [ "${choose_type_openclash}" = "n" ]; then
-        echo "【Lin】未启用 luci-app-openclash，跳过 Meta 内核预置"
-        return 0
-    fi
-
-    openclash_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-openclash" -print -quit)
-    if [ -z "${openclash_dir}" ] || [ ! -d "${openclash_dir}" ]; then
-        echo "【Lin】警告：已启用 luci-app-openclash，但未找到插件目录，跳过 Meta 内核预置"
-        return 0
-    fi
-
-    case "${cputype_simple}" in
-        amd64|arm64)
-            openclash_core_arch="${cputype_simple}"
-            ;;
-        *)
-            echo "【Lin】警告：OpenClash Meta 内核暂不支持当前架构 ${cputype:-unknown}，跳过预置"
-            return 0
-            ;;
-    esac
-
-    openclash_root_dir="$(readlink -f "${openclash_dir}")/root/etc/openclash"
-    openclash_core_dir="${openclash_root_dir}/core"
-    openclash_core_url="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-${openclash_core_arch}.tar.gz"
-
-    mkdir -p "${openclash_core_dir}"
-    temp_dir=$(mktemp -d "${openwrt_workdir}/tmp/openclash-meta.XXXXXX") || {
-        echo "【Lin】警告：无法创建 OpenClash 临时目录，跳过 Meta 内核预置"
-        return 0
-    }
-    temp_tar="${temp_dir}/clash-meta.tar.gz"
-
-    echo "【Lin】开始预置 OpenClash Meta 内核：${openclash_core_arch}"
-    if ! curl -fL --connect-timeout 30 --retry 3 --retry-delay 2 -o "${temp_tar}" "${openclash_core_url}"; then
-        echo "【Lin】警告：下载 OpenClash Meta 内核失败：${openclash_core_url}"
-        rm -rf "${temp_dir}"
-        return 0
-    fi
-
-    if ! tar -xzf "${temp_tar}" -C "${temp_dir}"; then
-        echo "【Lin】警告：解压 OpenClash Meta 内核失败"
-        rm -rf "${temp_dir}"
-        return 0
-    fi
-
-    if [ ! -f "${temp_dir}/clash" ]; then
-        echo "【Lin】警告：OpenClash Meta 内核压缩包内未找到 clash 主程序"
-        rm -rf "${temp_dir}"
-        return 0
-    fi
-
-    mv -f "${temp_dir}/clash" "${openclash_core_dir}/clash_meta"
-    chmod 0755 "${openclash_core_dir}/clash_meta"
-    rm -rf "${temp_dir}"
-
-    echo "【Lin】OpenClash Meta 内核预置完成：${openclash_core_dir}/clash_meta"
-    return 0
-}
-
 trim_passwall_variants_after_defconfig
-prepare_openclash_meta_core
 
 cd "${openwrt_workdir}"
 # HomeProxy 规则依赖外部 surge-rules 仓库，这里在编译前直接预置到插件资源目录。
@@ -184,7 +118,6 @@ if [ -n "${choose_type_homeproxy}" ] && [ "${choose_type_homeproxy}" != "n" ] &&
         echo "【Lin】homeproxy date has been updated!"
     fi 
 fi
-
 
 
 
