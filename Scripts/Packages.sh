@@ -146,12 +146,13 @@ update_package_list() {
     local package_name_list=($1)
     local package_repo=$2
     local package_branch=$3
+    local repo_root_files=${4:-}
     local full_repo
     local repo_url_git
     local repo_name_last
     local repo_name
     local existing_repo
-    local package_name
+    local package_name repo_root_file
 
     for package_name in "${package_name_list[@]}"; do
         DELETE_PACKAGE "${package_name}"
@@ -181,8 +182,70 @@ update_package_list() {
         MOVE_PACKAGE_FROM_LIST "${package_name}" "${repo_name}"
     done
 
+    if [ -n "${repo_root_files}" ]; then
+        for repo_root_file in ${repo_root_files}; do
+            if [ -f "./${repo_name}/${repo_root_file}" ]; then
+                cp -f "./${repo_name}/${repo_root_file}" "./${repo_root_file}"
+                echo "【Lin】复制插件包库${repo_name}的根文件${repo_root_file}到package中"
+            else
+                echo "【Lin】未找到插件包库${repo_name}的根文件：${repo_root_file}"
+            fi
+        done
+    fi
+
     echo "【Lin】删除插件包库：${repo_name}"
     rm -rf "${repo_name}"
+}
+
+prepare_easytier_version_file() {
+    local package_dir=$1
+    local target_version=${2:-}
+    local upstream_version_file="${package_dir}/version.mk"
+    local version_file="${package_dir}/easytier-version.mk"
+    local makefiles="
+${package_dir}/easytier/Makefile
+${package_dir}/luci-app-easytier/Makefile
+"
+    local makefile
+    local temp_file
+
+    if [ -f "${upstream_version_file}" ]; then
+        cp -f "${upstream_version_file}" "${version_file}"
+        rm -f "${upstream_version_file}"
+    elif [ ! -f "${version_file}" ]; then
+        echo "【Lin】未找到 EasyTier 上游版本文件：${upstream_version_file}"
+        return 0
+    fi
+
+    for makefile in ${makefiles}; do
+        if [ ! -f "${makefile}" ]; then
+            echo "【Lin】未找到 EasyTier Makefile：${makefile}"
+            continue
+        fi
+
+        temp_file=$(mktemp "${makefile##*/}.XXXXXX") || {
+            echo "【Lin】警告：无法创建 EasyTier Makefile 临时文件：${makefile}"
+            return 0
+        }
+
+        awk '
+            {
+                gsub(/\.\.\/version\.mk/, "../easytier-version.mk")
+                print
+            }
+        ' "${makefile}" > "${temp_file}"
+
+        mv -f "${temp_file}" "${makefile}"
+    done
+    
+    if [ -n "${target_version}" ]; then
+        cat > "${version_file}" <<EOF
+# EasyTier Version Configuration
+EASYTIER_VERSION=${target_version}
+EOF
+
+        echo "【Lin】已固定 EasyTier release 版本：${target_version}"
+    fi
 }
 
 # safe_update_package 适用于“要直接覆盖现有包目录，但失败时必须可回滚”的场景。
@@ -282,7 +345,7 @@ resolve_packages_luci_feed_branch() {
 apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
     UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
-    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"
+    UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "master" "pkg"
 
     update_package_list "luci-app-onliner" "danchexiaoyang/luci-app-onliner" "main"
     update_package_list "wrtbwmon" "brvphoenix/wrtbwmon" "master"
@@ -295,8 +358,9 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main"
-    # update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "releases/v2.6.4"
+    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main" "version.mk"
+    local easytier_release_version='2.6.4' # 注释掉这两行表示跟随包仓声明版本
+    prepare_easytier_version_file "." "${easytier_release_version}"
     
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
