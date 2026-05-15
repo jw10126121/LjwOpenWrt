@@ -286,21 +286,9 @@ apply_lean_runtime_customizations() {
     local dhcp_ip_start=10
     local dhcp_ip_end=254
     local dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
-    local frp_snippet holdoff_snippet dhcp_snippet remove_sqm_scripts_nss remove_nss_packages
+    local holdoff_snippet dhcp_snippet remove_sqm_scripts_nss remove_nss_packages
 
     [ -f "$file_default_settings" ] || return 0
-
-    frp_snippet=$(cat <<'EOF'
-[ -f /usr/bin/frpc ] && chmod +x /usr/bin/frpc
-[ -f /usr/bin/frps ] && chmod +x /usr/bin/frps
-[ -f /etc/init.d/frpc ] && chmod +x /etc/init.d/frpc
-[ -f /etc/init.d/frps ] && chmod +x /etc/init.d/frps
-EOF
-)
-    append_default_settings_snippet "uci commit system" "/etc/init.d/frpc" "$frp_snippet"
-    if grep -qF '/etc/init.d/frpc' "$file_setup_config"; then
-        echo "【Lin】修改frpc、frps执行权限成功！"
-    fi
 
     holdoff_snippet=$(cat <<'EOF'
 uci set luci.apply.holdoff=3

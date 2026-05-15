@@ -34,8 +34,8 @@ CONFIG_PACKAGE_luci-app-advancedplus=m       # 高级设置增强版
 CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m # 高级设置增强版中文语言包
 CONFIG_PACKAGE_luci-app-wol=y                # Wake on LAN
 CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y         # WOL 中文语言包
-CONFIG_PACKAGE_luci-app-wolplus=y            # 增强版 WOL
-CONFIG_PACKAGE_luci-app-timewol=y            # 定时 WOL
+#CONFIG_PACKAGE_luci-app-wolplus=m           # 增强版 WOL
+CONFIG_PACKAGE_luci-app-timewol=m            # 定时 WOL
 
 # ------------------------------------------------------------------------
 #  菜单整理：状态
