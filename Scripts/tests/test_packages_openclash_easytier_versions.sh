@@ -28,10 +28,10 @@ if printf '%s\n' "$COMMON_BODY" | grep -q 'UPDATE_PACKAGE "luci-app-openclash" "
 	exit 1
 fi
 
-printf '%s\n' "$COMMON_BODY" | grep -q 'prepare_easytier_version_file'
-printf '%s\n' "$COMMON_BODY" | grep -q 'update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main" "version.mk"'
+printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version'
+printf '%s\n' "$COMMON_BODY" | grep -q 'update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"'
 printf '%s\n' "$COMMON_BODY" | grep -q "local easytier_release_version='2.6.4'"
-printf '%s\n' "$COMMON_BODY" | grep -q 'prepare_easytier_version_file "." "${easytier_release_version}"'
+printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version "." "${easytier_release_version}"'
 
 TMPDIR=$(mktemp -d)
 cleanup() {
@@ -40,31 +40,48 @@ cleanup() {
 trap cleanup EXIT
 
 FUNCTIONS_FILE="$TMPDIR/functions.sh"
-extract_function "prepare_easytier_version_file" > "$FUNCTIONS_FILE"
+extract_function "pin_easytier_binary_version" > "$FUNCTIONS_FILE"
 
 TEST_REPO="$TMPDIR/package"
-mkdir -p "$TEST_REPO/easytier" "$TEST_REPO/luci-app-easytier"
-cat > "$TEST_REPO/version.mk" <<'EOF'
-# EasyTier Version Configuration
-EASYTIER_VERSION=2.6.2
-EOF
+mkdir -p "$TEST_REPO/easytier" "$TEST_REPO/easytier-noweb" "$TEST_REPO/luci-app-easytier"
 cat > "$TEST_REPO/easytier/Makefile" <<'EOF'
--include $(dir $(lastword $(MAKEFILE_LIST)))../version.mk
+PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)
+EOF
+cat > "$TEST_REPO/easytier-noweb/Makefile" <<'EOF'
+PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)
 EOF
 cat > "$TEST_REPO/luci-app-easytier/Makefile" <<'EOF'
--include $(dir $(lastword $(MAKEFILE_LIST)))../version.mk
+PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)
 EOF
 
 # shellcheck disable=SC1090
 . "$FUNCTIONS_FILE"
-prepare_easytier_version_file "$TEST_REPO"
+pin_easytier_binary_version "$TEST_REPO"
 
-grep -q '^EASYTIER_VERSION=2.6.2$' "$TEST_REPO/easytier-version.mk"
-grep -q '\.\./easytier-version.mk' "$TEST_REPO/easytier/Makefile"
-grep -q '\.\./easytier-version.mk' "$TEST_REPO/luci-app-easytier/Makefile"
+grep -q '2.6.2' "$TEST_REPO/easytier/Makefile"
+grep -q '2.6.2' "$TEST_REPO/easytier-noweb/Makefile"
+grep -q '2.6.2' "$TEST_REPO/luci-app-easytier/Makefile"
 
-prepare_easytier_version_file "$TEST_REPO" "2.6.4"
+pin_easytier_binary_version "$TEST_REPO" "2.6.4"
 
-grep -q '^EASYTIER_VERSION=2.6.4$' "$TEST_REPO/easytier-version.mk"
+grep -q '^PKG_VERSION:=2.6.4$' "$TEST_REPO/easytier/Makefile"
+grep -q '^PKG_VERSION:=2.6.4$' "$TEST_REPO/easytier-noweb/Makefile"
+grep -Fxq 'PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)' "$TEST_REPO/luci-app-easytier/Makefile"
+
+for config_file in \
+	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-MINI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI-MINI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI_full.txt" \
+	"$SCRIPT_DIR/../Config/JD-AX1800PRO-WIFI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/MIR3G-WIFI-MINI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/MT6000-WIFI-FW3.txt" \
+	"$SCRIPT_DIR/../Config/MT6000-WIFI-MINI-FW3.txt"
+do
+	grep -q 'CONFIG_PACKAGE_easytier-noweb=y\|^# CONFIG_PACKAGE_easytier-noweb is not set$' "$config_file"
+	! grep -q '^CONFIG_PACKAGE_easytier=y$' "$config_file"
+	! grep -q '^# CONFIG_EASYTIER_INCLUDE_WEBCONSOLE is not set$' "$config_file"
+done
 
 echo "test_packages_openclash_easytier_versions: ok"

@@ -89,6 +89,11 @@ touch "$TMPDIR/luci-i18n-basic-zh-cn_1_all.ipk"
 touch "$TMPDIR/luci-app-frps_1_all.ipk"
 touch "$TMPDIR/luci-i18n-frps-zh-cn_1_all.ipk"
 touch "$TMPDIR/frps_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-easytier_1_all.ipk"
+touch "$TMPDIR/luci-i18n-easytier-zh-cn_1_all.ipk"
+touch "$TMPDIR/easytier_2.6.4_aarch64.ipk"
+touch "$TMPDIR/easytier-noweb_2.6.4_aarch64.ipk"
+touch "$TMPDIR/kmod-tun_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-nlbwmon_1_all.ipk"
 touch "$TMPDIR/luci-i18n-nlbwmon-zh-cn_1_all.ipk"
 touch "$TMPDIR/nlbwmon_1_aarch64.ipk"
@@ -107,6 +112,7 @@ CONFIG_PACKAGE_luci-app-ssr-plus=m
 CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-3cat=y
 CONFIG_PACKAGE_luci-app-socat=m
+CONFIG_PACKAGE_luci-app-easytier=y
 CONFIG_PACKAGE_luci-app-openvpn=m
 CONFIG_PACKAGE_luci-app-basic=m
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
@@ -177,6 +183,22 @@ socat_1_aarch64.ipk
 for filename in $socat_required_files; do
 	if [ ! -f "$SOCAT_DIR/$filename" ]; then
 		echo "Missing expected socat file: $filename" >&2
+		exit 1
+	fi
+done
+
+EASYTIER_DIR="$TMPDIR/luci-app-easytier"
+easytier_required_files="
+luci-app-easytier_1_all.ipk
+luci-i18n-easytier-zh-cn_1_all.ipk
+easytier_2.6.4_aarch64.ipk
+easytier-noweb_2.6.4_aarch64.ipk
+kmod-tun_1_aarch64.ipk
+"
+
+for filename in $easytier_required_files; do
+	if [ ! -f "$EASYTIER_DIR/$filename" ]; then
+		echo "Missing expected EasyTier file: $filename" >&2
 		exit 1
 	fi
 done

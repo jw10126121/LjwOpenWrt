@@ -197,23 +197,18 @@ update_package_list() {
     rm -rf "${repo_name}"
 }
 
-prepare_easytier_version_file() {
+pin_easytier_binary_version() {
     local package_dir=$1
     local target_version=${2:-}
-    local upstream_version_file="${package_dir}/version.mk"
-    local version_file="${package_dir}/easytier-version.mk"
     local makefiles="
 ${package_dir}/easytier/Makefile
-${package_dir}/luci-app-easytier/Makefile
+${package_dir}/easytier-noweb/Makefile
 "
     local makefile
     local temp_file
 
-    if [ -f "${upstream_version_file}" ]; then
-        cp -f "${upstream_version_file}" "${version_file}"
-        rm -f "${upstream_version_file}"
-    elif [ ! -f "${version_file}" ]; then
-        echo "【Lin】未找到 EasyTier 上游版本文件：${upstream_version_file}"
+    if [ -z "${target_version}" ]; then
+        echo "【Lin】未指定 EasyTier 后端版本，保持上游默认版本"
         return 0
     fi
 
@@ -230,22 +225,18 @@ ${package_dir}/luci-app-easytier/Makefile
 
         awk '
             {
-                gsub(/\.\.\/version\.mk/, "../easytier-version.mk")
+                if ($0 ~ /^PKG_VERSION:=/) {
+                    print "PKG_VERSION:=" version
+                    next
+                }
                 print
             }
-        ' "${makefile}" > "${temp_file}"
+        ' version="${target_version}" "${makefile}" > "${temp_file}"
 
         mv -f "${temp_file}" "${makefile}"
     done
-    
-    if [ -n "${target_version}" ]; then
-        cat > "${version_file}" <<EOF
-# EasyTier Version Configuration
-EASYTIER_VERSION=${target_version}
-EOF
 
-        echo "【Lin】已固定 EasyTier release 版本：${target_version}"
-    fi
+    echo "【Lin】已固定 EasyTier 后端版本：${target_version}"
 }
 
 # safe_update_package 适用于“要直接覆盖现有包目录，但失败时必须可回滚”的场景。
@@ -358,9 +349,9 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
 
-    update_package_list "luci-app-easytier easytier" "EasyTier/luci-app-easytier" "main" "version.mk"
+    update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"
     local easytier_release_version='2.6.4' # 注释掉这两行表示跟随包仓声明版本
-    prepare_easytier_version_file "." "${easytier_release_version}"
+    pin_easytier_binary_version "." "${easytier_release_version}"
     
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"

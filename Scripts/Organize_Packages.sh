@@ -139,7 +139,7 @@ usbprinter|luci-app-usb-printer_ kmod-usb-printer_ p910nd_ luci-i18n-usb-printer
 pushbot|luci-app-pushbot_ iputils-arping_ jq_ curl_
 wechatpush|luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ curl_ bash_
 oaf|luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_
-easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ kmod-tun_
+easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ easytier-noweb_ kmod-tun_
 bandix|luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_
 argon|luci-theme-argon_ luci-i18n-argon-zh-cn_ curl_ jsonfilter_
 wolplus|luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_
