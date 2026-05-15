@@ -21,6 +21,12 @@ COMMON_BODY=$(awk '
 	printing { print }
 ' "$TARGET_SCRIPT")
 
+POST_FIX_BODY=$(awk '
+	/^apply_post_update_fixes\(\) \{/ { printing=1; next }
+	printing && /^}/ { exit }
+	printing { print }
+' "$TARGET_SCRIPT")
+
 printf '%s\n' "$COMMON_BODY" | grep -q 'UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "master" "pkg"'
 
 if printf '%s\n' "$COMMON_BODY" | grep -q 'UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "dev" "pkg"'; then
@@ -32,6 +38,10 @@ printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version'
 printf '%s\n' "$COMMON_BODY" | grep -q 'update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"'
 printf '%s\n' "$COMMON_BODY" | grep -q "local easytier_release_version='2.6.4'"
 printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version "." "${easytier_release_version}"'
+if printf '%s\n' "$POST_FIX_BODY" | grep -q 'preload_homeproxy_resources'; then
+	echo "Packages.sh should not preload HomeProxy resources in the default post-update fix chain" >&2
+	exit 1
+fi
 
 TMPDIR=$(mktemp -d)
 cleanup() {

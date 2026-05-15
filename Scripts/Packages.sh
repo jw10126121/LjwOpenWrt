@@ -693,7 +693,6 @@ apply_post_update_fixes() {
     fix_diskman_makefile
     fix_pushbot_runtime
     fix_wechatpush_runtime
-    preload_homeproxy_resources
 }
 
 # 主入口保持极简，只负责串联三个阶段：

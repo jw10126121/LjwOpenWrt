@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 说明：验证 diy_after_defconfig 里的 HomeProxy 资源预置只在实际启用 luci-app-homeproxy 时执行。
+# 说明：验证 diy_after_defconfig 里的 HomeProxy 资源预置默认关闭，只有显式开启时才执行。
 
 set -eu
 
@@ -42,9 +42,13 @@ chmod +x "$TEST_BIN/git"
 
 extract_homeproxy_block() {
 	awk '
-		/^choose_type_homeproxy=/ { printing=1 }
+		/^get_config_value\(\) \{/ { printing=1; remaining=2 }
+		/^preload_homeproxy_resources\(\) \{/ { printing=1 }
 		printing { print }
-		printing && /^fi$/ { exit }
+		printing && /^}/ {
+			remaining--
+			if (remaining == 0) exit
+		}
 	' "$TARGET_SCRIPT"
 }
 
@@ -70,8 +74,15 @@ EOF
 		openwrt_workdir="$case_dir"
 		export HOME_PROXY_GIT_MARKER="$marker"
 		PATH="$TEST_BIN:$PATH"
+		if [ "$mode" = enabled ]; then
+			PRELOAD_HOMEPROXY_RESOURCES=true
+		else
+			PRELOAD_HOMEPROXY_RESOURCES=false
+		fi
+		export PRELOAD_HOMEPROXY_RESOURCES
 		# shellcheck disable=SC1090
 		. "$BLOCK_FILE"
+		preload_homeproxy_resources
 	)
 }
 
