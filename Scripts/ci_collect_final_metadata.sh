@@ -62,6 +62,30 @@ map_device_name_alias() {
     esac
 }
 
+extract_device_profile_from_config() {
+    local config_path=$1
+    local device_name_list=()
+    local line
+    local fallback_profile=""
+
+    if [ -n "${DEVICE_PROFILE:-}" ]; then
+        fallback_profile="${DEVICE_PROFILE}"
+    fi
+
+    while IFS= read -r line; do
+        if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
+            device_name_list+=("${BASH_REMATCH[4]}")
+        fi
+    done < "${config_path}"
+
+    if [ ${#device_name_list[@]} -eq 0 ]; then
+        printf '%s\n' "${fallback_profile}"
+        return
+    fi
+
+    printf '%s\n' "$(IFS=$'、'; echo "${device_name_list[*]}")"
+}
+
 build_device_name_alias() {
     local raw_list=$1
     local old_ifs raw_name alias joined
@@ -142,12 +166,12 @@ repo_git_hash="${REPO_GIT_HASH:-}"
 source_flavor='lean'
 device_target="${DEVICE_TARGET:-}"
 device_subtarget="${DEVICE_SUBTARGET:-}"
-device_profile="${DEVICE_PROFILE:-}"
 device_arch="$(sed -n 's/^CONFIG_TARGET_ARCH_PACKAGES="\([^"]*\)"/\1/p' "${openwrt_path}/.config" | head -n1 || true)"
 config_version="$(extract_config_version "${openwrt_path}/.config")"
 include_version="$(extract_include_version "${openwrt_path}/include/version.mk")"
 op_version="$(choose_preferred_version "${config_version}" "${include_version}")"
 luci_version="$(extract_luci_version "${openwrt_path}/feeds.conf.default" "${op_version}" || true)"
+device_profile="$(extract_device_profile_from_config "${openwrt_path}/.config")"
 wrt_has_lite_text='[常规版]'
 wrt_has_wifi_text='有WIFI'
 package_manager='ipk'
@@ -214,7 +238,7 @@ fi
 # 统一拼接给 README / 通知消息使用的固件说明正文。
 # 文案仍保持“内核版本 / LUCI版本 / OP版本”，以兼容现有通知与 README，
 # 但代码层已经把三者的来源和用途拆开，避免把 LuCI feed 版本与主源码版本混为一谈。
-system_content="支持设备：${DEVICE_PROFILE}
+system_content="支持设备：${device_profile}
 固件类型：${wrt_has_lite_text}
 支持平台：${device_target}-${device_subtarget}
 源码风味：${source_flavor}
