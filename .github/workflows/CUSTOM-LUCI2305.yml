@@ -1,5 +1,6 @@
 #CI项目
 name: CUSTOM-LUCI2305
+run-name: CUSTOM-LUCI2305-${{ inputs.WRT_RELEASE_FIRMWARE && 'release' || 'test' }}
 
 #CI计划
 on:

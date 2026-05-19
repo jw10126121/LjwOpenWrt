@@ -42,6 +42,8 @@ assert_contains "$default_workflow" "MT6000-WIFI-MINI" "DEFAULT should expose MT
 assert_not_contains_before_jobs "$custom_apk_workflow" "WRT_DEVICE:" "CUSTOM-APK should not expose per-run device input"
 assert_not_contains_before_jobs "$custom_apk_workflow" "WRT_SOURCE_FLAVOR:" "CUSTOM-APK should not expose per-run source flavor input"
 
+assert_contains "$custom_apk_workflow" "run-name:" "CUSTOM-APK should expose a dynamic run name"
+assert_contains "$custom_apk_workflow" "CUSTOM-APK-static-apk" "CUSTOM-APK run name should show its fixed preset nature"
 assert_contains "$custom_apk_workflow" "uses: ./.github/workflows/DEFAULT.yml" "CUSTOM-APK should call DEFAULT reusable workflow"
 assert_contains "$custom_apk_workflow" "secrets: inherit" "CUSTOM-APK should inherit secrets when calling DEFAULT"
 

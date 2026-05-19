@@ -28,6 +28,8 @@ assert_contains "$core_workflow" "WRT_LUCI_BRANCH:" "CORE-ALL should accept WRT_
 assert_contains "$core_workflow" 'WRT_LUCI_BRANCH: ${{inputs.WRT_LUCI_BRANCH || ' "CORE-ALL should export WRT_LUCI_BRANCH into env"
 
 assert_contains "$custom_luci_workflow" "WRT_LUCI_BRANCH: openwrt-23.05" "CUSTOM-LUCI2305 should pin LuCI branch to openwrt-23.05"
+assert_contains "$custom_luci_workflow" "run-name:" "CUSTOM-LUCI2305 should expose a dynamic run name"
+assert_contains "$custom_luci_workflow" "CUSTOM-LUCI2305-\${{ inputs.WRT_RELEASE_FIRMWARE && 'release' || 'test' }}" "CUSTOM-LUCI2305 run name should reflect release mode"
 assert_contains "$custom_luci_workflow" "# WRT_SOURCE_HASH_INFO: ecec1ef93a8920f30ef927d989b13b674d614ca6" "CUSTOM-LUCI2305 should keep the old hash as a comment for later reuse"
 if grep -Fq 'luci23' "$default_workflow"; then
 	echo "DEFAULT should no longer mention luci23 overlay compatibility" >&2

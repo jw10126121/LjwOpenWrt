@@ -1,5 +1,6 @@
 #CI项目
 name: CUSTOM
+run-name: CUSTOM-${{ inputs.WRT_RELEASE_FIRMWARE && 'release' || 'test' }}
 
 #CI计划
 on:

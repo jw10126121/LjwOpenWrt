@@ -57,6 +57,8 @@ assert_contains "$default_workflow" "MT6000-WIFI-MINI" "DEFAULT should expose MT
 assert_not_contains_before_jobs "$custom_workflow" "WRT_DEVICE:" "CUSTOM should no longer expose per-run device input"
 assert_not_contains_before_jobs "$custom_workflow" "WRT_SOURCE_FLAVOR:" "CUSTOM should no longer expose per-run source flavor input"
 
+assert_contains "$custom_workflow" "run-name:" "CUSTOM should expose a dynamic run name"
+assert_contains "$custom_workflow" "CUSTOM-\${{ inputs.WRT_RELEASE_FIRMWARE && 'release' || 'test' }}" "CUSTOM run name should reflect release mode"
 assert_contains "$custom_workflow" "uses: ./.github/workflows/DEFAULT.yml" "CUSTOM should call DEFAULT reusable workflow"
 assert_contains "$custom_workflow" "secrets: inherit" "CUSTOM should inherit secrets when calling DEFAULT"
 

@@ -1,5 +1,6 @@
 #CI项目
 name: CUSTOM-APK
+run-name: CUSTOM-APK-static-apk
 
 #CI计划
 on:
