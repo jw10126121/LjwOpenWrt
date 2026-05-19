@@ -56,7 +56,7 @@ device_target=""
 device_subtarget=""
 
 while IFS= read -r line; do
-    # 同时兼容 CONFIG_TARGET_DEVICE_* 与较旧的 CONFIG_TARGET_*_DEVICE_* 两种写法。
+    line=$(echo "$line" | sed 's/#.*$//' | sed 's/[[:space:]]*$//')
     if [[ $line =~ ^(CONFIG_TARGET_DEVICE_|CONFIG_TARGET_)([^_]+)_([^_]+)_DEVICE_([^=]+)=y$ ]]; then
         device_target="${BASH_REMATCH[2]}"
         device_subtarget="${BASH_REMATCH[3]}"
@@ -64,9 +64,15 @@ while IFS= read -r line; do
     fi
 done < "${config_path}"
 
-device_profile="$(IFS=$'、'; echo "${device_name_list[*]}")"
-device_name_list_joined="$(IFS=$' '; echo "${device_name_list[*]}")"
-device_name_list_lian="$(IFS=$'_and_'; echo "${device_name_list[*]}")"
+if [ ${#device_name_list[@]} -eq 0 ]; then
+    device_profile=""
+    device_name_list_joined=""
+    device_name_list_lian=""
+else
+    device_profile="$(IFS=$'、'; echo "${device_name_list[*]}")"
+    device_name_list_joined="$(IFS=$' '; echo "${device_name_list[*]}")"
+    device_name_list_lian="$(IFS=$'_and_'; echo "${device_name_list[*]}")"
+fi
 
 dir_linux_version="${openwrt_path}/target/linux"
 dir_linux_device_target="$(find "${dir_linux_version}" -type d -name "${device_target}" -print -prune)"
