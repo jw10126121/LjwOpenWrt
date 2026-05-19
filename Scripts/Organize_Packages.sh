@@ -152,6 +152,7 @@ nftqos|luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_
 hdidle|luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_
 airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_
 vsftpd|luci-app-vsftpd_ luci-i18n-vsftpd-zh-cn_ vsftpd_ vsftpd-alt_
+lucky|luci-app-lucky_ luci-i18n-lucky-zh-cn_ lucky_
 EOF
 )
 
