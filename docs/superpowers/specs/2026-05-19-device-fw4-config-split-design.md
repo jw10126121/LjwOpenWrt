@@ -2,7 +2,7 @@
 
 ## 目标
 
-将当前 6 份同类设备配置从“`FW3` 主文件内嵌 `FW4` 注释段”的模式，统一为“独立 `FW3` 主文件 + 独立 `FW4` 主文件”的模式，降低单文件长度和维护复杂度。
+将当前 6 份既有同类设备配置从“`FW3` 主文件内嵌 `FW4` 注释段”的模式，统一为“独立 `FW3` 主文件 + 独立 `FW4` 主文件”的模式，并新增 `JD-AX6600-WIFI` 的成对主配置，降低单文件长度和维护复杂度。
 
 本次统一的设备范围：
 
@@ -12,6 +12,7 @@
 - `IPQ60XX-NOWIFI-MINI`
 - `JD-AX1800PRO-WIFI`
 - `JD-AX1800PRO-NOWIFI`
+- `JD-AX6600-WIFI`
 
 ## 背景
 
@@ -44,6 +45,7 @@
 - 将所有设备都统一为独立 `FW3` / `FW4` 文件
 - 重写 `export_config.sh` 的整体架构
 - 借机调整无关服务包的默认开关
+- 为 `CUSTOM.yml`、`CUSTOM-APK.yml`、`CUSTOM-LUCI2305.yml` 新增 `JD-AX6600-WIFI` 或 AX1800 Pro 的预设编译任务
 
 ## 目标文件结构
 
@@ -52,12 +54,19 @@
 - `Config/<DEVICE>-FW3.txt`
 - `Config/<DEVICE>-FW4.txt`
 
-对于这 6 份设备：
+对于这 6 份既有设备：
 
 - `-FW3.txt` 只保留 `FW3` 下的完整配置
 - `-FW4.txt` 只保留 `FW4` 下的完整配置
 - `-FW3.txt` 中删除 `# >>> FW4-BEGIN` / `# <<< FW4-END` 整段
 - 若 `device-overlays/<DEVICE>-FW4.txt` 只是空占位，则删除
+
+对于新增设备 `JD-AX6600-WIFI`：
+
+- 新增 `Config/JD-AX6600-WIFI-FW3.txt`
+- 新增 `Config/JD-AX6600-WIFI-FW4.txt`
+- 以 `JD-AX1800PRO-WIFI` 为模板，但设备 profile 改为 `CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=y`
+- 板级 Wi-Fi 校准包切换到 `jdcloud_re-cs-02` 对应包名
 
 ## 导出逻辑
 
@@ -112,13 +121,37 @@
 
 ## 设备覆盖原则
 
-虽然这 6 份设备会统一为同一种结构，但不强制所有 `FW4` 文件拥有完全相同的软件组合。仍然允许：
+虽然这 6 份既有设备会统一为同一种结构，但不强制所有 `FW4` 文件拥有完全相同的软件组合。仍然允许：
 
 - `NOWIFI` 与 `WIFI` 机型保留各自硬件差异
 - `MINI` 机型保留裁剪后的服务项
 - 某些代理或服务包在不同设备上继续保留 `y` / `m` 差异
 
 统一的是文件组织方式，不是把所有设备抹平成同一份包清单。
+
+## Workflow 入口
+
+本次还需要补齐“已有配置但默认手动入口未暴露”的设备入口，并新增 `JD-AX6600-WIFI` 的手动入口。
+
+范围仅限：
+
+- `.github/workflows/DEFAULT.yml`
+- `.github/workflows/CACHE-BENCH.yml`
+- `README.md`
+
+本次不修改：
+
+- `.github/workflows/CUSTOM.yml`
+- `.github/workflows/CUSTOM-APK.yml`
+- `.github/workflows/CUSTOM-LUCI2305.yml`
+
+设计要求：
+
+- `DEFAULT.yml` 的 `WRT_DEVICE` 选项应覆盖仓库当前已有配置设备，以及新增的 `JD-AX6600-WIFI`
+- `CACHE-BENCH.yml` 的 `WRT_DEVICE` 选项应与默认手动入口保持一致，避免设备支持集合分叉
+- `README.md` 的“支持目标”“常用预设”“主维护文件”应同步反映新增和补齐后的入口
+
+这意味着即使某些设备没有 `CUSTOM*` 预设任务，只要存在配置文件，也应能通过 `DEFAULT` 手动触发编译。
 
 ## 测试设计
 
@@ -179,7 +212,7 @@
 
 ### 风险 3：同类设备统一时引入跨设备误改
 
-这 6 份设备结构相似，但不是完全相同。批量替换时可能把某台设备独有的 `y/m/n` 差异覆盖掉。
+这批设备结构相似，但不是完全相同。批量替换时可能把某台设备独有的 `y/m/n` 差异覆盖掉。
 
 缓解方式：
 
@@ -194,8 +227,10 @@
 3. 复制同样模式到 `CMIOT-AX18-NOWIFI-MINI`
 4. 再迁移 `IPQ60XX-NOWIFI` / `IPQ60XX-NOWIFI-MINI`
 5. 最后迁移 `JD-AX1800PRO-WIFI` / `JD-AX1800PRO-NOWIFI`
-6. 删除已确认无用的空 `device-overlays/*-FW4.txt`
-7. 跑完整的设备级 `fw4` 导出测试
+6. 新增 `JD-AX6600-WIFI` 的 `FW3` / `FW4` 配置
+7. 补齐 `DEFAULT` / `CACHE-BENCH` / `README` 中的设备入口
+8. 删除已确认无用的空 `device-overlays/*-FW4.txt`
+9. 跑完整的设备级 `fw4` 导出测试和 workflow 入口相关测试
 
 ## 结论
 
