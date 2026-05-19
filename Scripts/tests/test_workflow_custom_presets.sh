@@ -45,6 +45,8 @@ assert_not_contains_before_jobs() {
 
 assert_contains "$default_workflow" "workflow_dispatch:" "DEFAULT should still support manual runs"
 assert_contains "$default_workflow" "workflow_call:" "DEFAULT should be reusable from CUSTOM"
+assert_contains "$default_workflow" "run-name:" "DEFAULT should expose a dynamic run name"
+assert_contains "$default_workflow" '${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '\'''\'' && inputs.WRT_OVERLAYS || '\''base'\'' }}' "DEFAULT run name should include device, firewall and overlays"
 assert_contains "$default_workflow" "WRT_OVERLAYS:" "DEFAULT reusable workflow should expose overlays input"
 assert_contains "$default_workflow" "WRT_LUCI_BRANCH:" "DEFAULT reusable workflow should expose LuCI branch input"
 assert_contains "$default_workflow" 'WRT_LUCI_BRANCH: ${{ inputs.WRT_LUCI_BRANCH }}' "DEFAULT should pass LuCI branch through to CORE-ALL"

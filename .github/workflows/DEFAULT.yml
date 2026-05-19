@@ -1,5 +1,6 @@
 #CI项目
 name: DEFAULT
+run-name: ${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
 
 on:
   workflow_call:
