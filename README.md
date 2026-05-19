@@ -6,9 +6,14 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 - `CMIOT-AX18-NOWIFI`
 - `CMIOT-AX18-NOWIFI-MINI`
+- `IPQ60XX-NOWIFI`
+- `IPQ60XX-NOWIFI-MINI`
 - `JD-AX1800PRO-WIFI`
+- `JD-AX1800PRO-NOWIFI`
+- `JD-AX6600-WIFI`
 - `MT6000-WIFI`
 - `MT6000-WIFI-MINI`
+- `MIR3G-WIFI-MINI`
 
 如需调整具体机型勾选项，直接修改对应配置文件中的 `CONFIG_TARGET_DEVICE_*`。
 
@@ -36,6 +41,8 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 - `AX18 无 Wi-Fi`：`WRT_DEVICE=CMIOT-AX18-NOWIFI`
 - `京东云亚瑟 AX1800 Pro 带 Wi-Fi`：`WRT_DEVICE=JD-AX1800PRO-WIFI`
+- `京东云亚瑟 AX1800 Pro 无 Wi-Fi`：`WRT_DEVICE=JD-AX1800PRO-NOWIFI`
+- `京东云雅典娜 AX6600 带 Wi-Fi`：`WRT_DEVICE=JD-AX6600-WIFI`
 
 ## 配置组织
 
@@ -50,9 +57,14 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 - `CMIOT-AX18-NOWIFI`：`Config/CMIOT-AX18-NOWIFI-FW3.txt`
 - `CMIOT-AX18-NOWIFI-MINI`：`Config/CMIOT-AX18-NOWIFI-MINI-FW3.txt`
+- `IPQ60XX-NOWIFI`：`Config/IPQ60XX-NOWIFI-FW3.txt`
+- `IPQ60XX-NOWIFI-MINI`：`Config/IPQ60XX-NOWIFI-MINI-FW3.txt`
 - `JD-AX1800PRO-WIFI`：`Config/JD-AX1800PRO-WIFI-FW3.txt`
+- `JD-AX1800PRO-NOWIFI`：`Config/JD-AX1800PRO-NOWIFI-FW3.txt`
+- `JD-AX6600-WIFI`：`Config/JD-AX6600-WIFI-FW3.txt`
 - `MT6000-WIFI`：`Config/MT6000-WIFI-FW3.txt`
 - `MT6000-WIFI-MINI`：`Config/MT6000-WIFI-MINI-FW3.txt`
+- `MIR3G-WIFI-MINI`：`Config/MIR3G-WIFI-MINI-FW3.txt`
 
 ## Overlay 约定
 

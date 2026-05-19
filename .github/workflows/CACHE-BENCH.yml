@@ -19,9 +19,14 @@ on:
         options:
           - CMIOT-AX18-NOWIFI
           - CMIOT-AX18-NOWIFI-MINI
+          - IPQ60XX-NOWIFI
+          - IPQ60XX-NOWIFI-MINI
           - JD-AX1800PRO-WIFI
+          - JD-AX1800PRO-NOWIFI
+          - JD-AX6600-WIFI
           - MT6000-WIFI
           - MT6000-WIFI-MINI
+          - MIR3G-WIFI-MINI
         default: 'CMIOT-AX18-NOWIFI'
       WRT_FIREWALL:
         description: '防火墙栈'
