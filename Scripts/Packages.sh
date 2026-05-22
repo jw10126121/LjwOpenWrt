@@ -334,7 +334,7 @@ resolve_packages_luci_feed_branch() {
 # 通用包清单：所有构建都会执行。
 # 这里应该只放“对当前 lean 源码树始终通用”的替换，不要放只在特定场景才成立的覆盖。
 apply_common_package_overrides() {
-    UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
+    # UPDATE_PACKAGE "luci-theme-kucat" "sirpdboy/luci-theme-kucat" "master"
     UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
     UPDATE_PACKAGE "luci-app-openclash" "vernesong/OpenClash" "master" "pkg"
 
