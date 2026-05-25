@@ -136,7 +136,9 @@ format_package_line() {
 package_search_root="$(cd "$(dirname "${config_file}")" 2>/dev/null && pwd -P)"
 [ -n "${package_search_root}" ] || package_search_root="$(pwd -P)"
 
-[ -f "$desc_file" ] && rm -fr "$desc_file"
+desc_dir="$(dirname "${desc_file}")"
+[ -n "${desc_dir}" ] && mkdir -p "${desc_dir}"
+[ -f "$desc_file" ] && rm -f "$desc_file"
 
 # 先写固定的编译说明与作者说明，再枚举已编译/可安装的插件与主题。
 # 编译说明

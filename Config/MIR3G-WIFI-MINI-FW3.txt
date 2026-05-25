@@ -117,6 +117,8 @@ CONFIG_PACKAGE_luci-app-openclash=m          # OpenClash 主程序
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
 CONFIG_PACKAGE_luci-app-ssr-plus=y           # FW3 默认提供 SSR Plus 主包
 CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=y    # SSR Plus 中文语言包
+CONFIG_PACKAGE_chinadns-ng=y                 # SSR Plus 依赖后端
+CONFIG_PACKAGE_ipt2socks=y                   # SSR Plus 依赖后端
 
 # ------------------------------------------------------------------------
 #  菜单整理：NAS

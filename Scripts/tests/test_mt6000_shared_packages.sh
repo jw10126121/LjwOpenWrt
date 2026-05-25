@@ -59,6 +59,8 @@ done
 
 grep -n '^CONFIG_PACKAGE_luci-app-verysync=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-verysync=m'
 grep -n '^CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m'
+grep -n '^CONFIG_PACKAGE_chinadns-ng=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_chinadns-ng=m'
+grep -n '^CONFIG_PACKAGE_ipt2socks=' "$FW3_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_ipt2socks=m'
 grep -n '^CONFIG_PACKAGE_luci-app-verysync=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-app-verysync=m'
 grep -n '^CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m'
 grep -n '^CONFIG_PACKAGE_verysync=' "$FW4_OUT" | tail -n 1 | grep -q 'CONFIG_PACKAGE_verysync=m'

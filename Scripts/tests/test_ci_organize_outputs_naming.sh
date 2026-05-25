@@ -14,7 +14,7 @@ cleanup() {
 trap cleanup EXIT
 
 OPENWRT_PATH="$TMPDIR/openwrt"
-mkdir -p "$OPENWRT_PATH/config_mine" "$OPENWRT_PATH/bin/packages" "$OPENWRT_PATH/bin/targets/qualcommax/ipq60xx"
+mkdir -p "$OPENWRT_PATH/bin/packages" "$OPENWRT_PATH/bin/targets/qualcommax/ipq60xx"
 TEST_BIN="$TMPDIR/test-bin"
 mkdir -p "$TEST_BIN"
 
@@ -81,6 +81,7 @@ test -f "$OPENWRT_PATH/upload/config_lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260419
 test -f "$OPENWRT_PATH/upload/readme_lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260419_T120000.txt"
 test -f "$OPENWRT_PATH/upload/Packages_lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260419_T120000.tar.gz"
 test -f "$OPENWRT_PATH/upload/lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260419_T120000_squashfs-sysupgrade.bin"
+test -f "$OPENWRT_PATH/config_mine/readme.txt"
 grep -q "^readme_desc_file=$OPENWRT_PATH/config_mine/readme.txt$" "$GITHUB_ENV"
 grep -q "^release_desc_file=$OPENWRT_PATH/readme_release.txt$" "$GITHUB_ENV"
 
