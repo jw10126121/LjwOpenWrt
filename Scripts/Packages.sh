@@ -343,8 +343,8 @@ apply_common_package_overrides() {
     update_package_list "luci-app-wrtbwmon" "brvphoenix/luci-app-wrtbwmon" "master"
     update_package_list "luci-app-oaf oaf open-app-filter" "destan19/OpenAppFilter" "master"
 
-    # safe_update_package "frp" "https://github.com/jw10126121/openwrt_frp" "main"
-    # update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
+    safe_update_package "frp" "https://github.com/jw10126121/openwrt_frp" "main"
+    update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
 
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
