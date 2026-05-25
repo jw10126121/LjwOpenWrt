@@ -33,6 +33,8 @@ touch "$TMPDIR/libpcre2_1_aarch64.ipk"
 touch "$TMPDIR/libsodium_1_aarch64.ipk"
 touch "$TMPDIR/dns2socks_1_aarch64.ipk"
 touch "$TMPDIR/dns2tcp_1_aarch64.ipk"
+touch "$TMPDIR/ipt2socks_1_aarch64.ipk"
+touch "$TMPDIR/chinadns-ng_1_aarch64.ipk"
 touch "$TMPDIR/mosdns_1_aarch64.ipk"
 touch "$TMPDIR/microsocks_1_aarch64.ipk"
 touch "$TMPDIR/shadowsocks-libev-ss-local_1_aarch64.ipk"
@@ -168,6 +170,8 @@ dnsmasq-full_1_aarch64.ipk
 jq_1_aarch64.ipk
 ip-full_1_aarch64.ipk
 curl_1_aarch64.ipk
+ipt2socks_1_aarch64.ipk
+chinadns-ng_1_aarch64.ipk
 libustream-openssl20201210_1_aarch64.ipk
 shadowsocks-libev-ss-local_1_aarch64.ipk
 shadowsocks-libev-ss-redir_1_aarch64.ipk
