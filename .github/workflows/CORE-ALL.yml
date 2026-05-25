@@ -77,6 +77,7 @@ env:
   WRT_OVERLAYS: ${{inputs.WRT_OVERLAYS || '' }}               # 可选 overlays
   WRT_LUCI_BRANCH: ${{inputs.WRT_LUCI_BRANCH || '' }}         # 可选 LuCI feed 分支
   WRT_CONFIG_LABEL: ''                                        # 组合标签
+  WRT_OVERLAYS_HASH: ''
   WRT_DIY_SETTING: ${{ inputs.WRT_DIY_SETTING }}              # 自定义配置
   WRT_DIY_FEEDS: ${{ inputs.WRT_DIY_FEEDS || 'diy_feeds.sh' }} # 主要用于更新Feeds
   WRT_DIYPackages: ${{inputs.WRT_DIYPackages}}                # 自定义包配置
@@ -177,6 +178,8 @@ jobs:
 
     - name: Check Config Values (检查配置变量)
       run: |
+        . "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/lib/overlay_utils.sh"
+
         WRT_HAS_WIFI=true
         [[ "$WRT_DEVICE" =~ NOWIFI|WIFINO|NO-WIFI|WIFI-NO ]] && { WRT_HAS_WIFI=false; }
         echo "WRT_HAS_WIFI=$WRT_HAS_WIFI" >> $GITHUB_ENV
@@ -187,6 +190,15 @@ jobs:
 
         WRT_CONFIG_LABEL="${WRT_DEVICE}-${WRT_FIREWALL^^}"
         echo "WRT_CONFIG_LABEL=$WRT_CONFIG_LABEL" >> $GITHUB_ENV
+
+        if [ -n "$WRT_OVERLAYS" ]; then
+            WRT_OVERLAYS=$(normalize_overlay_list "$GITHUB_WORKSPACE/$WRT_DIR_CONFIGS" "$WRT_OVERLAYS")
+        fi
+        echo "WRT_OVERLAYS=$WRT_OVERLAYS" >> $GITHUB_ENV
+
+        overlay_fingerprint="${WRT_OVERLAYS:-base}"
+        overlay_hash=$(printf '%s' "$overlay_fingerprint" | sha256sum | cut -c1-12)
+        echo "WRT_OVERLAYS_HASH=$overlay_hash" >> $GITHUB_ENV
 
         if printf '%s' ",${WRT_OVERLAYS}," | grep -qi ',apk,'; then
             echo "WRT_USE_APK=true" >> $GITHUB_ENV
@@ -312,7 +324,10 @@ jobs:
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: actions/cache/restore@v5
       with:
-        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
+        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}
+        restore-keys: |
+          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-
+          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
         path: |
           ${{ env.OPENWRT_PATH }}/staging_dir/host*
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
@@ -647,7 +662,7 @@ jobs:
       if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.restore_toolchain_cache.outputs.cache-hit != 'true' && steps.evaluate_cache_save_inputs.outputs.toolchain_present == 'true'
       uses: actions/cache/save@v5
       with:
-        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
+        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}
         path: |
           ${{ env.OPENWRT_PATH }}/staging_dir/host*
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*

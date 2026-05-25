@@ -27,9 +27,27 @@ assert_not_contains() {
 	fi
 }
 
-assert_toolchain_has_no_restore_keys() {
-	if awk '/Restore Toolchain Cache/,/Restore ccache Cache/' "$workflow_file" | grep -Fq -- 'restore-keys:'; then
-		echo "ASSERT FAILED: toolchain cache should not restore older prefixes" >&2
+assert_toolchain_uses_scoped_restore_key() {
+	local restore_block
+	restore_block="$(awk '/Restore Toolchain Cache/,/Restore ccache Cache/' "$workflow_file")"
+
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}'; then
+		echo "ASSERT FAILED: toolchain restore should use the per-config plus overlays key" >&2
+		exit 1
+	fi
+
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'restore-keys: |'; then
+		echo "ASSERT FAILED: toolchain restore should use restore-keys for broader reuse" >&2
+		exit 1
+	fi
+
+	if ! printf '%s\n' "$restore_block" | grep -Fxq -- '          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-'; then
+		echo "ASSERT FAILED: toolchain restore prefix should keep the shared subtarget/source scope" >&2
+		exit 1
+	fi
+
+	if ! printf '%s\n' "$restore_block" | grep -Fxq -- '          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}'; then
+		echo "ASSERT FAILED: toolchain restore should still be able to fall back to the legacy key shape" >&2
 		exit 1
 	fi
 }
@@ -53,8 +71,10 @@ assert_contains '- name: Restore Toolchain Cache' "workflow should restore toolc
 assert_contains 'uses: actions/cache/restore@v5' "workflow should use cache restore actions"
 assert_contains '- name: Save Toolchain Cache' "workflow should save toolchain cache explicitly"
 assert_contains 'uses: actions/cache/save@v5' "workflow should use cache save actions"
-assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}' "toolchain cache key should still include the source commit hash"
-assert_toolchain_has_no_restore_keys
+assert_contains 'WRT_OVERLAYS_HASH: ''' "workflow should define the overlays hash env slot"
+assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}' "toolchain cache key should include overlays hash to avoid variant collisions"
+assert_contains 'echo "WRT_OVERLAYS_HASH=$overlay_hash" >> $GITHUB_ENV' "workflow should publish the overlays hash for later cache key use"
+assert_toolchain_uses_scoped_restore_key
 
 assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
 assert_contains '- name: Save ccache Cache' "workflow should save ccache explicitly"
