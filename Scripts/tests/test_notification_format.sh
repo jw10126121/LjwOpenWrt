@@ -19,6 +19,18 @@ README_FILE="$TMPDIR/readme.txt"
 ENV_FILE="$TMPDIR/github_env.txt"
 OUTPUT_FILE="$TMPDIR/github_output.txt"
 
+mkdir -p \
+	"$TMPDIR/feeds/luci/applications/luci-app-accesscontrol" \
+	"$TMPDIR/feeds/luci/applications/luci-app-ddns"
+
+cat > "$TMPDIR/feeds/luci/applications/luci-app-accesscontrol/Makefile" <<'EOF'
+PKG_VERSION:=1.0.1
+EOF
+
+cat > "$TMPDIR/feeds/luci/applications/luci-app-ddns/Makefile" <<'EOF'
+PKG_VERSION:=$(or $(DDNS_VERSION),2.3.4)
+EOF
+
 cat > "$CONFIG_FILE" <<'EOF'
 CONFIG_PACKAGE_luci-app-accesscontrol=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
@@ -59,10 +71,10 @@ grep -q '^内核版本：6.12.80$' "$README_FILE"
 grep -q '^LUCI版本：23.05$' "$README_FILE"
 grep -q '^OP版本：24.10.5$' "$README_FILE"
 grep -q '^#### --- 集成的插件 --- ####$' "$README_FILE"
-grep -q '^luci-app-accesscontrol$' "$README_FILE"
+grep -q '^luci-app-accesscontrol (1.0.1)$' "$README_FILE"
 grep -q '^luci-app-adguardhome$' "$README_FILE"
 grep -q '^#### --- 安装包插件 --- ####$' "$README_FILE"
-grep -q '^luci-app-ddns$' "$README_FILE"
+grep -q '^luci-app-ddns (2.3.4)$' "$README_FILE"
 grep -q '^编译开始：D260418_T105727$' "$README_FILE"
 
 start_count=$(grep -c '^编译开始：D260418_T105727$' "$README_FILE")
@@ -81,6 +93,9 @@ printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^### --- 编译说明 --- ###$'
 printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^支持设备：glinet_gl-mt6000$'
 printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^FW环境：FW3$'
 printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^FRP角色：FRPC$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^luci-app-accesscontrol (1.0.1)$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^luci-app-adguardhome$'
+printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^luci-app-ddns (2.3.4)$'
 
 : > "$ENV_FILE"
 : > "$OUTPUT_FILE"
@@ -93,12 +108,16 @@ GITHUB_REPOSITORY="user/repo" \
 GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="failure" \
+readme_desc_file="$README_FILE" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
 
 grep -q '编译状态：failure' "$ENV_FILE"
 grep -q '编译开始：D260418_T105727' "$ENV_FILE"
 grep -q '编译结束：D260418_T120000' "$ENV_FILE"
+grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
+grep -q '^luci-app-adguardhome$' "$ENV_FILE"
+grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"
 if grep -q '下载地址：' "$ENV_FILE"; then
 	echo "Unexpected download URL in failure notification" >&2
 	exit 1
@@ -115,11 +134,15 @@ GITHUB_REPOSITORY="user/repo" \
 GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="success" \
+readme_desc_file="$README_FILE" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
 
 grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/D260418_T105727_mt6000' "$ENV_FILE"
 grep -q 'Artifact下载地址：https://github.com/user/repo/actions/runs/123456' "$ENV_FILE"
 grep -q '编译状态：success' "$ENV_FILE"
+grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
+grep -q '^luci-app-adguardhome$' "$ENV_FILE"
+grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"
 
 echo "test_notification_format: ok"

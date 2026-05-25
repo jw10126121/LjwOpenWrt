@@ -11,8 +11,21 @@ set -euo pipefail
 release_tag="${START_TIME:?START_TIME is required}_${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}"
 artifact_url="https://github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}/actions/runs/${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 
+get_notify_body() {
+    if [ -n "${readme_desc_file:-}" ] && [ -f "${readme_desc_file}" ]; then
+        cat "${readme_desc_file}"
+        return 0
+    fi
+
+    printf '%s\n' "${system_content:-}"
+}
+
 write_notify_content() {
     local target_file="$1"
+    local notify_body=""
+
+    notify_body="$(get_notify_body)"
+
     # GitHub Actions 多行变量需要 <<EOF 语法，这里统一封装，避免两处逻辑漂移。
     {
         echo "notify_content<<EOF"
@@ -23,7 +36,7 @@ write_notify_content() {
             echo "Artifact下载地址：${artifact_url}"
             echo ""
         fi
-        printf '%s\n' "${system_content:-}"
+        printf '%s\n' "${notify_body}"
         echo ""
         echo "编译状态：${COMPILE_STATUS:-unknown}"
         echo "编译开始：${START_TIME}"

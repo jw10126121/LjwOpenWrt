@@ -63,6 +63,79 @@ while getopts "hc:o:s:a:r:" opt; do
     esac
 done
 
+trim_value() {
+    printf '%s' "$1" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s/^"(.*)"$/\1/; s/^'\''(.*)'\''$/\1/'
+}
+
+parse_pkg_version_value() {
+    local raw_value="$1"
+    local parsed_value=""
+
+    raw_value="$(trim_value "${raw_value}")"
+    parsed_value="$(printf '%s\n' "${raw_value}" | sed -nE 's/^\$\(or[[:space:]]*[^,]+,[[:space:]]*([^)]+)\)$/\1/p')"
+    if [ -n "${parsed_value}" ]; then
+        raw_value="$(trim_value "${parsed_value}")"
+    fi
+
+    case "${raw_value}" in
+        ""|*'$('*|*'${'*)
+            return 1
+            ;;
+    esac
+
+    printf '%s' "${raw_value}"
+}
+
+find_package_makefile() {
+    local search_root="$1"
+    local package_name="$2"
+    local search_dir=""
+    local makefile_path=""
+
+    for search_dir in "${search_root}/package" "${search_root}/feeds" "${search_root}"; do
+        [ -d "${search_dir}" ] || continue
+
+        makefile_path="$(find "${search_dir}" \
+            \( -name .git -o -name build_dir -o -name staging_dir -o -name tmp -o -name bin \) -prune -o \
+            -type f -path "*/${package_name}/Makefile" -print | head -n1)"
+        [ -n "${makefile_path}" ] || continue
+
+        printf '%s' "${makefile_path}"
+        return 0
+    done
+
+    return 1
+}
+
+get_package_version() {
+    local package_name="$1"
+    local makefile_path=""
+    local version_line=""
+
+    makefile_path="$(find_package_makefile "${package_search_root}" "${package_name}")"
+    [ -n "${makefile_path}" ] || return 1
+
+    version_line="$(sed -nE 's/^[[:space:]]*PKG_VERSION[[:space:]]*[:+?]?=[[:space:]]*(.*)$/\1/p' "${makefile_path}" | head -n1)"
+    [ -n "${version_line}" ] || return 1
+
+    parse_pkg_version_value "${version_line}"
+}
+
+format_package_line() {
+    local package_name="$1"
+    local version=""
+
+    version="$(get_package_version "${package_name}")" || {
+        printf '%s' "${package_name}"
+        return 0
+    }
+
+    printf '%s (%s)' "${package_name}" "${version}"
+}
+
+package_search_root="$(cd "$(dirname "${config_file}")" 2>/dev/null && pwd -P)"
+[ -n "${package_search_root}" ] || package_search_root="$(pwd -P)"
+
 [ -f "$desc_file" ] && rm -fr "$desc_file"
 
 # 先写固定的编译说明与作者说明，再枚举已编译/可安装的插件与主题。
@@ -92,7 +165,8 @@ if [ -n "$pkg_list" ]; then
 	fi
 	
 	for item in $pkg_list; do
-    	echo "${item}${line_end_text}" >> $desc_file
+        package_line="$(format_package_line "${item}")"
+    	echo "${package_line}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
@@ -110,7 +184,8 @@ if [ -n "$pkg_list_package" ]; then
 		echo "#### --- 安装包插件 --- ####" >> $desc_file
 	fi
 	for item in $pkg_list_package; do
-    	echo "${item}${line_end_text}" >> $desc_file
+        package_line="$(format_package_line "${item}")"
+    	echo "${package_line}${line_end_text}" >> $desc_file
     done
     if [[ $is_release == 'true' || $is_release == true ]]; then
 		echo "</details>" >> $desc_file
