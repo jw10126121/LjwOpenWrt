@@ -60,6 +60,36 @@ OP版本：24.10.5
 EOF
 )
 
+system_content_note=$(cat <<'EOF'
+编译开始：D260418_T105727
+
+### --- 编译说明 --- ###
+支持设备：glinet_gl-mt6000
+固件类型：[常规版]
+支持平台：mediatek-filogic
+FW环境：FW3
+FRP角色：FRPC
+设备架构：aarch64_cortex-a53
+内核版本：6.12.80
+LUCI版本：23.05
+OP版本：24.10.5
+包管理器：ipkg
+默认地址：192.168.0.1
+默认密码：无 | password
+是否wifi：有WIFI
+源码地址：https://github.com/coolsnowwolf/lede
+源码分支：master
+源码hash：ecec1ef93a8920f30ef927d989b13b674d614ca6
+
+#### --- 集成的插件 --- ####
+luci-app-accesscontrol (1.0.1)
+luci-app-adguardhome
+
+#### --- 安装包插件 --- ####
+luci-app-ddns (2.3.4)
+EOF
+)
+
 # 先验证 README 生成逻辑，再验证 GitHub Actions 通知内容。
 bash "$README_SCRIPT" -c "$CONFIG_FILE" -o "$README_FILE" -s "$system_desc" -r false
 
@@ -135,12 +165,15 @@ GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="success" \
 readme_desc_file="$README_FILE" \
+system_content_note="$system_content_note" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
 
 grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/D260418_T105727_mt6000' "$ENV_FILE"
 grep -q 'Artifact下载地址：https://github.com/user/repo/actions/runs/123456' "$ENV_FILE"
 grep -q '编译状态：success' "$ENV_FILE"
+grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"
+grep -q '^### --- 编译说明 --- ###$' "$ENV_FILE"
 grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
 grep -q '^luci-app-adguardhome$' "$ENV_FILE"
 grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"

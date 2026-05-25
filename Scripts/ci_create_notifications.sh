@@ -12,6 +12,13 @@ release_tag="${START_TIME:?START_TIME is required}_${DEVICE_SUBTARGET:?DEVICE_SU
 artifact_url="https://github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}/actions/runs/${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 
 get_notify_body() {
+    # 完成通知优先复用“开始编译”时保存下来的完整正文，
+    # 这样下载地址之外，还能看到本次编译的设备/插件等内容。
+    if [ -n "${system_content_note:-}" ]; then
+        printf '%s\n' "${system_content_note}"
+        return 0
+    fi
+
     if [ -n "${readme_desc_file:-}" ] && [ -f "${readme_desc_file}" ]; then
         cat "${readme_desc_file}"
         return 0
