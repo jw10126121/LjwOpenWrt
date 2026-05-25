@@ -431,7 +431,8 @@ jobs:
     - name: Prepare Start Notification (准备开始推送内容)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
-        echo -e "【Lin】\n${system_content}"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_create_start_notification.sh"
+        echo "【Lin】已生成编译开始通知内容"
         sleep 1
 
     - name: Send dingding notify
@@ -439,7 +440,7 @@ jobs:
       if: env.DINGDING_TOKEN != ''
       env:
         DINGDING_MESSAGE: |
-          ${{ env.system_content }}
+          ${{ env.start_notify_content }}
       run: |
         payload=$(python3 -c 'import json, os; print(json.dumps({"msgtype":"text","text":{"content": os.environ["DINGDING_MESSAGE"]}}, ensure_ascii=False))')
         curl --fail --silent --show-error \

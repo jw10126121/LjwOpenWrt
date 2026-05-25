@@ -8,7 +8,7 @@ set -euo pipefail
 : "${GITHUB_ENV:?GITHUB_ENV is required}"
 : "${GITHUB_OUTPUT:?GITHUB_OUTPUT is required}"
 
-release_tag="${START_TIME:?START_TIME is required}_${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}"
+release_tag="${OUTPUT_NAME_PREFIX:-${START_TIME:?START_TIME is required}_${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}}"
 artifact_url="https://github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}/actions/runs/${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 
 get_notify_body() {

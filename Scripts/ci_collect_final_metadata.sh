@@ -238,7 +238,9 @@ fi
 # 统一拼接给 README / 通知消息使用的固件说明正文。
 # 文案仍保持“内核版本 / LUCI版本 / OP版本”，以兼容现有通知与 README，
 # 但代码层已经把三者的来源和用途拆开，避免把 LuCI feed 版本与主源码版本混为一谈。
-system_content="支持设备：${device_profile}
+system_content="编译开始：${start_time_tag}
+
+支持设备：${device_profile}
 固件类型：${wrt_has_lite_text}
 支持平台：${device_target}-${device_subtarget}
 源码风味：${source_flavor}

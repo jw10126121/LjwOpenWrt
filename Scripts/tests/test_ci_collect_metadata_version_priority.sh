@@ -95,6 +95,10 @@ grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_fw4_frpc_ipk_D260514_T003050$' "$TM
     echo "case1 should emit the lean_cmiot_ax18 fw4 output prefix" >&2
     exit 1
 }
+grep -q '^编译开始：D260514_T003050$' "$TMPDIR/case1.env" || {
+    echo "case1 system_content should include compile start time" >&2
+    exit 1
+}
 
 CASE_DIR2="$TMPDIR/explicit-luci-branch"
 make_openwrt_tree \

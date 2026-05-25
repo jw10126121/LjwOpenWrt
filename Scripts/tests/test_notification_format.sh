@@ -6,6 +6,7 @@ set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 README_SCRIPT="$SCRIPT_DIR/readme.sh"
+START_NOTIFY_SCRIPT="$SCRIPT_DIR/ci_create_start_notification.sh"
 NOTIFY_SCRIPT="$SCRIPT_DIR/ci_create_notifications.sh"
 
 TMPDIR=$(mktemp -d)
@@ -19,10 +20,13 @@ README_FILE="$TMPDIR/readme.txt"
 RELEASE_FILE="$TMPDIR/readme_release.txt"
 ENV_FILE="$TMPDIR/github_env.txt"
 OUTPUT_FILE="$TMPDIR/github_output.txt"
+START_OPENWRT_PATH="$TMPDIR/start-openwrt"
 
 mkdir -p \
 	"$TMPDIR/feeds/luci/applications/luci-app-accesscontrol" \
-	"$TMPDIR/feeds/luci/applications/luci-app-ddns"
+	"$TMPDIR/feeds/luci/applications/luci-app-ddns" \
+	"$START_OPENWRT_PATH/feeds/luci/applications/luci-app-accesscontrol" \
+	"$START_OPENWRT_PATH/feeds/luci/applications/luci-app-ddns"
 
 cat > "$TMPDIR/feeds/luci/applications/luci-app-accesscontrol/Makefile" <<'EOF'
 PKG_VERSION:=1.0.1
@@ -32,7 +36,21 @@ cat > "$TMPDIR/feeds/luci/applications/luci-app-ddns/Makefile" <<'EOF'
 PKG_VERSION:=$(or $(DDNS_VERSION),2.3.4)
 EOF
 
+cat > "$START_OPENWRT_PATH/feeds/luci/applications/luci-app-accesscontrol/Makefile" <<'EOF'
+PKG_VERSION:=1.0.1
+EOF
+
+cat > "$START_OPENWRT_PATH/feeds/luci/applications/luci-app-ddns/Makefile" <<'EOF'
+PKG_VERSION:=$(or $(DDNS_VERSION),2.3.4)
+EOF
+
 cat > "$CONFIG_FILE" <<'EOF'
+CONFIG_PACKAGE_luci-app-accesscontrol=y
+CONFIG_PACKAGE_luci-app-adguardhome=y
+CONFIG_PACKAGE_luci-app-ddns=m
+EOF
+
+cat > "$START_OPENWRT_PATH/.config" <<'EOF'
 CONFIG_PACKAGE_luci-app-accesscontrol=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 CONFIG_PACKAGE_luci-app-ddns=m
@@ -132,6 +150,60 @@ printf '%s\n' "$DINGDING_MESSAGE" | grep -q '^luci-app-ddns (2.3.4)$'
 GITHUB_ENV="$ENV_FILE" \
 GITHUB_OUTPUT="$OUTPUT_FILE" \
 START_TIME="D260418_T105727" \
+start_notify_desc_file="$README_FILE" \
+bash "$START_NOTIFY_SCRIPT"
+
+grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"
+grep -q '^#### --- 集成的插件 --- ####$' "$ENV_FILE"
+grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
+grep -q '^luci-app-adguardhome$' "$ENV_FILE"
+grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"
+if grep -q 'Release下载地址：' "$ENV_FILE"; then
+	echo "Unexpected release URL in start notification" >&2
+	exit 1
+fi
+if grep -q 'Artifact下载地址：' "$ENV_FILE"; then
+	echo "Unexpected artifact URL in start notification" >&2
+	exit 1
+fi
+if grep -q '编译状态：' "$ENV_FILE"; then
+	echo "Unexpected compile status in start notification" >&2
+	exit 1
+fi
+if grep -q '编译结束：' "$ENV_FILE"; then
+	echo "Unexpected compile end time in start notification" >&2
+	exit 1
+fi
+
+: > "$ENV_FILE"
+: > "$OUTPUT_FILE"
+START_WORKSPACE="$TMPDIR/start-workspace"
+mkdir -p "$START_WORKSPACE"
+cp -R "$SCRIPT_DIR" "$START_WORKSPACE/Scripts"
+GITHUB_ENV="$ENV_FILE" \
+GITHUB_OUTPUT="$OUTPUT_FILE" \
+OPENWRT_PATH="$START_OPENWRT_PATH" \
+GITHUB_WORKSPACE="$START_WORKSPACE" \
+WRT_DIR_SCRIPTS="Scripts" \
+WRT_MINE_SAY="" \
+system_content="$system_desc" \
+bash "$START_NOTIFY_SCRIPT"
+
+grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"
+grep -q '^#### --- 集成的插件 --- ####$' "$ENV_FILE"
+grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
+grep -q '^luci-app-adguardhome$' "$ENV_FILE"
+grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"
+if grep -q '编译状态：' "$ENV_FILE"; then
+	echo "Unexpected compile status in generated start notification" >&2
+	exit 1
+fi
+
+: > "$ENV_FILE"
+: > "$OUTPUT_FILE"
+GITHUB_ENV="$ENV_FILE" \
+GITHUB_OUTPUT="$OUTPUT_FILE" \
+START_TIME="D260418_T105727" \
 END_TIME="D260418_T120000" \
 DEVICE_SUBTARGET="mt6000" \
 GITHUB_REPOSITORY="user/repo" \
@@ -164,11 +236,12 @@ GITHUB_REPOSITORY="user/repo" \
 GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="success" \
+OUTPUT_NAME_PREFIX="lean_mt6000_fw3_frpc_ipk_D260418_T105727" \
 release_desc_file="$RELEASE_FILE" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
 
-grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/D260418_T105727_mt6000' "$ENV_FILE"
+grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/lean_mt6000_fw3_frpc_ipk_D260418_T105727' "$ENV_FILE"
 grep -q 'Artifact下载地址：https://github.com/user/repo/actions/runs/123456' "$ENV_FILE"
 grep -q '编译状态：success' "$ENV_FILE"
 grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"
