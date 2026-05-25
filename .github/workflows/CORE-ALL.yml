@@ -176,6 +176,18 @@ jobs:
     #     sudo -E apt-get -y clean
     #     sudo timedatectl set-timezone 'Asia/Shanghai'
 
+    - name: Checkout (下载当前源码)
+      uses: actions/checkout@v6.0.1
+
+    - name: Check Disk (磁盘信息)
+      run: |
+        df -hT $GITHUB_WORKSPACE
+
+    - name: Check Scripts (搜索脚本并配置权限)
+      run: |
+        echo "【Lin】配置脚本执行权限..."
+        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
+
     - name: Check Config Values (检查配置变量)
       run: |
         . "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/lib/overlay_utils.sh"
@@ -236,18 +248,6 @@ jobs:
         fi
         echo "【Lin】源码信息：[${WRT_REPO_BRANCH}] ${WRT_REPO_URL}"
         echo "【Lin】源码风味：lean"
-
-    - name: Checkout (下载当前源码)
-      uses: actions/checkout@v6.0.1
-
-    - name: Check Disk (磁盘信息)
-      run: |
-        df -hT $GITHUB_WORKSPACE
-
-    - name: Check Scripts (搜索脚本并配置权限)
-      run: |
-        echo "【Lin】配置脚本执行权限..."
-        find ./ -maxdepth 3 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
 
     - name: config git (修改git下载缓冲大小)
       run: |
