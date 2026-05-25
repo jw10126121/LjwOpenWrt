@@ -118,6 +118,7 @@ openclash|luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgm
 ssrplus|luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ libustream-openssl dnsmasq-full_ jq_ ip-full_ curl_ libpcap1_ libudns_ libuci-lua_ nping_ resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ dns2socks_ dns2tcp_ mosdns_ microsocks_ shadowsocks-libev-ss-local_ shadowsocks-libev-ss-redir_ shadowsocks-libev-ss-server_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ shadowsocksr-libev-ssr-server_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_ ca-bundle_ libopenssl3_ libubox20240329_ lyaml_ xz-utils_
 sqm|luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ sqm-scripts-nss_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_
 openvpnserver|luci-app-openvpn-server_ luci-i18n-openvpn-server-zh-cn_ liblzo_ openvpn-easy-rsa_ openvpn-openssl_
+adguardhome|luci-app-adguardhome_ luci-i18n-adguardhome-zh-cn_ adguardhome_ ca-certs_ curl_ wget-ssl_ ca-bundle_ libcurl_ libgnutls_ libmbedtls_ libopenssl_ libwolfssl_ kmod-crypto-hw-padlock_ kmod-crypto-user_ kmod-cryptodev_ libatomic_ libgcc_
 samba4|luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_
 mwan3|luci-app-mwan3_ luci-i18n-mwan3-zh-cn_ pdnsd-alt_ mwan3_
 alist|luci-app-alist_ luci-i18n-alist-zh-cn_ alist_ libfuse_ fuse-utils_
@@ -141,7 +142,10 @@ wechatpush|luci-app-wechatpush_ luci-i18n-wechatpush-zh-cn_ iputils-arping_ jq_ 
 oaf|luci-app-oaf_ luci-i18n-oaf-zh-cn_ appfilter_ kmod-oaf_
 easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ easytier-noweb_ kmod-tun_
 bandix|luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_
+mosdns|luci-app-mosdns_ luci-i18n-mosdns-zh-cn_ curl_ mosdns_ v2dat_ v2ray-geoip_ v2ray-geosite_ libcurl_ ca-bundle_ libgnutls_ libmbedtls_ libopenssl_ libwolfssl_ kmod-crypto-hw-padlock_ kmod-crypto-user_ kmod-cryptodev_ libatomic_ libgcc_
 argon|luci-theme-argon_ luci-i18n-argon-zh-cn_ curl_ jsonfilter_
+argonconfig|luci-app-argon-config_ luci-i18n-argon-config-zh-cn_ luci-theme-argon_
+onliner|luci-app-onliner_ luci-i18n-onliner-zh-cn_ arp-scan_ libpcap_
 wolplus|luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_
 versync|luci-app-verysync_ verysync_
 vlmcsd|luci-app-vlmcsd_ luci-i18n-vlmcsd-zh-cn_ vlmcsd_
@@ -151,6 +155,7 @@ tailscale|luci-app-tailscale_ luci-i18n-tailscale-zh-cn_ tailscale_
 nftqos|luci-app-nft-qos_ luci-i18n-nft-qos-zh-cn_ nft-qos_
 hdidle|luci-app-hd-idle_ luci-i18n-hd-idle-zh-cn_ hd-idle_ lsblk_
 airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync-openssl_
+turboacc|luci-app-turboacc_ luci-i18n-turboacc-zh-cn_ kmod-fast-classifier_ kmod-ipt-offload_ kmod-shortcut-fe-cm_ kmod-tcp-bbr_
 vsftpd|luci-app-vsftpd_ luci-i18n-vsftpd-zh-cn_ vsftpd_ vsftpd-alt_
 lucky|luci-app-lucky_ luci-i18n-lucky-zh-cn_ lucky_
 EOF

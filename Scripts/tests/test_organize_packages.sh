@@ -89,16 +89,46 @@ touch "$TMPDIR/luci-i18n-basic-zh-cn_1_all.ipk"
 touch "$TMPDIR/luci-app-frps_1_all.ipk"
 touch "$TMPDIR/luci-i18n-frps-zh-cn_1_all.ipk"
 touch "$TMPDIR/frps_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-adguardhome_1_all.ipk"
+touch "$TMPDIR/luci-i18n-adguardhome-zh-cn_1_all.ipk"
+touch "$TMPDIR/adguardhome_1_aarch64.ipk"
+touch "$TMPDIR/ca-certs_1_all.ipk"
+touch "$TMPDIR/wget-ssl_1_aarch64.ipk"
+touch "$TMPDIR/libcurl_1_aarch64.ipk"
+touch "$TMPDIR/libgnutls_1_aarch64.ipk"
+touch "$TMPDIR/libmbedtls_1_aarch64.ipk"
+touch "$TMPDIR/libopenssl_1_aarch64.ipk"
+touch "$TMPDIR/libwolfssl_1_aarch64.ipk"
+touch "$TMPDIR/kmod-crypto-hw-padlock_1_aarch64.ipk"
+touch "$TMPDIR/kmod-crypto-user_1_aarch64.ipk"
+touch "$TMPDIR/kmod-cryptodev_1_aarch64.ipk"
+touch "$TMPDIR/libatomic_1_aarch64.ipk"
+touch "$TMPDIR/libgcc_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-easytier_1_all.ipk"
 touch "$TMPDIR/luci-i18n-easytier-zh-cn_1_all.ipk"
 touch "$TMPDIR/easytier_2.6.4_aarch64.ipk"
 touch "$TMPDIR/easytier-noweb_2.6.4_aarch64.ipk"
 touch "$TMPDIR/kmod-tun_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-mosdns_1_all.ipk"
+touch "$TMPDIR/luci-i18n-mosdns-zh-cn_1_all.ipk"
+touch "$TMPDIR/v2dat_1_aarch64.ipk"
+touch "$TMPDIR/v2ray-geoip_1_all.ipk"
+touch "$TMPDIR/v2ray-geosite_1_all.ipk"
 touch "$TMPDIR/luci-app-nlbwmon_1_all.ipk"
 touch "$TMPDIR/luci-i18n-nlbwmon-zh-cn_1_all.ipk"
 touch "$TMPDIR/nlbwmon_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-arpbind_1_all.ipk"
 touch "$TMPDIR/luci-i18n-arpbind-zh-cn_1_all.ipk"
+touch "$TMPDIR/luci-app-onliner_1_all.ipk"
+touch "$TMPDIR/luci-i18n-onliner-zh-cn_1_all.ipk"
+touch "$TMPDIR/arp-scan_1_aarch64.ipk"
+touch "$TMPDIR/libpcap_1_aarch64.ipk"
+touch "$TMPDIR/luci-app-turboacc_1_all.ipk"
+touch "$TMPDIR/luci-i18n-turboacc-zh-cn_1_all.ipk"
+touch "$TMPDIR/kmod-fast-classifier_1_aarch64.ipk"
+touch "$TMPDIR/kmod-ipt-offload_1_aarch64.ipk"
+touch "$TMPDIR/kmod-shortcut-fe-cm_1_aarch64.ipk"
+touch "$TMPDIR/kmod-tcp-bbr_1_aarch64.ipk"
 touch "$TMPDIR/luci-app-vsftpd_1_all.ipk"
 touch "$TMPDIR/luci-i18n-vsftpd-zh-cn_1_all.ipk"
 touch "$TMPDIR/vsftpd-alt_1_aarch64.ipk"
@@ -114,6 +144,10 @@ CONFIG_PACKAGE_luci-app-3cat=y
 CONFIG_PACKAGE_luci-app-socat=m
 CONFIG_PACKAGE_luci-app-easytier=y
 CONFIG_PACKAGE_luci-app-openvpn=m
+CONFIG_PACKAGE_luci-app-adguardhome=m
+CONFIG_PACKAGE_luci-app-mosdns=m
+CONFIG_PACKAGE_luci-app-onliner=y
+CONFIG_PACKAGE_luci-app-turboacc=y
 CONFIG_PACKAGE_luci-app-basic=m
 CONFIG_PACKAGE_luci-app-rclone_INCLUDE_rclone-webui=y
 EOF
@@ -199,6 +233,71 @@ kmod-tun_1_aarch64.ipk
 for filename in $easytier_required_files; do
 	if [ ! -f "$EASYTIER_DIR/$filename" ]; then
 		echo "Missing expected EasyTier file: $filename" >&2
+		exit 1
+	fi
+done
+
+ADGUARDHOME_DIR="$TMPDIR/luci-app-adguardhome"
+adguardhome_required_files="
+luci-app-adguardhome_1_all.ipk
+luci-i18n-adguardhome-zh-cn_1_all.ipk
+adguardhome_1_aarch64.ipk
+ca-certs_1_all.ipk
+curl_1_aarch64.ipk
+wget-ssl_1_aarch64.ipk
+"
+
+for filename in $adguardhome_required_files; do
+	if [ ! -f "$ADGUARDHOME_DIR/$filename" ]; then
+		echo "Missing expected AdGuardHome file: $filename" >&2
+		exit 1
+	fi
+done
+
+MOSDNS_DIR="$TMPDIR/luci-app-mosdns"
+mosdns_required_files="
+luci-app-mosdns_1_all.ipk
+luci-i18n-mosdns-zh-cn_1_all.ipk
+mosdns_1_aarch64.ipk
+v2dat_1_aarch64.ipk
+v2ray-geoip_1_all.ipk
+v2ray-geosite_1_all.ipk
+"
+
+for filename in $mosdns_required_files; do
+	if [ ! -f "$MOSDNS_DIR/$filename" ]; then
+		echo "Missing expected MosDNS file: $filename" >&2
+		exit 1
+	fi
+done
+
+ONLINER_DIR="$TMPDIR/luci-app-onliner"
+onliner_required_files="
+luci-app-onliner_1_all.ipk
+luci-i18n-onliner-zh-cn_1_all.ipk
+arp-scan_1_aarch64.ipk
+"
+
+for filename in $onliner_required_files; do
+	if [ ! -f "$ONLINER_DIR/$filename" ]; then
+		echo "Missing expected Onliner file: $filename" >&2
+		exit 1
+	fi
+done
+
+TURBOACC_DIR="$TMPDIR/luci-app-turboacc"
+turboacc_required_files="
+luci-app-turboacc_1_all.ipk
+luci-i18n-turboacc-zh-cn_1_all.ipk
+kmod-fast-classifier_1_aarch64.ipk
+kmod-ipt-offload_1_aarch64.ipk
+kmod-shortcut-fe-cm_1_aarch64.ipk
+kmod-tcp-bbr_1_aarch64.ipk
+"
+
+for filename in $turboacc_required_files; do
+	if [ ! -f "$TURBOACC_DIR/$filename" ]; then
+		echo "Missing expected TurboACC file: $filename" >&2
 		exit 1
 	fi
 done
