@@ -351,8 +351,8 @@ apply_common_package_overrides() {
 
     # update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"
     update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "v2.6.4"
-    #local easytier_release_version='2.6.4' # 注释掉这两行表示跟随包仓声明版本
-    #pin_easytier_binary_version "." "${easytier_release_version}"
+    local easytier_release_version='2.4.5' # 注释掉这两行表示跟随包仓声明版本
+    pin_easytier_binary_version "." "${easytier_release_version}"
     
 
     UPDATE_PACKAGE "luci-app-bandix" "timsaya/luci-app-bandix" "main"
