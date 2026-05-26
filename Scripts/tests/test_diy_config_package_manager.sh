@@ -69,7 +69,7 @@ EOF
 		# shellcheck disable=SC1090
 		. "$FUNCTIONS_FILE"
 		configure_package_manager_mode >/dev/null
-		build_disable_feed_cmd "openwrt_sqm_scripts_nss"
+		build_disable_feed_cmd "openwrt_nss_packages"
 	) > "$case_dir/feed_cmd.txt"
 }
 

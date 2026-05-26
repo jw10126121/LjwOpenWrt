@@ -53,18 +53,9 @@ if grep -q 'qosmio/nss-packages.git' "$TMPDIR/ipq_lean/feeds.conf.default"; then
 	echo "lean IPQ build should not enable nss-packages feed" >&2
 	exit 1
 fi
-if grep -q 'qosmio/sqm-scripts-nss.git' "$TMPDIR/ipq_lean/feeds.conf.default"; then
-	echo "lean IPQ build should not enable sqm-scripts-nss feed" >&2
-	exit 1
-fi
-
 grep -q '^src-git helloworld ' "$TMPDIR/mt6000_lean/feeds.conf.default"
 if grep -q 'qosmio/nss-packages.git' "$TMPDIR/mt6000_lean/feeds.conf.default"; then
 	echo "MT6000 should not enable nss-packages feed" >&2
-	exit 1
-fi
-if grep -q 'qosmio/sqm-scripts-nss.git' "$TMPDIR/mt6000_lean/feeds.conf.default"; then
-	echo "MT6000 should not enable sqm-scripts-nss feed" >&2
 	exit 1
 fi
 

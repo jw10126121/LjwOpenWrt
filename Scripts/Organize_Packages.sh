@@ -116,7 +116,7 @@ ORGANIZE_USB_PACKAGES() {
 PACKAGE_OVERRIDES=$(cat <<'EOF'
 openclash|luci-app-openclash_ kmod-inet-diag_ coreutils-nohup_ libcap-bin_ libgmp10_ libruby libyaml_ ruby_ ruby-bigdecimal_ ruby-date_ ruby-digest_ ruby-enc_ ruby-forwardable_ ruby-pstore_ ruby-psych_ ruby-stringio_ ruby-strscan_ ruby-yaml_ unzip_ kmod-nft-tproxy_
 ssrplus|luci-app-ssr-plus_ luci-i18n-ssr-plus-zh-cn_ libustream-openssl dnsmasq-full_ jq_ ip-full_ curl_ libpcap1_ libudns_ libuci-lua_ nping_ resolveip_ lua-neturl_ libev_ libpcre2_ libsodium_ dns2socks_ dns2tcp_ ipt2socks_ chinadns-ng_ mosdns_ microsocks_ shadowsocks-libev-ss-local_ shadowsocks-libev-ss-redir_ shadowsocks-libev-ss-server_ shadowsocks-rust-sslocal_ shadowsocks-rust-ssserver_ shadowsocksr-libev-ssr-check_ shadowsocksr-libev-ssr-local_ shadowsocksr-libev-ssr-redir_ shadowsocksr-libev-ssr-server_ simple-obfs-client_ tcping_ xray-core_ coreutils_ coreutils-base64_ ca-bundle_ libopenssl3_ libubox20240329_ lyaml_ xz-utils_
-sqm|luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ sqm-scripts-nss_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_
+sqm|luci-app-sqm_ luci-i18n-sqm-zh-cn_ sqm-scripts_ kmod-ipt-ipopt_ kmod-ifb_ kmod-sched-cake_ kmod-sched-core_ iptables-mod-ipopt_ tc-tiny_ kmod-qca-nss-drv-igs_ kmod-qca-nss-drv-qdisc_
 openvpnserver|luci-app-openvpn-server_ luci-i18n-openvpn-server-zh-cn_ liblzo_ openvpn-easy-rsa_ openvpn-openssl_
 adguardhome|luci-app-adguardhome_ luci-i18n-adguardhome-zh-cn_ adguardhome_ ca-certs_ curl_ wget-ssl_ ca-bundle_ libcurl_ libgnutls_ libmbedtls_ libopenssl_ libwolfssl_ kmod-crypto-hw-padlock_ kmod-crypto-user_ kmod-cryptodev_ libatomic_ libgcc_
 samba4|luci-app-samba4_ luci-i18n-samba4-zh-cn_ libattr_ libgnutls_ libavahi-client_ libavahi-dbus-support_ libdaemon_ libdbus_ libexpat_ libgmp_ libnettle_ libtasn1_ libtirpc_ liburing_ avahi-dbus-daemon_ wsdd2_ samba4-libs_ samba4-server_ attr_ dbus_
@@ -158,6 +158,7 @@ airplay2|luci-app-airplay2_ luci-i18n-airplay2-zh-cn_ alsa-utils_ shairport-sync
 turboacc|luci-app-turboacc_ luci-i18n-turboacc-zh-cn_ kmod-fast-classifier_ kmod-ipt-offload_ kmod-shortcut-fe-cm_ kmod-tcp-bbr_
 vsftpd|luci-app-vsftpd_ luci-i18n-vsftpd-zh-cn_ vsftpd_ vsftpd-alt_
 lucky|luci-app-lucky_ luci-i18n-lucky-zh-cn_ lucky_
+sqmcontroller|luci-app-sqm-controller_ luci-i18n-sqm-controller-zh-cn_ python3_ python3-light_ kmod-sched-connmark_ kmod-sched-ctinfo_
 EOF
 )
 

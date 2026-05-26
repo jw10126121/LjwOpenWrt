@@ -286,7 +286,7 @@ apply_lean_runtime_customizations() {
     local dhcp_ip_start=10
     local dhcp_ip_end=254
     local dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
-    local holdoff_snippet dhcp_snippet remove_sqm_scripts_nss remove_nss_packages
+    local holdoff_snippet dhcp_snippet remove_nss_packages
 
     [ -f "$file_default_settings" ] || return 0
 
@@ -310,14 +310,6 @@ EOF
     append_default_settings_snippet "uci commit system" "uci set dhcp.@dnsmasq[0].sequential_ip=" "$dhcp_snippet"
     if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' "$file_setup_config"; then
         echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
-    fi
-
-    remove_sqm_scripts_nss=$(build_disable_feed_cmd "openwrt_sqm_scripts_nss")
-    append_default_settings_snippet "helloworld" "$remove_sqm_scripts_nss" "$remove_sqm_scripts_nss"
-    if grep -qF "$remove_sqm_scripts_nss" "$file_setup_config"; then
-        echo "【Lin】注释feeds中openwrt_sqm_scripts_nss完成"
-    else
-        echo "【Lin】注释feeds中openwrt_sqm_scripts_nss失败"
     fi
 
     remove_nss_packages=$(build_disable_feed_cmd "openwrt_nss_packages")
@@ -542,9 +534,7 @@ configure_base_package_options() {
 
 configure_nss_feed_options() {
     # 仓库现已固定为 lean 源码，不再注入 NSS feeds。
-    set_kconfig_value "CONFIG_FEED_sqm_scripts_nss" "n"
     set_kconfig_value "CONFIG_FEED_nss_packages" "n"
-    set_kconfig_value "CONFIG_PACKAGE_sqm-scripts-nss" "n"
 }
 
 main() {

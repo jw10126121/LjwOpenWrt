@@ -75,11 +75,9 @@ run_case IPQ60XX-NOWIFI-FW3 lean
 run_case MT6000-WIFI-FW4 lean
 
 grep -q '^CONFIG_FEED_helloworld=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_lean/.config"
-grep -q '^CONFIG_FEED_sqm_scripts_nss=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_lean/.config"
 grep -q '^CONFIG_FEED_nss_packages=n$' "$TMPDIR/IPQ60XX-NOWIFI-FW3_lean/.config"
 
 grep -q '^CONFIG_FEED_helloworld=n$' "$TMPDIR/MT6000-WIFI-FW4_lean/.config"
-grep -q '^CONFIG_FEED_sqm_scripts_nss=n$' "$TMPDIR/MT6000-WIFI-FW4_lean/.config"
 grep -q '^CONFIG_FEED_nss_packages=n$' "$TMPDIR/MT6000-WIFI-FW4_lean/.config"
 
 echo "test_diy_config_nss_feeds: ok"
