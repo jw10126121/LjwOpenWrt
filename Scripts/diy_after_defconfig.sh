@@ -63,11 +63,11 @@ configure_ecm_accel_delay_fix() {
 
     # qca-nss-ecm 默认把 accel_delay_pkts 设为 1，表示双向流量一出现就很快允许加速。
     # AX18 上这会导致微信朋友圈相关连接过早进入 ECM，出现无法刷新的问题。
-    # 改为 16 后，连接会先多走少量慢路径包，再进入 ECM；这是当前实机验证可用且
+    # 改为 24 后，连接会先多走少量慢路径包，再进入 ECM；这是当前实机验证可用且
     # 相对保守的最小有效值，比彻底关闭 ECM 或使用极大延迟值的副作用更小。
-    sed -i 's#echo 1 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#' "${ecm_init_file}"
-    if grep -qF "echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts" "${ecm_init_file}"; then
-        echo "【Lin】已为 CMIOT-AX18-NOWIFI 将 ECM 默认 accel_delay_pkts 调整为 16"
+    sed -i 's#echo 1 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#echo 24 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#' "${ecm_init_file}"
+    if grep -qF "echo 24 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts" "${ecm_init_file}"; then
+        echo "【Lin】已为 CMIOT-AX18-NOWIFI 将 ECM 默认 accel_delay_pkts 调整为 24"
     fi
 }
 
