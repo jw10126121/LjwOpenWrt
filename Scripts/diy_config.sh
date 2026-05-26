@@ -306,12 +306,20 @@ EOF
 configure_ecm_accel_delay_fix() {
     local ecm_init_file="./package/qca/qca-nss-ecm/files/qca-nss-ecm.init"
 
+    # 仅对已实机验证存在“微信朋友圈因 ECM 过早加速而异常”的
+    # CMIOT-AX18-NOWIFI 生效。其它 qualcommax 机型暂不统一调整，
+    # 避免把未经验证的平台一起改成更保守的加速时机。
+    [ "${WRT_TARGET}" = "CMIOT-AX18-NOWIFI" ] || return 0
     grep -q '^CONFIG_TARGET_qualcommax=y$' "${op_config}" 2>/dev/null || return 0
     [ -f "${ecm_init_file}" ] || return 0
 
+    # qca-nss-ecm 默认把 accel_delay_pkts 设为 1，表示双向流量一出现就很快允许加速。
+    # AX18 上这会导致微信朋友圈相关连接过早进入 ECM，出现无法刷新的问题。
+    # 改为 16 后，连接会先多走少量慢路径包，再进入 ECM；这是当前实机验证可用且
+    # 相对保守的最小有效值，比彻底关闭 ECM 或使用极大延迟值的副作用更小。
     sed -i 's#echo 1 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#' "${ecm_init_file}"
     if grep -qF "echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts" "${ecm_init_file}"; then
-        echo "【Lin】已将 ECM 默认 accel_delay_pkts 调整为 16"
+        echo "【Lin】已为 CMIOT-AX18-NOWIFI 将 ECM 默认 accel_delay_pkts 调整为 16"
     fi
 }
 
