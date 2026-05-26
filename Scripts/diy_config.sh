@@ -444,7 +444,8 @@ update_build_revision() {
     if [[ -n $distrib_revision ]]; then
         date_version=$(date +"%y%m%d")
         if [ -n "${op_version}" ]; then
-            show_version_text="v${op_version} by Lin on ${date_version}"
+            show_version_text="v${op_version}"
+            # show_version_text="v${op_version} by Lin on ${date_version}"
             to_distrib_revision="${show_version_text}"
         else
             to_distrib_revision="R${date_version} by Lin"
