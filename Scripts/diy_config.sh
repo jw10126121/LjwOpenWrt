@@ -303,6 +303,18 @@ EOF
     fi
 }
 
+configure_ecm_accel_delay_fix() {
+    local ecm_init_file="./package/qca/qca-nss-ecm/files/qca-nss-ecm.init"
+
+    grep -q '^CONFIG_TARGET_qualcommax=y$' "${op_config}" 2>/dev/null || return 0
+    [ -f "${ecm_init_file}" ] || return 0
+
+    sed -i 's#echo 1 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#' "${ecm_init_file}"
+    if grep -qF "echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts" "${ecm_init_file}"; then
+        echo "【Lin】已将 ECM 默认 accel_delay_pkts 调整为 16"
+    fi
+}
+
 patch_apk_empty_feed_indexing() {
     local package_makefile="${1:-./package/Makefile}"
     local temp_file
@@ -522,6 +534,7 @@ main() {
     update_build_revision
 
     apply_lean_runtime_customizations
+    configure_ecm_accel_delay_fix
     configure_nss_usage_display
 }
 
