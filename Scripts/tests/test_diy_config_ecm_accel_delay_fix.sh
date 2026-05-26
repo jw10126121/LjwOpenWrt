@@ -43,16 +43,15 @@ extract_function "configure_ecm_accel_delay_fix" > "$FUNCTIONS_FILE"
 run_case() {
 	local case_name=$1
 	local wrt_target=$2
-	local expected_value=$3
+	local config_body=$3
+	local expected_value=$4
 	local case_dir="$TMPDIR/$case_name"
 	local op_config="$case_dir/.config"
 	local ecm_init="$case_dir/package/qca/qca-nss-ecm/files/qca-nss-ecm.init"
 
 	mkdir -p "$(dirname "$ecm_init")"
 
-	cat > "$op_config" <<'EOF'
-CONFIG_TARGET_qualcommax=y
-EOF
+	printf '%s\n' "$config_body" > "$op_config"
 
 	cat > "$ecm_init" <<'EOF'
 load_ecm() {
@@ -76,7 +75,30 @@ EOF
 	grep -q "^		echo ${expected_value} > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts$" "$ecm_init"
 }
 
-run_case "ax18" "CMIOT-AX18-NOWIFI" "16"
-run_case "ax18_mini" "CMIOT-AX18-NOWIFI-MINI" "1"
+run_case \
+	"ax18" \
+	"CMIOT-AX18-NOWIFI" \
+	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
+	"16"
+run_case \
+	"ax18_fw3" \
+	"CMIOT-AX18-NOWIFI-FW3" \
+	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
+	"16"
+run_case \
+	"ax18_fw4" \
+	"CMIOT-AX18-NOWIFI-FW4" \
+	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
+	"16"
+run_case \
+	"ax18_wrong_config" \
+	"CMIOT-AX18-NOWIFI-FW3" \
+	"CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y" \
+	"1"
+run_case \
+	"ax18_mini" \
+	"CMIOT-AX18-NOWIFI-MINI" \
+	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
+	"1"
 
 echo "test_diy_config_ecm_accel_delay_fix: ok"
