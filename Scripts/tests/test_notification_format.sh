@@ -100,12 +100,14 @@ OP版本：24.10.5
 源码分支：master
 源码hash：ecec1ef93a8920f30ef927d989b13b674d614ca6
 
-#### --- 集成的插件 --- ####
-luci-app-accesscontrol (1.0.1)
-luci-app-adguardhome
+<details><summary>--- 集成的插件 ---</summary>
+luci-app-accesscontrol (1.0.1)<br>
+luci-app-adguardhome<br>
+</details>
 
-#### --- 安装包插件 --- ####
-luci-app-ddns (2.3.4)
+<details><summary>--- 安装包插件 ---</summary>
+luci-app-ddns (2.3.4)<br>
+</details>
 EOF
 
 # 先验证 README 生成逻辑，再验证 GitHub Actions 通知内容。
@@ -237,6 +239,7 @@ GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="success" \
 OUTPUT_NAME_PREFIX="lean_mt6000_fw3_frpc_ipk_D260418_T105727" \
+readme_desc_file="$README_FILE" \
 release_desc_file="$RELEASE_FILE" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
@@ -247,9 +250,14 @@ grep -q '编译状态：success' "$ENV_FILE"
 grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"
 grep -q '^编译结束：D260418_T120000$' "$ENV_FILE"
 grep -q '^### --- 编译说明 --- ###$' "$ENV_FILE"
+grep -q '^#### --- 集成的插件 --- ####$' "$ENV_FILE"
 grep -q 'luci-app-accesscontrol (1.0.1)' "$ENV_FILE"
 grep -q '^luci-app-adguardhome$' "$ENV_FILE"
 grep -q 'luci-app-ddns (2.3.4)' "$ENV_FILE"
+if grep -q '<details><summary>' "$ENV_FILE"; then
+	echo "Unexpected release HTML details markup in success notification" >&2
+	exit 1
+fi
 
 success_start_count=$(grep -c '^编译开始：D260418_T105727$' "$ENV_FILE")
 [ "$success_start_count" -eq 1 ] || {

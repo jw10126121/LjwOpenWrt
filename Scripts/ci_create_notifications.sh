@@ -12,15 +12,15 @@ release_tag="${OUTPUT_NAME_PREFIX:-${START_TIME:?START_TIME is required}_${DEVIC
 artifact_url="https://github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}/actions/runs/${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 
 get_notify_body() {
-    # 完成通知优先复用编译结束后整理出的发布说明，
-    # 这样下载地址之外，还能看到本次编译的设备/插件等内容。
-    if [ -n "${release_desc_file:-}" ] && [ -f "${release_desc_file}" ]; then
-        cat "${release_desc_file}"
+    # 通知正文优先使用纯文本版 readme，避免把 Release 专用的 HTML details 标签发到 IM。
+    if [ -n "${readme_desc_file:-}" ] && [ -f "${readme_desc_file}" ]; then
+        cat "${readme_desc_file}"
         return 0
     fi
 
-    if [ -n "${readme_desc_file:-}" ] && [ -f "${readme_desc_file}" ]; then
-        cat "${readme_desc_file}"
+    # 纯文本版缺失时，再回退到发布说明，确保至少仍有一份完整正文可用。
+    if [ -n "${release_desc_file:-}" ] && [ -f "${release_desc_file}" ]; then
+        cat "${release_desc_file}"
         return 0
     fi
 
