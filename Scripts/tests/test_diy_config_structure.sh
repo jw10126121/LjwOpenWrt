@@ -16,9 +16,21 @@ patch_apk_empty_feed_indexing
 main
 '
 
+forbidden_functions='
+build_disable_feed_cmd
+configure_nss_feed_options
+'
+
 for fn in $required_functions; do
 	if ! grep -q "^${fn}() {" "$TARGET_SCRIPT"; then
 		echo "Missing expected function: $fn" >&2
+		exit 1
+	fi
+done
+
+for fn in $forbidden_functions; do
+	if grep -q "^${fn}() {" "$TARGET_SCRIPT"; then
+		echo "Unexpected legacy function: $fn" >&2
 		exit 1
 	fi
 done

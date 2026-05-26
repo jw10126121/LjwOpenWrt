@@ -164,16 +164,6 @@ append_default_settings_snippet() {
     append_file_snippet "$file_setup_config" "# setup_config hooks" "$2" "$3"
 }
 
-build_disable_feed_cmd() {
-    local feed_name=$1
-
-    if [ "${package_manager}" = 'apk' ]; then
-        printf "[ -f /etc/apk/repositories.d/distfeeds.list ] && sed -i '\\|%s| s|^#*|#|' /etc/apk/repositories.d/distfeeds.list" "${feed_name}"
-    else
-        printf "[ -f /etc/opkg/distfeeds.conf ] && sed -i 's|^#*src/gz %s|#src/gz %s|' /etc/opkg/distfeeds.conf" "${feed_name}" "${feed_name}"
-    fi
-}
-
 configure_package_manager_mode() {
     if [ "${package_manager}" = 'apk' ]; then
         set_kconfig_value "CONFIG_PKG_FORMAT" "apk"
@@ -286,7 +276,7 @@ apply_lean_runtime_customizations() {
     local dhcp_ip_start=10
     local dhcp_ip_end=254
     local dhcp_ip_limit=$((dhcp_ip_end - dhcp_ip_start + 1))
-    local holdoff_snippet dhcp_snippet remove_nss_packages
+    local holdoff_snippet dhcp_snippet
 
     [ -f "$file_default_settings" ] || return 0
 
@@ -310,14 +300,6 @@ EOF
     append_default_settings_snippet "uci commit system" "uci set dhcp.@dnsmasq[0].sequential_ip=" "$dhcp_snippet"
     if grep -qF 'uci set dhcp.@dnsmasq[0].sequential_ip=' "$file_setup_config"; then
         echo "【Lin】设置DHCP顺序分配${dhcp_ip_start}~${dhcp_ip_end}的IP。"
-    fi
-
-    remove_nss_packages=$(build_disable_feed_cmd "openwrt_nss_packages")
-    append_default_settings_snippet "helloworld" "$remove_nss_packages" "$remove_nss_packages"
-    if grep -qF "$remove_nss_packages" "$file_setup_config"; then
-        echo "【Lin】注释feeds中openwrt_nss_packages完成"
-    else
-        echo "【Lin】注释feeds中openwrt_nss_packages失败"
     fi
 }
 
@@ -526,15 +508,9 @@ EOF
 configure_base_package_options() {
     # 编译后，软件源里，去掉helloworld在线源
     set_kconfig_value "CONFIG_FEED_helloworld" "n"
-    configure_nss_feed_options
     set_kconfig_value "CONFIG_PACKAGE_luci" "y"
     set_kconfig_value "CONFIG_LUCI_LANG_zh_Hans" "y"
     configure_package_manager_mode
-}
-
-configure_nss_feed_options() {
-    # 仓库现已固定为 lean 源码，不再注入 NSS feeds。
-    set_kconfig_value "CONFIG_FEED_nss_packages" "n"
 }
 
 main() {

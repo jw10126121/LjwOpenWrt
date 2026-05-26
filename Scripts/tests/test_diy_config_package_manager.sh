@@ -2,8 +2,7 @@
 
 # 说明：验证 diy_config.sh 中 apk / ipk 的核心兼容逻辑：
 # 1. .config 包管理器相关开关会按模式切换；
-# 2. 运行时 feed 修补命令会指向正确的 apk/opkg 配置文件；
-# 3. default-settings-chn 不再由包管理器切换逻辑直接控制。
+# 2. default-settings-chn 不再由包管理器切换逻辑直接控制。
 
 set -eu
 
@@ -43,8 +42,6 @@ FUNCTIONS_FILE="$TMPDIR/functions.sh"
 {
 	extract_function "set_kconfig_value"
 	echo
-	extract_function "build_disable_feed_cmd"
-	echo
 	extract_function "configure_package_manager_mode"
 } > "$FUNCTIONS_FILE"
 
@@ -69,17 +66,14 @@ EOF
 		# shellcheck disable=SC1090
 		. "$FUNCTIONS_FILE"
 		configure_package_manager_mode >/dev/null
-		build_disable_feed_cmd "openwrt_nss_packages"
-	) > "$case_dir/feed_cmd.txt"
+	)
 }
 
 run_case apk
 run_case ipk
 
 APK_CONFIG="$TMPDIR/apk/.config"
-APK_FEED_CMD="$TMPDIR/apk/feed_cmd.txt"
 IPK_CONFIG="$TMPDIR/ipk/.config"
-IPK_FEED_CMD="$TMPDIR/ipk/feed_cmd.txt"
 
 grep -q '^CONFIG_USE_APK=y$' "$APK_CONFIG"
 grep -q '^CONFIG_PKG_FORMAT=apk$' "$APK_CONFIG"
@@ -88,11 +82,6 @@ grep -q '^CONFIG_PACKAGE_luci-i18n-package-manager-zh-cn=y$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-app-opkg=n$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-lib-ipkg=n$' "$APK_CONFIG"
 grep -q '^CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=n$' "$APK_CONFIG"
-grep -q '/etc/apk/repositories.d/distfeeds.list' "$APK_FEED_CMD"
-if grep -q '/etc/opkg/distfeeds.conf' "$APK_FEED_CMD"; then
-	echo "apk mode should not point to opkg distfeeds" >&2
-	exit 1
-fi
 
 grep -q '^CONFIG_USE_APK=n$' "$IPK_CONFIG"
 grep -q '^CONFIG_PKG_FORMAT=ipk$' "$IPK_CONFIG"
@@ -107,11 +96,6 @@ if grep -q '^CONFIG_PACKAGE_default-settings-chn=' "$APK_CONFIG"; then
 fi
 if grep -q '^CONFIG_PACKAGE_default-settings-chn=' "$IPK_CONFIG"; then
 	echo "package manager toggle should not touch default-settings-chn in ipk mode" >&2
-	exit 1
-fi
-grep -q '/etc/opkg/distfeeds.conf' "$IPK_FEED_CMD"
-if grep -q '/etc/apk/repositories.d/distfeeds.list' "$IPK_FEED_CMD"; then
-	echo "ipk mode should not point to apk repositories" >&2
 	exit 1
 fi
 
