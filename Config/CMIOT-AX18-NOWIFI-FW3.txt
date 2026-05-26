@@ -10,6 +10,10 @@
 #     段落标记选择对应内容，不再额外叠加 GENERAL-SERVICE.txt / GENERAL-FW3.txt / GENERAL-FW4.txt。
 
 
+CONFIG_PACKAGE_kmod-sched-act-ipt=y   # 补全 act_ipt
+CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台需要
+
+
 # ------------------------------------------------------------------------
 #  菜单整理：系统
 # ------------------------------------------------------------------------
