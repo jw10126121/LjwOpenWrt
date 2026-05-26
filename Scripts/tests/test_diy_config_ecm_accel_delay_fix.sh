@@ -94,11 +94,16 @@ run_case \
 	"ax18_wrong_config" \
 	"CMIOT-AX18-NOWIFI-FW3" \
 	"CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y" \
-	"1"
+	"16"
 run_case \
 	"ax18_mini" \
 	"CMIOT-AX18-NOWIFI-MINI" \
 	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
-	"1"
+	"16"
+run_case \
+	"other_target" \
+	"MT6000-WIFI-FW3" \
+	"CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y" \
+	"16"
 
 echo "test_diy_config_ecm_accel_delay_fix: ok"

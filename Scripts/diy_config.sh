@@ -305,19 +305,7 @@ EOF
 
 configure_ecm_accel_delay_fix() {
     local ecm_init_file="./package/qca/qca-nss-ecm/files/qca-nss-ecm.init"
-    local ax18_device_config='^CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y$'
 
-    # 仅对已实机验证存在“微信朋友圈因 ECM 过早加速而异常”的
-    # CMIOT-AX18-NOWIFI 生效。其它 qualcommax 机型暂不统一调整，
-    # 避免把未经验证的平台一起改成更保守的加速时机。
-    case "${WRT_TARGET}" in
-        CMIOT-AX18-NOWIFI|CMIOT-AX18-NOWIFI-FW3|CMIOT-AX18-NOWIFI-FW4)
-            ;;
-        *)
-            return 0
-            ;;
-    esac
-    grep -q "${ax18_device_config}" "${op_config}" 2>/dev/null || return 0
     [ -f "${ecm_init_file}" ] || return 0
 
     # qca-nss-ecm 默认把 accel_delay_pkts 设为 1，表示双向流量一出现就很快允许加速。
