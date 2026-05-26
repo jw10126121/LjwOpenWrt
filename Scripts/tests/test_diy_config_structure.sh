@@ -12,6 +12,7 @@ configure_common_system_defaults
 configure_source_default_settings_package
 append_default_settings_snippet
 apply_lean_runtime_customizations
+write_build_target_marker
 patch_apk_empty_feed_indexing
 main
 '

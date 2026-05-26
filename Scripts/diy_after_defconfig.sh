@@ -13,6 +13,7 @@ current_script_dir=$(cd $(dirname $0) && pwd)
 echo "【Lin】脚本目录：${current_script_dir}"
 current_dir=$(pwd)
 openwrt_workdir="${current_dir}"
+target_label_marker_file="./.linjw-target-label"
 
 # 获取CPU架构
 cputype=$(grep -m 1 "^CONFIG_TARGET_ARCH_PACKAGES=" ./.config | awk -F'=' '{print $2}' | tr -d '"')
@@ -38,6 +39,36 @@ echo "【Lin】设备架构：${cputype_simple:-'未知架构'} ${cputype}"
 get_config_value() {
     local key="$1"
     grep -m 1 "^${key}=" ./.config | awk -F'=' '{print $2}' | tr -d '"'
+}
+
+configure_ecm_accel_delay_fix() {
+    local ecm_init_file="./package/qca/qca-nss-ecm/files/qca-nss-ecm.init"
+    local ax18_device_config='^CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y$'
+    local marker_file="${target_label_marker_file:-./.linjw-target-label}"
+    local target_label
+
+    [ -f "${ecm_init_file}" ] || return 0
+    [ -f "${marker_file}" ] || return 0
+
+    target_label=$(tr -d '\r' < "${marker_file}")
+    case "${target_label}" in
+        CMIOT-AX18-NOWIFI|CMIOT-AX18-NOWIFI-FW3|CMIOT-AX18-NOWIFI-FW4)
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+
+    grep -q "${ax18_device_config}" ./.config 2>/dev/null || return 0
+
+    # qca-nss-ecm 默认把 accel_delay_pkts 设为 1，表示双向流量一出现就很快允许加速。
+    # AX18 上这会导致微信朋友圈相关连接过早进入 ECM，出现无法刷新的问题。
+    # 改为 16 后，连接会先多走少量慢路径包，再进入 ECM；这是当前实机验证可用且
+    # 相对保守的最小有效值，比彻底关闭 ECM 或使用极大延迟值的副作用更小。
+    sed -i 's#echo 1 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts#' "${ecm_init_file}"
+    if grep -qF "echo 16 > /sys/kernel/debug/ecm/ecm_classifier_default/accel_delay_pkts" "${ecm_init_file}"; then
+        echo "【Lin】已为 CMIOT-AX18-NOWIFI 将 ECM 默认 accel_delay_pkts 调整为 16"
+    fi
 }
 
 preload_homeproxy_resources() {
@@ -89,9 +120,8 @@ preload_homeproxy_resources() {
 }
 
 cd "${openwrt_workdir}"
+configure_ecm_accel_delay_fix
 preload_homeproxy_resources
-
-
 
 
 

@@ -40,20 +40,20 @@ esac
 EOF
 chmod +x "$TEST_BIN/git"
 
-extract_homeproxy_block() {
-	awk '
-		/^get_config_value\(\) \{/ { printing=1; remaining=2 }
-		/^preload_homeproxy_resources\(\) \{/ { printing=1 }
+extract_function() {
+	local function_name=$1
+	awk -v name="$function_name" '
+		$0 ~ "^" name "\\(\\) *\\{" { printing=1 }
 		printing { print }
-		printing && /^}/ {
-			remaining--
-			if (remaining == 0) exit
-		}
+		printing && $0 == "}" { exit }
 	' "$TARGET_SCRIPT"
 }
 
 BLOCK_FILE="$TMPDIR/homeproxy_block.sh"
-extract_homeproxy_block > "$BLOCK_FILE"
+{
+	extract_function "get_config_value"
+	extract_function "preload_homeproxy_resources"
+} > "$BLOCK_FILE"
 
 run_case() {
 	local mode=$1
