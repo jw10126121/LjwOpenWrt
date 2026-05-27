@@ -60,7 +60,7 @@ check_config_file() {
 has_duplicate=0
 
 check_config_file \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-FW3.txt" \
+    "$CONFIG_DIR/CMIOT-AX18-NOWIFI-FW3.txt" \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
@@ -68,7 +68,7 @@ check_config_file \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI-FW3.txt" \
+    "$CONFIG_DIR/CMIOT-AX18-NOWIFI-MINI-FW3.txt" \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
@@ -76,9 +76,9 @@ check_config_file \
     "$CONFIG_DIR/GENERAL.txt" || has_duplicate=1
 
 check_config_file \
-    "$CONFIG_DIR/device-overlays/IPQ60XX-NOWIFI-MINI-FW4.txt" \
+    "$CONFIG_DIR/device-overlays/CMIOT-AX18-NOWIFI-MINI-FW4.txt" \
     "$CONFIG_DIR/GENERAL.txt" \
-    "$CONFIG_DIR/IPQ60XX-NOWIFI-MINI-FW3.txt" || has_duplicate=1
+    "$CONFIG_DIR/CMIOT-AX18-NOWIFI-MINI-FW3.txt" || has_duplicate=1
 
 if [ "$has_duplicate" -ne 0 ]; then
     echo "发现设备层或设备叠加层与其下层基础配置重复的同值配置，请继续收敛。" >&2

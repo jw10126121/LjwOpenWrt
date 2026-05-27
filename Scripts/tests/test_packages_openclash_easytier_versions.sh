@@ -35,9 +35,7 @@ if printf '%s\n' "$COMMON_BODY" | grep -q 'UPDATE_PACKAGE "luci-app-openclash" "
 fi
 
 printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version'
-printf '%s\n' "$COMMON_BODY" | grep -q 'update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"'
-printf '%s\n' "$COMMON_BODY" | grep -q "local easytier_release_version='2.6.4'"
-printf '%s\n' "$COMMON_BODY" | grep -q 'pin_easytier_binary_version "." "${easytier_release_version}"'
+printf '%s\n' "$COMMON_BODY" | grep -q 'update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "v2.6.4"'
 if printf '%s\n' "$POST_FIX_BODY" | grep -q 'preload_homeproxy_resources'; then
 	echo "Packages.sh should not preload HomeProxy resources in the default post-update fix chain" >&2
 	exit 1
@@ -81,9 +79,6 @@ grep -Fxq 'PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)' "$TEST_REPO/luci-app-ea
 for config_file in \
 	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-FW3.txt" \
 	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-MINI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI-MINI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/IPQ60XX-NOWIFI_full.txt" \
 	"$SCRIPT_DIR/../Config/JD-AX1800PRO-WIFI-FW3.txt" \
 	"$SCRIPT_DIR/../Config/MIR3G-WIFI-MINI-FW3.txt" \
 	"$SCRIPT_DIR/../Config/MT6000-WIFI-FW3.txt" \

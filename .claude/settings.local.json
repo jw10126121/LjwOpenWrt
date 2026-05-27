@@ -5,7 +5,18 @@
       "Bash(rtk read *)",
       "Bash(rtk grep *)",
       "Bash(awk '{print $1}')",
-      "Bash(rtk diff *)"
+      "Bash(rtk diff *)",
+      "Bash(bash Scripts/tests/test_ssrplus_upstream_defaults.sh)",
+      "Bash(bash Scripts/tests/test_ssrplus_config_dependencies.sh)",
+      "Bash(bash Scripts/tests/test_device_config_dedup.sh)",
+      "Bash(bash Scripts/tests/test_ipq60xx_shared_packages.sh)",
+      "Bash(bash Scripts/tests/test_packages_openclash_easytier_versions.sh)",
+      "Bash(bash Scripts/tests/test_cmiot_ax18_shared_packages.sh)",
+      "Bash(bash -x Scripts/tests/test_cmiot_ax18_shared_packages.sh)",
+      "Bash(bash Scripts/export_config.sh --config-dir Config --device CMIOT-AX18-NOWIFI --fw fw3 --output /tmp/test_fw3.txt)",
+      "Bash(bash Scripts/export_config.sh --config-dir Config --device CMIOT-AX18-NOWIFI --fw fw4 --output /tmp/test_fw4.txt)",
+      "Bash(bash Scripts/export_config.sh --config-dir Config --device IPQ60XX-NOWIFI --fw fw4 --output /tmp/test_ipq60xx_fw4.txt)",
+      "Bash(bash -x Scripts/tests/test_packages_openclash_easytier_versions.sh)"
     ],
     "additionalDirectories": [
       "/tmp",
