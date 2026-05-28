@@ -120,7 +120,7 @@ preload_homeproxy_resources() {
 }
 
 cd "${openwrt_workdir}"
-#configure_ecm_accel_delay_fix
+configure_ecm_accel_delay_fix
 preload_homeproxy_resources
 
 

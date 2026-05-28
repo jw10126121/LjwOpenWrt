@@ -17,7 +17,7 @@
 # >>> SERVICE-BEGIN
 CONFIG_PACKAGE_luci-theme-bootstrap=m        # LuCI默认主题
 CONFIG_PACKAGE_luci-theme-argon=y            # Argon 题
-CONFIG_PACKAGE_luci-theme-noobwrt=m	     	 # noobwrt主题
+CONFIG_PACKAGE_luci-theme-noobwrt=m	     # noobwrt主题
 CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
 CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
 CONFIG_PACKAGE_luci-app-autoreboot=y         # 定时重启
@@ -43,7 +43,7 @@ CONFIG_PACKAGE_luci-app-timewol=m            # 定时 WOL
 # ------------------------------------------------------------------------
 #  维护提示：在线设备、流量、监控和测速都归到这一组。
 # >>> SERVICE-BEGIN
-CONFIG_PACKAGE_luci-app-onliner=m            # 在线设备列表
+CONFIG_PACKAGE_luci-app-onliner=y            # 在线设备列表
 CONFIG_PACKAGE_luci-app-netdata=m            # Netdata 监控面板
 CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m     # Netdata 中文语言包
 CONFIG_PACKAGE_luci-app-netspeedtest=m       # 网速测试
@@ -73,9 +73,9 @@ CONFIG_PACKAGE_smartdns=m                    # SmartDNS 后端
 CONFIG_PACKAGE_luci-app-accesscontrol=y      # 上网时间控制。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y # 上网时间控制中文语言包。lean luci v25.12版本，这个插件已去掉，所以这边不生效
 CONFIG_PACKAGE_luci-app-oaf=y                # OpenAppFilter 应用过滤
-CONFIG_PACKAGE_luci-app-pushbot=m            # PushBot 推送
-CONFIG_PACKAGE_luci-i18n-pushbot-zh-cn=m     # PushBot 中文语言包
-CONFIG_PACKAGE_luci-app-wechatpush=y         # 微信推送
+CONFIG_PACKAGE_luci-app-pushbot=y            # PushBot 推送
+CONFIG_PACKAGE_luci-i18n-pushbot-zh-cn=y     # PushBot 中文语言包
+CONFIG_PACKAGE_luci-app-wechatpush=m         # 微信推送
 CONFIG_PACKAGE_luci-app-vlmcsd=y             # KMS 服务
 CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y      # KMS 中文语言包
 CONFIG_PACKAGE_vlmcsd=y                      # KMS 后端
@@ -93,10 +93,10 @@ CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
 #  流控 / 中继：SQM、Socat 和 UPnP 放一起，调网络质量或端口转发时优先看这里。
 CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
 CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
-CONFIG_PACKAGE_luci-app-3cat=y               # 端口转发 / 中继
-CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=y        # 3Cat 中文语言包
-CONFIG_PACKAGE_luci-app-socat=m              # Socat 端口转发 / 中继
-CONFIG_PACKAGE_luci-i18n-socat-zh-cn=m       # Socat 中文语言包
+CONFIG_PACKAGE_luci-app-3cat=m               # 端口转发 / 中继
+CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=m        # 3Cat 中文语言包
+CONFIG_PACKAGE_luci-app-socat=y              # Socat 端口转发 / 中继
+CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
 CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
 CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
 # >>> SERVICE-BEGIN
@@ -120,6 +120,7 @@ CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
 CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
 CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
 CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
+
 CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
 
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
@@ -158,8 +159,8 @@ CONFIG_PACKAGE_ip6tables-extra=y             # IPv6 扩展模块
 CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
-CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
-CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
+CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC，如果打开快速转发引擎QCA NSS ECM，可能会出现微信朋友圈不能刷新
+CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包，如果打开快速转发引擎QCA NSS ECM，可能会出现微信朋友圈不能刷新
 CONFIG_PACKAGE_luci-app-adguardhome=m        # AdGuard Home
 CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m # AdGuard Home 中文语言包
 CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
@@ -173,12 +174,12 @@ CONFIG_TARGET_qualcommax=y
 CONFIG_TARGET_qualcommax_ipq60xx=y	# ipq60xx
 CONFIG_TARGET_MULTI_PROFILE=y		# 一次编译多个机型
 
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=n			# 和目AX18、兆能M2
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=n	    # 和目AX18、兆能M2
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-ax1800=n   # GL AX1800
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_glinet_gl-axt1800=n  # GL AXT1800
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=n   # 京东云亚瑟
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02=y   # 京东云雅典娜
-CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=n	# 京东云太乙
+CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-07=n   # 京东云太乙
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_linksys_mr7350=n     # MR7350
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_qihoo_360v6=n        # 奇虎360V6
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_redmi_ax5-jdcloud=n  # 京东云AX5
@@ -196,3 +197,7 @@ CONFIG_PACKAGE_ath11k-firmware-qcn9074=n     # 关闭 QCN9074 固件
 CONFIG_PACKAGE_wpad-openssl=y                # 启用 AP 认证组件
 CONFIG_PACKAGE_hostapd-common=y              # 启用 hostapd 公共库
 CONFIG_PACKAGE_ipq-wifi-jdcloud_re-cs-02=y  # 雅典娜 AX6600 板级校准包
+
+CONFIG_PACKAGE_kmod-sched-act-ipt=y   # 补全 act_ipt
+CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台需要
+
