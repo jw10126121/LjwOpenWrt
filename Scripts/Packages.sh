@@ -361,9 +361,9 @@ apply_common_package_overrides() {
     update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"    # 保留可选 Socat 页面，依赖会自动带出 socat
 
-    UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
+    # UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
     # UPDATE_PACKAGE "luci-app-sqm" "https://git.cooluc.com/sbwml/luci-app-sqm" "main"
-    update_package_list "luci-app-sqm-controller" "Natduki/luci-app-sqm-controller" "main"
+    # update_package_list "luci-app-sqm-controller" "Natduki/luci-app-sqm-controller" "main"
 
 
     # quickfile 当前按需保留，默认不导入。
