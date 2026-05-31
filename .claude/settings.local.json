@@ -16,7 +16,14 @@
       "Bash(bash Scripts/export_config.sh --config-dir Config --device CMIOT-AX18-NOWIFI --fw fw3 --output /tmp/test_fw3.txt)",
       "Bash(bash Scripts/export_config.sh --config-dir Config --device CMIOT-AX18-NOWIFI --fw fw4 --output /tmp/test_fw4.txt)",
       "Bash(bash Scripts/export_config.sh --config-dir Config --device IPQ60XX-NOWIFI --fw fw4 --output /tmp/test_ipq60xx_fw4.txt)",
-      "Bash(bash -x Scripts/tests/test_packages_openclash_easytier_versions.sh)"
+      "Bash(bash -x Scripts/tests/test_packages_openclash_easytier_versions.sh)",
+      "Bash(rtk find *)",
+      "WebSearch",
+      "Bash(bash Scripts/tests/test_diy_after_defconfig_openclash_scope.sh)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh repo *)",
+      "Bash(rtk curl *)",
+      "Bash(python3 -c \"import sys,json,base64; d=json.load\\(sys.stdin\\); print\\(base64.b64decode\\(d.get\\('content',''\\)\\).decode\\(\\)\\)\")"
     ],
     "additionalDirectories": [
       "/tmp",

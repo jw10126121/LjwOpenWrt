@@ -71,6 +71,62 @@ configure_ecm_accel_delay_fix() {
     fi
 }
 
+preload_openclash_meta_core() {
+    local choose_type_openclash
+    local app_openclash_dir
+    local openclash_dir
+    local core_dir
+    local clash_arch
+    local target_label
+
+    # 检查 OpenClash 是否启用
+    choose_type_openclash=$(get_config_value "CONFIG_PACKAGE_luci-app-openclash")
+    app_openclash_dir=$(find ./package ./feeds/luci ./feeds/packages -maxdepth 3 -type d -iname "luci-app-openclash" -print -quit 2>/dev/null)
+
+    if [ -z "${choose_type_openclash}" ] || [ "${choose_type_openclash}" = "n" ] || [ ! -d "${app_openclash_dir}" ]; then
+        echo "【Lin】未启用 luci-app-openclash，跳过内核预置"
+        return 0
+    fi
+
+    # 检查设备是否为 AX6600 或 MT6000（仅这两款大内存设备预置）
+    target_label=$(tr -d '\r' < "${target_label_marker_file}" 2>/dev/null || echo "")
+    case "${target_label}" in
+        JD-AX6600-WIFI*|MT6000-WIFI*)
+            ;;
+        *)
+            echo "【Lin】设备 ${target_label:-未知} 不在预置列表中，跳过 OpenClash 内核预置"
+            return 0
+            ;;
+    esac
+
+    openclash_dir=$(readlink -f "${app_openclash_dir}")
+    [ -d "${openclash_dir}" ] || return 0
+
+    # 创建内核目录
+    core_dir="${openclash_dir}/root/etc/openclash/core"
+    mkdir -p "${core_dir}"
+
+    # 根据架构选择内核
+    case "${cputype_simple}" in
+        arm64) clash_arch="arm64" ;;
+        amd64) clash_arch="amd64" ;;
+        *)
+            echo "【Lin】不支持的架构：${cputype_simple}，跳过 OpenClash 内核预置"
+            return 0
+            ;;
+    esac
+
+    # 下载 Clash Meta 内核
+    local core_url="https://github.com/vernesong/OpenClash/core/raw/master/meta/clash-linux-${clash_arch}"
+    echo "【Lin】下载 OpenClash Meta 内核：${core_url}"
+    if curl -sL -o "${core_dir}/clash_meta" "${core_url}"; then
+        chmod +x "${core_dir}/clash_meta"
+        echo "【Lin】OpenClash Meta 内核预置完成"
+    else
+        echo "【Lin】警告：OpenClash Meta 内核下载失败"
+    fi
+}
+
 preload_homeproxy_resources() {
     local choose_type_homeproxy
     local app_homeproxy_dir
@@ -121,6 +177,7 @@ preload_homeproxy_resources() {
 
 cd "${openwrt_workdir}"
 configure_ecm_accel_delay_fix
+preload_openclash_meta_core
 preload_homeproxy_resources
 
 
