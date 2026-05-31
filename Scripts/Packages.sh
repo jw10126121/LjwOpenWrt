@@ -362,7 +362,7 @@ apply_common_package_overrides() {
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"    # 保留可选 Socat 页面，依赖会自动带出 socat
 
     # Guest-WIFI
-    UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main"
+    # UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
 
 
     # UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
