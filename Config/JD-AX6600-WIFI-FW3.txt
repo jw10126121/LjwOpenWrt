@@ -199,6 +199,6 @@ CONFIG_PACKAGE_wpad-openssl=y                # 启用 AP 认证组件
 CONFIG_PACKAGE_hostapd-common=y              # 启用 hostapd 公共库
 CONFIG_PACKAGE_ipq-wifi-jdcloud_re-cs-02=y  # 雅典娜 AX6600 板级校准包
 
-CONFIG_PACKAGE_kmod-sched-act-ipt=y   # 补全 act_ipt
-CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台需要
+# 仅高通平台需要，勿移入 General.txt
+CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
 

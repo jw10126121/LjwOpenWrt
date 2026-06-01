@@ -23,6 +23,7 @@ CONFIG_PACKAGE_kmod-fuse=y              # FUSE 用户态文件系统
 CONFIG_PACKAGE_kmod-tun=y               # TUN/TAP
 CONFIG_PACKAGE_kmod-wireguard=y         # WireGuard 内核模块
 CONFIG_PACKAGE_kmod-inet-diag=y         # sock_diag，ss 命令依赖
+CONFIG_PACKAGE_kmod-sched-act-ipt=y     # TC iptables 匹配，QoS/流量整形依赖
 
 # ------------------------------------------------------------------------
 #  通用运行时依赖
