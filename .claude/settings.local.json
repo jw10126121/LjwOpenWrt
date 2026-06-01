@@ -45,7 +45,8 @@
       "Bash(rtk git commit -m 'refactor\\(配置\\): CMIOT-AX18-NOWIFI 迁移到 FW4 overlay 模式 *)",
       "Bash(git commit -m 'refactor\\(配置\\): JD-AX1800PRO/AX6600 迁移到 FW4 overlay 模式 *)",
       "Bash(bash Scripts/export_config.sh --device MIR3G-WIFI-MINI --fw fw3 --output /tmp/mir3g-test.txt)",
-      "Bash(bash Scripts/export_config.sh --device MT6000-WIFI --fw fw3 --output /tmp/mt6000-test.txt)"
+      "Bash(bash Scripts/export_config.sh --device MT6000-WIFI --fw fw3 --output /tmp/mt6000-test.txt)",
+      "Bash(xargs -I {} basename {})"
     ],
     "additionalDirectories": [
       "/tmp",

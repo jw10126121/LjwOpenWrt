@@ -91,8 +91,8 @@ CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
 # ------------------------------------------------------------------------
 #  维护提示：组网、穿透、VPN、代理和网络协议相关都集中在这里。
 #  流控 / 中继：SQM、Socat 和 UPnP 放一起，调网络质量或端口转发时优先看这里。
-CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
-CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
+CONFIG_PACKAGE_luci-app-sqm=n                # SQM QoS - 排查冲突暂时禁用
+CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=n         # SQM 中文语言包
 CONFIG_PACKAGE_luci-app-3cat=m               # 端口转发 / 中继
 CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=m        # 3Cat 中文语言包
 CONFIG_PACKAGE_luci-app-socat=y              # Socat 端口转发 / 中继
@@ -122,7 +122,7 @@ CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
 CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
 #CONFIG_PACKAGE_luci-app-guest-wifi=y         # 访客WIFI
 
-CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
+CONFIG_PACKAGE_luci-app-openclash=n          # OpenClash 主程序 - 排查冲突暂时禁用
 
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
 CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
@@ -160,8 +160,8 @@ CONFIG_PACKAGE_ip6tables-extra=y             # IPv6 扩展模块
 CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
-CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC，如果打开快速转发引擎QCA NSS ECM，可能会出现微信朋友圈不能刷新
-CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包，如果打开快速转发引擎QCA NSS ECM，可能会出现微信朋友圈不能刷新
+CONFIG_PACKAGE_luci-app-turboacc=n           # FW3 默认启用 Turbo ACC - 排查冲突暂时禁用
+CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=n    # Turbo ACC 中文语言包 - 排查冲突暂时禁用
 CONFIG_PACKAGE_luci-app-adguardhome=m        # AdGuard Home
 CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m # AdGuard Home 中文语言包
 CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
@@ -200,5 +200,5 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=n      # 小米RM18
 #CONFIG_PACKAGE_ipq-wifi-jdcloud_re-cs-02=y  # 雅典娜 AX6600 板级校准包
 
 # 仅高通平台需要，勿移入 General.txt
-CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
+# CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
 
