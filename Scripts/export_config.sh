@@ -23,22 +23,18 @@ cleanup_files=''
 resolve_device_config() {
 	local config_root=$1
 	local device_name=$2
-	local fw_name=$3
-	local fw_upper
-	local candidate
 
-	fw_upper=$(printf '%s' "$fw_name" | tr '[:lower:]' '[:upper:]')
+	# 优先查找无后缀的基线文件
+	if [ -f "$config_root/${device_name}.txt" ]; then
+		printf '%s\n' "${device_name}.txt"
+		return 0
+	fi
 
-	for candidate in \
-		"${device_name}-${fw_upper}.txt" \
-		"${device_name}.txt" \
-		"${device_name}-FW3.txt"
-	do
-		if [ -f "$config_root/$candidate" ]; then
-			printf '%s\n' "$candidate"
-			return 0
-		fi
-	done
+	# 兼容旧文件名（过渡期，迁移完成后可移除）
+	if [ -f "$config_root/${device_name}-FW3.txt" ]; then
+		printf '%s\n' "${device_name}-FW3.txt"
+		return 0
+	fi
 
 	return 1
 }
@@ -214,9 +210,9 @@ if [ -n "$overlay_list" ]; then
 	overlay_list=$(normalize_overlay_list "$config_dir" "$overlay_list")
 fi
 
-device_config=$(resolve_device_config "$config_dir" "$device" "$fw" || true)
+device_config=$(resolve_device_config "$config_dir" "$device" || true)
 if [ -z "$device_config" ]; then
-	echo "缺少设备配置：$config_dir/${device}-$(printf '%s' "$fw" | tr '[:lower:]' '[:upper:]').txt 或 $config_dir/${device}.txt" >&2
+	echo "缺少设备配置：$config_dir/${device}.txt 或 $config_dir/${device}-FW3.txt" >&2
 	exit 1
 fi
 
@@ -250,6 +246,14 @@ bash "$MERGE_SCRIPT" \
 
 if [ -f "$config_dir/$device_overlay_config" ]; then
 	cat "$config_dir/$device_overlay_config" >> "$output_config"
+fi
+
+# --fw fw4 时追加 FW4 overlay 覆盖文件
+if [ "${fw}" = "fw4" ] || [ "${fw}" = "FW4" ]; then
+	fw4_overlay="${device}-FW4.txt"
+	if [ -f "$config_dir/$fw4_overlay" ]; then
+		cat "$config_dir/$fw4_overlay" >> "$output_config"
+	fi
 fi
 
 if [ -n "$overlay_list" ]; then
