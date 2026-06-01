@@ -11,7 +11,7 @@
 
 
 # 仅高通平台需要，勿移入 General.txt
-CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
+#CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
 
 
 # ------------------------------------------------------------------------
@@ -19,27 +19,27 @@ CONFIG_PACKAGE_kmod-nss-ifb=y         # 补全 nss-ifb，高通平台专属
 # ------------------------------------------------------------------------
 #  维护提示：主题、终端、计划任务、电源与系统调优优先看这里。
 # >>> SERVICE-BEGIN
-CONFIG_PACKAGE_luci-theme-bootstrap=m        # LuCI默认主题
-CONFIG_PACKAGE_luci-theme-argon=y            # Argon 题
-CONFIG_PACKAGE_luci-theme-noobwrt=m	     # noobwrt主题
-CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
-CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
+#CONFIG_PACKAGE_luci-theme-bootstrap=m        # LuCI默认主题
+#CONFIG_PACKAGE_luci-theme-argon=y            # Argon 题
+#CONFIG_PACKAGE_luci-theme-noobwrt=m	     # noobwrt主题
+#CONFIG_PACKAGE_luci-app-ramfree=y            # 一键释放内存
+#CONFIG_PACKAGE_luci-i18n-ramfree-zh-cn=y     # Ramfree 中文语言包
 #CONFIG_PACKAGE_luci-app-autoreboot=y        # 定时重启
 #CONFIG_PACKAGE_luci-i18n-autoreboot-zh-cn=y # 定时重启中文语言包
-CONFIG_PACKAGE_luci-app-filetransfer=y       # 文件传输，luci25.12不带
-CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y # 文件传输中文语言包，luci25.12不带
-CONFIG_PACKAGE_luci-app-ttyd=y               # Web 终端
-CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y        # ttyd 中文语言包
-CONFIG_PACKAGE_luci-app-cpufreq=m            # CPU 频率调节
-CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m     # CPU 频率调节中文语言包
-CONFIG_PACKAGE_luci-app-advancedsetting=m    # 高级设置
-CONFIG_PACKAGE_luci-i18n-advancedsetting-zh-cn=m # 高级设置中文语言包
-CONFIG_PACKAGE_luci-app-advancedplus=m       # 高级设置增强版
-CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m # 高级设置增强版中文语言包
-CONFIG_PACKAGE_luci-app-wol=y                # Wake on LAN
-CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y         # WOL 中文语言包
+#CONFIG_PACKAGE_luci-app-filetransfer=y       # 文件传输，luci25.12不带
+#CONFIG_PACKAGE_luci-i18n-filetransfer-zh-cn=y # 文件传输中文语言包，luci25.12不带
+#CONFIG_PACKAGE_luci-app-ttyd=y               # Web 终端
+#CONFIG_PACKAGE_luci-i18n-ttyd-zh-cn=y        # ttyd 中文语言包
+#CONFIG_PACKAGE_luci-app-cpufreq=m            # CPU 频率调节
+#CONFIG_PACKAGE_luci-i18n-cpufreq-zh-cn=m     # CPU 频率调节中文语言包
+#CONFIG_PACKAGE_luci-app-advancedsetting=m    # 高级设置
+#CONFIG_PACKAGE_luci-i18n-advancedsetting-zh-cn=m # 高级设置中文语言包
+#CONFIG_PACKAGE_luci-app-advancedplus=m       # 高级设置增强版
+#CONFIG_PACKAGE_luci-i18n-advancedplus-zh-cn=m # 高级设置增强版中文语言包
+#CONFIG_PACKAGE_luci-app-wol=y                # Wake on LAN
+#CONFIG_PACKAGE_luci-i18n-wol-zh-cn=y         # WOL 中文语言包
 #CONFIG_PACKAGE_luci-app-wolplus=m           # 增强版 WOL
-CONFIG_PACKAGE_luci-app-timewol=m            # 定时 WOL
+#CONFIG_PACKAGE_luci-app-timewol=m            # 定时 WOL
 # <<< SERVICE-END
 
 # ------------------------------------------------------------------------
@@ -47,108 +47,108 @@ CONFIG_PACKAGE_luci-app-timewol=m            # 定时 WOL
 # ------------------------------------------------------------------------
 #  维护提示：在线设备、流量、监控和测速都归到这一组。
 # >>> SERVICE-BEGIN
-CONFIG_PACKAGE_luci-app-onliner=y            # 在线设备列表
-CONFIG_PACKAGE_luci-app-netdata=m            # Netdata 监控面板
-CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m     # Netdata 中文语言包
-CONFIG_PACKAGE_luci-app-netspeedtest=m       # 网速测试
-CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m # 网速测试中文语言包
+#CONFIG_PACKAGE_luci-app-onliner=y            # 在线设备列表
+#CONFIG_PACKAGE_luci-app-netdata=m            # Netdata 监控面板
+#CONFIG_PACKAGE_luci-i18n-netdata-zh-cn=m     # Netdata 中文语言包
+#CONFIG_PACKAGE_luci-app-netspeedtest=m       # 网速测试
+#CONFIG_PACKAGE_luci-i18n-netspeedtest-zh-cn=m # 网速测试中文语言包
 # <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-bandix=m             # 流量统计
-CONFIG_PACKAGE_bandix=m                      # Bandix 后端
-CONFIG_PACKAGE_luci-app-nlbwmon=m            # nlbwmon 流量统计
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m     # nlbwmon 中文语言包
-CONFIG_PACKAGE_luci-app-wrtbwmon=m           # wrtbwmon 实时流量统计
-CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m    # wrtbwmon 中文语言包
-CONFIG_PACKAGE_wrtbwmon=m                    # wrtbwmon 后端
+#CONFIG_PACKAGE_luci-app-bandix=m             # 流量统计
+#CONFIG_PACKAGE_bandix=m                      # Bandix 后端
+#CONFIG_PACKAGE_luci-app-nlbwmon=m            # nlbwmon 流量统计
+#CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=m     # nlbwmon 中文语言包
+#CONFIG_PACKAGE_luci-app-wrtbwmon=m           # wrtbwmon 实时流量统计
+#CONFIG_PACKAGE_luci-i18n-wrtbwmon-zh-cn=m    # wrtbwmon 中文语言包
+#CONFIG_PACKAGE_wrtbwmon=m                    # wrtbwmon 后端
 
 # ------------------------------------------------------------------------
 #  菜单整理：服务
 # ------------------------------------------------------------------------
 #  维护提示：访问控制、广告过滤、推送、常驻网络服务放这里。
 # >>> SERVICE-BEGIN
-CONFIG_PACKAGE_luci-app-ddns=y               # 动态域名
-CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y        # DDNS 中文语言包
-CONFIG_PACKAGE_luci-app-ddns-go=m            # DDNS-GO
-CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m     # DDNS-GO 中文语言包
-CONFIG_PACKAGE_ddns-go=m                     # DDNS-GO 后端
-CONFIG_PACKAGE_luci-app-smartdns=m           # SmartDNS
-CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m    # SmartDNS 中文语言包
-CONFIG_PACKAGE_smartdns=m                    # SmartDNS 后端
-CONFIG_PACKAGE_luci-app-accesscontrol=y      # 上网时间控制。lean luci v25.12版本，这个插件已去掉，所以这边不生效
-CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y # 上网时间控制中文语言包。lean luci v25.12版本，这个插件已去掉，所以这边不生效
-CONFIG_PACKAGE_luci-app-oaf=m                # OpenAppFilter 应用过滤
-CONFIG_PACKAGE_luci-app-pushbot=y            # PushBot 推送
-CONFIG_PACKAGE_luci-i18n-pushbot-zh-cn=y     # PushBot 中文语言包
-CONFIG_PACKAGE_luci-app-wechatpush=y         # 微信推送
-CONFIG_PACKAGE_luci-app-vlmcsd=y             # KMS 服务
-CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y      # KMS 中文语言包
-CONFIG_PACKAGE_vlmcsd=y                      # KMS 后端
-CONFIG_PACKAGE_luci-app-watchcat=y           # 网络守护
-CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y    # Watchcat 中文语言包
-CONFIG_PACKAGE_watchcat=y                    # Watchcat 后端
+#CONFIG_PACKAGE_luci-app-ddns=y               # 动态域名
+#CONFIG_PACKAGE_luci-i18n-ddns-zh-cn=y        # DDNS 中文语言包
+#CONFIG_PACKAGE_luci-app-ddns-go=m            # DDNS-GO
+#CONFIG_PACKAGE_luci-i18n-ddns-go-zh-cn=m     # DDNS-GO 中文语言包
+#CONFIG_PACKAGE_ddns-go=m                     # DDNS-GO 后端
+#CONFIG_PACKAGE_luci-app-smartdns=m           # SmartDNS
+#CONFIG_PACKAGE_luci-i18n-smartdns-zh-cn=m    # SmartDNS 中文语言包
+#CONFIG_PACKAGE_smartdns=m                    # SmartDNS 后端
+#CONFIG_PACKAGE_luci-app-accesscontrol=y      # 上网时间控制。lean luci v25.12版本，这个插件已去掉，所以这边不生效
+#CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y # 上网时间控制中文语言包。lean luci v25.12版本，这个插件已去掉，所以这边不生效
+#CONFIG_PACKAGE_luci-app-oaf=m                # OpenAppFilter 应用过滤
+#CONFIG_PACKAGE_luci-app-pushbot=y            # PushBot 推送
+#CONFIG_PACKAGE_luci-i18n-pushbot-zh-cn=y     # PushBot 中文语言包
+#CONFIG_PACKAGE_luci-app-wechatpush=y         # 微信推送
+#CONFIG_PACKAGE_luci-app-vlmcsd=y             # KMS 服务
+#CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y      # KMS 中文语言包
+#CONFIG_PACKAGE_vlmcsd=y                      # KMS 后端
+#CONFIG_PACKAGE_luci-app-watchcat=y           # 网络守护
+#CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y    # Watchcat 中文语言包
+#CONFIG_PACKAGE_watchcat=y                    # Watchcat 后端
 # <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-arpbind=m            # ARP 绑定
-CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
+#CONFIG_PACKAGE_luci-app-arpbind=m            # ARP 绑定
+#CONFIG_PACKAGE_luci-i18n-arpbind-zh-cn=m     # ARP 绑定中文语言包
 
 # ------------------------------------------------------------------------
 #  菜单整理：网络
 # ------------------------------------------------------------------------
 #  维护提示：组网、穿透、VPN、代理和网络协议相关都集中在这里。
 #  流控 / 中继：SQM、Socat 和 UPnP 放一起，调网络质量或端口转发时优先看这里。
-CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
-CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
+#CONFIG_PACKAGE_luci-app-sqm=y                # SQM QoS
+#CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y         # SQM 中文语言包
 #CONFIG_PACKAGE_luci-app-sqm-controller=m    # SQM 控制器
-CONFIG_PACKAGE_luci-app-3cat=m               # 端口转发 / 中继
-CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=m        # 3Cat 中文语言包
-CONFIG_PACKAGE_luci-app-socat=y              # Socat 端口转发 / 中继
-CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
-CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
-CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
+#CONFIG_PACKAGE_luci-app-3cat=m               # 端口转发 / 中继
+#CONFIG_PACKAGE_luci-i18n-3cat-zh-cn=m        # 3Cat 中文语言包
+#CONFIG_PACKAGE_luci-app-socat=y              # Socat 端口转发 / 中继
+#CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
+#CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
+#CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
 # >>> SERVICE-BEGIN
-CONFIG_PACKAGE_luci-app-lucky=m		     # 反向代理lucky
-CONFIG_PACKAGE_luci-i18n-lucky-zh-cn=m	     # 反向代理lucky中文语言包
-CONFIG_PACKAGE_luci-app-easytier=y           # EasyTier 组网
-CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y    # EasyTier 中文语言包
-CONFIG_PACKAGE_easytier-noweb=y              # EasyTier 后端（无 Web）
-CONFIG_PACKAGE_luci-app-zerotier=m           # ZeroTier 组网
-CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=m    # ZeroTier 中文语言包
-CONFIG_PACKAGE_luci-app-frpc=y               # FRP 客户端页面
-CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y        # FRP 客户端中文语言包
-CONFIG_PACKAGE_frpc=y                        # FRP 客户端后端
-CONFIG_PACKAGE_luci-app-frps=m               # FRP 服务端页面
-CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m        # FRP 服务端中文语言包
-CONFIG_PACKAGE_frps=m                        # FRP 服务端后端
+#CONFIG_PACKAGE_luci-app-lucky=m		     # 反向代理lucky
+#CONFIG_PACKAGE_luci-i18n-lucky-zh-cn=m	     # 反向代理lucky中文语言包
+#CONFIG_PACKAGE_luci-app-easytier=y           # EasyTier 组网
+#CONFIG_PACKAGE_luci-i18n-easytier-zh-cn=y    # EasyTier 中文语言包
+#CONFIG_PACKAGE_easytier-noweb=y              # EasyTier 后端（无 Web）
+#CONFIG_PACKAGE_luci-app-zerotier=m           # ZeroTier 组网
+#CONFIG_PACKAGE_luci-i18n-zerotier-zh-cn=m    # ZeroTier 中文语言包
+#CONFIG_PACKAGE_luci-app-frpc=y               # FRP 客户端页面
+#CONFIG_PACKAGE_luci-i18n-frpc-zh-cn=y        # FRP 客户端中文语言包
+#CONFIG_PACKAGE_frpc=y                        # FRP 客户端后端
+#CONFIG_PACKAGE_luci-app-frps=m               # FRP 服务端页面
+#CONFIG_PACKAGE_luci-i18n-frps-zh-cn=m        # FRP 服务端中文语言包
+#CONFIG_PACKAGE_frps=m                        # FRP 服务端后端
 # <<< SERVICE-END
-CONFIG_PACKAGE_luci-app-openvpn=m            # OpenVPN 客户端页面
-CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m     # OpenVPN 中文语言包
-CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
-CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
-CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
-CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
-CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
+#CONFIG_PACKAGE_luci-app-openvpn=m            # OpenVPN 客户端页面
+#CONFIG_PACKAGE_luci-i18n-openvpn-zh-cn=m     # OpenVPN 中文语言包
+#CONFIG_PACKAGE_luci-app-openvpn-server=m     # OpenVPN 服务端页面
+#CONFIG_PACKAGE_luci-i18n-openvpn-server-zh-cn=m # OpenVPN 服务端中文语言包
+#CONFIG_PACKAGE_luci-proto-wireguard=m        # WireGuard 协议页面
+#CONFIG_PACKAGE_wireguard-tools=m             # WireGuard 工具
+#CONFIG_PACKAGE_luci-app-openclash=y          # OpenClash 主程序
 
 # [最新包已支持FW4]SSR Plus 主包、中文包和附加组件集中维护。
-CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
-CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
-CONFIG_PACKAGE_chinadns-ng=m                 # SSR Plus 依赖后端
-CONFIG_PACKAGE_ipt2socks=m                   # SSR Plus 依赖后端
+#CONFIG_PACKAGE_luci-app-ssr-plus=m           # FW3 默认提供 SSR Plus 主包
+#CONFIG_PACKAGE_luci-i18n-ssr-plus-zh-cn=m    # SSR Plus 中文语言包
+#CONFIG_PACKAGE_chinadns-ng=m                 # SSR Plus 依赖后端
+#CONFIG_PACKAGE_ipt2socks=m                   # SSR Plus 依赖后端
 
 # ------------------------------------------------------------------------
 #  菜单整理：NAS
 # ------------------------------------------------------------------------
 #  维护提示：共享、同步、FTP、打印和文件索引都归到这组。
-CONFIG_PACKAGE_luci-app-hd-idle=m            # 硬盘休眠
-CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m     # 硬盘休眠中文语言包
-CONFIG_PACKAGE_luci-app-openlist=m           # OpenList 文件索引
-CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m    # OpenList 中文语言包
-CONFIG_PACKAGE_luci-app-samba4=m             # Samba 共享
-CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m      # Samba 中文语言包
-CONFIG_PACKAGE_luci-app-usb-printer=m        # USB 打印服务
-CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m # USB 打印中文语言包
-CONFIG_PACKAGE_luci-app-verysync=m           # 微力同步
-CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m    # 微力同步中文语言包
-CONFIG_PACKAGE_luci-app-vsftpd=m             # FTP 服务
-CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m      # FTP 中文语言包
+#CONFIG_PACKAGE_luci-app-hd-idle=m            # 硬盘休眠
+#CONFIG_PACKAGE_luci-i18n-hd-idle-zh-cn=m     # 硬盘休眠中文语言包
+#CONFIG_PACKAGE_luci-app-openlist=m           # OpenList 文件索引
+#CONFIG_PACKAGE_luci-i18n-openlist-zh-cn=m    # OpenList 中文语言包
+#CONFIG_PACKAGE_luci-app-samba4=m             # Samba 共享
+#CONFIG_PACKAGE_luci-i18n-samba4-zh-cn=m      # Samba 中文语言包
+#CONFIG_PACKAGE_luci-app-usb-printer=m        # USB 打印服务
+#CONFIG_PACKAGE_luci-i18n-usb-printer-zh-cn=m # USB 打印中文语言包
+#CONFIG_PACKAGE_luci-app-verysync=m           # 微力同步
+#CONFIG_PACKAGE_luci-i18n-verysync-zh-cn=m    # 微力同步中文语言包
+#CONFIG_PACKAGE_luci-app-vsftpd=m             # FTP 服务
+#CONFIG_PACKAGE_luci-i18n-vsftpd-zh-cn=m      # FTP 中文语言包
 
 # ------------------------------------------------------------------------
 #  防火墙相关插件
@@ -163,12 +163,12 @@ CONFIG_PACKAGE_ip6tables-extra=y             # IPv6 扩展模块
 CONFIG_PACKAGE_ip6tables-mod-nat=y           # IPv6 NAT 模块
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y        # FullCone NAT 内核模块
 CONFIG_PACKAGE_iptables-mod-fullconenat=y    # FullCone NAT 用户态模块
-CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
-CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
-CONFIG_PACKAGE_luci-app-adguardhome=m        # AdGuard Home
-CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m # AdGuard Home 中文语言包
-CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
-CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
+#CONFIG_PACKAGE_luci-app-turboacc=y           # FW3 默认启用 Turbo ACC，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
+#CONFIG_PACKAGE_luci-i18n-turboacc-zh-cn=y    # Turbo ACC 中文语言包，如果打开快速转发引擎QCA NSS ECM，会出现微信朋友圈不能刷新
+#CONFIG_PACKAGE_luci-app-adguardhome=m        # AdGuard Home
+#CONFIG_PACKAGE_luci-i18n-adguardhome-zh-cn=m # AdGuard Home 中文语言包
+#CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary=n # 不内置二进制
+#CONFIG_PACKAGE_luci-app-homeproxy=n          # FW3 下不启用 HomeProxy
 
 # ------------------------------------------------------------------------
 #  目标平台 / 机型
