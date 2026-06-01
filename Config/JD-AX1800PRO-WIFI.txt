@@ -191,11 +191,11 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_xiaomi_rm1800=n      # 小米RM18
 #  无线能力恢复
 # ------------------------------------------------------------------------
 #  维护提示：亚瑟 AX1800 Pro 走 IPQ6018 + ath11k AHB，无线能力在这里显式打开。
-CONFIG_PACKAGE_kmod-ath11k=y                 # 启用 Wi-Fi 驱动
-CONFIG_PACKAGE_kmod-ath11k-ahb=y             # 启用 AHB 版 ath11k
-CONFIG_PACKAGE_kmod-ath11k-pci=n             # 关闭 PCI 版 ath11k
-CONFIG_PACKAGE_ath11k-firmware-ipq6018=y     # 启用 IPQ6018 固件
-CONFIG_PACKAGE_ath11k-firmware-qcn9074=n     # 关闭 QCN9074 固件
-CONFIG_PACKAGE_wpad-openssl=y                # 启用 AP 认证组件
-CONFIG_PACKAGE_hostapd-common=y              # 启用 hostapd 公共库
-CONFIG_PACKAGE_ipq-wifi-jdcloud_ax1800pro=y  # 亚瑟 AX1800 Pro 板级校准包
+#CONFIG_PACKAGE_kmod-ath11k=y                 # 启用 Wi-Fi 驱动
+#CONFIG_PACKAGE_kmod-ath11k-ahb=y             # 启用 AHB 版 ath11k
+#CONFIG_PACKAGE_kmod-ath11k-pci=n             # 关闭 PCI 版 ath11k
+#CONFIG_PACKAGE_ath11k-firmware-ipq6018=y     # 启用 IPQ6018 固件
+#CONFIG_PACKAGE_ath11k-firmware-qcn9074=n     # 关闭 QCN9074 固件
+#CONFIG_PACKAGE_wpad-openssl=y                # 启用 AP 认证组件
+#CONFIG_PACKAGE_hostapd-common=y              # 启用 hostapd 公共库
+#CONFIG_PACKAGE_ipq-wifi-jdcloud_ax1800pro=y  # 亚瑟 AX1800 Pro 板级校准包
