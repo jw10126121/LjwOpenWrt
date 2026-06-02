@@ -47,6 +47,11 @@ output_name_prefix="${OUTPUT_NAME_PREFIX:-${DEVICE_SUBTARGET:?DEVICE_SUBTARGET i
 cp -f ./my_config.txt "./upload/config_${output_name_prefix}.txt"
 cp -f "${readme_desc_file}" "./upload/readme_${output_name_prefix}.txt"
 
+# 保留 defconfig 后的 diffconfig seed 文件，命名与 config 保持一致，前缀改为 config_seed_。
+if [ -f ./seed.config ]; then
+    cp -f ./seed.config "./upload/config_seed_${output_name_prefix}.txt"
+fi
+
 tmp_dir="$(mktemp -d)"
 # 先把分散在 bin/ 下的所有 ipk/apk 收拢到临时目录，再统一重组和压缩。
 find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
