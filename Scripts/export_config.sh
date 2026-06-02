@@ -123,6 +123,41 @@ preprocess_device_config() {
 	done < "$input_config"
 }
 
+dedupe_config_assignments() {
+	local config_path=$1
+	local deduped_config
+
+	deduped_config=$(mktemp)
+	awk '
+		function active_config_key(line, normalized, parts) {
+			normalized = line
+			sub(/^[ \t]+/, "", normalized)
+			if (normalized ~ /^CONFIG_[^=[:space:]]+=/) {
+				split(normalized, parts, "=")
+				return parts[1]
+			}
+			return ""
+		}
+
+		{
+			lines[NR] = $0
+			keys[NR] = active_config_key($0)
+			if (keys[NR] != "") {
+				last_seen[keys[NR]] = NR
+			}
+		}
+
+		END {
+			for (line_no = 1; line_no <= NR; line_no++) {
+				if (keys[line_no] == "" || last_seen[keys[line_no]] == line_no) {
+					print lines[line_no]
+				}
+			}
+		}
+	' "$config_path" > "$deduped_config"
+	mv "$deduped_config" "$config_path"
+}
+
 show_help() {
 	cat <<'EOF'
 用法：
@@ -267,5 +302,7 @@ if [ -n "$overlay_list" ]; then
 		cat "$(resolve_overlay_file "$config_dir" "$overlay_name")" >> "$output_config"
 	done
 fi
+
+dedupe_config_assignments "$output_config"
 
 echo "导出完成：$output_config"
