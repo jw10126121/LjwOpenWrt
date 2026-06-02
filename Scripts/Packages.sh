@@ -362,6 +362,9 @@ apply_common_package_overrides() {
     update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"    # 保留可选 Socat 页面，依赖会自动带出 socat
 
     UPDATE_PACKAGE "luci-app-athena-led" "NONGFAH/luci-app-athena-led" "main"
+    # NONGFAH 版本的 init 脚本和主程序需要可执行权限，否则安装后服务无法启动
+    [ -f ./luci-app-athena-led/root/etc/init.d/athena_led ] && chmod +x ./luci-app-athena-led/root/etc/init.d/athena_led
+    [ -f ./luci-app-athena-led/root/usr/sbin/athena-led ] && chmod +x ./luci-app-athena-led/root/usr/sbin/athena-led
     # update_package_list "luci-app-athena-led" "Sh1rokoDev/luci-app-athena-led" "LuCI2-JS"
     # # 修复 athena-led：@TARGET_ 放在 LUCI_DEPENDS 里不能正确约束包的可见性，
     # # 需要移到 define Package/config 块中，否则 make defconfig 会删除配置。
