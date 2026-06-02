@@ -11,7 +11,7 @@
 
 
 CONFIG_PACKAGE_luci-app-athena-led=y          # 雅典娜LED管理
-CONFIG_PACKAGE_luci-i18n-athena-led-zh-cn=m   # 雅典娜LED管理中文语言包
+CONFIG_PACKAGE_luci-i18n-athena-led-zh-cn=y   # 雅典娜LED管理中文语言包
 
 # ------------------------------------------------------------------------
 #  菜单整理：系统

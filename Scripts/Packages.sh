@@ -363,6 +363,16 @@ apply_common_package_overrides() {
 
     #UPDATE_PACKAGE "luci-app-athena-led" "NONGFAH/luci-app-athena-led" "main"
     update_package_list "luci-app-athena-led" "Sh1rokoDev/luci-app-athena-led" "LuCI2-JS"
+    # 修复 athena-led：@TARGET_ 放在 LUCI_DEPENDS 里不能正确约束包的可见性，
+    # 需要移到 define Package/config 块中，否则 make defconfig 会删除配置。
+    _athena_mk=$(find ./luci-app-athena-led -maxdepth 1 -name "Makefile" 2>/dev/null)
+    if [ -n "$_athena_mk" ]; then
+        # 1) 从 LUCI_DEPENDS 中移除 @TARGET_ 条件
+        perl -i -pe 's{ \@TARGET_\S+}{}' "$_athena_mk"
+        # 2) 在 include luci.mk 之前插入 Kconfig config 块，约束设备可见性
+        perl -i -0pe 's{(include.*luci\.mk)}{define Package/luci-app-athena-led/config\n\tconfig LUCI_APP_ASTHENA_LED_TARGET\n\t\tbool\n\t\tdefault y if TARGET_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02\n\t\tdefault n\nendef\n\n$1}m' "$_athena_mk"
+        echo "【Lin】已修复 athena-led 的 @TARGET_ 条件位置"
+    fi
 
     # Guest-WIFI
     # UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
