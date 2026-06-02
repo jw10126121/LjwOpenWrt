@@ -100,7 +100,7 @@ WRT_FIREWALL=${WRT_FIREWALL:-}
 WRT_OVERLAYS=${WRT_OVERLAYS:-}
 WRT_LUCI_BRANCH=${WRT_LUCI_BRANCH:-}
 WRT_DIY_SETTING=${WRT_DIY_SETTING:-diy_config.sh}
-WRT_DIYPackages=${WRT_DIYPackages:-Packages.sh}
+WRT_DIYPackages=${WRT_DIYPackages:-auto}
 WRT_DIY_FEEDS=${WRT_DIY_FEEDS:-diy_feeds.sh}
 WRT_DEFAULT_LANIP=${WRT_DEFAULT_LANIP:-192.168.0.1}
 WRT_SOURCE_HASH_INFO=${WRT_SOURCE_HASH_INFO:-}
@@ -131,9 +131,9 @@ esac
 require_dir "$OPENWRT_PATH"
 require_dir "$CONFIG_ROOT"
 require_file "$SCRIPT_ROOT/$WRT_DIY_FEEDS"
-require_file "$SCRIPT_ROOT/$WRT_DIYPackages"
 require_file "$SCRIPT_ROOT/$WRT_DIY_SETTING"
 require_file "$SCRIPT_ROOT/export_config.sh"
+require_file "$SCRIPT_ROOT/resolve_device_script.sh"
 require_file "$SCRIPT_ROOT/diy_after_defconfig.sh"
 require_file "$OVERLAY_UTILS"
 
@@ -196,7 +196,15 @@ perl ./scripts/feeds install -a
 
 echo "【Lin】执行自定义包脚本：$WRT_DIYPackages"
 cd ./package
-bash "$SCRIPT_ROOT/$WRT_DIYPackages"
+WRT_RESOLVED_DIY_PACKAGES=$(
+	bash "$SCRIPT_ROOT/resolve_device_script.sh" \
+		"$SCRIPT_ROOT" \
+		"$WRT_DIYPackages" \
+		"$WRT_DEVICE"
+)
+require_file "$SCRIPT_ROOT/$WRT_RESOLVED_DIY_PACKAGES"
+echo "【Lin】实际自定义包脚本：$WRT_RESOLVED_DIY_PACKAGES"
+bash "$SCRIPT_ROOT/$WRT_RESOLVED_DIY_PACKAGES"
 cd "$OPENWRT_PATH"
 
 echo "【Lin】导出参数化配置"

@@ -55,7 +55,7 @@ on:
         description: 'DIY包配置'
         required: false
         type: string
-        default: 'Packages.sh'
+        default: 'auto'
       WRT_DEFAULT_LANIP:
         description: '默认LAN-IP'
         required: false

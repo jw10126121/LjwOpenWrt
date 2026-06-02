@@ -374,8 +374,14 @@ jobs:
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |
         cd ./package
-        echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
-        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_DIYPackages"
+        WRT_RESOLVED_DIY_PACKAGES=$(
+          bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/resolve_device_script.sh" \
+            "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS" \
+            "$WRT_DIYPackages" \
+            "$WRT_DEVICE"
+        )
+        echo "【Lin】执行DIY包脚本：$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_RESOLVED_DIY_PACKAGES"
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/$WRT_RESOLVED_DIY_PACKAGES"
 
     - name: diy config (自定义配置)
       working-directory: ${{ env.OPENWRT_PATH }}

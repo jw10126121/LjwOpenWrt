@@ -28,6 +28,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 - `WRT_FIREWALL`：防火墙栈，`fw3` 或 `fw4`
 - `WRT_OVERLAYS`：可选差异层，逗号分隔，例如 `frps,apk`
 - `WRT_LUCI_BRANCH`：可选 LuCI feed 分支，例如 `openwrt-23.05`、`23.05`、`2305`
+- `WRT_DIYPackages`：默认 `auto`，优先使用 `Scripts/Packages-<设备名>.sh` 或短名脚本；显式填 `Packages.sh` 可强制使用通用包脚本
 - `WRT_SOURCE_HASH_INFO`：可选 commit hash，用于固定到指定 lean 提交
 
 说明：
@@ -48,7 +49,7 @@ lean-only 的 OpenWrt 云编译仓库，源码固定为 [coolsnowwolf/lede](http
 
 当前配置按以下顺序叠加：
 
-- `Config/GENERAL.txt`
+- `Config/GENERAL-<设备名>.txt` 或 `Config/GENERAL-<设备短名>.txt`（若存在），否则使用 `Config/GENERAL.txt`
 - `Config/<设备名>-FW3.txt` 或 `Config/<设备名>.txt`
 - `Config/device-overlays/<设备名>-<FW>.txt`（若存在）
 - `Config/overlays/<overlay>.txt`（按 `WRT_OVERLAYS` 顺序叠加）

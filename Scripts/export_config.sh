@@ -2,7 +2,7 @@
 
 # 说明：
 # 1. 导出一份可直接分享的参数化合并配置文件。
-# 2. 固定加载 GENERAL.txt，再按需要叠加设备主配置、device-overlay 与 overlays。
+# 2. 优先加载设备专用 GENERAL-*.txt，再按需要叠加设备主配置、device-overlay 与 overlays。
 # 3. overlay 支持多个同时叠加，按传入顺序覆盖。
 
 set -eu
@@ -37,6 +37,33 @@ resolve_device_config() {
 	fi
 
 	return 1
+}
+
+resolve_general_configs() {
+	local config_root=$1
+	local device_name=$2
+	local short_device_name=''
+
+	if [ -f "$config_root/GENERAL-${device_name}.txt" ]; then
+		printf '%s\n' "GENERAL-${device_name}.txt"
+		return 0
+	fi
+
+	case "$device_name" in
+		*-WIFI)
+			short_device_name=${device_name%-WIFI}
+			;;
+		*-NOWIFI)
+			short_device_name=${device_name%-NOWIFI}
+			;;
+	esac
+
+	if [ -n "$short_device_name" ] && [ -f "$config_root/GENERAL-${short_device_name}.txt" ]; then
+		printf '%s\n' "GENERAL-${short_device_name}.txt"
+		return 0
+	fi
+
+	printf '%s\n' 'GENERAL.txt'
 }
 
 cleanup() {
@@ -251,7 +278,7 @@ if [ -z "$device_config" ]; then
 	exit 1
 fi
 
-resolved_general_configs='GENERAL.txt'
+resolved_general_configs=$(resolve_general_configs "$config_dir" "$device")
 device_config_path="$config_dir/$device_config"
 processed_device_config="$device_config_path"
 embeds_fw_stack=false
