@@ -463,9 +463,8 @@ apply_luci_feed_25_12_package_overrides() {
 
     echo "【Lin】检测到 LuCI feed 为 openwrt-25.12，补齐 25.12 兼容包源"
 
-    echo "【Lin】25.12未找到luci-app-accesscontrol，从coolsnowwolf/luci的openwrt-23.05分支获取"
-    update_package_list "luci-app-accesscontrol" "coolsnowwolf/luci" "openwrt-23.05" # 25.12 feed 时补入 lean 上游 v23.05 luci-app-accesscontrol
-    update_package_list "luci-app-filetransfer" "coolsnowwolf/luci" "openwrt-23.05" # 25.12 feed 时补入 lean 上游 v23.05 luci-app-filetransfer
+    echo "【Lin】25.12未找到luci-app-accesscontrol和luci-app-filetransfer，从coolsnowwolf/luci的openwrt-23.05分支获取"
+    update_package_list "luci-app-accesscontrol luci-app-filetransfer" "coolsnowwolf/luci" "openwrt-23.05" # 25.12 feed 时补入 lean 上游 v23.05 luci-app-accesscontrol和luci-app-filetransfer
     # ensure_accesscontrol_menu_compat
 
     # echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
