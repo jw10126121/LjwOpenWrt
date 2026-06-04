@@ -94,7 +94,7 @@ CONFIG_PACKAGE_luci-i18n-socat-zh-cn=y       # Socat 中文语言包
 CONFIG_PACKAGE_luci-app-upnp=y               # UPnP
 CONFIG_PACKAGE_luci-i18n-upnp-zh-cn=y        # UPnP 中文语言包
 CONFIG_PACKAGE_luci-app-wifischedule=m       # Wi-Fi 定时开关
-CONFIG_PACKAGE_luci-app-guest-wifi=y         # 访客WIFI
+CONFIG_PACKAGE_luci-app-guest-wifi=m         # 访客WIFI
 #CONFIG_PACKAGE_luci-app-guestwifi=m         # 访客WIFI，三频段使用
 
 # ------------------------------------------------------------------------

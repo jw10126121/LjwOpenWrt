@@ -360,7 +360,7 @@ apply_common_package_overrides() {
 
     update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
     # 保留可选 Socat 页面，依赖会自动带出 socat
-    update_package_list "luci-app-socat luci-app-guest-wifi" "Lienol/openwrt-package" "main"    
+    update_package_list "luci-app-socat luci-app-guest-wifi" "https://github.com/Lienol/openwrt-package" "main"    
 
     # UPDATE_PACKAGE "luci-app-athena-led" "NONGFAH/luci-app-athena-led" "main"
     # # NONGFAH 版本的 init 脚本和主程序需要可执行权限，否则安装后服务无法启动
