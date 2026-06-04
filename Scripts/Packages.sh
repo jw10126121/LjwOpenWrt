@@ -380,8 +380,8 @@ apply_common_package_overrides() {
 
     # Guest-WIFI
     # UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
-    # 3频可用
-    update_package_list "luci-app-guestwifi" "yufanpin/luci-app-guestwifi" "master"
+    # 3频可用,20260604编译报错
+    # update_package_list "luci-app-guestwifi" "yufanpin/luci-app-guestwifi" "master"
 
 
     # UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
