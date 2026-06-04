@@ -68,7 +68,7 @@ jobs:
     name: lean-JD-AX6600-WIFI-fw3-base
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: JW-AX6600-WIFI
+      WRT_DEVICE: JD-AX6600-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
