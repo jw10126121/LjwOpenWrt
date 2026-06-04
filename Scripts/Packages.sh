@@ -359,7 +359,8 @@ apply_common_package_overrides() {
     UPDATE_PACKAGE "openwrt-bandix" "timsaya/openwrt-bandix" "main"
 
     update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
-    update_package_list "luci-app-socat" "Lienol/openwrt-package" "main"    # 保留可选 Socat 页面，依赖会自动带出 socat
+    # 保留可选 Socat 页面，依赖会自动带出 socat
+    update_package_list "luci-app-socat luci-app-guest-wifi" "Lienol/openwrt-package" "main"    
 
     # UPDATE_PACKAGE "luci-app-athena-led" "NONGFAH/luci-app-athena-led" "main"
     # # NONGFAH 版本的 init 脚本和主程序需要可执行权限，否则安装后服务无法启动
@@ -378,7 +379,7 @@ apply_common_package_overrides() {
     fi
 
     # Guest-WIFI
-    UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
+    # UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
 
 
     # UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
@@ -397,6 +398,7 @@ apply_lean_package_overrides() {
         # update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
         # 使用lean源码自带的argon
         update_package_list "luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
+        update_package_list "luci-app-filetransfer" "coolsnowwolf/luci" "openwrt-23.05" # 25.12 feed 时补入 lean 上游 v23.05 luci-app-filetransfer
     else
         UPDATE_PACKAGE "luci-theme-argon" "jerrykuku/luci-theme-argon" "v2.3.2"
         UPDATE_PACKAGE "luci-app-argon-config" "jerrykuku/luci-app-argon-config" "master"
@@ -410,6 +412,7 @@ apply_lean_package_overrides() {
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
     # 添加luci-theme-noobwrt
     UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
+    
 }
 
 ensure_accesscontrol_menu_compat() {
