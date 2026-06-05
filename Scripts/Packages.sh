@@ -385,7 +385,7 @@ apply_common_package_overrides() {
 
 
     # UPDATE_PACKAGE "luci-app-sqm" "gitbruc/luci-app-sqm" "main"
-    # UPDATE_PACKAGE "luci-app-sqm" "https://git.cooluc.com/sbwml/luci-app-sqm" "main"
+    UPDATE_PACKAGE "luci-app-sqm" "https://git.cooluc.com/sbwml/luci-app-sqm" "main"
     # update_package_list "luci-app-sqm-controller" "Natduki/luci-app-sqm-controller" "main"
 
     # quickfile 当前按需保留，默认不导入。
