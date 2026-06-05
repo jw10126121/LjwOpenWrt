@@ -60,7 +60,8 @@
       "Bash(mkdir -p /Users/lin/Documents/Git/Linjw/LjwOpenWrt/Config/vikingyfy /Users/lin/Documents/Git/Linjw/LjwOpenWrt/Scripts/vikingyfy)",
       "Bash(python3 -c ' *)",
       "Bash(rm -f /Users/lin/.claude/plans/floofy-swimming-cascade.md)",
-      "Bash(bash -n /Users/lin/Documents/Git/Linjw/LjwOpenWrt/Scripts/Packages.sh)"
+      "Bash(bash -n /Users/lin/Documents/Git/Linjw/LjwOpenWrt/Scripts/Packages.sh)",
+      "Bash(curl -sL https://raw.githubusercontent.com/VIKINGYFY/immortalwrt/master/feeds.conf.default)"
     ],
     "additionalDirectories": [
       "/tmp",
