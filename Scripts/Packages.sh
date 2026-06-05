@@ -39,11 +39,13 @@ find_package_dirs() {
 }
 
 # 统一把 owner/repo 形式转换成完整 GitHub URL；
-# 已经是 github.com 全路径时保持不变，兼容脚本中两种写法。
+# 已经是完整 URL（以 http/https 开头）时保持不变，兼容脚本中多种写法。
 normalize_repo_url() {
     local package_repo=$1
 
-    if [[ "${package_repo}" == *github.com* ]]; then
+    if [[ "${package_repo}" == http://* ]] || [[ "${package_repo}" == https://* ]]; then
+        printf '%s\n' "${package_repo}"
+    elif [[ "${package_repo}" == *github.com* ]]; then
         printf '%s\n' "${package_repo}"
     else
         printf 'https://github.com/%s.git\n' "${package_repo}"
@@ -360,7 +362,7 @@ apply_common_package_overrides() {
 
     update_package_list "luci-app-vlmcsd vlmcsd" "sbwml/openwrt_pkgs" "main"
     # 保留可选 Socat 页面，依赖会自动带出 socat
-    update_package_list "luci-app-socat luci-app-guest-wifi" "https://github.com/Lienol/openwrt-package" "main"    
+    update_package_list "luci-app-socat luci-app-guest-wifi" "Lienol/openwrt-package" "main"    
 
     # UPDATE_PACKAGE "luci-app-athena-led" "NONGFAH/luci-app-athena-led" "main"
     # # NONGFAH 版本的 init 脚本和主程序需要可执行权限，否则安装后服务无法启动
