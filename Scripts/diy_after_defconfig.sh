@@ -176,7 +176,7 @@ preload_homeproxy_resources() {
 }
 
 cd "${openwrt_workdir}"
-#configure_ecm_accel_delay_fix
+configure_ecm_accel_delay_fix
 # preload_openclash_meta_core
 #preload_homeproxy_resources
 
