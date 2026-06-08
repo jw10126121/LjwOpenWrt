@@ -89,6 +89,7 @@ env:
   WRT_diy_after_defconfig: 'diy_after_defconfig.sh'
   WRT_THEME_NAME: 'argon'
   UPLOAD_FIRMWARE_DIR: true
+  SPLIT_ARTIFACTS: true                                       # 是否将固件和Packages包分开上传到Artifact
   IS_RESET_PASSWORD: true                                     # 是否把密码重置为空
   UPLOAD_ALL_BIN_DIR: false                                   # 是否上传编译后的bin目录，因整理编译后的文件设置了UPLOAD_FIRMWARE_DIR，所以不上传整个bin目录
   IS_RESIZE_SPACE: true                                      # 是否扩容空间，一般编译内容不多，可以不扩容，减少资源浪费
@@ -534,6 +535,12 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE
 
+    - name: Split Artifacts (按需分离固件与Packages包)
+      if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true' && env.SPLIT_ARTIFACTS == 'true'
+      run: |
+        mkdir -p "${{ env.OPENWRT_PATH }}/packages_upload"
+        mv ${{ env.OPENWRT_PATH }}/upload/Packages_*.tar.gz "${{ env.OPENWRT_PATH }}/packages_upload/" 2>/dev/null || true
+
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload_artifact
       timeout-minutes: 30
@@ -543,6 +550,17 @@ jobs:
       with:
         name: ${{ env.OUTPUT_NAME_PREFIX }}
         path: ${{ env.OPENWRT_PATH }}/upload
+
+    - name: Upload Packages To Artifact(将Packages包单独上传到Artifact)
+      id: upload_packages_artifact
+      timeout-minutes: 30
+      continue-on-error: true
+      if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true' && env.SPLIT_ARTIFACTS == 'true'
+      uses: actions/upload-artifact@v6.0.0
+      with:
+        name: ${{ env.OUTPUT_NAME_PREFIX }}-packages
+        path: ${{ env.OPENWRT_PATH }}/packages_upload
+        if-no-files-found: ignore
 
     - name: Create Notification Content (创建推送结果内容)
       id: notification_content
