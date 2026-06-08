@@ -36,6 +36,21 @@ resolve_device_config() {
 		return 0
 	fi
 
+	# NOWIFI 设备回退到基础设备配置（NOWIFI 语义由 overlay 处理）
+	case "$device_name" in
+		*-NOWIFI)
+			local short_name=${device_name%-NOWIFI}
+			if [ -f "$config_root/${short_name}.txt" ]; then
+				printf '%s\n' "${short_name}.txt"
+				return 0
+			fi
+			if [ -f "$config_root/${short_name}-FW3.txt" ]; then
+				printf '%s\n' "${short_name}-FW3.txt"
+				return 0
+			fi
+			;;
+	esac
+
 	return 1
 }
 

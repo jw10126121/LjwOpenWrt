@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 说明：MT6000-WIFI 的一组设备共用包
-# 已统一收口到 Config/MT6000-WIFI-FW3.txt，不再拆成普通设备层 + device-overlays。
+# 说明：GL-MT6000-WIFI 的一组设备共用包
+# 已统一收口到 Config/GL-MT6000-WIFI-FW3.txt，不再拆成普通设备层 + device-overlays。
 
 set -eu
 
@@ -19,13 +19,13 @@ FW4_OUT="$TMPDIR/fw4.txt"
 
 bash "$EXPORT_SCRIPT" \
 	--config-dir "$SCRIPT_DIR/../Config" \
-	--device "MT6000-WIFI" \
+	--device "GL-MT6000-WIFI" \
 	--fw "fw3" \
 	--output "$FW3_OUT" >/dev/null
 
 bash "$EXPORT_SCRIPT" \
 	--config-dir "$SCRIPT_DIR/../Config" \
-	--device "MT6000-WIFI" \
+	--device "GL-MT6000-WIFI" \
 	--fw "fw4" \
 	--output "$FW4_OUT" >/dev/null
 

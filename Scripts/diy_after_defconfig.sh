@@ -101,10 +101,10 @@ preload_openclash_meta_core() {
         return 0
     fi
 
-    # 检查设备是否为 AX6600 或 MT6000（仅这两款大内存设备预置）
+    # 检查设备是否为 AX6600 或 GL-MT6000（仅这两款大内存设备预置）
     target_label=$(tr -d '\r' < "${target_label_marker_file}" 2>/dev/null || echo "")
     case "${target_label}" in
-        JD-AX6600-WIFI*|MT6000-WIFI*)
+        JD-AX6600-WIFI*|GL-MT6000-WIFI*)
             ;;
         *)
             echo "【Lin】设备 ${target_label:-未知} 不在预置列表中，跳过 OpenClash 内核预置"

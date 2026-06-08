@@ -19,9 +19,9 @@
 根据项目中的配置文件，我们支持以下设备：
 - CMIOT-AX18-NOWIFI
 - IPQ60XX-NOWIFI
-- JD-AX1800PRO-NOWIFI
 - JD-AX1800PRO-WIFI
-- MT6000-WIFI
+- JD-AX6600-WIFI
+- GL-MT6000-WIFI
 - 以及其他类似的设备配置
 
 ## 防火墙版本

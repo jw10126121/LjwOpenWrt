@@ -31,20 +31,6 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  cmiot_ax18_nowifi_mini_fw3_apk:
-    name: lean-CMIOT-AX18-NOWIFI-MINI-fw3-apk
-    uses: ./.github/workflows/DEFAULT.yml
-    with:
-      WRT_DEVICE: CMIOT-AX18-NOWIFI-MINI
-      WRT_FIREWALL: fw3
-      WRT_OVERLAYS: apk
-      WRT_DIY_SETTING: diy_config.sh
-      WRT_DIYPackages: Packages.sh
-      WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: false
-      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-    secrets: inherit
-
   cmiot_ax18_nowifi_fw3_frps_apk:
     name: lean-CMIOT-AX18-NOWIFI-fw3-frps-apk
     uses: ./.github/workflows/DEFAULT.yml
@@ -59,39 +45,11 @@ jobs:
       WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
-  cmiot_ax18_nowifi_mini_fw3_frps_apk:
-    name: lean-CMIOT-AX18-NOWIFI-MINI-fw3-frps-apk
+  gl_mt6000_wifi_fw3_apk:
+    name: lean-GL-MT6000-WIFI-fw3-apk
     uses: ./.github/workflows/DEFAULT.yml
     with:
-      WRT_DEVICE: CMIOT-AX18-NOWIFI-MINI
-      WRT_FIREWALL: fw3
-      WRT_OVERLAYS: frps,apk
-      WRT_DIY_SETTING: diy_config.sh
-      WRT_DIYPackages: Packages.sh
-      WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: false
-      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-    secrets: inherit
-
-  mt6000_wifi_fw3_apk:
-    name: lean-MT6000-WIFI-fw3-apk
-    uses: ./.github/workflows/DEFAULT.yml
-    with:
-      WRT_DEVICE: MT6000-WIFI
-      WRT_FIREWALL: fw3
-      WRT_OVERLAYS: apk
-      WRT_DIY_SETTING: diy_config.sh
-      WRT_DIYPackages: Packages.sh
-      WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: false
-      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}
-    secrets: inherit
-
-  mt6000_wifi_mini_fw3_apk:
-    name: lean-MT6000-WIFI-MINI-fw3-apk
-    uses: ./.github/workflows/DEFAULT.yml
-    with:
-      WRT_DEVICE: MT6000-WIFI-MINI
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: apk
       WRT_DIY_SETTING: diy_config.sh

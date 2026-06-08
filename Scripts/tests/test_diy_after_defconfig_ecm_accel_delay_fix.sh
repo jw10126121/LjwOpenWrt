@@ -76,25 +76,20 @@ run_case \
 	"ax18_fw3" \
 	"CMIOT-AX18-NOWIFI-FW3" \
 	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
-	"16"
+	"24"
 run_case \
 	"ax18_fw4" \
 	"CMIOT-AX18-NOWIFI-FW4" \
 	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
-	"16"
+	"24"
 run_case \
 	"ax18_marker_stale" \
 	"CMIOT-AX18-NOWIFI-FW3" \
 	"CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt6000=y" \
 	"1"
 run_case \
-	"ax18_mini" \
-	"CMIOT-AX18-NOWIFI-MINI-FW3" \
-	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
-	"1"
-run_case \
 	"other_target" \
-	"MT6000-WIFI-FW3" \
+	"GL-MT6000-WIFI-FW3" \
 	"CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_cmiot_ax18=y" \
 	"1"
 

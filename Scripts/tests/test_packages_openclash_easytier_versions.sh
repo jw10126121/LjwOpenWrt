@@ -77,12 +77,9 @@ grep -q '^PKG_VERSION:=2.6.4$' "$TEST_REPO/easytier-noweb/Makefile"
 grep -Fxq 'PKG_VERSION:=$(or $(EASYTIER_VERSION),2.6.2)' "$TEST_REPO/luci-app-easytier/Makefile"
 
 for config_file in \
-	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI-MINI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/JD-AX1800PRO-WIFI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/MIR3G-WIFI-MINI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/MT6000-WIFI-FW3.txt" \
-	"$SCRIPT_DIR/../Config/MT6000-WIFI-MINI-FW3.txt"
+	"$SCRIPT_DIR/../Config/CMIOT-AX18-NOWIFI.txt" \
+	"$SCRIPT_DIR/../Config/JD-AX1800PRO-WIFI.txt" \
+	"$SCRIPT_DIR/../Config/GL-MT6000-WIFI.txt"
 do
 	grep -q 'CONFIG_PACKAGE_easytier-noweb=y\|^# CONFIG_PACKAGE_easytier-noweb is not set$' "$config_file"
 	! grep -q '^CONFIG_PACKAGE_easytier=y$' "$config_file"

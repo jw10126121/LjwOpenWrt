@@ -26,8 +26,8 @@ if ! grep -q 'JD-AX6600-WIFI' "$TARGET_SCRIPT"; then
     exit 1
 fi
 
-if ! grep -q 'MT6000-WIFI' "$TARGET_SCRIPT"; then
-    echo "MT6000-WIFI device check should exist" >&2
+if ! grep -q 'GL-MT6000-WIFI' "$TARGET_SCRIPT"; then
+    echo "GL-MT6000-WIFI device check should exist" >&2
     exit 1
 fi
 
