@@ -56,7 +56,7 @@ tmp_dir="$(mktemp -d)"
 # 先把分散在 bin/ 下的所有 ipk/apk 收拢到临时目录，再统一重组和压缩。
 find ./bin/packages/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
 find ./bin/targets/ -type f \( -name "*.ipk" -o -name "*.apk" \) -exec mv -f {} "${tmp_dir}" \;
-find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$" -exec rm -rf {} +
+find ./bin/targets/ -iregex ".*\(buildinfo\|json\|sha256sums\|packages\)$" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(initramfs-uImage\).*" -exec rm -rf {} +
 find ./bin/targets/ -iregex ".*\(-imagebuilder-\).*" -exec rm -rf {} +
 

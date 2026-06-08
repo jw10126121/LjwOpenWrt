@@ -531,6 +531,12 @@ jobs:
       run: |
         bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_organize_outputs.sh"
 
+    - name: Supplement Versions From Manifest(从 manifest 补充插件版本号)
+      if: steps.organize.outputs.status == 'success'
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        bash "$GITHUB_WORKSPACE/$WRT_DIR_SCRIPTS/ci_supplement_versions_from_manifest.sh"
+
     - name: Check Disk (查询磁盘信息)
       run: |
         df -hT $GITHUB_WORKSPACE
