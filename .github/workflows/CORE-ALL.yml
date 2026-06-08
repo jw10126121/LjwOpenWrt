@@ -541,12 +541,6 @@ jobs:
       run: |
         df -hT $GITHUB_WORKSPACE
 
-    - name: Split Artifacts (按需分离固件与Packages包)
-      if: steps.finalize_compile.outputs.status == 'success' && env.UPLOAD_FIRMWARE_DIR == 'true' && env.SPLIT_ARTIFACTS == 'true'
-      run: |
-        mkdir -p "${{ env.OPENWRT_PATH }}/packages_upload"
-        mv ${{ env.OPENWRT_PATH }}/upload/Packages_*.tar.gz "${{ env.OPENWRT_PATH }}/packages_upload/" 2>/dev/null || true
-
     - name: Upload Firmware To Artifact(将固件上传到Artifact)
       id: upload_artifact
       timeout-minutes: 30
@@ -555,7 +549,9 @@ jobs:
       uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ env.OUTPUT_NAME_PREFIX }}
-        path: ${{ env.OPENWRT_PATH }}/upload
+        path: |
+          ${{ env.OPENWRT_PATH }}/upload/*
+          !${{ env.OPENWRT_PATH }}/upload/Packages_*.tar.gz
 
     - name: Upload Packages To Artifact(将Packages包单独上传到Artifact)
       id: upload_packages_artifact
@@ -565,7 +561,7 @@ jobs:
       uses: actions/upload-artifact@v6.0.0
       with:
         name: ${{ env.OUTPUT_NAME_PREFIX }}-packages
-        path: ${{ env.OPENWRT_PATH }}/packages_upload
+        path: ${{ env.OPENWRT_PATH }}/upload/Packages_*.tar.gz
         if-no-files-found: ignore
 
     - name: Create Notification Content (创建推送结果内容)
