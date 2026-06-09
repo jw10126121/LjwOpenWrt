@@ -1,9 +1,11 @@
 #CI项目
 name: CUSTOM
-run-name: CUSTOM-${{ inputs.WRT_RELEASE_FIRMWARE && 'release' || 'test' }}
+run-name: CUSTOM-${{ (inputs.WRT_RELEASE_FIRMWARE == '' && true || inputs.WRT_RELEASE_FIRMWARE) && 'release' || 'test' }}
 
 #CI计划
 on:
+  schedule:
+    - cron: '0 3 1 * *'  # 每月1日 03:00 UTC
   workflow_dispatch:
     inputs:
       WHAT_MY_SAY:
@@ -33,7 +35,7 @@ jobs:
       WRT_DIYPackages: Packages.sh
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE == '' && true || inputs.WRT_RELEASE_FIRMWARE }}
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
@@ -48,7 +50,7 @@ jobs:
       WRT_DIYPackages: Packages.sh
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE == '' && true || inputs.WRT_RELEASE_FIRMWARE }}
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
@@ -63,7 +65,7 @@ jobs:
       WRT_DIYPackages: Packages.sh
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE == '' && true || inputs.WRT_RELEASE_FIRMWARE }}
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
 
@@ -78,6 +80,6 @@ jobs:
       WRT_DIYPackages: Packages.sh
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
-      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE }}
+      WRT_RELEASE_FIRMWARE: ${{ inputs.WRT_RELEASE_FIRMWARE == '' && true || inputs.WRT_RELEASE_FIRMWARE }}
       WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}
     secrets: inherit
