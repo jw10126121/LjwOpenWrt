@@ -31,8 +31,8 @@ assert_toolchain_uses_scoped_restore_key() {
 	local restore_block
 	restore_block="$(awk '/Restore Toolchain Cache/,/Restore ccache Cache/' "$workflow_file")"
 
-	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}'; then
-		echo "ASSERT FAILED: toolchain restore should use the per-config plus overlays key" >&2
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}'; then
+		echo "ASSERT FAILED: toolchain restore should use the per-config key" >&2
 		exit 1
 	fi
 
@@ -54,15 +54,15 @@ assert_toolchain_uses_scoped_restore_key() {
 
 assert_restore_ccache_uses_rolling_key() {
 	local restore_block
-	restore_block="$(awk '/Restore ccache Cache/,/Cache Diagnostics After Restore/' "$workflow_file")"
+	restore_block="$(awk '/Restore ccache Cache/,/Refresh Cache Metadata/' "$workflow_file")"
 
-	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}'; then
-		echo "ASSERT FAILED: restore ccache should use the rolling START_TIME key" >&2
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.START_DATE }}'; then
+		echo "ASSERT FAILED: restore ccache should use the source-scoped daily rolling key" >&2
 		exit 1
 	fi
 
-	if printf '%s\n' "$restore_block" | grep -Eq -- '^[[:space:]]+key: ccache-\$\{\{ runner\.os \}\}-\$\{\{ env\.DEVICE_SUBTARGET \}\}-\$\{\{ env\.WRT_VER \}\}[[:space:]]*$'; then
-		echo "ASSERT FAILED: restore ccache should no longer use the frozen stable key" >&2
+	if printf '%s\n' "$restore_block" | grep -Eq -- '^[[:space:]]+key: ccache-\$\{\{ runner\.os \}\}-\$\{\{ env\.DEVICE_SUBTARGET \}\}-\$\{\{ env\.WRT_VER \}\}-\$\{\{ env\.REPO_GIT_hash_simple \}\}[[:space:]]*$'; then
+		echo "ASSERT FAILED: restore ccache should no longer use the frozen source hash key" >&2
 		exit 1
 	fi
 }
@@ -71,16 +71,16 @@ assert_contains '- name: Restore Toolchain Cache' "workflow should restore toolc
 assert_contains 'uses: actions/cache/restore@v5' "workflow should use cache restore actions"
 assert_contains '- name: Save Toolchain Cache' "workflow should save toolchain cache explicitly"
 assert_contains 'uses: actions/cache/save@v5' "workflow should use cache save actions"
-assert_contains 'WRT_OVERLAYS_HASH: ''' "workflow should define the overlays hash env slot"
-assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}-${{ env.WRT_OVERLAYS_HASH }}' "toolchain cache key should include overlays hash to avoid variant collisions"
-assert_contains 'echo "WRT_OVERLAYS_HASH=$overlay_hash" >> $GITHUB_ENV' "workflow should publish the overlays hash for later cache key use"
+assert_not_contains 'WRT_OVERLAYS_HASH' "workflow should not keep an unused overlays hash variable"
+assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}' "toolchain cache key should share small overlay variants within each config label"
 assert_toolchain_uses_scoped_restore_key
 
 assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
 assert_contains '- name: Save ccache Cache' "workflow should save ccache explicitly"
-assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.START_TIME }}' "ccache restore and save keys should roll forward with the build start time"
+assert_contains 'key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.START_DATE }}' "ccache restore and save keys should roll forward daily within the source scope"
 assert_restore_ccache_uses_rolling_key
 assert_contains 'restore-keys: |' "ccache restore step should still keep restore-keys"
+assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-' "ccache source-scoped restore prefix should remain available"
 assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-' "ccache restore prefix should remain unchanged"
 assert_not_contains "steps.restore_ccache_cache.outputs.cache-hit != 'true'" "ccache save should no longer be blocked on an exact cache hit"
 
