@@ -238,13 +238,13 @@ GITHUB_REPOSITORY="user/repo" \
 GITHUB_RUN_ID="123456" \
 WRT_RELEASE_FIRMWARE="true" \
 COMPILE_STATUS="success" \
-OUTPUT_NAME_PREFIX="lean_mt6000_fw3_frpc_ipk_D260418_T105727" \
+OUTPUT_NAME_PREFIX="lean_mt6000_fw3_ipk_frpc_D260418_T105727" \
 readme_desc_file="$README_FILE" \
 release_desc_file="$RELEASE_FILE" \
 system_content="$system_desc" \
 bash "$NOTIFY_SCRIPT"
 
-grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/lean_mt6000_fw3_frpc_ipk_D260418_T105727' "$ENV_FILE"
+grep -q 'Release下载地址：https://github.com/user/repo/releases/tag/lean_mt6000_fw3_ipk_frpc_D260418_T105727' "$ENV_FILE"
 grep -q 'Artifact下载地址：https://github.com/user/repo/actions/runs/123456' "$ENV_FILE"
 grep -q '编译状态：success' "$ENV_FILE"
 grep -q '^编译开始：D260418_T105727$' "$ENV_FILE"

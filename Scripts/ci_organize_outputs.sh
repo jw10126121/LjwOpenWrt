@@ -39,7 +39,7 @@ echo "readme_desc_file=${readme_desc_file}" >> "${GITHUB_ENV}"
 echo "release_desc_file=${release_desc_file}" >> "${GITHUB_ENV}"
 
 # output_name_prefix 是所有导出文件共享的命名前缀。
-# 命名格式统一为“源码风味 / 设备别名 / 可选 nowifi / FW / FRP / 包管理器 / 编译开始时间”，
+# 命名格式统一为“源码风味 / 设备别名 / 可选 nowifi / FW / 包管理器 / 功能 / 编译开始时间”，
 # 避免文件名里继续混入 target 子平台和源码版本等冗余字段。
 output_name_prefix="${OUTPUT_NAME_PREFIX:-${DEVICE_SUBTARGET:?DEVICE_SUBTARGET is required}_${DEVICE_NAME_LIST_LIAN:?DEVICE_NAME_LIST_LIAN is required}_${BUILD_VARIANT_TAG:?BUILD_VARIANT_TAG is required}_${WRT_VER:?WRT_VER is required}_${START_TIME:?START_TIME is required}}"
 

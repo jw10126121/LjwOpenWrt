@@ -89,9 +89,9 @@ run_case "$CASE_DIR" "$TMPDIR/case1.env"
 grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case1.env"
 grep -q '^LUCI_VERSION=24.10.5$' "$TMPDIR/case1.env"
 grep -q '^PACKAGE_MANAGER_TAG=ipk$' "$TMPDIR/case1.env"
-grep -q '^BUILD_VARIANT_TAG=lean_fw4_frpc_ipk$' "$TMPDIR/case1.env"
+grep -q '^BUILD_VARIANT_TAG=lean_fw4_ipk_frpc$' "$TMPDIR/case1.env"
 grep -q '^DEVICE_NAME_ALIAS=cmiot_ax18$' "$TMPDIR/case1.env"
-grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_fw4_frpc_ipk_D260514_T003050$' "$TMPDIR/case1.env" || {
+grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_fw4_ipk_frpc_D260514_T003050$' "$TMPDIR/case1.env" || {
     echo "case1 should emit the lean_cmiot_ax18 fw4 output prefix" >&2
     exit 1
 }
@@ -115,7 +115,7 @@ run_case "$CASE_DIR2" "$TMPDIR/case2.env"
 
 grep -q '^OP_VERSION=24.10.5$' "$TMPDIR/case2.env"
 grep -q '^LUCI_VERSION=23.05$' "$TMPDIR/case2.env"
-grep -q '^BUILD_VARIANT_TAG=lean_fw4_frpc_ipk$' "$TMPDIR/case2.env"
+grep -q '^BUILD_VARIANT_TAG=lean_fw4_ipk_frpc$' "$TMPDIR/case2.env"
 
 CASE_DIR3="$TMPDIR/mixed-fw-stack"
 make_openwrt_tree \
@@ -133,7 +133,7 @@ run_case "$CASE_DIR3" "$TMPDIR/case3.env"
 
 grep -q '^FW_STACK_TAG=mixed$' "$TMPDIR/case3.env"
 grep -q 'FW环境：FW3+FW4(冲突)' "$TMPDIR/case3.env"
-grep -q '^BUILD_VARIANT_TAG=lean_mixed_frpc_ipk$' "$TMPDIR/case3.env"
+grep -q '^BUILD_VARIANT_TAG=lean_mixed_ipk_frpc$' "$TMPDIR/case3.env"
 
 CASE_DIR4="$TMPDIR/nowifi-ax18"
 make_openwrt_tree \
@@ -150,7 +150,7 @@ mv "$CASE_DIR4/version.mk.tmp" "$CASE_DIR4/include/version.mk"
 run_case "$CASE_DIR4" "$TMPDIR/case4.env" "false" "cmiot_ax18"
 
 grep -q '^DEVICE_NAME_ALIAS=cmiot_ax18$' "$TMPDIR/case4.env"
-grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_nowifi_fw3_frpc_ipk_D260514_T003050$' "$TMPDIR/case4.env" || {
+grep -q '^OUTPUT_NAME_PREFIX=lean_cmiot_ax18_nowifi_fw3_ipk_frpc_D260514_T003050$' "$TMPDIR/case4.env" || {
     echo "case4 should emit the lean_cmiot_ax18_nowifi fw3 output prefix" >&2
     exit 1
 }
@@ -170,7 +170,7 @@ mv "$CASE_DIR5/version.mk.tmp" "$CASE_DIR5/include/version.mk"
 run_case "$CASE_DIR5" "$TMPDIR/case5.env" "true" "jdcloud_re-ss-01"
 
 grep -q '^DEVICE_NAME_ALIAS=jd_ax1800pro$' "$TMPDIR/case5.env"
-grep -q '^OUTPUT_NAME_PREFIX=lean_jd_ax1800pro_fw3_frpc_ipk_D260514_T003050$' "$TMPDIR/case5.env" || {
+grep -q '^OUTPUT_NAME_PREFIX=lean_jd_ax1800pro_fw3_ipk_frpc_D260514_T003050$' "$TMPDIR/case5.env" || {
     echo "case5 should emit the lean_jd_ax1800pro fw3 output prefix" >&2
     exit 1
 }
