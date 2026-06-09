@@ -56,6 +56,9 @@ map_device_name_alias() {
         jdcloud_re-ss-01|jdcloud_ax1800pro)
             printf '%s\n' 'jd_ax1800pro'
             ;;
+        jdcloud_re-cs-02)
+            printf '%s\n' 'jd_ax6600'
+            ;;
         *)
             printf '%s\n' "${raw_name}"
             ;;
