@@ -41,6 +41,8 @@ assert_contains "$custom_workflow" 'name: GL-MT6000-WIFI-fw3-base' "CUSTOM MT600
 assert_contains "$custom_workflow" 'name: JD-AX6600-WIFI-fw3-base' "CUSTOM JD AX6600 job should have a device-first display name"
 assert_not_contains "$custom_workflow" 'name: lean-' "CUSTOM graph labels should not be prefixed with lean"
 
+assert_contains "$custom_workflow" 'WRT_SOURCE_HASH_INFO:' "CUSTOM should expose the optional source hash input"
+assert_contains "$custom_workflow" 'WRT_SOURCE_HASH_INFO: ${{ inputs.WRT_SOURCE_HASH_INFO }}' "CUSTOM should pass source hash input when calling CORE-ALL"
 assert_contains "$custom_workflow" 'WRT_DIY_FEEDS: diy_feeds.sh' "CUSTOM should pass the default feeds script when calling CORE-ALL"
 assert_contains "$custom_workflow" 'WRT_MINE_SAY: ${{ inputs.WHAT_MY_SAY }}' "CUSTOM should map the note input to CORE-ALL"
 assert_not_contains "$custom_workflow" '      WHAT_MY_SAY: ${{ inputs.WHAT_MY_SAY }}' "CUSTOM should not pass DEFAULT-only input names to CORE-ALL"
