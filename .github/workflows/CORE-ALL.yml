@@ -319,10 +319,10 @@ jobs:
       if: env.CACHE_TOOLCHAIN == 'true'
       uses: actions/cache/restore@v5
       with:
-        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}
+        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
         restore-keys: |
           toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-
-          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
+          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-
         path: |
           ${{ env.OPENWRT_PATH }}/staging_dir/host*
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
@@ -654,15 +654,17 @@ jobs:
 
     - name: Save Toolchain Cache
       if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.restore_toolchain_cache.outputs.cache-hit != 'true' && steps.evaluate_cache_save_inputs.outputs.toolchain_present == 'true'
+      continue-on-error: true
       uses: actions/cache/save@v5
       with:
-        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}
+        key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}
         path: |
           ${{ env.OPENWRT_PATH }}/staging_dir/host*
           ${{ env.OPENWRT_PATH }}/staging_dir/tool*
 
     - name: Save ccache Cache
       if: always() && env.CACHE_TOOLCHAIN == 'true' && steps.evaluate_cache_save_inputs.outputs.ccache_present == 'true'
+      continue-on-error: true
       uses: actions/cache/save@v5
       with:
         key: ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.START_DATE }}

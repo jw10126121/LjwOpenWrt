@@ -144,7 +144,7 @@ easytier|luci-app-easytier_ luci-i18n-easytier-zh-cn_ easytier_ easytier-noweb_ 
 bandix|luci-app-bandix_ bandix_ luci-i18n-bandix-zh-cn_
 mosdns|luci-app-mosdns_ luci-i18n-mosdns-zh-cn_ curl_ mosdns_ v2dat_ v2ray-geoip_ v2ray-geosite_ libcurl_ ca-bundle_ libgnutls_ libmbedtls_ libopenssl_ libwolfssl_ kmod-crypto-hw-padlock_ kmod-crypto-user_ kmod-cryptodev_ libatomic_ libgcc_
 argon|luci-theme-argon_ luci-i18n-argon-zh-cn_ curl_ jsonfilter_
-argonconfig|luci-app-argon-config_ luci-i18n-argon-config-zh-cn_ luci-theme-argon_
+argonconfig|luci-app-argon-config_ luci-i18n-argon-config-zh-cn_
 onliner|luci-app-onliner_ luci-i18n-onliner-zh-cn_ arp-scan_ libpcap_
 wolplus|luci-app-wolplus_ luci-i18n-wolplus-zh-cn_ etherwake_
 versync|luci-app-verysync_ verysync_

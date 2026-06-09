@@ -31,8 +31,13 @@ assert_toolchain_uses_scoped_restore_key() {
 	local restore_block
 	restore_block="$(awk '/Restore Toolchain Cache/,/Restore ccache Cache/' "$workflow_file")"
 
-	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}'; then
-		echo "ASSERT FAILED: toolchain restore should use the per-config key" >&2
+	if ! printf '%s\n' "$restore_block" | grep -Fq -- 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}'; then
+		echo "ASSERT FAILED: toolchain restore should use the shared subtarget/source key" >&2
+		exit 1
+	fi
+
+	if printf '%s\n' "$restore_block" | grep -Fq -- 'WRT_CONFIG_LABEL'; then
+		echo "ASSERT FAILED: toolchain restore should not split caches by config label" >&2
 		exit 1
 	fi
 
@@ -46,8 +51,8 @@ assert_toolchain_uses_scoped_restore_key() {
 		exit 1
 	fi
 
-	if ! printf '%s\n' "$restore_block" | grep -Fxq -- '          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}'; then
-		echo "ASSERT FAILED: toolchain restore should still be able to fall back to the legacy key shape" >&2
+	if ! printf '%s\n' "$restore_block" | grep -Fxq -- '          toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-'; then
+		echo "ASSERT FAILED: toolchain restore should fall back to the shared subtarget/version scope" >&2
 		exit 1
 	fi
 }
@@ -72,7 +77,8 @@ assert_contains 'uses: actions/cache/restore@v5' "workflow should use cache rest
 assert_contains '- name: Save Toolchain Cache' "workflow should save toolchain cache explicitly"
 assert_contains 'uses: actions/cache/save@v5' "workflow should use cache save actions"
 assert_not_contains 'WRT_OVERLAYS_HASH' "workflow should not keep an unused overlays hash variable"
-assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}' "toolchain cache key should share small overlay variants within each config label"
+assert_contains 'key: toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}' "toolchain cache key should be shared by subtarget and source hash"
+assert_not_contains 'toolchain-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-${{ env.WRT_CONFIG_LABEL }}' "toolchain cache should not create one cache per device config"
 assert_toolchain_uses_scoped_restore_key
 
 assert_contains '- name: Restore ccache Cache' "workflow should restore ccache explicitly"
@@ -83,6 +89,7 @@ assert_contains 'restore-keys: |' "ccache restore step should still keep restore
 assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-${{ env.REPO_GIT_hash_simple }}-' "ccache source-scoped restore prefix should remain available"
 assert_contains 'ccache-${{ runner.os }}-${{ env.DEVICE_SUBTARGET }}-${{ env.WRT_VER }}-' "ccache restore prefix should remain unchanged"
 assert_not_contains "steps.restore_ccache_cache.outputs.cache-hit != 'true'" "ccache save should no longer be blocked on an exact cache hit"
+assert_contains 'continue-on-error: true' "cache save steps should tolerate duplicate parallel cache reservations"
 
 assert_contains '- name: Initialize Build Observability' "workflow should initialize build timing observability"
 assert_contains 'echo "PREP_STAGE_START_TS=$(date +%s)" >> "$GITHUB_ENV"' "workflow should record the prep stage start timestamp"
