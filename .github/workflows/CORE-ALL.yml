@@ -116,6 +116,7 @@ permissions: write-all
 
 jobs:
   build:
+    name: ${{ inputs.WRT_DEVICE }}-${{ inputs.WRT_FIREWALL }}-${{ inputs.WRT_OVERLAYS != '' && inputs.WRT_OVERLAYS || 'base' }}
     runs-on: ubuntu-24.04
     if: github.event.repository.owner.id == github.event.sender.id
     steps:
