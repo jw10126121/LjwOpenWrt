@@ -35,6 +35,8 @@ for general_cfg in $general_configs; do
 		exit 1
 	fi
 	cat "$config_path" >> "$output_config"
+	# 确保文件间有换行分隔，避免拼接时注释连在一起
+	echo "" >> "$output_config"
 done
 
 device_config_path="$device_config"
