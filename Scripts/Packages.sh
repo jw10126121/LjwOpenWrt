@@ -28,12 +28,17 @@ package_workdir=$(pwd)
 openwrt_workdir="$(readlink -f ..)"
 luci_feed_branch='unknown'
 
-# 源码类型：lean（默认）或 vwrt
-# 用法：SOURCE_TYPE=vwrt bash Packages.sh
-SOURCE_TYPE="${SOURCE_TYPE:-lean}"
-echo "【Lin】源码类型：${SOURCE_TYPE}"
-
 echo "【Lin】工作目录：${package_workdir}"
+
+# 源码类型：根据 lean 特有文件自动判断
+# 如果存在 package/lean/default-settings/files/zzz-default-settings 则为 lean，否则为 vwrt
+file_default_settings="${package_workdir}/lean/default-settings/files/zzz-default-settings"
+if [ -f "${file_default_settings}" ]; then
+    SOURCE_TYPE="lean"
+else
+    SOURCE_TYPE="vwrt"
+fi
+echo "【Lin】源码类型：${SOURCE_TYPE}"
 
 # 在 package/、feeds/luci/、feeds/packages/ 三个常见来源中查找同名包。
 # 这样无论包来自官方 feeds 还是第三方仓库，都能先做统一清理。

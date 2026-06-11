@@ -106,7 +106,7 @@ WRT_THEME=$default_theme_name
 op_config="./.config"
 # op.config_generate
 CFG_FILE_OP="./package/base-files/files/bin/config_generate"
-# lean.config_generate
+# lean.config_generate，这个应该是在feeds后才有的
 CFG_FILE_LEDE="./package/base-files/luci2/bin/config_generate"
 # lean.默认配置文件，固件首次刷入后运行
 file_default_settings="./package/lean/default-settings/files/zzz-default-settings"
@@ -116,8 +116,8 @@ setup_config_template="${current_script_dir}/patch/99-setup_config.txt"
 target_label_marker_file="./.linjw-target-label"
 
 # 源码类型：根据 lean 特有文件自动判断
-# 如果存在 package/base-files/luci2/bin/config_generate 则为 lean，否则为 vwrt
-if [ -f "${CFG_FILE_LEDE}" ]; then
+# 如果存在 ./package/lean/default-settings/files/zzz-default-settings 则为 lean，否则为 vwrt
+if [ -f "${file_default_settings}" ]; then
     SOURCE_TYPE="lean"
 else
     SOURCE_TYPE="vwrt"
