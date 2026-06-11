@@ -28,6 +28,11 @@ package_workdir=$(pwd)
 openwrt_workdir="$(readlink -f ..)"
 luci_feed_branch='unknown'
 
+# 源码类型：lean（默认）或 vwrt
+# 用法：SOURCE_TYPE=vwrt bash Packages.sh
+SOURCE_TYPE="${SOURCE_TYPE:-lean}"
+echo "【Lin】源码类型：${SOURCE_TYPE}"
+
 echo "【Lin】工作目录：${package_workdir}"
 
 # 在 package/、feeds/luci/、feeds/packages/ 三个常见来源中查找同名包。
@@ -323,6 +328,10 @@ UPDATE_VERSION() {
     done
 }
 
+# 解析 LuCI feed 分支类型，用于后续差异化处理。
+# 从 feeds.conf.default 中提取 src-git luci 行的分支标识，
+# 并通过 canonicalize_luci_feed_branch_token 归一化为标准格式（如 openwrt-24.10）。
+# 结果存入全局变量 luci_feed_branch，供后续 apply_*_package_overrides 判断使用。
 resolve_packages_luci_feed_branch() {
     if command -v resolve_luci_feed_branch >/dev/null 2>&1; then
         luci_feed_branch=$(resolve_luci_feed_branch "${openwrt_workdir}/feeds.conf.default")
@@ -347,9 +356,11 @@ apply_common_package_overrides() {
 
     safe_update_package "frp" "https://github.com/jw10126121/openwrt_frp" "v0.69.0"
     update_package_list "luci-app-frpc luci-app-frps" "superzjg/luci-app-frpc_frps" "main"
-
+    ensure_luci_app_frp_init_permissions
     UPDATE_PACKAGE "luci-app-wechatpush" "tty228/luci-app-wechatpush" "master"
+    fix_wechatpush_runtime
     UPDATE_PACKAGE "luci-app-pushbot" "zzsj0928/luci-app-pushbot" "master"
+    fix_pushbot_runtime
 
     # update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "main"
     update_package_list "luci-app-easytier easytier easytier-noweb" "EasyTier/luci-app-easytier" "v2.6.4"
@@ -369,16 +380,7 @@ apply_common_package_overrides() {
     # [ -f ./luci-app-athena-led/root/etc/init.d/athena_led ] && chmod +x ./luci-app-athena-led/root/etc/init.d/athena_led && echo "【Lin】修复权限：luci-app-athena-led/root/etc/init.d/athena_led"
     # [ -f ./luci-app-athena-led/root/usr/sbin/athena-led ] && chmod +x ./luci-app-athena-led/root/usr/sbin/athena-led && echo "【Lin】修复权限：luci-app-athena-led/root/usr/sbin/athena-led"
     update_package_list "luci-app-athena-led" "Sh1rokoDev/luci-app-athena-led" "LuCI2-JS"
-    # 修复 athena-led：@TARGET_ 放在 LUCI_DEPENDS 里不能正确约束包的可见性，
-    # 需要移到 define Package/config 块中，否则 make defconfig 会删除配置。
-    _athena_mk=$(find ./luci-app-athena-led -maxdepth 1 -name "Makefile" 2>/dev/null)
-    if [ -n "$_athena_mk" ]; then
-        # 1) 从 LUCI_DEPENDS 中移除 @TARGET_ 条件
-        perl -i -pe 's{ \@TARGET_\S+}{}' "$_athena_mk"
-        # 2) 在 include luci.mk 之前插入 Kconfig config 块，约束设备可见性
-        perl -i -0pe 's{(include.*luci\.mk)}{define Package/luci-app-athena-led/config\n\tconfig LUCI_APP_ASTHENA_LED_TARGET\n\t\tbool\n\t\tdefault y if TARGET_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02\n\t\tdefault n\nendef\n\n$1}m' "$_athena_mk"
-        echo "【Lin】已修复 athena-led 的 @TARGET_ 条件位置"
-    fi
+    fix_athena_led_makefile
 
     # Guest-WIFI
     # UPDATE_PACKAGE "luci-app-guest-wifi" "kenzok78/luci-app-guest-wifi" "main" # 不可用
@@ -393,11 +395,19 @@ apply_common_package_overrides() {
     # quickfile 当前按需保留，默认不导入。
     # 如果后续重新启用，需要同时确认设备侧是否改成 luci-nginx 路线。
     # update_package_list "luci-app-quickfile quickfile" "sbwml/luci-app-quickfile" "main"
+
+    # lean源码树中 luci-app-adguardhome 版本较旧且缺中文，这里直接从 kenzok8/openwrt-packages 下载
+    update_package_list "luci-app-adguardhome" "kenzok8/openwrt-packages" "master"
+
+    update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
 }
 
 # lean 风味额外覆盖。
 # 只放 lean 源码树中确实需要替换、且不会和其它风味共享的包。
 apply_lean_package_overrides() {
+    echo "【Lin】启用lean专属包覆盖"
+    # 25.12没有的包，从23.05获取
+    apply_luci_feed_25_12_package_overrides
     if is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
         # update_package_list "luci-theme-argon luci-app-argon-config" "sbwml/luci-theme-argon" "openwrt-25.12"
         # 使用lean源码自带的argon
@@ -411,48 +421,13 @@ apply_lean_package_overrides() {
         update_package_list "luci-app-3cat" "coolsnowwolf/luci" "openwrt-25.12" # 非 25.12 feed 时补入 lean 上游 3cat
     fi
     
-    update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
+    # update_package_list "luci-app-wolplus" "sundaqiang/openwrt-packages" "master"
     update_package_list "luci-app-netspeedtest speedtest-cli" "sbwml/openwrt_pkgs" "main"
-    # 添加luci-theme-noobwrt
-    UPDATE_PACKAGE "luci-theme-noobwrt" "nooblk-98/luci-theme-noobwrt" "master"
-    
 }
 
-ensure_accesscontrol_menu_compat() {
-    local package_dir
-    local menu_dir
-    local menu_file
-
-    package_dir=$(find ./ -maxdepth 2 -type d -iname 'luci-app-accesscontrol' -print | head -n 1)
-    [ -n "${package_dir}" ] || return 0
-
-    menu_dir="${package_dir}/root/usr/share/luci/menu.d"
-    menu_file="${menu_dir}/luci-app-accesscontrol.json"
-
-    if [ -f "${menu_file}" ]; then
-        echo "【Lin】luci-app-accesscontrol 已自带 menu.d，跳过兼容补丁"
-        return 0
-    fi
-
-    mkdir -p "${menu_dir}"
-    cat > "${menu_file}" <<'EOF'
-{
-	"admin/services/mia": {
-		"title": "Internet Access Schedule Control",
-		"order": 30,
-		"action": {
-			"type": "cbi",
-			"path": "mia",
-			"post": { "cbi.submit": true }
-		},
-		"depends": {
-			"acl": [ "luci-app-accesscontrol" ],
-			"uci": { "mia": true }
-		}
-	}
-}
-EOF
-    echo "【Lin】已为 luci-app-accesscontrol 补齐 LuCI 25.12 menu.d 兼容文件"
+# vwrt源码风格
+apply_vwrt_package_overrides() {
+    echo "【Lin】启用vwrt专属包覆盖"
 }
 
 # OpenWrt 25.12 的 LuCI 菜单机制与语言包状态和旧分支不同，这里统一补一层兼容：
@@ -467,7 +442,6 @@ apply_luci_feed_25_12_package_overrides() {
 
     echo "【Lin】25.12未找到luci-app-accesscontrol和luci-app-filetransfer，从coolsnowwolf/luci的openwrt-23.05分支获取"
     update_package_list "luci-app-accesscontrol luci-app-filetransfer" "coolsnowwolf/luci" "openwrt-23.05" # 25.12 feed 时补入 lean 上游 v23.05 luci-app-accesscontrol和luci-app-filetransfer
-    # ensure_accesscontrol_menu_compat
 
     # echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 coolsnowwolf/luci 的 openwrt-23.05 分支补回"
     # update_package_list "luci-app-adguardhome" "coolsnowwolf/luci" "openwrt-23.05"
@@ -522,93 +496,6 @@ package_has_adguardhome_translation_zh() {
         -path "*/zh_CN/adguardhome.po" -o \
         -path "*/zh/adguardhome.po" \
     \) -print -quit 2>/dev/null | grep -q .
-}
-
-ensure_adguardhome_menu_compat() {
-    local package_dir
-    local menu_dir
-    local menu_file
-
-    package_dir=$(find ./ -maxdepth 2 -type d -iname 'luci-app-adguardhome' -print | head -n 1)
-    [ -n "${package_dir}" ] || return 0
-
-    menu_dir="${package_dir}/root/usr/share/luci/menu.d"
-    menu_file="${menu_dir}/luci-app-adguardhome.json"
-
-    if [ -f "${menu_file}" ]; then
-        echo "【Lin】luci-app-adguardhome 已自带 menu.d，跳过兼容补丁"
-        return 0
-    fi
-
-    mkdir -p "${menu_dir}"
-    cat > "${menu_file}" <<'EOF'
-{
-	"admin/services/AdGuardHome": {
-		"title": "AdGuard Home",
-		"order": 11,
-		"action": {
-			"type": "firstchild"
-		},
-		"depends": {
-			"acl": [ "luci-app-adguardhome" ],
-			"uci": { "AdGuardHome": true }
-		}
-	},
-	"admin/services/AdGuardHome/base": {
-		"title": "Base Setting",
-		"order": 1,
-		"action": {
-			"type": "cbi",
-			"path": "AdGuardHome/base",
-			"post": { "cbi.submit": true }
-		}
-	},
-	"admin/services/AdGuardHome/log": {
-		"title": "Log",
-		"order": 2,
-		"action": {
-			"type": "form",
-			"path": "AdGuardHome/log"
-		}
-	},
-	"admin/services/AdGuardHome/manual": {
-		"title": "Manual Config",
-		"order": 3,
-		"action": {
-			"type": "cbi",
-			"path": "AdGuardHome/manual",
-			"post": { "cbi.submit": true }
-		}
-	}
-}
-EOF
-    echo "【Lin】已为 luci-app-adguardhome 补齐 LuCI 25.12 menu.d 兼容文件"
-}
-
-# 25.12 下先尊重当前上游 LuCI 包：
-# 如果官方/当前包已经带中文，就保持原样；
-# 只有仍然缺中文时，才回退到 kenzok8/openwrt-packages 的兼容版实现。
-fallback_adguardhome_package_25_12() {
-    local adguardhome_dir
-
-    if ! is_luci_feed_25_12 "${openwrt_workdir}/feeds.conf.default"; then
-        return 0
-    fi
-
-    adguardhome_dir=$(find_adguardhome_package_dir)
-    if [ -z "${adguardhome_dir}" ]; then
-        echo "【Lin】25.12未找到luci-app-adguardhome目录，跳过 adguardhome 中文检查"
-        return 0
-    fi
-
-    if package_has_adguardhome_translation_zh "${adguardhome_dir}"; then
-        echo "【Lin】当前 luci-app-adguardhome 已带中文，保持现有上游：${adguardhome_dir}"
-        return 0
-    fi
-
-    echo "【Lin】当前 luci-app-adguardhome 仍缺中文，从 kenzok8/openwrt-packages 的兼容版补回"
-    update_package_list "luci-app-adguardhome" "kenzok8/openwrt-packages" "master"
-    ensure_adguardhome_menu_compat
 }
 
 # 下列函数都属于“后置修补链”：
@@ -697,6 +584,21 @@ fix_wechatpush_runtime() {
     fi
 }
 
+# 修复 athena-led：@TARGET_ 放在 LUCI_DEPENDS 里不能正确约束包的可见性，
+# 需要移到 define Package/config 块中，否则 make defconfig 会删除配置。
+fix_athena_led_makefile() {
+    local athena_mk
+
+    athena_mk=$(find ./luci-app-athena-led -maxdepth 1 -name "Makefile" 2>/dev/null)
+    if [ -n "${athena_mk}" ]; then
+        # 1) 从 LUCI_DEPENDS 中移除 @TARGET_ 条件
+        perl -i -pe 's{ \@TARGET_\S+}{}' "${athena_mk}"
+        # 2) 在 include luci.mk 之前插入 Kconfig config 块，约束设备可见性
+        perl -i -0pe 's{(include.*luci\.mk)}{define Package/luci-app-athena-led/config\n\tconfig LUCI_APP_ASTHENA_LED_TARGET\n\t\tbool\n\t\tdefault y if TARGET_qualcommax_ipq60xx_DEVICE_jdcloud_re-cs-02\n\t\tdefault n\nendef\n\n$1}m' "${athena_mk}"
+        echo "【Lin】已修复 athena-led 的 @TARGET_ 条件位置"
+    fi
+}
+
 # homeproxy 这里不是简单替换包，而是预先把规则资源准备到包目录中。
 # 这样最终编译出来的镜像会自带一套规则资源，减少首次使用时的初始化成本。
 preload_homeproxy_resources() {
@@ -730,25 +632,29 @@ preload_homeproxy_resources() {
 apply_post_update_fixes() {
     fix_quickfile_makefile
     apply_lang_node_prebuilt_fix
-    ensure_luci_app_frp_init_permissions
-    fallback_adguardhome_package_25_12
     update_openvpn_easy_rsa_version
     fix_tailscale_makefile
     fix_rust_build
     fix_diskman_makefile
-    fix_pushbot_runtime
-    fix_wechatpush_runtime
 }
 
 # 主入口保持极简，只负责串联三个阶段：
 # 1. 应用通用包覆盖
-# 2. 应用 lean 专属覆盖
+# 2. 应用源码类型专属覆盖（lean 或 vwrt）
 # 3. 执行后置修补链
 main() {
     resolve_packages_luci_feed_branch
     apply_common_package_overrides
-    apply_lean_package_overrides
-    apply_luci_feed_25_12_package_overrides
+
+    case "${SOURCE_TYPE}" in
+        vwrt)
+            apply_vwrt_package_overrides
+            ;;
+        lean|*)
+            apply_lean_package_overrides
+            ;;
+    esac
+
     apply_post_update_fixes
 }
 
