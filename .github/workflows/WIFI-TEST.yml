@@ -102,3 +102,93 @@ jobs:
       WRT_MINE_SAY: "WiFi测试 - test-wifi-0614 (6月14日)"
       WRT_CHECKOUT_REF: test-wifi-0614
     secrets: inherit
+
+  # 20260422_master
+  build-20260422:
+    name: 20260422_master
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi测试 - 20260422_master"
+      WRT_CHECKOUT_REF: 20260422_master
+    secrets: inherit
+
+  # lean
+  build-lean:
+    name: lean
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi测试 - lean"
+      WRT_CHECKOUT_REF: lean
+    secrets: inherit
+
+  # openwrt
+  build-openwrt:
+    name: openwrt
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi测试 - openwrt"
+      WRT_CHECKOUT_REF: openwrt
+    secrets: inherit
+
+  # test-wireless-0605
+  build-wireless-0605:
+    name: test-wireless-0605
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi测试 - test-wireless-0605"
+      WRT_CHECKOUT_REF: test-wireless-0605
+    secrets: inherit
+
+  # 缓存
+  build-cache:
+    name: 缓存
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi测试 - 缓存"
+      WRT_CHECKOUT_REF: 缓存
+    secrets: inherit
