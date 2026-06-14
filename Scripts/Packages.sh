@@ -648,19 +648,27 @@ apply_post_update_fixes() {
 # 2. 应用源码类型专属覆盖（lean 或 vwrt）
 # 3. 执行后置修补链
 main() {
+    echo "【Lin】========== Packages.sh 调试信息 =========="
+    echo "【Lin】源码类型：${SOURCE_TYPE}"
+    echo "【Lin】file_default_settings 存在：$([ -f "${file_default_settings}" ] && echo '是' || echo '否')"
+    echo "【Lin】当前工作目录：$(pwd)"
+
     resolve_packages_luci_feed_branch
     apply_common_package_overrides
 
     case "${SOURCE_TYPE}" in
         vwrt)
+            echo "【Lin】执行 vwrt 包覆盖"
             apply_vwrt_package_overrides
             ;;
         lean|*)
+            echo "【Lin】执行 lean 包覆盖"
             apply_lean_package_overrides
             ;;
     esac
 
     apply_post_update_fixes
+    echo "【Lin】========== Packages.sh 调试结束 =========="
 }
 
 main

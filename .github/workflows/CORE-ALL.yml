@@ -420,6 +420,30 @@ jobs:
         echo "【Lin】make defconfig后配置文件为："
         echo "$(cat seed.config)"
 
+    - name: Check Wireless Config (检查无线配置)
+      working-directory: ${{ env.OPENWRT_PATH }}
+      run: |
+        echo "【Lin】检查 .config 中的无线相关配置项..."
+        wireless_keys="wpad|hostapd|mt7915|mt7986|mt7921|mac80211|cfg80211|wireless|WIRELESS"
+        wireless_found=$(grep -iE "$wireless_keys" .config 2>/dev/null || true)
+        if [ -n "$wireless_found" ]; then
+          echo "【Lin】✅ 找到以下无线相关配置项："
+          echo "$wireless_found"
+        else
+          echo "【Lin】❌ 警告：.config 中未找到任何无线相关配置项！"
+          echo "【Lin】这可能导致固件缺少无线功能"
+        fi
+        # 检查关键无线包是否启用
+        for pkg in wpad-openssl hostapd-common kmod-mt7915e kmod-mt7986-firmware kmod-mac80211 kmod-cfg80211; do
+          if grep -q "^CONFIG_PACKAGE_${pkg}=y" .config 2>/dev/null; then
+            echo "【Lin】  ✅ ${pkg}=y"
+          elif grep -q "^CONFIG_PACKAGE_${pkg}=m" .config 2>/dev/null; then
+            echo "【Lin】  ⚠️  ${pkg}=m (模块)"
+          else
+            echo "【Lin】  ❌ ${pkg} 未启用"
+          fi
+        done
+
     - name: DIY after defconfig (确认config后执行脚本)
       working-directory: ${{ env.OPENWRT_PATH }}
       run: |

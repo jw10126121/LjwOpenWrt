@@ -571,26 +571,37 @@ configure_base_package_options() {
 # 主入口：串联所有配置流程。
 main() {
     WRT_TARGET="${config_name}"
+    echo "【Lin】========== diy_config.sh 调试信息 =========="
     echo "【Lin】源码类型：${SOURCE_TYPE}"
+    echo "【Lin】config_name：${config_name}"
+    echo "【Lin】file_default_settings 存在：$([ -f "${file_default_settings}" ] && echo '是' || echo '否')"
+    echo "【Lin】file_default_settings 路径：$(readlink -f "${file_default_settings}" 2>/dev/null || echo '无法解析')"
+    echo "【Lin】当前工作目录：$(pwd)"
 
     configure_common_system_defaults
 
     # lean 源码专用：更新编译版本号
     if [ "${SOURCE_TYPE}" = "lean" ]; then
+        echo "【Lin】执行 lean 专用：update_build_revision + apply_lean_runtime_customizations"
         update_build_revision
         apply_lean_runtime_customizations
+    else
+        echo "【Lin】⚠️ SOURCE_TYPE=${SOURCE_TYPE}，跳过 lean 专用函数"
     fi
 
     # vwrt 源码专用：配置无线参数
     if [ "${SOURCE_TYPE}" = "vwrt" ]; then
+        echo "【Lin】执行 vwrt 专用：configure_wifi_vwrt"
         configure_wifi_vwrt
     fi
 
     write_build_target_marker
 
     if [ "${SOURCE_TYPE}" = "lean" ]; then
+        echo "【Lin】执行 lean 专用：configure_nss_usage_display"
         configure_nss_usage_display
     fi
+    echo "【Lin】========== diy_config.sh 调试结束 =========="
 }
 
 main
