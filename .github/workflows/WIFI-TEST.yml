@@ -19,7 +19,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -37,7 +37,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -109,7 +109,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI-FW3
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -127,7 +127,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI-FW3
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -145,7 +145,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -163,7 +163,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -181,7 +181,7 @@ jobs:
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_DEVICE: MT6000-WIFI-FW3
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
