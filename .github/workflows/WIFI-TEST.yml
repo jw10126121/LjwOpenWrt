@@ -1,5 +1,5 @@
 #=================================================
-# Description: WiFi问题排查 - 批量编译测试分支
+# Description: WiFi问题排查 - 编译 dd90835..b7dbfa0 所有提交
 # 用于排查 GL-MT6000 WiFi 问题
 #=================================================
 
@@ -13,9 +13,9 @@ permissions: write-all
 
 #CI任务
 jobs:
-  # test-wifi-0605 (6月5日 基准点)
-  build-0605:
-    name: test-wifi-0605 (6月5日)
+  # 765625e - MT6000-WIFI
+  build-765625e:
+    name: 765625e (6月6日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
@@ -27,13 +27,13 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wifi-0605 (6月5日)"
-      WRT_CHECKOUT_REF: test-wifi-0605
+      WRT_MINE_SAY: "WiFi排查 - 765625e (6月6日)"
+      WRT_CHECKOUT_REF: 765625e
     secrets: inherit
 
-  # test-wifi-0607 (6月7日)
-  build-0607:
-    name: test-wifi-0607 (6月7日)
+  # 6e520ae - MT6000-WIFI
+  build-6e520ae:
+    name: 6e520ae (6月6日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
@@ -45,13 +45,49 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wifi-0607 (6月7日)"
-      WRT_CHECKOUT_REF: test-wifi-0607
+      WRT_MINE_SAY: "WiFi排查 - 6e520ae (6月6日)"
+      WRT_CHECKOUT_REF: 6e520ae
     secrets: inherit
 
-  # test-wifi-0609 (6月9日)
-  build-0609:
-    name: test-wifi-0609 (6月9日)
+  # f30f249 - MT6000-WIFI
+  build-f30f249:
+    name: f30f249 (6月7日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - f30f249 (6月7日)"
+      WRT_CHECKOUT_REF: f30f249
+    secrets: inherit
+
+  # 62b2f4f - MT6000-WIFI
+  build-62b2f4f:
+    name: 62b2f4f (6月8日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 62b2f4f (6月8日)"
+      WRT_CHECKOUT_REF: 62b2f4f
+    secrets: inherit
+
+  # 1096c4c - GL-MT6000-WIFI
+  build-1096c4c:
+    name: 1096c4c (6月8日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
@@ -63,13 +99,13 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wifi-0609 (6月9日)"
-      WRT_CHECKOUT_REF: test-wifi-0609
+      WRT_MINE_SAY: "WiFi排查 - 1096c4c (6月8日)"
+      WRT_CHECKOUT_REF: 1096c4c
     secrets: inherit
 
-  # test-wifi-0611 (6月11日)
-  build-0611:
-    name: test-wifi-0611 (6月11日)
+  # e05af74 - GL-MT6000-WIFI
+  build-e05af74:
+    name: e05af74 (6月8日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
@@ -81,13 +117,13 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wifi-0611 (6月11日)"
-      WRT_CHECKOUT_REF: test-wifi-0611
+      WRT_MINE_SAY: "WiFi排查 - e05af74 (6月8日)"
+      WRT_CHECKOUT_REF: e05af74
     secrets: inherit
 
-  # test-wifi-0614 (6月14日 最新)
-  build-0614:
-    name: test-wifi-0614 (6月14日)
+  # 4004f45 - GL-MT6000-WIFI
+  build-4004f45:
+    name: 4004f45 (6月8日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
@@ -99,17 +135,17 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wifi-0614 (6月14日)"
-      WRT_CHECKOUT_REF: test-wifi-0614
+      WRT_MINE_SAY: "WiFi排查 - 4004f45 (6月8日)"
+      WRT_CHECKOUT_REF: 4004f45
     secrets: inherit
 
-  # 20260422_master
-  build-20260422:
-    name: 20260422_master
+  # 95597fc - GL-MT6000-WIFI
+  build-95597fc:
+    name: 95597fc (6月8日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: MT6000-WIFI-FW3
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -117,17 +153,17 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - 20260422_master"
-      WRT_CHECKOUT_REF: 20260422_master
+      WRT_MINE_SAY: "WiFi排查 - 95597fc (6月8日)"
+      WRT_CHECKOUT_REF: 95597fc
     secrets: inherit
 
-  # lean
-  build-lean:
-    name: lean
+  # 3b1c3ce - GL-MT6000-WIFI
+  build-3b1c3ce:
+    name: 3b1c3ce (6月9日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: MT6000-WIFI-FW3
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -135,17 +171,17 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - lean"
-      WRT_CHECKOUT_REF: lean
+      WRT_MINE_SAY: "WiFi排查 - 3b1c3ce (6月9日)"
+      WRT_CHECKOUT_REF: 3b1c3ce
     secrets: inherit
 
-  # openwrt
-  build-openwrt:
-    name: openwrt
+  # 6fae69a - GL-MT6000-WIFI
+  build-6fae69a:
+    name: 6fae69a (6月9日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: MT6000-WIFI
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -153,17 +189,17 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - openwrt"
-      WRT_CHECKOUT_REF: openwrt
+      WRT_MINE_SAY: "WiFi排查 - 6fae69a (6月9日)"
+      WRT_CHECKOUT_REF: 6fae69a
     secrets: inherit
 
-  # test-wireless-0605
-  build-wireless-0605:
-    name: test-wireless-0605
+  # 5481399 - GL-MT6000-WIFI
+  build-5481399:
+    name: 5481399 (6月9日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: MT6000-WIFI
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -171,17 +207,17 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - test-wireless-0605"
-      WRT_CHECKOUT_REF: test-wireless-0605
+      WRT_MINE_SAY: "WiFi排查 - 5481399 (6月9日)"
+      WRT_CHECKOUT_REF: 5481399
     secrets: inherit
 
-  # 缓存
-  build-cache:
-    name: 缓存
+  # d63dfcf - GL-MT6000-WIFI
+  build-d63dfcf:
+    name: d63dfcf (6月9日)
     uses: ./.github/workflows/CORE-ALL.yml
     with:
       WRT_SOURCE_HASH_INFO: ''
-      WRT_DEVICE: MT6000-WIFI-FW3
+      WRT_DEVICE: GL-MT6000-WIFI
       WRT_FIREWALL: fw3
       WRT_OVERLAYS: ''
       WRT_DIY_SETTING: diy_config.sh
@@ -189,6 +225,186 @@ jobs:
       WRT_DIY_FEEDS: diy_feeds.sh
       WRT_DEFAULT_LANIP: 192.168.0.1
       WRT_RELEASE_FIRMWARE: false
-      WRT_MINE_SAY: "WiFi测试 - 缓存"
-      WRT_CHECKOUT_REF: 缓存
+      WRT_MINE_SAY: "WiFi排查 - d63dfcf (6月9日)"
+      WRT_CHECKOUT_REF: d63dfcf
+    secrets: inherit
+
+  # 02103da - GL-MT6000-WIFI
+  build-02103da:
+    name: 02103da (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 02103da (6月9日)"
+      WRT_CHECKOUT_REF: 02103da
+    secrets: inherit
+
+  # 2e1cb09 - GL-MT6000-WIFI
+  build-2e1cb09:
+    name: 2e1cb09 (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 2e1cb09 (6月9日)"
+      WRT_CHECKOUT_REF: 2e1cb09
+    secrets: inherit
+
+  # 6342c8e - GL-MT6000-WIFI
+  build-6342c8e:
+    name: 6342c8e (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 6342c8e (6月9日)"
+      WRT_CHECKOUT_REF: 6342c8e
+    secrets: inherit
+
+  # ab70cb7 - GL-MT6000-WIFI
+  build-ab70cb7:
+    name: ab70cb7 (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - ab70cb7 (6月9日)"
+      WRT_CHECKOUT_REF: ab70cb7
+    secrets: inherit
+
+  # 15a446f - GL-MT6000-WIFI
+  build-15a446f:
+    name: 15a446f (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 15a446f (6月9日)"
+      WRT_CHECKOUT_REF: 15a446f
+    secrets: inherit
+
+  # 6ac03cb - GL-MT6000-WIFI
+  build-6ac03cb:
+    name: 6ac03cb (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - 6ac03cb (6月9日)"
+      WRT_CHECKOUT_REF: 6ac03cb
+    secrets: inherit
+
+  # b52b35a - GL-MT6000-WIFI
+  build-b52b35a:
+    name: b52b35a (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - b52b35a (6月9日)"
+      WRT_CHECKOUT_REF: b52b35a
+    secrets: inherit
+
+  # b82ff87 - GL-MT6000-WIFI
+  build-b82ff87:
+    name: b82ff87 (6月9日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - b82ff87 (6月9日)"
+      WRT_CHECKOUT_REF: b82ff87
+    secrets: inherit
+
+  # c396c9b - GL-MT6000-WIFI
+  build-c396c9b:
+    name: c396c9b (6月11日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - c396c9b (6月11日)"
+      WRT_CHECKOUT_REF: c396c9b
+    secrets: inherit
+
+  # b7dbfa0 - GL-MT6000-WIFI
+  build-b7dbfa0:
+    name: b7dbfa0 (6月11日)
+    uses: ./.github/workflows/CORE-ALL.yml
+    with:
+      WRT_SOURCE_HASH_INFO: ''
+      WRT_DEVICE: GL-MT6000-WIFI
+      WRT_FIREWALL: fw3
+      WRT_OVERLAYS: ''
+      WRT_DIY_SETTING: diy_config.sh
+      WRT_DIYPackages: Packages.sh
+      WRT_DIY_FEEDS: diy_feeds.sh
+      WRT_DEFAULT_LANIP: 192.168.0.1
+      WRT_RELEASE_FIRMWARE: false
+      WRT_MINE_SAY: "WiFi排查 - b7dbfa0 (6月11日)"
+      WRT_CHECKOUT_REF: b7dbfa0
     secrets: inherit
